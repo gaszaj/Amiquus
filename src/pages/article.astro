@@ -1,0 +1,243 @@
+---
+import ArticleLayout from '../layouts/ArticleLayout.astro';
+
+const articleData = {
+  title: "Varnost, označevanje in opozarjanje pri cestnih delih",
+  description: "Načrtujete izvajanje cestnih del? V tem članku odkrijte ključne smernice za varnost vseh udeležencev v prometu, ki jih kot izvajalec gradbenih del na cestnih odsekih, enostavno ne smete spregledati.",
+  publishDate: "2025-03-10",
+  updateDate: "2025-03-15",
+  author: {
+    name: "Rastko Škrjanec",
+    profileUrl: "/si/rasto-skrjanec",
+    image: "https://media.licdn.com/dms/image/v2/C5603AQGHWJMBAj0tFQ/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1654103709275?e=2147483647&v=beta&t=ycMITJfAm1pnGrWWd6Y6_QPpz6mLFUNZQH2ypSv8Jao"
+  },
+  category: "safety-standards",
+  headings: [
+    {
+      depth: 2,
+      slug: "varnost-pri-cestnih-delih",
+      text: "Varnost pri cestnih delih"
+    },
+    {
+      depth: 3,
+      slug: "oznacevanje-in-opozarjanje",
+      text: "Označevanje in opozarjanje pri cestnih delih"
+    },
+    {
+      depth: 2,
+      slug: "priporoceni-varnostni-ukrepi",
+      text: "Priporočeni varnostni ukrepi in signalizacija"
+    },
+    {
+      depth: 3,
+      slug: "dodatni-znaki",
+      text: "Dodatni znaki za označevanje pri cestnih delih"
+    },
+    {
+      depth: 2,
+      slug: "prakticni-nasveti",
+      text: "Praktični nasveti za implementacijo"
+    },
+    {
+      depth: 2,
+      slug: "pogosta-vprasanja",
+      text: "Pogosta vprašanja (FAQ)"
+    },
+    {
+      depth: 3,
+      slug: "naj-bodo-vasa-dela-varna",
+      text: "Naj bodo vaša cestna dela varna in učinkovita"
+    }
+  ]
+};
+
+// Product data
+const basicSigns = [
+  {
+    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp",
+    name: "Opozorilna piramida DELO NA CESTI",
+    url: "/si/opozorilna-piramida/delo-na-cesti"
+  },
+  {
+    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANIVALINACESTI-btXmf.webp",
+    name: "Opozorilna piramida OBVEZNA SMER",
+    url: "/si/opozorilna-piramida/obvezna-smer"
+  },
+  {
+    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPARKIRNIPROSTOR-YyfIE.webp",
+    name: "Opozorilna piramida ZOŽENJE CESTE",
+    url: "/si/opozorilna-piramida/zozenje-ceste"
+  }
+];
+
+const additionalSigns = [
+  {
+    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp",
+    name: "Opozorilna piramida DELO NA CESTI 250m",
+    url: "/si/opozorilna-piramida/delo-na-cesti-250m"
+  },
+  {
+    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANIVALINACESTI-btXmf.webp",
+    name: "Opozorilna piramida DELO NA CESTI 500m",
+    url: "/si/opozorilna-piramida/delo-na-cesti-500m"
+  },
+  {
+    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPARKIRNIPROSTOR-YyfIE.webp",
+    name: "Opozorilna piramida OBVOZ",
+    url: "/si/opozorilna-piramida/obvoz"
+  },
+  {
+    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp",
+    name: "Opozorilna piramida ZAPRTA CESTA",
+    url: "/si/opozorilna-piramida/zaprta-cesta"
+  },
+  {
+    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANIVALINACESTI-btXmf.webp",
+    name: "Opozorilna piramida ZOŽENJE Z DESNE",
+    url: "/si/opozorilna-piramida/zozenje-z-desne"
+  },
+  {
+    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPARKIRNIPROSTOR-YyfIE.webp",
+    name: "Opozorilna piramida ZOŽENJE Z LEVE",
+    url: "/si/opozorilna-piramida/zozenje-z-leve"
+  },
+  {
+    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp",
+    name: "Opozorilna piramida OMEJITEV HITROSTI",
+    url: "/si/opozorilna-piramida/omejitev-hitrosti"
+  }
+];
+---
+
+<ArticleLayout {...articleData}>
+  <h2 id="varnost-pri-cestnih-delih">Varnost pri cestnih delih</h2>
+  <p>
+    Pri gradbenih delih na cesti je največji izziv zaščita delavcev in hkratno usmerjanje prometa. Vozniki morajo pravočasno vedeti, da se približujejo gradbišču. Delavci potrebujejo dovolj velik in jasno označen delovni prostor. Na hitrih cestah in avtocestah je pravilno označevanje še posebej pomembno, saj imajo vozniki zaradi višje hitrosti manj časa za ukrepanje. Gradbišče moramo zato označiti na več zaporednih točkah, da se lahko vozniki pravočasno prilagodijo novemu prometnemu režimu.
+  </p>
+
+  <div class="fear-banner">
+    Neustrezno označevanje cestnih del lahko privede do tragičnih nesreč in visokih kazni za odgovorne gradbene izvajalce!
+  </div>
+
+  <h3 id="oznacevanje-in-opozarjanje">Označevanje in opozarjanje pri cestnih delih</h3>
+  <p>Za ustrezno označevanje cestnih del lahko uporabite prenosne piramidne znake:</p>
+  
+  <div class="basic-signs-grid">
+    {basicSigns.map(sign => (
+      <div class="product-card">
+        <img 
+          src={sign.image} 
+          alt={sign.name}
+          class="w-full h-48 object-contain p-4"
+        />
+        <div class="p-4 text-center">
+          <h4 class="font-medium text-signal-dark mb-4">{sign.name}</h4>
+          <a 
+            href={sign.url}
+            class="block w-full bg-black text-signal-green border border-signal-green font-medium py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center"
+          >
+            Naroči znak
+          </a>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <p>
+    Naši opozorilni piramidni znaki so enostavno zložljivi, UV odporni in zagotavljajo odlično vidljivost tudi v slabših vremenskih pogojih.
+  </p>
+
+  <h2 id="priporoceni-varnostni-ukrepi">Priporočeni varnostni ukrepi in signalizacija</h2>
+  <p>
+    Pri označevanju gradbenih del na cesti moramo misliti na več stvari hkrati. Najprej označimo spremembo prometnega režima - vozniki morajo točno vedeti, kako naj vozijo mimo gradbišča. Če dela potekajo dlje časa in v več fazah, mora biti vsaka faza označena posebej. Postavitev znakov prilagodimo tudi glede na del dneva. Ponoči in v slabem vremenu dodamo svetlobno signalizacijo, ki zagotavlja boljšo vidnost gradbišča.
+  </p>
+
+  <h3 id="dodatni-znaki">Dodatni znaki za označevanje pri cestnih delih</h3>
+  
+  <div class="overflow-x-auto my-8">
+    <table class="w-full bg-white rounded-lg shadow-sm">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="p-4 text-left">Slika</th>
+          <th class="p-4 text-left">Ime znaka</th>
+          <th class="p-4 text-left">Povezava</th>
+        </tr>
+      </thead>
+      <tbody>
+        {additionalSigns.map((sign, index) => (
+          <tr class={index % 2 === 0 ? 'bg-gray-50' : ''}>
+            <td class="p-4">
+              <img 
+                src={sign.image} 
+                alt={sign.name}
+                class="w-20 h-20 object-contain"
+              />
+            </td>
+            <td class="p-4 font-medium text-signal-dark">{sign.name}</td>
+            <td class="p-4">
+              <a 
+                href={sign.url}
+                class="text-signal-green hover:underline"
+              >
+                Več informacij →
+              </a>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    Naši opozorilni trikotniki se postavijo v nekaj trenutkih, odporni so na vse vremenske razmere in vidni do 300 metrov.
+  </p>
+
+  <h2 id="prakticni-nasveti">Praktični nasveti za implementacijo</h2>
+  <p>
+    Z označevanjem gradbišča vedno začnemo na najbolj oddaljeni točki. Na avtocesti prvi znak postavimo že 2-3 kilometre pred začetkom del, nato pa postopoma dodajamo oznake na vsakih 250-500 metrov. Pri delih v mestu ali na lokalnih cestah je ključno, da domačinom zagotovimo jasne informacije o obvozih. Če se prometni režim spreminja iz dneva v dan, moramo to jasno označiti že zjutraj ali ponoči.
+  </p>
+
+  <div class="helpful-banner">
+    Med izvajanjem cestnih del redno preverjajte stanje vseh znakov, še posebej v nočnem času in ob slabem vremenu, ko je vidljivost zmanjšana.
+  </div>
+
+  <h2 id="pogosta-vprasanja">Pogosta vprašanja (FAQ)</h2>
+  <div class="faq-section">
+    <div class="faq-item">
+      <h4 class="faq-question">Koliko opozorilnih znakov potrebujemo pri cestnih delih?</h4>
+      <p class="faq-answer">Za osnovno gradbišče na lokalni cesti potrebujete običajno 8-10 znakov: 2-3 za najavo del, 2-3 za označitev obvoza in 3-4 za označitev samega gradbišča.</p>
+    </div>
+    <div class="faq-item">
+      <h4 class="faq-question">Kdaj je najbolje postaviti opozorilne znake pri cestnih delih?</h4>
+      <p class="faq-answer">Znake postavite vsaj dan pred začetkom del.</p>
+    </div>
+    <div class="faq-item">
+      <h4 class="faq-question">Kako najbolje označiti gradbišče v križišču?</h4>
+      <p class="faq-answer">Križišče mora biti označeno iz vseh smeri: znaki za najavo del, oznake obveznih smeri in po potrebi znaki za obvoz.</p>
+    </div>
+  </div>
+
+  <h3 id="naj-bodo-vasa-dela-varna">Naj bodo vaša cestna dela varna in učinkovita</h3>
+  <p>Preverite našo celotno ponudbo opozorilnih piramidnih znakov namenjenih posebej za označevanje cestnih del:</p>
+  
+  <div class="basic-signs-grid">
+    {[...basicSigns, ...additionalSigns.slice(0, 3)].map(sign => (
+      <div class="product-card">
+        <img 
+          src={sign.image} 
+          alt={sign.name}
+          class="w-full h-48 object-contain p-4"
+        />
+        <div class="p-4 text-center">
+          <h4 class="font-medium text-signal-dark mb-4">{sign.name}</h4>
+          <a 
+            href={sign.url}
+            class="block w-full bg-black text-signal-green border border-signal-green font-medium py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center"
+          >
+            Naroči znak
+          </a>
+        </div>
+      </div>
+    ))}
+  </div>
+</ArticleLayout>

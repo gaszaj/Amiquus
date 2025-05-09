@@ -1,0 +1,93 @@
+---
+import ProductLayout from '../layouts/ProductLayout.astro';
+
+// Mock product data
+const productData = {
+  title: "Opozorilna piramida DELO NA CESTI",
+  description: "Za varnost vseh udeležencev v prometu je postavitev opozorilne piramide DELO NA CESTI ključen korak za zmanjšanje nevarnosti na cestah.",
+  price: "€149.99",
+  image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp",
+  specifications: {
+    dimensions: "100x100x100 cm (osnova), 90 cm višine",
+    material: "Aluminijev okvir z UV odpornim platnom",
+    weight: "3.2 kg",
+    visibility: "Do 300 metrov",
+    windResistance: "Do 70 km/h",
+    setupTime: "1-2 minuti"
+  },
+  category: "traffic-road-safety",
+  productId: "TP-100"
+};
+---
+
+<ProductLayout {...productData}>
+  <div class="product-description space-y-6">
+    <!-- Expert Recommendation with larger icon -->
+    <div class="bg-signal-green/5 p-6 rounded-lg border-l-4 border-signal-green mb-8">
+      <div class="flex items-center gap-4">
+        <svg class="w-12 h-12 text-signal-green" viewBox="0 0 16 16">
+          <g fill="#00ce9c">
+            <path d="M12.5 16a3.5 3.5 0 1 0 0-7a3.5 3.5 0 0 0 0 7m1.679-4.493l-1.335 2.226a.75.75 0 0 1-1.174.144l-.774-.773a.5.5 0 0 1 .708-.708l.547.548l1.17-1.951a.5.5 0 1 1 .858.514M11 5a3 3 0 1 1-6 0a3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4a2 2 0 0 0 0 4"/>
+            <path d="M8.256 14a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z"/>
+          </g>
+        </svg>
+        <p class="text-xl font-semibold">Prometni trikotnik DELO NA CESTI priporoča 9/10 strokovnjakov za cestno varnost!</p>
+      </div>
+    </div>
+
+    <!-- Authority Proof with consistent checkmark sizes -->
+    <div class="bg-gray-50 p-6 rounded-lg">
+      <h2 class="text-xl font-semibold mb-4">Prometni trikotnik DELO NA CESTI priporočajo ali uporabljajo:</h2>
+      <ul class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <li class="flex items-center gap-4">
+          <svg class="w-10 h-10 text-green-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-lg">20+ prometnih inženirjev</span>
+        </li>
+        <li class="flex items-center gap-4">
+          <svg class="w-10 h-10 text-green-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-lg">Osebje Direkcije RS za infrastrukturo</span>
+        </li>
+        <li class="flex items-center gap-4">
+          <svg class="w-10 h-10 text-green-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-lg">Osebje iz Inšpektorata RS za promet</span>
+        </li>
+      </ul>
+    </div>
+    
+    <!-- Safety Warning Section -->
+    <div class="bg-yellow-50 p-6 rounded-lg">
+      <div class="flex flex-col space-y-4">
+        <div class="flex items-center gap-4">
+          <svg class="w-12 h-12 text-yellow-700" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2m0 2a8 8 0 1 0 0 16a8 8 0 0 0 0-16m0 11a1 1 0 1 1 0 2a1 1 0 0 1 0-2m0-9a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1"/>
+          </svg>
+          <h3 class="text-xl font-semibold text-yellow-800">Se strinjate, da je varnost na gradbiščih ključnega pomena?</h3>
+        </div>
+        <p class="text-yellow-700 ml-16">
+          Opozorilna piramida se uporablja pri deloviščih za izboljšanje varnosti in opozarjanje voznikov na spremembe na cesti.
+        </p>
+      </div>
+    </div>
+
+    <!-- Use Cases -->
+    <div class="space-y-4">
+      <p>Opozorilni piramidni znak lahko namestite na gradbiščih, zoženih odsekih ali cestnih križiščih, kjer potekajo dela.</p>
+      <ul class="list-disc pl-6 space-y-2">
+        <li>Postavite ga pred gradbišči na cestah.</li>
+        <li>Postavite ga na odsekih z zoženimi voznimi pasovi.</li>
+        <li>Postavite ga v bližini delovišč na cestni infrastrukturi.</li>
+      </ul>
+    </div>
+
+    <!-- Final CTA -->
+    <div class="bg-signal-green/10 p-6 rounded-lg border-l-4 border-signal-green">
+      <p class="text-xl font-semibold">Investirajte v opozorilni znak DELO NA CESTI. Pomagajte izboljšati varnost na gradbiščih in cestnih odsekih!</p>
+    </div>
+  </div>
+</ProductLayout>

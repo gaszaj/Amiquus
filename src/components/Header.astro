@@ -1,0 +1,309 @@
+---
+// Header component for the EU Signal website
+const navigation = [
+  { name: 'Domov', href: '/' },
+  { name: 'Izdelki', href: '/izdelki' },
+  { name: 'Kategorije', href: '/kategorije' },
+  { name: 'Kontakt', href: '/kontakt' }
+];
+
+// --- Language Switcher Logic ---
+const supportedLanguages = [
+  { code: 'sl', name: 'Slovenščina', short: 'SL' },
+  { code: 'en', name: 'English', short: 'EN' },
+  { code: 'de', name: 'Deutsch', short: 'DE' },
+  { code: 'it', name: 'Italiano', short: 'IT' },
+  { code: 'hr', name: 'Hrvatski', short: 'HR' },
+  { code: 'fr', name: 'Français', short: 'FR' },
+  { code: 'es', name: 'Español', short: 'ES' }
+  // Add or remove languages as needed
+];
+const defaultLangCode = 'sl'; // Your site's default language code
+
+const currentPathname = Astro.url.pathname;
+const pathParts = currentPathname.split('/').filter(p => p !== '');
+
+let currentDetectedLang = defaultLangCode;
+let slugParts = [...pathParts];
+
+if (pathParts.length > 0 && supportedLanguages.some(lang => lang.code === pathParts[0])) {
+  currentDetectedLang = pathParts[0];
+  slugParts.shift();
+} else {
+  currentDetectedLang = defaultLangCode;
+}
+
+const baseSlug = slugParts.join('/') || '';
+
+const languageLinks = supportedLanguages.map(lang => {
+  let newPath;
+  if (lang.code === defaultLangCode) {
+    newPath = baseSlug ? `/${baseSlug}` : '/';
+  } else {
+    newPath = `/${lang.code}${baseSlug ? `/${baseSlug}` : ''}`;
+  }
+  // Ensure root language paths like /en have a trailing slash if baseSlug is empty
+  if (!baseSlug && lang.code !== defaultLangCode && !newPath.endsWith('/')) {
+    newPath += '/';
+  }
+  if (newPath === `/${defaultLangCode}/` && defaultLangCode) { // Avoid /sl/ if / is the target
+      newPath = '/';
+  }
+
+
+  return { ...lang, display: lang.short, href: newPath, isActive: lang.code === currentDetectedLang };
+});
+
+const currentLanguageObject = supportedLanguages.find(lang => lang.code === currentDetectedLang) || 
+                              supportedLanguages.find(lang => lang.code === defaultLangCode) || 
+                              supportedLanguages[0]; // Fallback
+// --- End Language Switcher Logic ---
+---
+
+<header class="header-transparent">
+  <nav class="container mx-auto px-4 py-4 flex items-center justify-between">
+    {/* Logo */}
+    <a href="/" class="flex items-center">
+      <span class="text-2xl font-bold text-white">EUSIGNAL</span>
+    </a>
+
+    {/* Desktop Navigation & Language Switcher */}
+    <div class="hidden md:flex items-center space-x-8">
+      {navigation.map(item => (
+        <a
+          href={item.href}
+          class="text-gray-300 hover:text-white transition-colors"
+        >
+          {item.name}
+        </a>
+      ))}
+      <a
+        href="/narocilo"
+        class="bg-black text-signal-green border border-signal-green px-6 py-2 hover:bg-signal-green hover:text-black transition-all duration-200"
+      >
+        Oddajte naročilo
+      </a>
+
+      {/* Desktop Language Dropdown Switcher */}
+      <div class="relative ml-6 pl-6 border-l border-gray-600" id="desktop-lang-switcher-container">
+        <button
+          type="button"
+          id="desktop-lang-button"
+          class="flex items-center text-sm font-medium text-gray-300 hover:text-white focus:outline-none"
+          aria-expanded="false"
+          aria-haspopup="true"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 512 512">
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" d="M48 112h288M192 64v48m80 336l96-224l96 224m-162.5-64h133M281.3 112S257 206 199 277S80 384 80 384"/>
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" d="M256 336s-35-27-72-75s-56-85-56-85"/>
+          </svg>
+          <span>{currentLanguageObject.short}</span>
+          <svg class="ml-1 -mr-1 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+          </svg>
+        </button>
+        <div
+          id="desktop-lang-dropdown"
+          class="absolute right-0 mt-2 w-48 origin-top-right rounded-md shadow-lg bg-gray-800/80 backdrop-blur-md ring-1 ring-black ring-opacity-5 focus:outline-none hidden z-20"
+          role="menu"
+          aria-orientation="vertical"
+          aria-labelledby="desktop-lang-button"
+        >
+          <div class="py-1 max-h-60 overflow-y-auto" role="none">
+            {languageLinks.map(lang => (
+              <a
+                href={lang.href}
+                class:list={[
+                  "block px-4 py-2 text-sm transition-colors",
+                  lang.isActive
+                    ? "bg-gray-700 text-white font-semibold cursor-default"
+                    : "text-gray-300 hover:bg-gray-600 hover:text-white"
+                ]}
+                role="menuitem"
+                title={lang.name}
+              >
+                {lang.name} ({lang.short})
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Mobile Menu Button */}
+    <button
+      type="button"
+      class="md:hidden text-gray-300 hover:text-white"
+      aria-label="Toggle menu"
+      id="mobile-menu-button"
+    >
+      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+  </nav>
+
+  {/* Mobile Navigation */}
+  <div class="md:hidden hidden" id="mobile-menu">
+    <div class="px-2 pt-2 pb-3 space-y-1">
+      {navigation.map(item => (
+        <a
+          href={item.href}
+          class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+        >
+          {item.name}
+        </a>
+      ))}
+
+      {/* Mobile Language Dropdown Switcher */}
+      <div class="pt-4 pb-2 border-t border-gray-700 mt-2">
+        <button
+          type="button"
+          id="mobile-lang-button"
+          class="flex justify-between items-center w-full px-3 py-2 text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors"
+          aria-expanded="false"
+          aria-controls="mobile-lang-dropdown-list"
+        >
+          <span class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 512 512">
+              <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" d="M48 112h288M192 64v48m80 336l96-224l96 224m-162.5-64h133M281.3 112S257 206 199 277S80 384 80 384"/>
+              <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" d="M256 336s-35-27-72-75s-56-85-56-85"/>
+            </svg>
+            Jezik: {currentLanguageObject.short} ({currentLanguageObject.name})
+          </span>
+          <svg class="ml-1 h-5 w-5 transform transition-transform duration-150" id="mobile-lang-chevron" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+        </button>
+        <div id="mobile-lang-dropdown-list" class="mt-1 space-y-1 pl-3 hidden max-h-52 overflow-y-auto">
+          {languageLinks.map(lang => (
+            <a
+              href={lang.href}
+              class:list={[
+                "block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors rounded-r-md",
+                lang.isActive
+                  ? "bg-gray-600 border-signal-green text-white cursor-default"
+                  : "border-transparent text-gray-400 hover:bg-gray-700 hover:border-gray-500 hover:text-white"
+              ]}
+              title={lang.name}
+            >
+              {lang.name}
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <a
+        href="/narocilo"
+        class="block mt-4 mx-1 px-3 py-2 bg-black text-signal-green border border-signal-green hover:bg-signal-green hover:text-black transition-all duration-200 text-center rounded-md"
+      >
+        Oddajte naročilo
+      </a>
+    </div>
+  </div>
+</header>
+
+<script is:inline>
+  // --- Mobile Menu Toggle ---
+  const mobileMenuButton = document.getElementById('mobile-menu-button');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  if (mobileMenuButton && mobileMenu) {
+    mobileMenuButton.addEventListener('click', () => {
+      const isExpanded = mobileMenu.classList.toggle('hidden');
+      mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
+    });
+  }
+
+  // --- Desktop Language Dropdown ---
+  const desktopLangButton = document.getElementById('desktop-lang-button');
+  const desktopLangDropdown = document.getElementById('desktop-lang-dropdown');
+  const desktopLangSwitcherContainer = document.getElementById('desktop-lang-switcher-container');
+
+  if (desktopLangButton && desktopLangDropdown && desktopLangSwitcherContainer) {
+    desktopLangButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const isExpanded = desktopLangButton.getAttribute('aria-expanded') === 'true';
+      desktopLangButton.setAttribute('aria-expanded', String(!isExpanded));
+      desktopLangDropdown.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!desktopLangSwitcherContainer.contains(event.target) && desktopLangButton.getAttribute('aria-expanded') === 'true') {
+        desktopLangButton.setAttribute('aria-expanded', 'false');
+        desktopLangDropdown.classList.add('hidden');
+      }
+    });
+  }
+
+  // --- Mobile Language Dropdown ---
+  const mobileLangButton = document.getElementById('mobile-lang-button');
+  const mobileLangDropdownList = document.getElementById('mobile-lang-dropdown-list');
+  const mobileLangChevron = document.getElementById('mobile-lang-chevron');
+
+  if (mobileLangButton && mobileLangDropdownList && mobileLangChevron) {
+    mobileLangButton.addEventListener('click', () => {
+      const isExpanded = mobileLangButton.getAttribute('aria-expanded') === 'true';
+      mobileLangButton.setAttribute('aria-expanded', String(!isExpanded));
+      mobileLangDropdownList.classList.toggle('hidden');
+      mobileLangChevron.classList.toggle('rotate-180');
+    });
+  }
+
+  // --- Scroll Handler for Header Background ---
+  document.addEventListener('DOMContentLoaded', () => {
+    const header = document.querySelector('.header-transparent');
+    
+    const updateHeaderBackground = () => {
+      if (window.scrollY > 0) {
+        header.classList.add('header-scrolled');
+      } else {
+        header.classList.remove('header-scrolled');
+      }
+    };
+
+    window.addEventListener('scroll', updateHeaderBackground);
+    updateHeaderBackground(); // Initial check
+  });
+</script>
+
+<style>
+  .header-transparent {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgb(0, 0, 0);
+    transition: background-color 0.3s ease;
+  }
+
+  .header-scrolled {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .rotate-180 {
+    transform: rotate(180deg);
+  }
+
+  /* Styling for scrollbars in dropdowns if content overflows */
+  .max-h-60::-webkit-scrollbar,
+  .max-h-52::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .max-h-60::-webkit-scrollbar-track,
+  .max-h-52::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+
+  .max-h-60::-webkit-scrollbar-thumb,
+  .max-h-52::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+  }
+
+  .max-h-60::-webkit-scrollbar-thumb:hover,
+  .max-h-52::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+  }
+</style>
