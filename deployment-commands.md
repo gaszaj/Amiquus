@@ -87,3 +87,15 @@ Remember:
 - Write clear commit messages
 - Test locally before pushing
 - Check Netlify deployment logs if build fails
+
+# 1. First, check what changes you have
+git status
+
+# 2. Add all your changes to staging
+git add .
+
+# 3. Commit your changes with a descriptive message
+git commit -m "Update project files"
+
+# 4. Push to GitHub
+git push origin main
