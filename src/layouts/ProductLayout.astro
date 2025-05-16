@@ -18,12 +18,12 @@ export interface Props {
   productId: string;
 }
 
-const { 
-  title, 
-  description, 
-  price, 
-  image, 
-  specifications, 
+const {
+  title,
+  description,
+  price,
+  image,
+  specifications,
   category,
   productId
 } = Astro.props;
@@ -39,7 +39,7 @@ const relatedProducts = [
   {
     id: "tp-002",
     title: "Opozorilna piramida OBVEZNA SMER",
-    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANIVALINACESTI-btXmf.webp", 
+    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANIVALINACESTI-btXmf.webp",
     category: "traffic-road-safety",
     url: "/si/opozorilna-piramida/obvezna-smer"
   },
@@ -51,7 +51,7 @@ const relatedProducts = [
     url: "/si/opozorilna-piramida/zozenje-ceste"
   },
   {
-    id: "tp-004", 
+    id: "tp-004",
     title: "Opozorilna piramida ZAPRTA CESTA",
     image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp",
     category: "traffic-road-safety",
@@ -61,7 +61,7 @@ const relatedProducts = [
     id: "tp-005",
     title: "Opozorilna piramida OBVOZ",
     image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANIVALINACESTI-btXmf.webp",
-    category: "traffic-road-safety", 
+    category: "traffic-road-safety",
     url: "/si/opozorilna-piramida/obvoz"
   }
 ];
@@ -143,15 +143,17 @@ const faqItems = [
         <!-- Move H1 above the gallery -->
         <h1 class="text-3xl font-bold text-signal-dark mb-6">{title}</h1>
 
+        <!-- Updated Product Gallery -->
         <div class="product-gallery mb-8">
-          <div class="bg-white rounded-lg">
-            <img 
-              src={image} 
-              alt={title} 
+          <div class="border-2 border-signal-green rounded-lg p-8">
+            <img
+              src={image}
+              alt={title}
               class="w-full h-[400px] object-contain animate-fade-in"
             />
           </div>
         </div>
+
 
         <!-- Technical Specifications for Mobile -->
         <div class="lg:hidden mb-8">
@@ -230,75 +232,76 @@ const faqItems = [
         </div>
 
         <div class="product-details">
-          <p class="text-2xl font-semibold text-signal-green mb-4">{price}</p>
-          <a 
-            href="#narocilnica" 
-            class="inline-block bg-signal-green hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors mb-8"
+          <p class="text-2xl text-black font-semibold pl-4 pr-4 underline decoration-signal-green mb-4">{price}</p> {/* Added mb-4 for spacing like original price had */}
+
+          <a
+            href="#narocilnica"
+            class="inline-block bg-black text-signal-green border border-signal-green font-semibold py-3 px-6 rounded-lg hover:bg-signal-green hover:text-black transition-colors mb-8"
           >
             <span class="flex items-center">
-              Izpolnite naročilnico 
+              Izpolnite naročilnico
               <svg class="w-5 h-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
               </svg>
             </span>
           </a>
-          
+
           <div class="prose max-w-none mb-8">
             <slot />
           </div>
 
-          <!-- Order Form Section -->
+          <!-- Updated Order Form Section -->
           <section id="narocilnica" class="scroll-mt-24 mb-8">
-            <div class="bg-white rounded-lg shadow-sm p-6">
-              <h2 class="text-xl font-semibold mb-6">Naročilnica</h2>
+            <div class="bg-white rounded-lg shadow-sm p-8">
+              <h2 class="text-2xl font-bold mb-6 text-black">Naročilnica</h2>
               <p class="text-signal-gray mb-6">Prosimo vnesite svoje osebne podatke ali podatke podjetja za oddajo naročila izdelka {title}.</p>
-              
+
               <form class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-signal-gray mb-1">Ime*</label>
                   <input type="text" placeholder="Vnesite svoje ime" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-signal-gray mb-1">Priimek*</label>
                   <input type="text" placeholder="Vnesite svoj priimek" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-signal-gray mb-1">Podjetje (ni obvezno)</label>
                   <input type="text" placeholder="Vnesite ime podjetja" class="w-full px-3 py-2 border border-gray-300 rounded-md">
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-signal-gray mb-1">ID za DDV (izpolni samo podjetje)</label>
                   <input type="text" placeholder="Vnesite ID za DDV" class="w-full px-3 py-2 border border-gray-300 rounded-md">
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-signal-gray mb-1">Ulica*</label>
                   <input type="text" placeholder="Vnesite ime ulice" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-signal-gray mb-1">Kraj*</label>
                   <input type="text" placeholder="Vnesite ime kraja" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-signal-gray mb-1">Poštna številka*</label>
                   <input type="text" placeholder="Vnesite poštno številko" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-signal-gray mb-1">Elektronski naslov*</label>
                   <input type="email" placeholder="Vnesite e-naslov" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-signal-gray mb-1">Telefonska številka*</label>
                   <input type="tel" placeholder="Vnesite telefonsko številko" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-signal-gray mb-1">Količina*</label>
                   <select class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
@@ -308,7 +311,7 @@ const faqItems = [
                     ))}
                   </select>
                 </div>
-                
+
                 <div class="md:col-span-2">
                   <label class="block text-sm font-medium text-signal-gray mb-1">Plačilo (100 EUR + DDV)*</label>
                   <div class="space-y-2">
@@ -322,21 +325,21 @@ const faqItems = [
                     </label>
                   </div>
                 </div>
-                
+
                 <div class="md:col-span-2">
                   <label class="block text-sm font-medium text-signal-gray mb-1">Sporočilo</label>
                   <textarea rows="4" placeholder="Vpišite dodatne informacije ali posebne zahteve" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
                 </div>
-                
+
                 <div class="md:col-span-2">
                   <label class="flex items-center">
                     <input type="checkbox" required class="mr-2">
                     <span class="text-sm">Strinjam se s pogoji podjetja.*</span>
                   </label>
                 </div>
-                
+
                 <div class="md:col-span-2">
-                  <button type="submit" class="w-full bg-signal-green hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center">
+                  <button type="submit" class="w-full bg-black text-signal-green border border-signal-green font-semibold py-3 px-6 rounded-lg hover:bg-signal-green hover:text-black transition-colors flex items-center justify-center">
                     Oddajte naročilnico →
                   </button>
                 </div>
@@ -344,30 +347,32 @@ const faqItems = [
             </div>
           </section>
 
-          <!-- FAQ Section -->
-          <section class="space-y-4 mt-12">
-            <h2 class="text-2xl font-bold mb-6">Pogosta vprašanja (FAQ)</h2>
-            {faqItems.map((item, index) => (
-              <details class="bg-white rounded-lg shadow-sm group">
-                <summary class="p-4 cursor-pointer font-medium hover:bg-gray-50 flex items-center justify-between">
-                  {item.question}
-                  <svg class="w-5 h-5 transform transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </summary>
-                <div class="p-4 pt-0 text-signal-gray">
-                  {item.answer}
-                </div>
-              </details>
-            ))}
+          <!-- Updated FAQ Section -->
+          <section class="bg-signal-green rounded-xl p-8 mt-12">
+            <h2 class="text-2xl font-bold mb-6 text-black">Pogosta vprašanja (FAQ)</h2>
+            <div class="space-y-4">
+              {faqItems.map((item, index) => (
+                <details class="bg-signal-green rounded-lg group">
+                  <summary class="p-4 cursor-pointer font-medium text-black hover:bg-[#a5d429] flex items-center justify-between rounded-t-lg border border-black group-open:rounded-b-none">
+                    {item.question}
+                    <svg class="w-6 h-6 transform transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div class="p-4 text-white bg-black rounded-b-lg">
+                    {item.answer}
+                  </div>
+                </details>
+              ))}
+            </div>
 
             <!-- Back to form button -->
             <div class="text-center mt-8">
-              <a 
-                href="#narocilnica" 
-                class="inline-flex items-center bg-white border border-signal-green text-signal-green hover:bg-signal-green hover:text-white font-medium py-3 px-6 rounded-lg transition-colors"
+              <a
+                href="#narocilnica"
+                class="inline-flex items-center bg-white text-black border border-black font-medium py-3 px-6 rounded-lg hover:bg-black hover:text-white transition-colors"
               >
-                <svg class="w-5 h-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <svg class="w-5 h-5 mr-2 transition-colors" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
                 </svg>
                 Nazaj na naročilnico
@@ -380,28 +385,28 @@ const faqItems = [
         {filteredProducts.length > 0 && (
           <div class="mt-16">
             <h2 class="text-2xl font-bold mb-6">Sorodni izdelki</h2>
-            
+
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProducts.map(product => (
                 <div class="product-card bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
                   <a href={product.url} class="block relative overflow-hidden pb-[75%]">
-                    <img 
-                      src={product.image} 
-                      alt={product.title} 
+                    <img
+                      src={product.image}
+                      alt={product.title}
                       loading="lazy"
                       class="absolute inset-0 w-full h-full object-cover object-center"
                     />
                   </a>
-                  
+
                   <div class="p-4">
                     <h3 class="font-medium text-lg mb-4">
                       <a href={product.url} class="text-signal-dark hover:text-signal-green transition-colors">
                         {product.title}
                       </a>
                     </h3>
-                    
-                    <a 
-                      href={product.url} 
+
+                    <a
+                      href={product.url}
                       class="inline-block bg-white border border-signal-gray hover:border-signal-green text-signal-dark font-medium py-2 px-4 rounded-md transition-colors w-full text-center"
                     >
                       Poglej izdelek
@@ -416,87 +421,87 @@ const faqItems = [
 
       <!-- Sidebar -->
       <div class="hidden lg:block lg:w-1/3">
-        <div class="bg-white rounded-lg shadow-sm p-6 sticky top-20">
+        <div class="bg-black text-white rounded-lg shadow-sm p-6 sticky top-20">
           <!-- Technical Specifications -->
           <div class="mb-6">
-            <h3 class="text-lg font-semibold mb-4">Tehnične specifikacije</h3>
+            <h3 class="text-lg font-semibold mb-4 text-white">Tehnične specifikacije</h3>
             <ul class="space-y-4">
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                   </svg>
                 </span>
                 <div>
-                  <span class="block font-medium">Dimenzije</span>
-                  <span class="text-sm text-signal-gray">{specifications.dimensions}</span>
+                  <span class="block font-medium text-white">Dimenzije</span>
+                  <span class="text-sm text-gray-300">{specifications.dimensions}</span>
                 </div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                   </svg>
                 </span>
                 <div>
-                  <span class="block font-medium">Material</span>
-                  <span class="text-sm text-signal-gray">{specifications.material}</span>
+                  <span class="block font-medium text-white">Material</span>
+                  <span class="text-sm text-gray-300">{specifications.material}</span>
                 </div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
                   </svg>
                 </span>
                 <div>
-                  <span class="block font-medium">Teža</span>
-                  <span class="text-sm text-signal-gray">{specifications.weight}</span>
+                  <span class="block font-medium text-white">Teža</span>
+                  <span class="text-sm text-gray-300">{specifications.weight}</span>
                 </div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
                 </span>
                 <div>
-                  <span class="block font-medium">Vidnost</span>
-                  <span class="text-sm text-signal-gray">{specifications.visibility}</span>
+                  <span class="block font-medium text-white">Vidnost</span>
+                  <span class="text-sm text-gray-300">{specifications.visibility}</span>
                 </div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </span>
                 <div>
-                  <span class="block font-medium">Vetrovne razmere</span>
-                  <span class="text-sm text-signal-gray">{specifications.windResistance}</span>
+                  <span class="block font-medium text-white">Vetrovne razmere</span>
+                  <span class="text-sm text-gray-300">{specifications.windResistance}</span>
                 </div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </span>
                 <div>
-                  <span class="block font-medium">Čas sestavljanja</span>
-                  <span class="text-sm text-signal-gray">{specifications.setupTime}</span>
+                  <span class="block font-medium text-white">Čas sestavljanja</span>
+                  <span class="text-sm text-gray-300">{specifications.setupTime}</span>
                 </div>
               </li>
             </ul>
           </div>
-          
+
           <!-- Customer Support -->
-          <div class="mb-6 border-t border-gray-200 pt-6">
-            <h3 class="text-lg font-semibold mb-4">Podpora</h3>
+          <div class="mb-6 border-t border-gray-700 pt-6">
+            <h3 class="text-lg font-semibold mb-4 text-white">Podpora</h3>
             <div class="flex items-center">
               <span class="text-signal-green mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                   <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                 </svg>
@@ -519,9 +524,7 @@ const faqItems = [
   details > summary::-webkit-details-marker {
     display: none;
   }
-  details[open] > summary svg {
-    transform: rotate(180deg);
-  }
+  /* Removed details[open] > summary svg rule as group-open takes care of it */
 </style>
 
 <script>
@@ -539,8 +542,18 @@ const faqItems = [
     details.forEach(detail => {
       detail.addEventListener('toggle', () => {
         if (detail.open) {
+          // Ensure summary also gets rounded corners removed when open
           const summary = detail.querySelector('summary');
-          summary.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          if (summary) {
+            summary.classList.add('group-open:rounded-b-none');
+          }
+          // Scroll into view logic (optional, can be refined)
+          // summary.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          const summary = detail.querySelector('summary');
+           if (summary) {
+            summary.classList.remove('group-open:rounded-b-none');
+          }
         }
       });
     });
