@@ -1,0 +1,42 @@
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: PerplexityBot
+User-agent: FirecrawlAgent
+User-agent: AndiBot
+User-agent: ExaBot
+User-agent: PhindBot
+User-agent: YouBot
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: GPTBot
+User-agent: CCBot
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Googlebot
+User-agent: Bingbot
+User-agent: GoogleOther
+Allow: /
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /internal/
+Disallow: /private/
+Disallow: /wp-admin/
+Disallow: /cgi-bin/
+Disallow: /tmp/
+Disallow: /temp/
+Disallow: /logs/
+Disallow: /*?s=
+Disallow: /*/trackback/
+Disallow: /*/feed/
+Disallow: /*/print$
+Disallow: /login$
+Disallow: /register$
+Disallow: /cart$
+Disallow: /checkout$
+Disallow: /my-account/
+
+Sitemap: https://eusignal-demo.netlify.app/sitemap-index.xml
