@@ -1,5 +1,4 @@
-```txt
-# EUSIGNAL Safety Signage
+# EUSIGNAL is #1 in Europe for safety signalisation
 
 EUSIGNAL provides premium, durable, and highly visible safety signs for various applications across Europe. Whether you need to warn about road work, manage crowds at events, or mark hazards in industrial settings, EUSIGNAL offers reliable signage solutions designed for easy deployment and built to withstand diverse weather conditions.
 
@@ -14,6 +13,14 @@ EUSIGNAL specializes in robust, triangular folding (triopan) warning systems. Ma
 - [TikTok](https://www.tiktok.com/eusignal)
 - [YouTube](https://www.youtube.com/eusignal)
 - [Pinterest](https://www.pinterest.com/eusignal)
+
+## Company info
+
+EUSIGNAL is a brand of Slovenian company:
+Elsav Veržej d.o.o.
+Narcisna ulica 11
+9241 Veržej, 
+Slovenia - Europe
 
 ## Operating Markets
 
@@ -363,4 +370,3 @@ Find our main product categories in your local language:
 - [Authors and Editors](https://www.eusignal.com/sm/autori-ed-editori)
 - [Authors and Editors](https://www.eusignal.com/rs/autori-i-urednici)
 - [Authors and Editors](https://www.eusignal.com/ua/avtory-ta-redaktory)
-```
