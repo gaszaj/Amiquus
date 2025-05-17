@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import { defineConfig, passthroughImageService } from 'astro/config';
+import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
@@ -19,7 +20,8 @@ export default defineConfig({
       Logger: 2,
       // Compress the default output directory
       Path: ["./dist"]
-    })
+    }),
+    sitemap()
   ],
   site: 'https://eusignal.com',
   image: {
