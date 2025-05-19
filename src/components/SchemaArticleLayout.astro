@@ -1,0 +1,144 @@
+---
+// src/components/schemas/ArticleLayoutSchema.astro
+
+// Props are named to match your placeholders.
+// The values for these props are expected to be *exactly* as they should appear in the schema.
+// For example, DATE_PUBLISHED_ISO should be a string like "2024-12-08T18:10:04+02:00".
+// ARTICLE_OG_IMAGE_URL should be a full URL.
+export interface Props {
+  // For WebPage & main Article entity
+  ARTICLE_NAME: string;
+  ARTICLE_FULL_URL: string;
+  ARTICLE_META_SEO: string; // Can be empty string if not available
+  PAGE_LOCALE: string;
+  ARTICLE_H1: string;
+  ARTICLE_OG_IMAGE_URL: string;
+  DATE_PUBLISHED_ISO: string;
+  DATE_MODIFIED_ISO: string;
+
+  // For Breadcrumbs in WebPage
+  M_HOME_NAME: string;
+  PAGE_FULL_PERMALINK: string; // Homepage URL
+
+  // For Author in Article
+  WWW_AUTHOR_ASCII: string;
+  AUTHOR_PROFILE_IMAGE_URL: string;
+  AUTHOR_FULL_URL: string;
+  AUTHOR_SAMEAS_URLS?: string[]; // Array of full URLs, e.g., ["https://...", "https://..."]
+
+  // For FAQPage
+  // This prop expects the 'mainEntity' array for FAQPage directly.
+  // If no FAQs, this prop can be undefined or an empty array.
+  FAQ_MAIN_ENTITY?: Array<{
+    "@type": "Question";
+    name: string;
+    acceptedAnswer: {
+      "@type": "Answer";
+      text: string;
+    };
+  }>;
+
+  // For Organization
+  ORG_NAME: string; // e.g., "eusignal.com"
+  ORG_URL: string; // e.g., "https://www.eusignal.com"
+  ORG_FOUNDING_DATE: string; // e.g., "2012"
+  ORG_LOGO_URL: string;
+  ORG_KEYWORDS: string[]; // e.g., ["Keyword1", "Keyword2"]
+  ORG_EMPLOYEES_MIN: string;
+  ORG_EMPLOYEES_MAX: string;
+  ORG_SLOGAN: string;
+  ORG_CONTACT_EMAIL: string;
+  ORG_CONTACT_TYPE: string;
+  ORG_SAMEAS_URLS: string[]; // Array of full URLs
+  ORG_AREA_SERVED_COUNTRY_NAME: string;
+  ORG_AREA_SERVED_COUNTRY_CODE: string;
+}
+
+const {
+  ARTICLE_NAME, ARTICLE_FULL_URL, ARTICLE_META_SEO, PAGE_LOCALE,
+  M_HOME_NAME, PAGE_FULL_PERMALINK, ARTICLE_H1, ARTICLE_OG_IMAGE_URL,
+  WWW_AUTHOR_ASCII, AUTHOR_PROFILE_IMAGE_URL, AUTHOR_FULL_URL, AUTHOR_SAMEAS_URLS = [],
+  DATE_PUBLISHED_ISO, DATE_MODIFIED_ISO,
+  FAQ_MAIN_ENTITY,
+  ORG_NAME, ORG_URL, ORG_FOUNDING_DATE, ORG_LOGO_URL, ORG_KEYWORDS,
+  ORG_EMPLOYEES_MIN, ORG_EMPLOYEES_MAX, ORG_SLOGAN,
+  ORG_CONTACT_EMAIL, ORG_CONTACT_TYPE, ORG_SAMEAS_URLS: ORG_SOCIAL_URLS = [],
+  ORG_AREA_SERVED_COUNTRY_NAME, ORG_AREA_SERVED_COUNTRY_CODE,
+} = Astro.props;
+
+const schemaToRender = [];
+
+// 1. WebPage with nested Article
+const webPageArticle = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": ARTICLE_NAME,
+  "url": ARTICLE_FULL_URL,
+  "description": ARTICLE_META_SEO,
+  "inLanguage": PAGE_LOCALE,
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": M_HOME_NAME, "item": PAGE_FULL_PERMALINK },
+      { "@type": "ListItem", "position": 2, "name": ARTICLE_NAME, "item": ARTICLE_FULL_URL }
+    ]
+  },
+  "mainEntity": {
+    "@type": "Article",
+    "headline": ARTICLE_H1,
+    "description": ARTICLE_META_SEO,
+    "image": ARTICLE_OG_IMAGE_URL,
+    "author": {
+      "@type": "Person",
+      "name": WWW_AUTHOR_ASCII,
+      "image": AUTHOR_PROFILE_IMAGE_URL,
+      "url": AUTHOR_FULL_URL,
+      ...(AUTHOR_SAMEAS_URLS.length > 0 && { "sameAs": AUTHOR_SAMEAS_URLS })
+    },
+    "datePublished": DATE_PUBLISHED_ISO,
+    "dateModified": DATE_MODIFIED_ISO,
+    "inLanguage": PAGE_LOCALE // Can also be at the Article level
+  }
+};
+schemaToRender.push(webPageArticle);
+
+// 2. FAQPage (only if FAQ_MAIN_ENTITY is provided and has items)
+if (FAQ_MAIN_ENTITY && FAQ_MAIN_ENTITY.length > 0) {
+  schemaToRender.push({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": FAQ_MAIN_ENTITY
+  });
+}
+
+// 3. Organization
+const organization = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": ORG_NAME,
+  "url": ORG_URL,
+  "foundingDate": ORG_FOUNDING_DATE,
+  "logo": ORG_LOGO_URL,
+  "keywords": ORG_KEYWORDS,
+  "numberOfEmployees": {
+    "@type": "QuantitativeValue",
+    "minValue": ORG_EMPLOYEES_MIN,
+    "maxValue": ORG_EMPLOYEES_MAX
+  },
+  "slogan": ORG_SLOGAN,
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": ORG_CONTACT_EMAIL,
+    "contactType": ORG_CONTACT_TYPE
+  },
+  "sameAs": ORG_SOCIAL_URLS,
+  "areaServed": {
+    "@type": "Country",
+    "name": ORG_AREA_SERVED_COUNTRY_NAME,
+    "identifier": ORG_AREA_SERVED_COUNTRY_CODE
+  }
+};
+schemaToRender.push(organization);
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schemaToRender)} />
