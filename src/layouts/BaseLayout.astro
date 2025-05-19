@@ -1,8 +1,9 @@
 ---
 import '@fontsource-variable/inter';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
 import { ClientRouter } from 'astro:transitions';
 
-// --- Props for BaseLayout ---
 export interface Props {
   title: string;
   description?: string;
@@ -18,150 +19,23 @@ const {
   keywords = "safety signs, warning signs, triopan, road safety, construction safety, event safety",
   locale = "sl-SI"
 } = Astro.props;
-
-// --- Variables and Logic from Header.astro ---
-const navigation = [
-  { name: 'Domov', href: '/' },
-  { name: 'Izdelki', href: '/izdelki' },
-  { name: 'Kategorije', href: '/kategorije' },
-  { name: 'Kontakt', href: '/kontakt' }
-];
-
-const supportedLanguages = [
-  { code: 'sl', name: 'Slovenščina', short: 'SL' },
-  { code: 'en', name: 'English', short: 'EN' },
-  { code: 'de', name: 'Deutsch', short: 'DE' },
-  { code: 'it', name: 'Italiano', short: 'IT' },
-  { code: 'hr', name: 'Hrvatski', short: 'HR' },
-  { code: 'fr', name: 'Français', short: 'FR' },
-  { code: 'es', name: 'Español', short: 'ES' }
-];
-const defaultLangCode = 'sl';
-
-const currentPathname = Astro.url.pathname;
-const pathParts = currentPathname.split('/').filter(p => p !== '');
-
-let currentDetectedLang = defaultLangCode;
-let slugParts = [...pathParts];
-
-if (pathParts.length > 0 && supportedLanguages.some(lang => lang.code === pathParts[0])) {
-  currentDetectedLang = pathParts[0];
-  slugParts.shift();
-} else {
-  currentDetectedLang = defaultLangCode;
-}
-
-const baseSlug = slugParts.join('/') || '';
-
-const languageLinks = supportedLanguages.map(lang => {
-  let newPath;
-  if (lang.code === defaultLangCode) {
-    newPath = baseSlug ? `/${baseSlug}` : '/';
-  } else {
-    newPath = `/${lang.code}${baseSlug ? `/${baseSlug}` : ''}`;
-  }
-  if (!baseSlug && lang.code !== defaultLangCode && !newPath.endsWith('/')) {
-    newPath += '/';
-  }
-  if (newPath === `/${defaultLangCode}/` && defaultLangCode) {
-      newPath = '/';
-  }
-  return { ...lang, display: lang.short, href: newPath, isActive: lang.code === currentDetectedLang };
-});
-
-const currentLanguageObject = supportedLanguages.find(lang => lang.code === currentDetectedLang) || 
-                              supportedLanguages.find(lang => lang.code === defaultLangCode) || 
-                              supportedLanguages[0];
-
-// --- Variables and Logic from Footer.astro ---
-const currentYear = new Date().getFullYear();
-
-const footerNavGroups = [
-  {
-    title: 'Podjetje',
-    links: [
-      { text: 'O nas', href: '/si/o-nas' },
-      { text: 'Vizija in misija', href: '/si/vizija-in-misija' },
-      { text: 'Kako delujemo', href: '/si/kako-delujemo' },
-      { text: 'Mediji in znamka', href: '/si/mediji-in-znamka' },
-      { text: 'Avtorji in uredniki', href: '/si/avtorji-in-uredniki' },
-      { text: 'Kontakt', href: '/si/kontakt' }
-    ]
-  },
-  {
-    title: 'Podpora',
-    links: [
-      { text: 'Pogosta vprašanja FAQ', href: '/si/pogosta-vprasanja-faq' },
-      { text: 'Garancija', href: '/si/garancija' },
-      { text: 'Politika vračil', href: '/si/politika-vracil' },
-      { text: 'Politika poštnin', href: '/si/politika-postnin' },
-      { text: 'Pravilnik o pritožbah', href: '/si/pravilnik-o-pritozbah' },
-      { text: 'Dostopnost', href: '/si/dostopnost' }
-    ]
-  },
-  {
-    title: 'Sodelovanja',
-    links: [
-      { text: 'Delovna mesta', href: '/si/delovna-mesta' },
-      { text: 'Partnerstva', href: '/si/partnerstva' },
-      { text: 'Affiliate Politika', href: '/si/affiliate-politika' },
-      { text: 'Etični kodeks', href: '/si/eticni-kodeks' },
-      { text: 'Politika EDI', href: '/si/politika-edi' }
-    ]
-  },
-  {
-    title: 'Pravilniki',
-    links: [
-      { text: 'Pogoji uporabe', href: '/si/pogoji-uporabe' },
-      { text: 'Politika zasebnosti', href: '/si/politika-zasebnosti' },
-      { text: 'Politika piškotkov', href: '/si/politika-piskotkov' },
-      { text: 'Politika GDPR', href: '/si/politika-gdpr' },
-      { text: 'Izjava o omejitvi odgovornosti', href: '/si/izjava-o-omejitvi-odgovornosti' },
-      { text: 'Politika poštene uporabe', href: '/si/politika-postene-uporabe' },
-      { text: 'Uredniška politika', href: '/si/uredniska-politika' }
-    ]
-  }
-];
-
-const socialLinks = [
-  { name: 'LinkedIn', url: 'https://linkedin.com/', icon: 'linkedin' },
-  { name: 'Facebook', url: 'https://facebook.com/', icon: 'facebook' },
-  { name: 'Twitter', url: 'https://twitter.com/', icon: 'twitter' },
-  { name: 'Instagram', url: 'https://instagram.com/', icon: 'instagram' }
-];
-
-const bestSellers = [
-  { text: 'DELO NA CESTI', href: '/si/opozorilna-piramida/delo-na-cesti' },
-  { text: 'POZOR GRADBIŠČE', href: '/si/opozorilna-piramida/pozor-gradbisce' },
-  { text: 'ZAČASNI OBVOZ', href: '/si/opozorilna-piramida/zacasni-obvoz' },
-  { text: 'ZAPRTA CESTA', href: '/si/opozorilna-piramida/zaprta-cesta' },
-  { text: 'KOMUNALNA DELA', href: '/si/opozorilna-piramida/komunalna-dela' },
-  { text: 'VZDRŽEVALNA DELA', href: '/si/opozorilna-piramida/vzdrzevalna-dela' }
-];
-
-const bundles = [
-  { text: 'Gradbeni varnostni komplet znakov', href: '/si/opozorilni-komplet/gradbeni-varnostni-komplet-znakov' },
-  { text: 'Komunalni varnostni komplet znakov', href: '/si/opozorilni-komplet/komunalni-varnostni-komplet-znakov' },
-  { text: 'Kmetijski varnostni komplet znakov', href: '/si/opozorilni-komplet/kmetijski-varnostni-komplet-znakov' },
-  { text: 'Cestno-varnostni komplet znakov', href: '/si/opozorilni-komplet/cestno-varnostni-komplet-znakov' },
-  { text: 'Skladiščni varnostni komplet znakov', href: '/si/opozorilni-komplet/skladiscni-varnostni-komplet-znakov' },
-  { text: 'Varnostni komplet znakov za intelektualno lastnino', href: '/si/opozorilni-komplet/varnostni-komplet-znakov-za-intelektualno-lastnino' }
-];
 ---
 
 <!DOCTYPE html>
-<html lang={currentLanguageObject.code || "en"}> {/* Set global lang based on detected lang */}
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="/favicon-32x32.png" />
     <meta name="generator" content={Astro.generator} />
     
+    <!-- Primary Meta Tags -->
     <title>{title} | EUSIGNAL</title>
     <meta name="title" content={`${title} | EUSIGNAL`} />
     <meta name="description" content={description} />
     <meta name="keywords" content={keywords} />
 
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content={Astro.url} />
     <meta property="og:title" content={`${title} | EUSIGNAL`} />
@@ -169,24 +43,28 @@ const bundles = [
     <meta property="og:image" content={new URL(image, Astro.url)} />
     <meta property="og:locale" content={locale} />
 
+    <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content={Astro.url} />
     <meta property="twitter:title" content={`${title} | EUSIGNAL`} />
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content={new URL(image, Astro.url)} />
 
+    <!-- Mobile/Web App Metadata -->
     <meta name="application-name" content="EUSIGNAL" />
     <meta name="apple-mobile-web-app-title" content="EUSIGNAL" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="format-detection" content="telephone=no" />
 
+    <!-- Favicon and Icons -->
     <link rel="icon" type="image/png" href="/favicon-32x32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
+    <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -194,8 +72,10 @@ const bundles = [
       rel="stylesheet"
     />
 
+    <!-- Google Tag Manager -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-C226712T4V"></script>
-    <script is:inline> // Made GTM init inline
+    <script>
+      // @ts-nocheck
       window.dataLayer = window.dataLayer || [];
       function gtag() {
         dataLayer.push(arguments);
@@ -204,7 +84,8 @@ const bundles = [
       gtag('config', 'G-C226712T4V');
     </script>
 
-    <script type="text/javascript" is:inline> // Made Clarity script inline
+    <!-- Microsoft Clarity -->
+    <script type="text/javascript">
       (function (c, l, a, r, i, t, y) {
         c[a] =
           c[a] ||
@@ -219,239 +100,21 @@ const bundles = [
       })(window, document, 'clarity', 'script', 'n485m4sf6f');
     </script>
 
+    <!-- Bing Webmasters Tools -->
     <meta name="msvalidate.01" content="DDD4F3AAE215AEED9F6A9752BA1FA679" />
+
+    <!-- Yandex Webmasters Tools -->
     <meta name="yandex-verification" content="bcc0015e53551a45" />
     <ClientRouter />
   </head>
   <body class="min-h-screen bg-signal-light flex flex-col">
-    <!-- Header HTML Start -->
-    <header class="header-transparent">
-      <nav class="container mx-auto px-4 py-4 flex items-center justify-between">
-        <a href="/" class="flex items-center">
-          <span class="text-2xl font-bold text-white">EUSIGNAL</span>
-        </a>
-        <div class="hidden md:flex items-center space-x-8">
-          {navigation.map(item => (
-            <a
-              href={item.href}
-              class="text-gray-300 hover:text-white transition-colors"
-            >
-              {item.name}
-            </a>
-          ))}
-          <a
-            href="/narocilo"
-            class="bg-black text-signal-green border border-signal-green px-6 py-2 hover:bg-signal-green hover:text-black transition-all duration-200"
-          >
-            Oddajte naročilo
-          </a>
-          <div class="relative ml-6 pl-6 border-l border-gray-600" id="desktop-lang-switcher-container">
-            <button
-              type="button"
-              id="desktop-lang-button"
-              class="flex items-center text-sm font-medium text-gray-300 hover:text-white focus:outline-none"
-              aria-expanded="false"
-              aria-haspopup="true"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 512 512">
-                <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" d="M48 112h288M192 64v48m80 336l96-224l96 224m-162.5-64h133M281.3 112S257 206 199 277S80 384 80 384"/>
-                <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" d="M256 336s-35-27-72-75s-56-85-56-85"/>
-              </svg>
-              <span>{currentLanguageObject.short}</span>
-              <svg class="ml-1 -mr-1 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-              </svg>
-            </button>
-            <div
-              id="desktop-lang-dropdown"
-              class="absolute right-0 mt-2 w-48 origin-top-right rounded-md shadow-lg bg-gray-800/80 backdrop-blur-md ring-1 ring-black ring-opacity-5 focus:outline-none hidden z-20"
-              role="menu"
-              aria-orientation="vertical"
-              aria-labelledby="desktop-lang-button"
-            >
-              <div class="py-1 max-h-60 overflow-y-auto" role="none">
-                {languageLinks.map(lang => (
-                  <a
-                    href={lang.href}
-                    class:list={[
-                      "block px-4 py-2 text-sm transition-colors",
-                      lang.isActive
-                        ? "bg-gray-700 text-white font-semibold cursor-default"
-                        : "text-gray-300 hover:bg-gray-600 hover:text-white"
-                    ]}
-                    role="menuitem"
-                    title={lang.name}
-                  >
-                    {lang.name} ({lang.short})
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-        <button
-          type="button"
-          class="md:hidden text-gray-300 hover:text-white"
-          aria-label="Toggle menu"
-          id="mobile-menu-button"
-        >
-          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-          </svg>
-        </button>
-      </nav>
-      <div class="md:hidden hidden" id="mobile-menu">
-        <div class="px-2 pt-2 pb-3 space-y-1">
-          {navigation.map(item => (
-            <a
-              href={item.href}
-              class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
-            >
-              {item.name}
-            </a>
-          ))}
-          <div class="pt-4 pb-2 border-t border-gray-700 mt-2">
-            <button
-              type="button"
-              id="mobile-lang-button"
-              class="flex justify-between items-center w-full px-3 py-2 text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors"
-              aria-expanded="false"
-              aria-controls="mobile-lang-dropdown-list"
-            >
-              <span class="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 512 512">
-                  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" d="M48 112h288M192 64v48m80 336l96-224l96 224m-162.5-64h133M281.3 112S257 206 199 277S80 384 80 384"/>
-                  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" d="M256 336s-35-27-72-75s-56-85-56-85"/>
-                </svg>
-                Jezik: {currentLanguageObject.short} ({currentLanguageObject.name})
-              </span>
-              <svg class="ml-1 h-5 w-5 transform transition-transform duration-150" id="mobile-lang-chevron" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-            </button>
-            <div id="mobile-lang-dropdown-list" class="mt-1 space-y-1 pl-3 hidden max-h-52 overflow-y-auto">
-              {languageLinks.map(lang => (
-                <a
-                  href={lang.href}
-                  class:list={[
-                    "block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors rounded-r-md",
-                    lang.isActive
-                      ? "bg-gray-600 border-signal-green text-white cursor-default"
-                      : "border-transparent text-gray-400 hover:bg-gray-700 hover:border-gray-500 hover:text-white"
-                  ]}
-                  title={lang.name}
-                >
-                  {lang.name}
-                </a>
-              ))}
-            </div>
-          </div>
-          <a
-            href="/narocilo"
-            class="block mt-4 mx-1 px-3 py-2 bg-black text-signal-green border border-signal-green hover:bg-signal-green hover:text-black transition-all duration-200 text-center rounded-md"
-          >
-            Oddajte naročilo
-          </a>
-        </div>
-      </div>
-    </header>
-    <!-- Header HTML End -->
-
+    <Header />
     <main class="flex-grow">
       <slot />
     </main>
+    <Footer />
 
-    <!-- Footer HTML Start -->
-    <footer class="bg-black text-white pt-12 pb-6">
-      <div class="container mx-auto px-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          <div class="lg:col-span-2">
-            <h3 class="text-xl font-bold mb-4">EUSIGNAL</h3>
-            <p class="mb-4 text-signal-green">#1 v Evropi za varnostne opozorilne znake</p>
-            <div class="flex space-x-4 mt-6">
-              {socialLinks.map(social => (
-                <a href={social.url} target="_blank" rel="noopener" class="text-gray-300 hover:text-signal-green transition-colors" aria-label={social.name}>
-                  {social.icon === 'linkedin' && (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                  )}
-                  {social.icon === 'facebook' && (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>
-                  )}
-                  {social.icon === 'twitter' && (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
-                  )}
-                  {social.icon === 'instagram' && (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                  )}
-                </a>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h4 class="text-lg font-medium mb-4 text-signal-green">Najbolj prodajano</h4>
-            <ul class="space-y-2">
-              {bestSellers.map(link => (
-                <li><a href={link.href} class="text-gray-300 hover:text-signal-green transition-colors">{link.text}</a></li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h4 class="text-lg font-medium mb-4 text-signal-green">Kompleti</h4>
-            <ul class="space-y-2">
-              {bundles.map(link => (
-                <li><a href={link.href} class="text-gray-300 hover:text-signal-green transition-colors">{link.text}</a></li>
-              ))}
-            </ul>
-          </div>
-        </div>
-        <div class="border-t border-gray-800 my-8"></div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {footerNavGroups.map(group => (
-            <div>
-              <h4 class="text-lg font-medium mb-4 text-signal-green">{group.title}</h4>
-              <ul class="space-y-2">
-                {group.links.map(link => (
-                  <li><a href={link.href} class="text-gray-300 hover:text-signal-green transition-colors">{link.text}</a></li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div class="border-t border-gray-800 mt-8 pt-8">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="flex items-start">
-              <div class="flex-shrink-0 mr-3 text-signal-green">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-4.198 0-8 3.403-8 7.602 0 4.198 3.469 9.21 8 16.398 4.531-7.188 8-12.2 8-16.398 0-4.199-3.801-7.602-8-7.602zm0 11c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"/></svg>
-              </div>
-              <div>
-                <h5 class="font-medium mb-1">Naslov</h5>
-                <address class="text-gray-300 not-italic">Elsav Veržej d.o.o.<br />Narcisna ulica 11<br />9241 Veržej, Slovenia</address>
-              </div>
-            </div>
-            <div class="flex items-start">
-              <div class="flex-shrink-0 mr-3 text-signal-green">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 6.817h-18.779l5.513-6.812zm9.208-1.264l4.616-3.741v9.348l-4.616-5.607z"/></svg>
-              </div>
-              <div>
-                <h5 class="font-medium mb-1">Email</h5>
-                <p class="text-gray-300"><a href="mailto:info@eusignal.com" class="hover:text-signal-green transition-colors">info@eusignal.com</a></p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="flex justify-center mt-8 mb-4">
-          <a href="//www.dmca.com/Protection/Status.aspx?id=d16a2101-9f06-4e74-8c8d-df2cc670a14d" title="DMCA.com Protection Status" class="dmca-badge">
-            <img src="//images.dmca.com/Badges/dmca-badge-w150-5x1-01.png?ID=d16a2101-9f06-4e74-8c8d-df2cc670a14d" alt="DMCA.com Protection Status" />
-          </a>
-          <script is:inline src="//images.dmca.com/Badges/DMCABadgeHelper.min.js"></script>
-        </div>
-        <div class="border-t border-gray-800 mt-8 pt-6">
-          <div class="flex flex-col md:flex-row justify-between items-center">
-            <p class="text-gray-400 text-sm mb-4 md:mb-0">© {currentYear} <span class="text-signal-green">EUSIGNAL BRAND</span> | Vse pravice pridržane.</p>
-          </div>
-        </div>
-      </div>
-    </footer>
-    <!-- Footer HTML End -->
-
+    <!-- Move to Top Button -->
     <button
       id="moveToTop"
       class="fixed bottom-[25px] right-[25px] w-10 h-10 bg-[#BCEF2F] rounded-lg shadow-lg flex items-center justify-center opacity-0 invisible transition-all duration-300 hover:bg-[#a5d429] focus:outline-none focus:ring-2 focus:ring-[#BCEF2F] focus:ring-opacity-50"
@@ -461,103 +124,6 @@ const bundles = [
         <path d="M12 19V5M5 12l7-7 7 7"/>
       </svg>
     </button>
-
-    <script is:inline>
-      document.addEventListener('DOMContentLoaded', () => {
-        // --- Mobile Menu Toggle ---
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-
-        if (mobileMenuButton && mobileMenu) {
-          mobileMenuButton.addEventListener('click', () => {
-            const isExpanded = mobileMenu.classList.toggle('hidden');
-            mobileMenuButton.setAttribute('aria-expanded', String(!isExpanded));
-          });
-        }
-
-        // --- Desktop Language Dropdown ---
-        const desktopLangButton = document.getElementById('desktop-lang-button');
-        const desktopLangDropdown = document.getElementById('desktop-lang-dropdown');
-        const desktopLangSwitcherContainer = document.getElementById('desktop-lang-switcher-container');
-
-        if (desktopLangButton && desktopLangDropdown && desktopLangSwitcherContainer) {
-          desktopLangButton.addEventListener('click', (event) => {
-            event.stopPropagation();
-            const isExpanded = desktopLangButton.getAttribute('aria-expanded') === 'true';
-            desktopLangButton.setAttribute('aria-expanded', String(!isExpanded));
-            desktopLangDropdown.classList.toggle('hidden');
-          });
-
-          document.addEventListener('click', (event) => {
-            if (desktopLangSwitcherContainer && !desktopLangSwitcherContainer.contains(event.target) && desktopLangButton.getAttribute('aria-expanded') === 'true') {
-              desktopLangButton.setAttribute('aria-expanded', 'false');
-              desktopLangDropdown.classList.add('hidden');
-            }
-          });
-        }
-
-        // --- Mobile Language Dropdown ---
-        const mobileLangButton = document.getElementById('mobile-lang-button');
-        const mobileLangDropdownList = document.getElementById('mobile-lang-dropdown-list');
-        const mobileLangChevron = document.getElementById('mobile-lang-chevron');
-
-        if (mobileLangButton && mobileLangDropdownList && mobileLangChevron) {
-          mobileLangButton.addEventListener('click', () => {
-            const isExpanded = mobileLangButton.getAttribute('aria-expanded') === 'true';
-            mobileLangButton.setAttribute('aria-expanded', String(!isExpanded));
-            mobileLangDropdownList.classList.toggle('hidden');
-            mobileLangChevron.classList.toggle('rotate-180');
-          });
-        }
-
-        // --- Scroll Handler for Header Background ---
-        const header = document.querySelector('.header-transparent');
-        if (header) {
-            const updateHeaderBackground = () => {
-              if (window.scrollY > 0) {
-                header.classList.add('header-scrolled');
-              } else {
-                header.classList.remove('header-scrolled');
-              }
-            };
-            window.addEventListener('scroll', updateHeaderBackground);
-            updateHeaderBackground(); // Initial check
-        }
-
-        // --- Animation observer for scroll animations ---
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('visible');
-            }
-          });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.animate-on-scroll').forEach(element => {
-          observer.observe(element);
-        });
-
-        // --- Move to Top Button functionality ---
-        const moveToTopButton = document.getElementById('moveToTop');
-        if (moveToTopButton) {
-          window.addEventListener('scroll', () => {
-            if (window.scrollY > 750) {
-              moveToTopButton.classList.remove('opacity-0', 'invisible');
-              moveToTopButton.classList.add('opacity-100', 'visible');
-            } else {
-              moveToTopButton.classList.add('opacity-0', 'invisible');
-              moveToTopButton.classList.remove('opacity-100', 'visible');
-            }
-          });
-          moveToTopButton.addEventListener('click', () => {
-            window.scrollTo({
-              top: 0,
-              behavior: 'smooth'
-            });
-          });
-        }
-      });
-    </script>
   </body>
 </html>
 
@@ -578,7 +144,7 @@ const bundles = [
   body {
     font-size: var(--font-size-base);
     line-height: var(--line-height-body);
-    color: #111827; /* Default text color from original BaseLayout */
+    color: #111827;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -614,45 +180,43 @@ const bundles = [
   }
 </style>
 
-<style>
-  /* Styles from Header.astro */
-  .header-transparent {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    background: rgb(0, 0, 0); /* Initial background for header */
-    transition: background-color 0.3s ease;
-  }
+<script>
+  // Animation observer for scroll animations
+  document.addEventListener('DOMContentLoaded', () => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
 
-  .header-scrolled {
-    background: rgba(0, 0, 0, 0.7); /* Scrolled background for header */
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-  }
+    document.querySelectorAll('.animate-on-scroll').forEach(element => {
+      observer.observe(element);
+    });
 
-  .rotate-180 {
-    transform: rotate(180deg);
-  }
+    // Move to Top Button functionality
+    const moveToTopButton = document.getElementById('moveToTop');
+    
+    if (moveToTopButton) {
+      // Show/hide button based on scroll position
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 750) {
+          moveToTopButton.classList.remove('opacity-0', 'invisible');
+          moveToTopButton.classList.add('opacity-100', 'visible');
+        } else {
+          moveToTopButton.classList.add('opacity-0', 'invisible');
+          moveToTopButton.classList.remove('opacity-100', 'visible');
+        }
+      });
 
-  .max-h-60::-webkit-scrollbar,
-  .max-h-52::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  .max-h-60::-webkit-scrollbar-track,
-  .max-h-52::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-  }
-
-  .max-h-60::-webkit-scrollbar-thumb,
-  .max-h-52::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
-  }
-
-  .max-h-60::-webkit-scrollbar-thumb:hover,
-  .max-h-52::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
-  }
-</style>
+      // Scroll to top when clicked
+      moveToTopButton.addEventListener('click', () => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    }
+  });
+</script>
