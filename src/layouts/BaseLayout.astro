@@ -1,4 +1,8 @@
 ---
+// Import JSON data
+import commonData from '../data/common.json';
+const common = commonData[0]; // Get the first (and only) object from commonData array
+
 import '@fontsource-variable/inter';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -11,12 +15,13 @@ export interface Props {
   locale?: string;
 }
 
-const { 
-  title, 
-  description = "EUSIGNAL - Premium safety signs and triopan warning systems manufactured in Slovenia and distributed across Europe.", 
+const {
+  title,
+  // Use common.PAGE_ORGANISATION_FULL_NAME in the default description
+  description = `${common.PAGE_ORGANISATION_FULL_NAME} - Premium safety signs and triopan warning systems manufactured in Slovenia and distributed across Europe.`,
   image = "/images/og-image.jpg",
   keywords = "safety signs, warning signs, triopan, road safety, construction safety, event safety",
-  locale = "sl-SI"
+  locale = "sl-SI" // Default locale
 } = Astro.props;
 ---
 
@@ -27,17 +32,17 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="/favicon-32x32.png" />
     <meta name="generator" content={Astro.generator} />
-    
+
     <!-- Primary Meta Tags -->
-    <title>{title} | EUSIGNAL</title>
-    <meta name="title" content={`${title} | EUSIGNAL`} />
+    <title>{title} | {common.PAGE_ORGANISATION_FULL_NAME}</title>
+    <meta name="title" content={`${title} | ${common.PAGE_ORGANISATION_FULL_NAME}`} />
     <meta name="description" content={description} />
     <meta name="keywords" content={keywords} />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content={Astro.url} />
-    <meta property="og:title" content={`${title} | EUSIGNAL`} />
+    <meta property="og:title" content={`${title} | ${common.PAGE_ORGANISATION_FULL_NAME}`} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={new URL(image, Astro.url)} />
     <meta property="og:locale" content={locale} />
@@ -45,13 +50,13 @@ const {
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content={Astro.url} />
-    <meta property="twitter:title" content={`${title} | EUSIGNAL`} />
+    <meta property="twitter:title" content={`${title} | ${common.PAGE_ORGANISATION_FULL_NAME}`} />
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content={new URL(image, Astro.url)} />
 
     <!-- Mobile/Web App Metadata -->
-    <meta name="application-name" content="EUSIGNAL" />
-    <meta name="apple-mobile-web-app-title" content="EUSIGNAL" />
+    <meta name="application-name" content={common.PAGE_ORGANISATION_FULL_NAME} />
+    <meta name="apple-mobile-web-app-title" content={common.PAGE_ORGANISATION_FULL_NAME} />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="format-detection" content="telephone=no" />
@@ -72,38 +77,48 @@ const {
     />
 
     <!-- Google Tag Manager -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-C226712T4V"></script>
-    <script>
-      // @ts-nocheck
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag('js', new Date());
-      gtag('config', 'G-C226712T4V');
-    </script>
+    {common.PAGE_GOOGLE_ANALYTICS_ID && (
+      <>
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${common.PAGE_GOOGLE_ANALYTICS_ID}`}></script>
+        <script is:inline define:vars={{ gtagId: common.PAGE_GOOGLE_ANALYTICS_ID }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+          gtag('config', gtagId);
+        </script>
+      </>
+    )}
 
     <!-- Microsoft Clarity -->
-    <script type="text/javascript">
-      (function (c, l, a, r, i, t, y) {
-        c[a] =
-          c[a] ||
-          function () {
-            (c[a].q = c[a].q || []).push(arguments);
-          };
-        t = l.createElement(r);
-        t.async = 1;
-        t.src = 'https://www.clarity.ms/tag/' + i;
-        y = l.getElementsByTagName(r)[0];
-        y.parentNode.insertBefore(t, y);
-      })(window, document, 'clarity', 'script', 'n485m4sf6f');
-    </script>
+    {common.PAGE_MICROSOFT_CLARITY && (
+      <script type="text/javascript" is:inline define:vars={{ clarityId: common.PAGE_MICROSOFT_CLARITY }}>
+        (function (c, l, a, r, i, t, y) {
+          c[a] =
+            c[a] ||
+            function () {
+              (c[a].q = c[a].q || []).push(arguments);
+            };
+          t = l.createElement(r);
+          t.async = 1;
+          t.src = 'https://www.clarity.ms/tag/' + i; // i is clarityId here
+          y = l.getElementsByTagName(r)[0];
+          y.parentNode.insertBefore(t, y);
+        })(window, document, 'clarity', 'script', clarityId);
+      </script>
+    )}
 
     <!-- Bing Webmasters Tools -->
-    <meta name="msvalidate.01" content="DDD4F3AAE215AEED9F6A9752BA1FA679" />
+    {common.PAGE_BING_VALIDATE && (
+      <meta name="msvalidate.01" content={common.PAGE_BING_VALIDATE} />
+    )}
 
     <!-- Yandex Webmasters Tools -->
-    <meta name="yandex-verification" content="bcc0015e53551a45" />
+    {common.PAGE_YANDEX_VALIDATE && (
+      <meta name="yandex-verification" content={common.PAGE_YANDEX_VALIDATE} />
+    )}
+    
     <slot name="schema" />
   </head>
   <body class="min-h-screen bg-signal-light flex flex-col">
