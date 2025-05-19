@@ -2,9 +2,10 @@
 // Header component for the EU Signal website
 const navigation = [
   { name: 'Domov', href: '/' },
-  { name: 'Izdelki', href: '/izdelki' },
-  { name: 'Kategorije', href: '/kategorije' },
-  { name: 'Kontakt', href: '/kontakt' }
+  { name: 'Product', href: '/product' },
+  { name: 'Author', href: '/author' },
+  { name: 'EEAT', href: '/eeat' },
+  { name: 'Article', href: '/article' },
 ];
 
 // --- Language Switcher Logic ---
@@ -63,14 +64,18 @@ const currentLanguageObject = supportedLanguages.find(lang => lang.code === curr
 <header class="header-transparent">
   <nav class="container mx-auto px-4 py-4 flex items-center justify-between">
     {/* Logo */}
-    {/* Logo */}
-    <a href="/" class="flex items-center">
+    <a 
+      href="/" 
+      class="flex items-center"
+      id="header-logo-link"
+    >
       <img 
         src="/EUSIGNAL-PNGFile_Horizontal-Light.png" 
         alt="EUSIGNAL Logo" 
         class="h-6 w-auto"
         style="max-height: 40px;"
       />
+      <span class="sr-only">EUSIGNAL Home</span>
     </a>
 
     {/* Desktop Navigation & Language Switcher */}
