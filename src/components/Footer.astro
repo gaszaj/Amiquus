@@ -94,7 +94,7 @@ const bundles = [
       <div class="lg:col-span-2">
         <img 
           src="/EUSIGNAL-PNGFile_Horizontal-Light.png" 
-          alt="EUSIGNAL Logo" 
+          alt={`${common.PAGE_ORGANISATION_FULL_NAME} Logo`}
           class="h-10 w-auto mb-4"
           style="max-height: 40px;"
         />
@@ -231,7 +231,7 @@ const bundles = [
     <div class="border-t border-gray-800 mt-8 pt-6">
       <div class="flex flex-col md:flex-row justify-between items-center">
         <p class="text-gray-400 text-sm mb-4 md:mb-0">
-          &copy; {currentYear} <span class="text-signal-green">EUSIGNAL BRAND</span> | {common.M_COPYRIGHT}
+          &copy; {currentYear} <span class="text-signal-green">{common.PAGE_ORGANISATION_FULL_NAME} BRAND</span> | {common.M_COPYRIGHT}
         </p>
       </div>
     </div>
