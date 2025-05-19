@@ -1,178 +1,104 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 
-interface Props {
+// Define the shapes of the data this layout expects
+interface HeroData {
   title: string;
-  description?: string;
+  subtitle: string;
+  ctaText: string;
+  ctaLink: string;
+  features: string[];
+  socialProof: {
+    text: string;
+    rating: number;
+    userPhotos: string[];
+  };
 }
 
-const { title, description } = Astro.props;
+interface Product {
+  title: string;
+  image: string;
+  url: string;
+}
 
-// Hero section data
-const heroData = {
-  title: "Široka ponudba opozorilnih piramidnih znakov",
-  subtitle: "Prometni troznak ali zložljivi trinožec ali prometna zložljiva piramida je znak za obveščanje udeležencev v cestnem prometu.",
-  ctaText: "Oddajte naročilo",
-  ctaLink: "#najbolj-prodajano",
-  features: [
-    "V skladu z regulativo EU",
-    "Trpežno in kakovostno", 
-    "Priporočajo varnostni inšpektorji"
-  ],
-  socialProof: {
-    text: "Zaupa nam že 1763 kupcev po vsej Evropi",
-    rating: 5,
-    userPhotos: [
-      "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg",
-      "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg",
-      "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg",
-      "https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg",
-      "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg"
-    ]
-  }
-};
+interface FeatureItem {
+  icon: string;
+  title: string;
+  description: string;
+}
 
-// Bestseller products data
-const bestsellerProducts = [
-  {
-    title: "Opozorilna piramida DELO NA CESTI",
-    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp",
-    url: "/si/opozorilna-piramida/delo-na-cesti"
-  },
-  {
-    title: "Opozorilna piramida POZOR GRADBIŠČE",
-    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANIVALINACESTI-btXmf.webp",
-    url: "/si/opozorilna-piramida/pozor-gradbisce"
-  },
-  {
-    title: "Opozorilna piramida PREPOVEDAN VSTOP",
-    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPARKIRNIPROSTOR-YyfIE.webp",
-    url: "/si/opozorilna-piramida/prepovedan-vstop"
-  },
-  {
-    title: "Opozorilna piramida ŠOLSKA POT",
-    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp",
-    url: "/si/opozorilna-piramida/solska-pot"
-  },
-  {
-    title: "Opozorilna piramida POZOR GASILCI",
-    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANIVALINACESTI-btXmf.webp",
-    url: "/si/opozorilna-piramida/pozor-gasilci"
-  },
-  {
-    title: "Opozorilna piramida OMEJITEV HITROSTI 30",
-    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPARKIRNIPROSTOR-YyfIE.webp",
-    url: "/si/opozorilna-piramida/omejitev-hitrosti-30"
-  },
-  {
-    title: "Opozorilna piramida STOP",
-    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp",
-    url: "/si/opozorilna-piramida/stop"
-  },
-  {
-    title: "Opozorilna piramida PARKIRNI PROSTOR",
-    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANIVALINACESTI-btXmf.webp",
-    url: "/si/opozorilna-piramida/parkirni-prostor"
-  },
-  {
-    title: "Opozorilna piramida POZOR VILIČAR",
-    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPARKIRNIPROSTOR-YyfIE.webp",
-    url: "/si/opozorilna-piramida/pozor-vilicar"
-  }
-];
+interface FaqItem {
+  question: string;
+  answer: string;
+}
 
-// Features list
-const features = [
-  {
-    icon: "⚡",
-    title: "Hitra postavitev",
-    description: "Postavite v manj kot minuti"
-  },
-  {
-    icon: "🔄",
-    title: "Enostavno premikanje",
-    description: "Preprosto prenašanje in premikanje"
-  },
-  {
-    icon: "📦",
-    title: "Še enostavneje zlaganje",
-    description: "Kompaktno zlaganje za shranjevanje"
-  }
-];
+interface MarqueeItem {
+  url: string;
+  image: string;
+  alt: string;
+}
 
-// Institutions
-const institutions = [
-  "Zavarovalnica Triglav",
-  "Generali",
-  "Zavarovalnica Sava",
-  "Vzajemna",
-  "Inšektorat RS za delo",
-  "Slovenska Policija"
-];
+interface FormAlerts {
+  invalidEmail: string;
+  termsNotAccepted: string;
+  submissionSuccess: string;
+  submissionError: string;
+}
 
-// FAQ items
-const faqItems = [
-  {
-    question: "Kakšne so dimenzije in teža?",
-    answer: "Osnovne dimenzije so 100x100x100 cm z višino 90 cm, zasnovano za optimalno stabilnost in prenosljivost."
-  },
-  {
-    question: "Iz katerih materialov je izdelan in kako trpežen je?",
-    answer: "Izdelan iz vzdržljivih aluminijastih profilov, prekritih z UV-odporno tkanino, ki zagotavlja odlične odsevne lastnosti in odpornost na vse vremenske vplive."
-  },
-  {
-    question: "Kako stabilen je znak?",
-    answer: "Zaradi piramidne strukture in stabilnega podnožja zagotavlja odlično stabilnost na vseh površinah."
-  },
-  {
-    question: "Ali je znak viden ponoči in v slabem vremenu?",
-    answer: "Da, visoko odsevni material zagotavlja odlično vidljivost v dežju, megli in pri slabi vidljivosti."
-  },
-  {
-    question: "Ali je znak odporen na vremenske vplive?",
-    answer: "Da, UV-odporna tkanina in trpežen aluminijast okvir sta odporna na vse vremenske razmere: sneg, dež, sonce, meglo in vetrove do 70 km/h."
-  },
-  {
-    question: "Ali je znak primeren za uporabo v ekstremnih vremenskih razmerah?",
-    answer: "Da, zasnovan je za uporabo v vseh vremenskih razmerah, vključno s snegom, dežjem in močnimi vetrovi do 70 km/h."
-  },
-  {
-    question: "Kako hitro lahko znak postavim?",
-    answer: "Postavitev traja le 1-2 minuti - enostavno ga razprete, pritrdite in namestite. Preprosto ga je tudi premestiti ali pospraviti."
-  },
-  {
-    question: "Kakšni so pogoji shranjevanja?",
-    answer: "Shranjujte v suhem prostoru, zloženo v priloženi torbi za prenašanje."
-  },
-  {
-    question: "Kakšna je garancijska doba?",
-    answer: "24-mesečna garancija na material in proizvodne napake."
-  },
-  {
-    question: "Ali lahko prilagodim opozorilno sporočilo?",
-    answer: "Da, omogočamo prilagojeno besedilo in dodajanje logotipov podjetij. Za ponudbo nas kontaktirajte na info@eusignal.com."
-  },
-  {
-    question: "Ali lahko naročim več znakov z različnimi napisi?",
-    answer: "Da, za večja naročila z različnimi napisi izpolnite naročilnico."
-  },
-  {
-    question: "Ali lahko znak uporabljam na javnih površinah?",
-    answer: "Da, vendar se pred uporabo posvetujte s pristojnimi organi, lokalno upravo ali lastniki zemljišč."
-  },
-  {
-    question: "Kakšen je dobavni rok?",
-    answer: "Standardna dostava traja 3-14 delovnih dni znotraj EU."
-  },
-  {
-    question: "Kakšni so načini plačila?",
-    answer: "Sprejemamo Google Pay, Apple Pay, Visa in Mastercard za individualna naročila. Za večja poslovna naročila vas prosimo za izpolnitev naročilnice."
-  },
-  {
-    question: "Kakšni so pogoji vračila?",
-    answer: "14-dnevni rok za vračilo neuporabljenih izdelkov v originalni embalaži. Kasnejših reklamacij ne upoštevamo."
-  }
-];
+interface Props {
+  // Props for BaseLayout
+  title: string;
+  description?: string;
+
+  // Props for page content
+  heroData: HeroData;
+  marqueeItems: MarqueeItem[];
+  bestsellersSection: {
+    title: string;
+    products: Product[];
+    productCtaText: string; // Added for the "Oddajte naročilo" button on product cards
+  };
+  featuresSection: {
+    title: string;
+    items: FeatureItem[];
+  };
+  institutionsSection: {
+    title: string;
+    items: string[];
+  };
+  faqSection: {
+    title: string;
+    items: FaqItem[];
+  };
+  contactSection: {
+    title: string;
+    subtitle: string;
+    formLabels: {
+      fullName: string;
+      fullNamePlaceholder: string;
+      email: string;
+      emailPlaceholder: string;
+      message: string;
+      messagePlaceholder: string;
+      terms: string;
+      submitButton: string;
+    };
+  };
+  formAlerts: FormAlerts; // Added for JavaScript alert messages
+}
+
+const { 
+  title, 
+  description,
+  heroData,
+  marqueeItems,
+  bestsellersSection,
+  featuresSection,
+  institutionsSection,
+  faqSection,
+  contactSection,
+  formAlerts // Destructure new prop for JS alerts
+} = Astro.props;
 ---
 
 <BaseLayout title={title} description={description}>
@@ -225,42 +151,22 @@ const faqItems = [
           <div class="troznak-marquee__group">
             {[...Array(2)].map(() => (
               <div class="flex gap-4">
-                <a href="/si/opozorilna-piramida/pozor-visece-breme">
-                  <img src='https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVISEEBREME-wCeK1.webp' alt='Triopan / trinožec POZOR VISEČE BREME' />
-                </a>
-                <a href="/si/opozorilna-piramida/omejitev-hitrosti-30">
-                  <img src='https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANOMEJITEVHITROSTI30-UNCer.webp' alt='Triopan / trinožec OMEJITEV HITROSTI 30' />
-                </a>
-                <a href="/si/opozorilna-piramida/parkirni-prostor">
-                  <img src='https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPARKIRNIPROSTOR-YyfIE.webp' alt='Triopan / trinožec PARKIRNI PROSTOR' />
-                </a>
-                <a href="/si/opozorilna-piramida/maraton">
-                  <img src='https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANMARATON-gdUyw.webp' alt='Triopan / trinožec MARATON' />
-                </a>
-                <a href="/si/opozorilna-piramida/pozor-vilicar">
-                  <img src='https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp' alt='Triopan / trinožec POZOR VILIČAR' />
-                </a>
+                {marqueeItems.map(item => (
+                  <a href={item.url}>
+                    <img src={item.image} alt={item.alt} />
+                  </a>
+                ))}
               </div>
             ))}
           </div>
           <div aria-hidden="true" class="troznak-marquee__group">
             {[...Array(2)].map(() => (
               <div class="flex gap-4">
-                <a href="/si/opozorilna-piramida/pozor-visece-breme">
-                  <img src='https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVISEEBREME-wCeK1.webp' alt='Triopan / trinožec POZOR VISEČE BREME' />
-                </a>
-                <a href="/si/opozorilna-piramida/omejitev-hitrosti-30">
-                  <img src='https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANOMEJITEVHITROSTI30-UNCer.webp' alt='Triopan / trinožec OMEJITEV HITROSTI 30' />
-                </a>
-                <a href="/si/opozorilna-piramida/parkirni-prostor">
-                  <img src='https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPARKIRNIPROSTOR-YyfIE.webp' alt='Triopan / trinožec PARKIRNI PROSTOR' />
-                </a>
-                <a href="/si/opozorilna-piramida/maraton">
-                  <img src='https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANMARATON-gdUyw.webp' alt='Triopan / trinožec MARATON' />
-                </a>
-                <a href="/si/opozorilna-piramida/pozor-vilicar">
-                  <img src='https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp' alt='Triopan / trinožec POZOR VILIČAR' />
-                </a>
+                {marqueeItems.map(item => (
+                  <a href={item.url}>
+                    <img src={item.image} alt={item.alt} />
+                  </a>
+                ))}
               </div>
             ))}
           </div>
@@ -270,11 +176,11 @@ const faqItems = [
   </section>
 
   <!-- Bestsellers Section -->
-  <section id="najbolj-prodajano" class="py-16 bg-white">
+  <section id="best-sellers" class="py-16 bg-white">
     <div class="container mx-auto px-4">
-      <h2 class="text-3xl font-bold text-black mb-12 text-center">Najbolj prodajano</h2>
+      <h2 class="text-3xl font-bold text-black mb-12 text-center">{bestsellersSection.title}</h2>
       <div class="grid grid-cols-2 lg:grid-cols-3 gap-2">
-        {bestsellerProducts.map(product => (
+        {bestsellersSection.products.map(product => (
           <div class="bg-white border border-gray-100 overflow-hidden group">
             <a href={product.url} class="block">
               <img 
@@ -287,7 +193,7 @@ const faqItems = [
                   {product.title}
                 </h3>
                 <button class="w-full bg-black text-signal-green border border-signal-green py-2 px-4 hover:bg-signal-green hover:text-black transition-all">
-                  Oddajte naročilo
+                  {bestsellersSection.productCtaText}
                 </button>
               </div>
             </a>
@@ -300,9 +206,9 @@ const faqItems = [
   <!-- Features Section -->
   <section class="py-16 bg-gray-50">
     <div class="container mx-auto px-4">
-      <h2 class="text-3xl font-bold text-black mb-12 text-center">Zložljivi, trpežni in vidljivi</h2>
+      <h2 class="text-3xl font-bold text-black mb-12 text-center">{featuresSection.title}</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {features.map(feature => (
+        {featuresSection.items.map(feature => (
           <div class="text-center p-6 bg-white rounded-lg shadow-sm">
             <div class="text-4xl mb-4">{feature.icon}</div>
             <h3 class="text-xl font-semibold mb-2">{feature.title}</h3>
@@ -313,33 +219,14 @@ const faqItems = [
     </div>
   </section>
 
-  <!-- Bundles Section 
-  <section class="py-16 bg-white">
-    <div class="container mx-auto px-4">
-      <h2 class="text-3xl font-bold text-black mb-12 text-center">Kupite opozorilne komplete</h2>
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        {bundles.map(bundle => (
-          <a 
-            href={bundle.path}
-            class="bg-gray-50 p-4 rounded-lg hover:bg-signal-green hover:text-black transition-all duration-300"
-          >
-            <h3 class="text-sm font-medium">
-              {bundle.name}
-            </h3>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>-->
-
   <!-- Institutions Section -->
   <section class="py-16 bg-black">
     <div class="container mx-auto px-4">
       <h2 class="text-3xl font-bold text-white mb-12 text-center">
-        Naše izdelke potrjuje strokovno osebje iz priznanih organizacij
+        {institutionsSection.title}
       </h2>
       <div class="flex flex-wrap justify-center items-center gap-12">
-        {institutions.map(institution => (
+        {institutionsSection.items.map(institution => (
           <div class="text-xl font-medium text-signal-green hover:text-white transition-colors cursor-pointer">
             {institution}
           </div>
@@ -351,9 +238,9 @@ const faqItems = [
   <!-- FAQ Section -->
   <section class="py-16 bg-white">
     <div class="container mx-auto px-4">
-      <h2 class="text-3xl font-bold text-black mb-4 text-center">Pogosta vprašanja (FAQ)</h2>
+      <h2 class="text-3xl font-bold text-black mb-4 text-center">{faqSection.title}</h2>
       <div class="max-w-3xl mx-auto space-y-4">
-        {faqItems.map(item => (
+        {faqSection.items.map(item => (
           <details class="bg-gray-50 rounded-lg group">
             <summary class="p-4 cursor-pointer font-medium flex items-center justify-between">
               <span>{item.question}</span>
@@ -378,36 +265,36 @@ const faqItems = [
   <!-- Contact Section -->
   <section class="py-16 bg-gray-50">
     <div class="container mx-auto px-4">
-      <h2 class="text-3xl font-bold text-black mb-4 text-center">Vstopite v kontakt</h2>
+      <h2 class="text-3xl font-bold text-black mb-4 text-center">{contactSection.title}</h2>
       <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-        Imate vprašanje ali predlog za sodelovanje? Izpolnite spodnji obrazec in odgovorili vam bomo v najkrajšem možnem času.
+        {contactSection.subtitle}
       </p>
 
       <div class="max-w-2xl mx-auto">
         <form class="space-y-6">
           <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">Vaše polno ime</label>
+            <label class="block text-sm font-medium text-gray-600 mb-1">{contactSection.formLabels.fullName}</label>
             <input 
               type="text" 
-              placeholder="npr.: Matej Kovac"
+              placeholder={contactSection.formLabels.fullNamePlaceholder}
               class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-signal-green focus:ring-1 focus:ring-signal-green" 
               required
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">Vaš email</label>
+            <label class="block text-sm font-medium text-gray-600 mb-1">{contactSection.formLabels.email}</label>
             <input 
               type="email" 
-              placeholder="npr.: matej.kovac@gmail.com"
+              placeholder={contactSection.formLabels.emailPlaceholder}
               class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-signal-green focus:ring-1 focus:ring-signal-green" 
               required
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">Vaše sporočilo</label>
+            <label class="block text-sm font-medium text-gray-600 mb-1">{contactSection.formLabels.message}</label>
             <textarea 
               rows="4" 
-              placeholder="Tukaj vpišite sporočilo, v katerem na kratko opišite svoje predloge"
+              placeholder={contactSection.formLabels.messagePlaceholder}
               class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-signal-green focus:ring-1 focus:ring-signal-green"
               required
             ></textarea>
@@ -415,14 +302,14 @@ const faqItems = [
           <div class="flex items-center gap-2">
             <input type="checkbox" id="terms" required />
             <label for="terms" class="text-sm text-gray-600">
-              Strinjam se s pogoji uporabe
+              {contactSection.formLabels.terms}
             </label>
           </div>
           <button 
             type="submit" 
             class="w-full bg-black text-signal-green border border-signal-green py-3 rounded-lg hover:bg-signal-green hover:text-black transition-all"
           >
-            Pošlji
+            {contactSection.formLabels.submitButton}
           </button>
         </form>
       </div>
@@ -516,31 +403,34 @@ details > summary::-webkit-details-marker {
 }
 </style>
 
-<script>
+<script define:vars={{ alerts: formAlerts }}>
 document.addEventListener('DOMContentLoaded', () => {
-  const form = document.querySelector('form');
+  const form = document.querySelector('form'); // Consider a more specific selector if multiple forms exist
   if (form) {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       
-      const email = form.querySelector('input[type="email"]');
-      if (email && !email.value.includes('@')) {
-        alert('Vnesite veljaven e-poštni naslov.');
+      const emailInput = form.querySelector('input[type="email"]');
+      if (emailInput && !emailInput.value.includes('@')) {
+        alert(alerts.invalidEmail); // Use passed alert message
         return;
       }
 
-      const terms = form.querySelector('#terms');
-      if (terms && !terms.checked) {
-        alert('Potrdite, da se strinjate s pogoji.');
+      const termsCheckbox = form.querySelector('#terms');
+      if (termsCheckbox && !termsCheckbox.checked) {
+        alert(alerts.termsNotAccepted); // Use passed alert message
         return;
       }
 
       try {
-        // Form submission logic here
-        alert('Vaše sporočilo je bilo uspešno poslano');
+        // Form submission logic here (e.g., send data to a server)
+        // For now, we just show the success message
+        console.log('Form data would be submitted here.');
+        alert(alerts.submissionSuccess); // Use passed alert message
         form.reset();
       } catch (error) {
-        alert('Prišlo je do napake. Prosimo, poskusite znova.');
+        console.error('Form submission error:', error);
+        alert(alerts.submissionError); // Use passed alert message
       }
     });
   }

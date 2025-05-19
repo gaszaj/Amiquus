@@ -1,22 +1,83 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 
+// --- Type Definitions for Props ---
+export interface AuthorInfo {
+  name: string;
+  profileUrl: string;
+  image: string;
+}
+
+export interface HeadingInfo {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+export interface RelatedArticleInfo {
+  title: string;
+  url: string;
+  date: string; // Date string, formatting will be handled by props
+}
+
+// --- Content Props for Sections ---
+export interface TocContent {
+  title: string;
+}
+
+export interface EditorialPolicyContent {
+  title: string;
+  description: string;
+  ctaText: string;
+  ctaLink: string;
+}
+
+export interface DisclaimerContent {
+  text: string;
+}
+
+export interface RelatedArticlesContent {
+  title: string;
+  articles: RelatedArticleInfo[];
+}
+
+export interface HelpBoxContent {
+  title: string;
+  description: string;
+  ctaText: string;
+  ctaLink: string;
+}
+
+// --- Main Props Interface ---
 export interface Props {
+  // Base Layout Props
   title: string;
   description?: string;
+
+  // Article Metadata (passed through)
   publishDate: string;
   updateDate?: string;
-  author: {
-    name: string;
-    profileUrl: string;
-    image: string;
-  };
-  category: string;
-  headings: Array<{
-    depth: number;
-    slug: string;
-    text: string;
-  }>;
+  author: AuthorInfo;
+  headings: HeadingInfo[];
+  // category: string; // Removed as it wasn't used in the layout structure directly
+
+  // Date Formatting Props
+  mainDateFormatOptions: Intl.DateTimeFormatOptions;
+  mainDateLocale: string;
+  relatedDateFormatOptions: Intl.DateTimeFormatOptions;
+  relatedDateLocale: string;
+
+  // UI Text Labels
+  authorLabelText: string;
+  publishedLabelText: string;
+  updatedLabelText?: string;
+
+  // Section Content Props
+  tocContent: TocContent;
+  editorialPolicyContent: EditorialPolicyContent;
+  disclaimerContent: DisclaimerContent;
+  relatedArticlesContent: RelatedArticlesContent;
+  helpBoxContent: HelpBoxContent;
 }
 
 const {
@@ -25,79 +86,28 @@ const {
   publishDate,
   updateDate,
   author,
-  category,
-  headings = []
+  headings = [],
+  mainDateFormatOptions,
+  mainDateLocale,
+  relatedDateFormatOptions,
+  relatedDateLocale,
+  authorLabelText,
+  publishedLabelText,
+  updatedLabelText,
+  tocContent,
+  editorialPolicyContent,
+  disclaimerContent,
+  relatedArticlesContent,
+  helpBoxContent,
 } = Astro.props;
 
-// Format dates
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('sl-SI', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
+// Generic Date Formatter
+const formatDate = (dateString: string, locale: string, options: Intl.DateTimeFormatOptions) => {
+  return new Date(dateString).toLocaleDateString(locale, options);
 };
 
-// Filter to only include h2 and h3 headings for the TOC
+// Filter headings for TOC (presentation logic, can stay)
 const tocHeadings = headings.filter(heading => heading.depth >= 2 && heading.depth <= 3);
-
-// Mock related articles data
-const allArticles = [
-  {
-    title: "Varnost, označevanje in opozarjanje pri tekaških dogodkih",
-    url: "/articles/safety-signs-visibility-night",
-    date: "2025-03-15"
-  },
-  {
-    title: "Varnost, označevanje in opozarjanje pri športnih dogodkih",
-    url: "/articles/eu-regulations-road-warning-systems",
-    date: "2025-03-10"
-  },
-  {
-    title: "Varnost, označevanje in opozarjanje pri kolesarskih dirkah",
-    url: "/articles/maintain-triopan-warning-signs",
-    date: "2025-03-05"
-  },
-  {
-    title: "Varnost, označevanje in opozarjanje pri športnih turnirjih",
-    url: "/articles/warning-signs-construction-sites",
-    date: "2025-02-28"
-  },
-  {
-    title: "Varnost, označevanje in opozarjanje pri športnih dnevih",
-    url: "/articles/event-safety-warning-systems",
-    date: "2025-02-20"
-  },
-  {
-    title: "Varnost, označevanje in opozarjanje pri šolskih tekmovanjih",
-    url: "/articles/highway-work-zone-safety",
-    date: "2025-02-15"
-  },
-  {
-    title: "Varnost, označevanje in opozarjanje pri javnih prireditvah",
-    url: "/articles/emergency-response-warning-systems",
-    date: "2025-02-10"
-  },
-  {
-    title: "Varnost, označevanje in opozarjanje pri športnih objektih",
-    url: "/articles/safety-sign-technology-innovation",
-    date: "2025-02-05"
-  }
-];
-
-// Filter out current article and get related ones
-const relatedArticles = allArticles
-  .filter(article => article.title !== title)
-  .slice(0, 9);
-
-// Format date for related articles
-const formatRelatedDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
-};
 ---
 
 <BaseLayout title={title} description={description}>
@@ -111,10 +121,9 @@ const formatRelatedDate = (dateString: string) => {
           <p class="text-xl text-gray-300 mb-6">{description}</p>
         )}
         
-        <!-- Author info with improved responsive layout -->
         <div class="flex flex-col sm:flex-row flex-wrap gap-2 sm:items-center">
           <div class="flex items-center">
-            <span class="text-gray-300 mr-2">Članek je pripravil:</span>
+            <span class="text-gray-300 mr-2">{authorLabelText}</span>
             <a href={author.profileUrl} class="flex items-center group">
               <img 
                 src={author.image} 
@@ -128,13 +137,13 @@ const formatRelatedDate = (dateString: string) => {
           </div>
           <div class="flex items-center">
             <span class="hidden sm:inline mx-2 text-gray-300">•</span>
-            <span class="text-gray-300">Objavljeno: {formatDate(publishDate)}</span>
+            <span class="text-gray-300">{publishedLabelText} {formatDate(publishDate, mainDateLocale, mainDateFormatOptions)}</span>
           </div>
-          {updateDate && (
+          {updateDate && updatedLabelText && (
             <div class="flex items-center">
               <span class="hidden sm:inline mx-2 text-gray-300">•</span>
               <span class="text-gray-300">
-                Posodobljeno: {formatDate(updateDate)}
+                {updatedLabelText} {formatDate(updateDate, mainDateLocale, mainDateFormatOptions)}
               </span>
             </div>
           )}
@@ -150,7 +159,7 @@ const formatRelatedDate = (dateString: string) => {
         <div class="sticky top-24">
           {tocHeadings.length > 0 && (
             <nav class="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
-              <h2 class="text-lg font-semibold text-signal-dark mb-2 pb-2 border-b">Na tej strani</h2>
+              <h2 class="text-lg font-semibold text-signal-dark mb-2 pb-2 border-b">{tocContent.title}</h2>
               <ul class="space-y-1">
                 {tocHeadings.map(heading => (
                   <li class={`${heading.depth === 2 ? 'mt-2 first:mt-0' : 'ml-3'}`}>
@@ -179,42 +188,45 @@ const formatRelatedDate = (dateString: string) => {
 
         <!-- Editorial Policy Section -->
         <div class="bg-black text-white rounded-xl p-8 my-12">
-          <h3 class="text-2xl font-bold mb-4">Uredniška politika</h3>
+          <h3 class="text-2xl font-bold mb-4">{editorialPolicyContent.title}</h3>
           <p class="text-gray-300 mb-6">
-            Naši članki so skrbno pripravljeni in preverjeni s strani strokovnjakov. Preberite našo uredniško politiko za več informacij o našem procesu.
+            {editorialPolicyContent.description}
           </p>
           <a 
-            href="/si/uredniska-politika" 
+            href={editorialPolicyContent.ctaLink} 
             class="inline-block bg-signal-green text-black font-semibold px-6 py-3 rounded-lg hover:bg-[#a5d429] transition-colors"
           >
-            Preberite več →
+            {editorialPolicyContent.ctaText}
           </a>
         </div>
 
+        <!-- Disclaimer Section -->
         <div class="bg-red-50 border border-red-100 rounded-xl p-6 mt-6">
           <p class="text-red-800 text-sm">
-            Vsebina tega članka je zgolj informativne narave in ne predstavlja uradnih navodil. Za točne podatke o varnostnih zahtevah se posvetujte s pristojnimi institucijami.
+            {disclaimerContent.text}
           </p>
         </div>
 
         <!-- Related Articles Section -->
-        <div class="border-t border-gray-200 pt-12 mt-12">
-          <h2 class="text-2xl font-bold mb-8">Sorodni članki</h2>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {relatedArticles.map(article => (
-              <article class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                <h3 class="font-semibold text-lg mb-2">
-                  <a href={article.url} class="text-signal-dark hover:text-signal-green transition-colors">
-                    {article.title}
-                  </a>
-                </h3>
-                <p class="text-signal-gray text-sm">
-                  {formatRelatedDate(article.date)}
-                </p>
-              </article>
-            ))}
+        {relatedArticlesContent.articles && relatedArticlesContent.articles.length > 0 && (
+           <div class="border-t border-gray-200 pt-12 mt-12">
+            <h2 class="text-2xl font-bold mb-8">{relatedArticlesContent.title}</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {relatedArticlesContent.articles.map(article => (
+                <article class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                  <h3 class="font-semibold text-lg mb-2">
+                    <a href={article.url} class="text-signal-dark hover:text-signal-green transition-colors">
+                      {article.title}
+                    </a>
+                  </h3>
+                  <p class="text-signal-gray text-sm">
+                    {formatDate(article.date, relatedDateLocale, relatedDateFormatOptions)}
+                  </p>
+                </article>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <!-- Right Sidebar -->
@@ -222,15 +234,15 @@ const formatRelatedDate = (dateString: string) => {
         <div class="sticky top-24 space-y-6">
           <!-- Need Help Box -->
           <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <h3 class="text-xl font-semibold text-signal-dark mb-3">Potrebujete pomoč?</h3>
+            <h3 class="text-xl font-semibold text-signal-dark mb-3">{helpBoxContent.title}</h3>
             <p class="text-signal-gray mb-4">
-              Kontaktirajte naše strokovno osebje, ki vam bo pomagalo pri ustreznem zavarovanju območja.
+              {helpBoxContent.description}
             </p>
             <a 
-              href="mailto:support@eu-signal.com" 
+              href={helpBoxContent.ctaLink} 
               class="block bg-black text-signal-green border border-signal-green text-center font-medium py-3 px-4 rounded-lg hover:bg-signal-green hover:text-black transition-all"
             >
-              Vprašajte nas
+              {helpBoxContent.ctaText}
             </a>
           </div>
         </div>
@@ -246,7 +258,7 @@ const formatRelatedDate = (dateString: string) => {
     font-weight: 600;
   }
 
-  .toc-link.active:where([class*="border-l-4"]) {
+  .toc-link.active:where([class*="border-l-4"]) { /* Original selector */
     border-left-color: var(--signal-green);
   }
 
@@ -335,7 +347,7 @@ const formatRelatedDate = (dateString: string) => {
     const headings = Array.from(document.querySelectorAll('h2[id], h3[id], h4[id]'));
     const tocLinks = Array.from(document.querySelectorAll('.toc-link'));
     
-    if (headings.length && tocLinks.length) {
+    if (headings.length > 0 && tocLinks.length > 0) { 
       const observerOptions = {
         rootMargin: '-100px 0px -60% 0px',
         threshold: 0
@@ -347,10 +359,8 @@ const formatRelatedDate = (dateString: string) => {
           const tocLink = document.querySelector(`.toc-link[href="#${id}"]`);
           
           if (tocLink) {
-            if (entry.isIntersecting) {
-              // Remove active class from all links
+            if (entry.isIntersecting && entry.intersectionRatio > 0) { 
               tocLinks.forEach(link => link.classList.remove('active'));
-              // Add active class to current link
               tocLink.classList.add('active');
             }
           }
@@ -358,7 +368,9 @@ const formatRelatedDate = (dateString: string) => {
       }, observerOptions);
       
       headings.forEach(heading => {
-        headingObserver.observe(heading);
+        if (heading.id) { 
+            headingObserver.observe(heading);
+        }
       });
     }
   });

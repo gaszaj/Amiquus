@@ -1,13 +1,26 @@
 ---
 import EEATLayout from '../layouts/EEATLayout.astro';
+
+// Define content for the page, including labels previously in the layout
+const pageTitle = "Understanding Triopan Warning System Technology";
+const pageDescription = "A comprehensive exploration of triopan warning system technology, design principles, and application scenarios across various safety contexts.";
+const articlePublishDate = "2025-03-10";
+const articleUpdateDate = "2025-03-15";
+const publishedTextLabel = "Objavljeno:";
+const updatedTextLabel = "Posodobljeno:";
+const articleDateLocale = "sl-SI"; // Moved from layout's formatDate function
 ---
 
 <EEATLayout 
-  title="Understanding Triopan Warning System Technology"
-  description="A comprehensive exploration of triopan warning system technology, design principles, and application scenarios across various safety contexts."
-  publishDate="2025-03-10"
-  updateDate="2025-03-15"
+  title={pageTitle}
+  description={pageDescription}
+  publishDate={articlePublishDate}
+  updateDate={articleUpdateDate}
+  publishedLabel={publishedTextLabel}
+  updatedLabel={updatedTextLabel}
+  dateLocale={articleDateLocale}
 >
+  <!-- The actual article content goes here, into the slot -->
   <p class="lead text-xl text-signal-gray mb-8">
     Triopan warning systems represent a significant advancement in portable safety signage, offering superior visibility, stability, and ease of deployment compared to traditional warning signs. This guide explores the technology behind these systems and their various applications across safety contexts.
   </p>
@@ -64,7 +77,7 @@ import EEATLayout from '../layouts/EEATLayout.astro';
 
     <p>
       The effectiveness of triopan warning systems is recognized across European safety standards and regulations, with many jurisdictions specifically requiring their use in certain safety contexts. Their adoption continues to expand as organizations prioritize higher visibility safety solutions that can be rapidly deployed in emergency situations.
-    </p>
+    </p
 
     <p>
       As technology continues to advance, triopan warning systems are likely to incorporate even more sophisticated features including smart connectivity, automated deployment mechanisms, and enhanced material science innovations that further improve visibility and durability. These advancements will ensure that triopan systems remain at the forefront of portable safety signage solutions for decades to come.

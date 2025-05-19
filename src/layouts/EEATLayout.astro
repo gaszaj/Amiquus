@@ -2,17 +2,35 @@
 import BaseLayout from './BaseLayout.astro';
 
 export interface Props {
+  // Props for BaseLayout
   title: string;
   description?: string;
+  
+  // Props for article metadata
   publishDate: string;
   updateDate?: string;
+  
+  // Props for metadata labels
+  publishedLabel: string;
+  updatedLabel?: string;
+  
+  // Prop for date formatting locale
+  dateLocale: string; 
 }
 
-const { title, description, publishDate, updateDate } = Astro.props;
+const { 
+  title, 
+  description, 
+  publishDate, 
+  updateDate,
+  publishedLabel,
+  updatedLabel,
+  dateLocale // Destructure the new locale prop
+} = Astro.props;
 
-// Format dates
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('sl-SI', {
+// Format dates - uses the passed locale
+const formatDate = (dateString: string, locale: string) => {
+  return new Date(dateString).toLocaleDateString(locale, { // Use the locale prop here
     year: 'numeric',
     month: 'long',
     day: 'numeric'
@@ -29,11 +47,11 @@ const formatDate = (dateString: string) => {
         
         <!-- Publication Info -->
         <div class="flex flex-wrap items-center gap-2 text-lg animate-slide-up">
-          <span class="text-signal-green">Objavljeno: {formatDate(publishDate)}</span>
-          {updateDate && (
+          <span class="text-signal-green">{publishedLabel} {formatDate(publishDate, dateLocale)}</span>
+          {updateDate && updatedLabel && (
             <>
               <span class="text-gray-400">•</span>
-              <span class="text-signal-green">Posodobljeno: {formatDate(updateDate)}</span>
+              <span class="text-signal-green">{updatedLabel} {formatDate(updateDate, dateLocale)}</span>
             </>
           )}
         </div>
@@ -44,7 +62,7 @@ const formatDate = (dateString: string) => {
   <!-- Main Content -->
   <div class="container mx-auto px-4 py-12">
     <div class="prose prose-lg max-w-4xl mx-auto">
-      <slot />
+      <slot /> {/* The main article content will be passed here */}
     </div>
   </div>
 </BaseLayout>
@@ -57,18 +75,18 @@ const formatDate = (dateString: string) => {
   }
 
   .prose h2 {
-    color: var(--signal-dark);
+    color: var(--signal-dark); /* Assuming --signal-dark is defined globally or in BaseLayout */
     margin-top: 2.5rem;
     margin-bottom: 1.5rem;
-    font-size: 1.875rem;
+    font-size: 1.875rem; /* Equivalent to text-3xl in Tailwind default */
     font-weight: 700;
   }
   
   .prose h3 {
-    color: var(--signal-dark);
+    color: var(--signal-dark); /* Assuming --signal-dark is defined globally or in BaseLayout */
     margin-top: 2rem;
     margin-bottom: 1rem;
-    font-size: 1.5rem;
+    font-size: 1.5rem; /* Equivalent to text-2xl */
     font-weight: 600;
   }
   
@@ -79,13 +97,14 @@ const formatDate = (dateString: string) => {
   
   .prose ul {
     margin-bottom: 1.5rem;
-    padding-left: 1.25rem;
+    padding-left: 1.25rem; /* Equivalent to pl-5 */
   }
 
   .prose li {
     margin-bottom: 0.5rem;
   }
 
+  /* Global animations - if not already defined in BaseLayout or a global CSS file */
   :global(.animate-fade-in) {
     animation: fadeIn 0.5s ease-in-out;
   }

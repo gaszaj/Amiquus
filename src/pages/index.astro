@@ -1,8 +1,250 @@
 ---
 import HomepageLayout from '../layouts/HomepageLayout.astro';
+
+// --- Data for the Homepage ---
+
+// Hero section data
+const heroData = {
+  title: "Široka ponudba opozorilnih piramidnih znakov",
+  subtitle: "Prometni troznak ali zložljivi trinožec ali prometna zložljiva piramida je znak za obveščanje udeležencev v cestnem prometu.",
+  ctaText: "Oddajte naročilo",
+  ctaLink: "#best-sellers",
+  features: [
+    "V skladu z regulativo EU",
+    "Trpežno in kakovostno", 
+    "Priporočajo varnostni inšpektorji"
+  ],
+  socialProof: {
+    text: "Zaupa nam že 1763 kupcev po vsej Evropi",
+    rating: 5,
+    userPhotos: [
+      "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg",
+      "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg",
+      "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg",
+      "https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg",
+      "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg"
+    ]
+  }
+};
+
+// Marquee items data
+const marqueeItems = [
+  { 
+    url: "/si/opozorilna-piramida/pozor-visece-breme", 
+    image: 'https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVISEEBREME-wCeK1.webp', 
+    alt: 'Triopan / trinožec POZOR VISEČE BREME' 
+  },
+  { 
+    url: "/si/opozorilna-piramida/omejitev-hitrosti-30", 
+    image: 'https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANOMEJITEVHITROSTI30-UNCer.webp', 
+    alt: 'Triopan / trinožec OMEJITEV HITROSTI 30' 
+  },
+  { 
+    url: "/si/opozorilna-piramida/parkirni-prostor", 
+    image: 'https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPARKIRNIPROSTOR-YyfIE.webp', 
+    alt: 'Triopan / trinožec PARKIRNI PROSTOR' 
+  },
+  { 
+    url: "/si/opozorilna-piramida/maraton", 
+    image: 'https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANMARATON-gdUyw.webp', 
+    alt: 'Triopan / trinožec MARATON' 
+  },
+  { 
+    url: "/si/opozorilna-piramida/pozor-vilicar", 
+    image: 'https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp', 
+    alt: 'Triopan / trinožec POZOR VILIČAR' 
+  }
+];
+
+// Bestsellers section data
+const bestsellersSection = {
+  title: "Najbolj prodajano",
+  productCtaText: "Oddajte naročilo",
+  products: [
+    {
+      title: "Opozorilna piramida DELO NA CESTI",
+      image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp",
+      url: "/si/opozorilna-piramida/delo-na-cesti"
+    },
+    {
+      title: "Opozorilna piramida POZOR GRADBIŠČE",
+      image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANIVALINACESTI-btXmf.webp",
+      url: "/si/opozorilna-piramida/pozor-gradbisce"
+    },
+    {
+      title: "Opozorilna piramida PREPOVEDAN VSTOP",
+      image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPARKIRNIPROSTOR-YyfIE.webp",
+      url: "/si/opozorilna-piramida/prepovedan-vstop"
+    },
+    {
+      title: "Opozorilna piramida ŠOLSKA POT",
+      image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp",
+      url: "/si/opozorilna-piramida/solska-pot"
+    },
+    {
+      title: "Opozorilna piramida POZOR GASILCI",
+      image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANIVALINACESTI-btXmf.webp",
+      url: "/si/opozorilna-piramida/pozor-gasilci"
+    },
+    {
+      title: "Opozorilna piramida OMEJITEV HITROSTI 30",
+      image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPARKIRNIPROSTOR-YyfIE.webp",
+      url: "/si/opozorilna-piramida/omejitev-hitrosti-30"
+    },
+    {
+      title: "Opozorilna piramida STOP",
+      image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp",
+      url: "/si/opozorilna-piramida/stop"
+    },
+    {
+      title: "Opozorilna piramida PARKIRNI PROSTOR",
+      image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANIVALINACESTI-btXmf.webp",
+      url: "/si/opozorilna-piramida/parkirni-prostor"
+    },
+    {
+      title: "Opozorilna piramida POZOR VILIČAR",
+      image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPARKIRNIPROSTOR-YyfIE.webp",
+      url: "/si/opozorilna-piramida/pozor-vilicar"
+    }
+  ]
+};
+
+// Features section data
+const featuresSection = {
+  title: "Zložljivi, trpežni in vidljivi",
+  items: [
+    {
+      icon: "⚡",
+      title: "Hitra postavitev",
+      description: "Postavite v manj kot minuti"
+    },
+    {
+      icon: "🔄",
+      title: "Enostavno premikanje",
+      description: "Preprosto prenašanje in premikanje"
+    },
+    {
+      icon: "📦",
+      title: "Še enostavneje zlaganje",
+      description: "Kompaktno zlaganje za shranjevanje"
+    }
+  ]
+};
+
+// Institutions section data
+const institutionsSection = {
+  title: "Naše izdelke potrjuje strokovno osebje iz priznanih organizacij",
+  items: [
+    "Zavarovalnica Triglav",
+    "Generali",
+    "Zavarovalnica Sava",
+    "Vzajemna",
+    "Inšektorat RS za delo",
+    "Slovenska Policija"
+  ]
+};
+
+// FAQ section data
+const faqSection = {
+  title: "Pogosta vprašanja (FAQ)",
+  items: [
+    {
+      question: "Kakšne so dimenzije in teža?",
+      answer: "Osnovne dimenzije so 100x100x100 cm z višino 90 cm, zasnovano za optimalno stabilnost in prenosljivost."
+    },
+    {
+      question: "Iz katerih materialov je izdelan in kako trpežen je?",
+      answer: "Izdelan iz vzdržljivih aluminijastih profilov, prekritih z UV-odporno tkanino, ki zagotavlja odlične odsevne lastnosti in odpornost na vse vremenske vplive."
+    },
+    {
+      question: "Kako stabilen je znak?",
+      answer: "Zaradi piramidne strukture in stabilnega podnožja zagotavlja odlično stabilnost na vseh površinah."
+    },
+    {
+      question: "Ali je znak viden ponoči in v slabem vremenu?",
+      answer: "Da, visoko odsevni material zagotavlja odlično vidljivost v dežju, megli in pri slabi vidljivosti."
+    },
+    {
+      question: "Ali je znak odporen na vremenske vplive?",
+      answer: "Da, UV-odporna tkanina in trpežen aluminijast okvir sta odporna na vse vremenske razmere: sneg, dež, sonce, meglo in vetrove do 70 km/h."
+    },
+    {
+      question: "Ali je znak primeren za uporabo v ekstremnih vremenskih razmerah?",
+      answer: "Da, zasnovan je za uporabo v vseh vremenskih razmerah, vključno s snegom, dežjem in močnimi vetrovi do 70 km/h."
+    },
+    {
+      question: "Kako hitro lahko znak postavim?",
+      answer: "Postavitev traja le 1-2 minuti - enostavno ga razprete, pritrdite in namestite. Preprosto ga je tudi premestiti ali pospraviti."
+    },
+    {
+      question: "Kakšni so pogoji shranjevanja?",
+      answer: "Shranjujte v suhem prostoru, zloženo v priloženi torbi za prenašanje."
+    },
+    {
+      question: "Kakšna je garancijska doba?",
+      answer: "24-mesečna garancija na material in proizvodne napake."
+    },
+    {
+      question: "Ali lahko prilagodim opozorilno sporočilo?",
+      answer: "Da, omogočamo prilagojeno besedilo in dodajanje logotipov podjetij. Za ponudbo nas kontaktirajte na info@eusignal.com."
+    },
+    {
+      question: "Ali lahko naročim več znakov z različnimi napisi?",
+      answer: "Da, za večja naročila z različnimi napisi izpolnite naročilnico."
+    },
+    {
+      question: "Ali lahko znak uporabljam na javnih površinah?",
+      answer: "Da, vendar se pred uporabo posvetujte s pristojnimi organi, lokalno upravo ali lastniki zemljišč."
+    },
+    {
+      question: "Kakšen je dobavni rok?",
+      answer: "Standardna dostava traja 3-14 delovnih dni znotraj EU."
+    },
+    {
+      question: "Kakšni so načini plačila?",
+      answer: "Sprejemamo Google Pay, Apple Pay, Visa in Mastercard za individualna naročila. Za večja poslovna naročila vas prosimo za izpolnitev naročilnice."
+    },
+    {
+      question: "Kakšni so pogoji vračila?",
+      answer: "14-dnevni rok za vračilo neuporabljenih izdelkov v originalni embalaži. Kasnejših reklamacij ne upoštevamo."
+    }
+  ]
+};
+
+// Contact section data
+const contactSection = {
+  title: "Vstopite v kontakt",
+  subtitle: "Imate vprašanje ali predlog za sodelovanje? Izpolnite spodnji obrazec in odgovorili vam bomo v najkrajšem možnem času.",
+  formLabels: {
+    fullName: "Vaše polno ime",
+    fullNamePlaceholder: "npr.: Matej Kovac",
+    email: "Vaš email",
+    emailPlaceholder: "npr.: matej.kovac@gmail.com",
+    message: "Vaše sporočilo",
+    messagePlaceholder: "Tukaj vpišite sporočilo, v katerem na kratko opišite svoje predloge",
+    terms: "Strinjam se s pogoji uporabe",
+    submitButton: "Pošlji"
+  }
+};
+
+// Form alert messages for client-side script
+const formAlertMessages = {
+  invalidEmail: "Vnesite veljaven e-poštni naslov.",
+  termsNotAccepted: "Potrdite, da se strinjate s pogoji.",
+  submissionSuccess: "Vaše sporočilo je bilo uspešno poslano!",
+  submissionError: "Prišlo je do napake pri pošiljanju. Prosimo, poskusite znova."
+};
 ---
 
 <HomepageLayout 
   title="Premium varnostni znaki in opozorilni sistemi"
   description="EU Signal - Slovenski proizvajalec premium varnostnih znakov in opozorilnih sistemov triopan za promet, gradbeništvo, nujne službe in dogodke po vsej Evropi."
+  heroData={heroData}
+  marqueeItems={marqueeItems}
+  bestsellersSection={bestsellersSection}
+  featuresSection={featuresSection}
+  institutionsSection={institutionsSection}
+  faqSection={faqSection}
+  contactSection={contactSection}
+  formAlerts={formAlertMessages}
 />

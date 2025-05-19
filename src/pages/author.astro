@@ -1,39 +1,56 @@
 ---
 import AuthorLayout from '../layouts/AuthorLayout.astro';
-import { Image } from 'astro:assets';
-import authorImage from '../assets/Rastko-Škrjanec.jpeg';
+import type { ImageMetadata } from 'astro:assets'; // Import type if not already global
+import authorImage from '../assets/Rastko-Škrjanec.jpeg'; // Adjust path
 
-const authorData = {
+// --- Author's Core Data ---
+const authorProfileData = {
   name: "Rastko Škrjanec",
   description: "Rastko Škrjanec je lastnik in direktor ELSAV Veržej, slovenskega podjetja s 25-letno tradicijo proizvodnje prometnovarnostne opreme. Pod njegovim vodstvom je podjetje uvedlo bistvene izboljšave tako v kakovosti izdelkov kot v proizvodnih procesih in doseglo zmogljivost izdelave do 200 prometnih znakov dnevno. Rastko skupaj s sinom Nikom, ki je odraščal v poslovnem okolju, ohranja zavezanost podjetja k odličnosti ob zagotavljanju EU certifikatov in skladnosti s standardi SIST EN. Ko podjetje prehaja v naslednjo generacijo, se Rastko še naprej osredotoča na inovacije na področju varnostnih znakov, medtem ko se njegov sin pripravlja na nadaljevanje poslanstva podjetja varovanja življenj z vrhunskimi opozorilnimi sistemi.",
-  image: authorImage,
+  image: authorImage as ImageMetadata, // Cast if necessary, or ensure import is typed
   socialLinks: {
     linkedin: "https://si.linkedin.com/in/rastko-%C5%A1krjanec-bb8b22176",
-    twitter: "https://www.facebook.com/rastko.skrjanec/",
+    twitter: "https://www.facebook.com/rastko.skrjanec/", // Assuming this is the intended "Twitter/X" link
     website: "https://www.elsaverzej.com/index.php/kontakt.html",
     email: "rastko.skrjanec@elsaverzej.com"
   },
   jobTitle: "CEO & Owner",
   company: "ELSAV Veržej",
-  languages: [
-    "Slovenian",
-    "English",
-    "German",
-    "Croatian"
-  ],
-  authorId: "rastko-skrjanec",
-  joinDate: "2020-05-15"
+  // authorId: "rastko-skrjanec", // This ID is for routing/data fetching, not directly for layout
+  // joinDate: "2020-05-15" // Not used by layout currently
+};
+
+// --- Data for Layout Sections & UI Text ---
+const languagesData = [
+  { name: "Slovenian", flag: "🇸🇮" },
+  { name: "English", flag: "🇬🇧" },
+  { name: "German", flag: "🇩🇪" },
+  { name: "Croatian", flag: "🇭🇷" }
+];
+
+const layoutStringsData = {
+  baseLayoutDescriptionPrefix: "Learn more about", // Example, adjust as needed
+  socialLinkLabelLinkedIn: "LinkedIn",
+  socialLinkLabelTwitter: "Twitter", // Or "Facebook" if that's what the link points to
+  socialLinkLabelWebsite: "Website",
+  socialLinkLabelEmail: "Email",
+  jobTitleAtCompanySeparator: " at ",
+  languagesSectionTitle: "Jeziki",
+  languagesSectionIcon: "🌍",
+  footerLinkAllAuthorsText: "Ostali avtorji",
+  footerLinkAllAuthorsUrl: "/si/avtorji-in-uredniki",
+  footerLinkEditorialPolicyText: "Preberite našo uredniško politiko",
+  footerLinkEditorialPolicyUrl: "/si/uredniska-politika",
 };
 ---
 
 <AuthorLayout
-  name={authorData.name}
-  description={authorData.description}
-  image={authorData.image}
-  socialLinks={authorData.socialLinks}
-  jobTitle={authorData.jobTitle}
-  company={authorData.company}
-  languages={authorData.languages}
-  authorId={authorData.authorId}
-  joinDate={authorData.joinDate}
+  name={authorProfileData.name}
+  description={authorProfileData.description}
+  image={authorProfileData.image}
+  socialLinks={authorProfileData.socialLinks}
+  jobTitle={authorProfileData.jobTitle}
+  company={authorProfileData.company}
+  languages={languagesData}
+  layoutStrings={layoutStringsData}
 />

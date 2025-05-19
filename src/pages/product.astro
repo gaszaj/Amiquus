@@ -1,11 +1,12 @@
 ---
 import ProductLayout from '../layouts/ProductLayout.astro';
+import type { RelatedProductInfo, FaqItemData } from '../layouts/ProductLayout.astro';
 
-// Mock product data
-const productData = {
+// --- Core Product Data ---
+const productCoreData = {
   title: "Opozorilna piramida DELO NA CESTI",
   subtitle: "Za varnost vseh udeležencev v prometu je postavitev opozorilne piramide DELO NA CESTI ključen korak za zmanjšanje nevarnosti na cestah.",
-  description: "Za varnost vseh udeležencev v prometu je postavitev opozorilne piramide DELO NA CESTI ključen korak za zmanjšanje nevarnosti na cestah.",
+  description: "Opozorilna piramida DELO NA CESTI - ključna za varnost na gradbiščih in cestnih delih. Izdelana iz trpežnih materialov, visoka vidljivost, enostavna postavitev.", // Meta description for BaseLayout
   price: "€149.99",
   image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp",
   specifications: {
@@ -16,14 +17,109 @@ const productData = {
     windResistance: "Do 70 km/h",
     setupTime: "1-2 minuti"
   },
-  category: "traffic-road-safety",
-  productId: "TP-100"
+  category: "traffic-road-safety", // For filtering related products
+  productId: "TP-100" // For filtering related products
+};
+
+// --- Data for Layout Sections (FAQs, Related Products, Quantity Options) ---
+const productFaqItems: FaqItemData[] = [
+  { question: "Kaj je opozorilna prometna piramida in zakaj se uporablja?", answer: "Opozorilna prometna piramida (znana tudi pod izrazom triopan) je prenosni varnostni znak trikotne oblike, ki se uporablja za hitro in učinkovito opozarjanje na nevarnosti ali posebne okoliščine na cesti ter v okolici." },
+  { question: "Koliko dni traja rok dobave?", answer: `Rok dobave opozorilne piramide ${productCoreData.title} je običajno med 3-14 delovnih dni.` },
+  { question: "Kakšne so možnosti plačila?", answer: "Za fizične uporabnike oziroma manjša naročila, omogočamo plačila preko Google Pay, Apple Pay, Visa, Mastercard. Za večja naročila opozorilnih varnostnih piramid in naročila na podjetje vas naprošamo, da izpolnite naročilnico." },
+  { question: `Kakšen je material in kako dolgo zdrži ${productCoreData.title}?`, answer: `Konstrukcija prometnega piramidnega znaka ${productCoreData.title} je iz trpežnih profilov iz aluminija. Preko profilov je napeto UV odporno platno, ki ima odlične odsevne značilnosti in je odporno na vse vremenske vplive.` },
+  { question: `Kakšne so dimenzije prometnega troznaka ${productCoreData.title}?`, answer: "Prometni znak je v obliki piramide, kar pomeni, da pri tleh meri v dimenzijah 100x100x100 cm. Višina je 90 cm." },
+  { question: `Ali je znak ${productCoreData.title} viden ponoči in v slabem vremenu?`, answer: "Prometni trikotnik je viden tudi ponoči in ima odlične odsevne lastnosti. Odsevno platno omogoča vidljivost tudi v dežju, megli in ob slabši vidljivosti." },
+  { question: `Kako hitro lahko znak ${productCoreData.title} postavim?`, answer: "Znak je izjemno lahko in hitro postavljiv. Postavitev običajno traja le kakšno minuto ali dve. Znak lahko po prenehanju uporabe enostavno sestavite ali ga premaknete na novo mesto." },
+  { question: `Ali je znak ${productCoreData.title} primeren za uporabo na prostem?`, answer: "UV platno in trpežni aluminijasti okvir so odporni na vse vremenske vplive: sneg, dež, sonce, meglo, veter (do 70 km/h), zato je znak idealen za uporabo na prostem." },
+  { question: "Ali lahko naročim več kosov z različnimi napisi?", answer: "Seveda. Za večja naročila vam svetujemo, da izpolnite naročilnico." },
+  { question: `Kakšna je stabilnost znaka ${productCoreData.title}?`, answer: `Zaradi značilne piramidne strukture in stabilnega podnožja je znak ${productCoreData.title} izjemno stabilen ne glede na teren na katerem je postavljen.` },
+  { question: "Ali lahko naročim znak po meri?", answer: "Za vsa naročila po meri, tiskanje vaših logotipov podjetja in drugih želj, nam prosim pišite na info@eusignal.com." },
+  { question: `Ali lahko znak ${productCoreData.title} uporabljam na javnih površinah?`, answer: "Da, znak lahko uporabljate na javnih površinah, a se pred tem posvetujte s pristojnimi organi, lokalno samoupravo ali lastniki zemljišč." },
+  { question: "Kakšni so pogoji vračila?", answer: "Vračila izdelkov so možna le v roku prvih 14 dni po nakupu. Kasnejših reklamacij NE upoštevamo." }
+];
+
+const allAvailableProducts: RelatedProductInfo[] = [ // Master list of all products
+  { id: "tp-001", title: "Opozorilna piramida DELO NA CESTI", image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp", category: "traffic-road-safety", url: "/si/opozorilna-piramida/delo-na-cesti" },
+  { id: "tp-002", title: "Opozorilna piramida OBVEZNA SMER", image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANIVALINACESTI-btXmf.webp", category: "traffic-road-safety", url: "/si/opozorilna-piramida/obvezna-smer" },
+  { id: "tp-003", title: "Opozorilna piramida ZOŽENJE CESTE", image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPARKIRNIPROSTOR-YyfIE.webp", category: "construction-maintenance", url: "/si/opozorilna-piramida/zozenje-ceste" },
+  { id: "tp-004", title: "Opozorilna piramida ZAPRTA CESTA", image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp", category: "traffic-road-safety", url: "/si/opozorilna-piramida/zaprta-cesta" },
+  { id: "tp-005", title: "Opozorilna piramida OBVOZ", image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANIVALINACESTI-btXmf.webp", category: "traffic-road-safety", url: "/si/opozorilna-piramida/obvoz" }
+];
+
+const filteredRelatedProducts = allAvailableProducts
+  .filter(product => product.id !== productCoreData.productId)
+  .sort((a, b) => { // Prioritize same category
+    if (a.category === productCoreData.category && b.category !== productCoreData.category) return -1;
+    if (a.category !== productCoreData.category && b.category === productCoreData.category) return 1;
+    return 0;
+  })
+  .slice(0, 3);
+
+const productQuantityOptions: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 30];
+
+// --- UI Text Strings for the Layout ---
+const productPageLayoutStrings = {
+  techSpecTitle: "Tehnične specifikacije",
+  techSpecDimensionsLabel: "Dimenzije",
+  techSpecMaterialLabel: "Material",
+  techSpecWeightLabel: "Teža",
+  techSpecVisibilityLabel: "Vidnost",
+  techSpecWindResistanceLabel: "Vetrovne razmere",
+  techSpecSetupTimeLabel: "Čas sestavljanja",
+  orderButtonText: "Izpolnite naročilnico",
+  orderFormTitle: "Naročilnica",
+  orderFormSubtitleBase: "Prosimo vnesite svoje osebne podatke ali podatke podjetja za oddajo naročila izdelka", // Product title will be appended
+  orderFormNameLabel: "Ime*",
+  orderFormNamePlaceholder: "Vnesite svoje ime",
+  orderFormSurnameLabel: "Priimek*",
+  orderFormSurnamePlaceholder: "Vnesite svoj priimek",
+  orderFormCompanyLabel: "Podjetje (ni obvezno)",
+  orderFormCompanyPlaceholder: "Vnesite ime podjetja",
+  orderFormVatIdLabel: "ID za DDV (izpolni samo podjetje)",
+  orderFormVatIdPlaceholder: "Vnesite ID za DDV",
+  orderFormStreetLabel: "Ulica*",
+  orderFormStreetPlaceholder: "Vnesite ime ulice",
+  orderFormCityLabel: "Kraj*",
+  orderFormCityPlaceholder: "Vnesite ime kraja",
+  orderFormZipLabel: "Poštna številka*",
+  orderFormZipPlaceholder: "Vnesite poštno številko",
+  orderFormEmailLabel: "Elektronski naslov*",
+  orderFormEmailPlaceholder: "Vnesite e-naslov",
+  orderFormPhoneLabel: "Telefonska številka*",
+  orderFormPhonePlaceholder: "Vnesite telefonsko številko",
+  orderFormQuantityLabel: "Količina*",
+  orderFormQuantityDefaultOption: "Izberite količino",
+  orderFormPaymentLabelBase: "Plačilo (", // Price will be inserted here
+  orderFormPaymentCod: "Po povzetju",
+  orderFormPaymentPreInvoice: "Predračun",
+  orderFormMessageLabel: "Sporočilo",
+  orderFormMessagePlaceholder: "Vpišite dodatne informacije ali posebne zahteve",
+  orderFormTermsLabel: "Strinjam se s pogoji podjetja.*",
+  orderFormSubmitButtonText: "Oddajte naročilnico →",
+  faqSectionTitle: "Pogosta vprašanja (FAQ)",
+  faqBackButtonText: "Nazaj na naročilnico",
+  relatedProductsTitle: "Sorodni izdelki",
+  relatedProductViewButtonText: "Poglej izdelek",
+  customerSupportTitle: "Podpora",
+  customerSupportEmail: "info@eusignal.com",
+  formSubmissionAlertText: "Hvala za vaše naročilo! Kontaktirali vas bomo v najkrajšem možnem času."
 };
 ---
 
-<ProductLayout {...productData}>
+<ProductLayout
+  title={productCoreData.title}
+  subtitle={productCoreData.subtitle}
+  description={productCoreData.description}
+  price={productCoreData.price}
+  image={productCoreData.image}
+  specifications={productCoreData.specifications}
+  relatedProducts={filteredRelatedProducts}
+  quantityOptions={productQuantityOptions}
+  faqItems={productFaqItems}
+  layoutStrings={productPageLayoutStrings}
+>
+  <!-- Main product description and content goes here -->
   <div class="product-description space-y-6">
-    <!-- Expert Recommendation with larger icon -->
     <div class="bg-signal-green/5 p-6 rounded-lg border-l-4 border-signal-green mb-8">
       <div class="flex items-center gap-4">
         <svg class="w-12 h-12 text-signal-green" viewBox="0 0 16 16">
@@ -32,42 +128,32 @@ const productData = {
             <path d="M8.256 14a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z"/>
           </g>
         </svg>
-        <p class="text-xl font-semibold">Prometni trikotnik DELO NA CESTI priporoča 9/10 strokovnjakov za cestno varnost!</p>
+        <p class="text-xl font-semibold">Prometni trikotnik {productCoreData.title} priporoča 9/10 strokovnjakov za cestno varnost!</p>
       </div>
     </div>
 
-    <!-- Authority Proof with consistent checkmark sizes -->
     <div class="bg-gray-50 p-6 rounded-lg">
-      <h2 class="text-xl font-semibold mb-4">Prometni trikotnik DELO NA CESTI priporočajo ali uporabljajo:</h2>
+      <h2 class="text-xl font-semibold mb-4">Prometni trikotnik {productCoreData.title} priporočajo ali uporabljajo:</h2>
       <ul class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <li class="flex items-center gap-4">
-          <svg class="w-10 h-10 text-green-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-          </svg>
+          <svg class="w-10 h-10 text-green-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
           <span class="text-lg">20+ prometnih inženirjev</span>
         </li>
         <li class="flex items-center gap-4">
-          <svg class="w-10 h-10 text-green-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-          </svg>
+          <svg class="w-10 h-10 text-green-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
           <span class="text-lg">Osebje Direkcije RS za infrastrukturo</span>
         </li>
         <li class="flex items-center gap-4">
-          <svg class="w-10 h-10 text-green-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-          </svg>
+          <svg class="w-10 h-10 text-green-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
           <span class="text-lg">Osebje iz Inšpektorata RS za promet</span>
         </li>
       </ul>
     </div>
     
-    <!-- Safety Warning Section -->
     <div class="bg-yellow-50 p-6 rounded-lg">
       <div class="flex flex-col space-y-4">
         <div class="flex items-center gap-4">
-          <svg class="w-12 h-12 text-yellow-700" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2m0 2a8 8 0 1 0 0 16a8 8 0 0 0 0-16m0 11a1 1 0 1 1 0 2a1 1 0 0 1 0-2m0-9a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1"/>
-          </svg>
+          <svg class="w-12 h-12 text-yellow-700" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2m0 2a8 8 0 1 0 0 16a8 8 0 0 0 0-16m0 11a1 1 0 1 1 0 2a1 1 0 0 1 0-2m0-9a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1"/></svg>
           <h3 class="text-xl font-semibold text-yellow-800">Se strinjate, da je varnost na gradbiščih ključnega pomena?</h3>
         </div>
         <p class="text-yellow-700 ml-16">
@@ -76,7 +162,6 @@ const productData = {
       </div>
     </div>
 
-    <!-- Use Cases -->
     <div class="space-y-4">
       <p>Opozorilni piramidni znak lahko namestite na gradbiščih, zoženih odsekih ali cestnih križiščih, kjer potekajo dela.</p>
       <ul class="list-disc pl-6 space-y-2">
@@ -86,9 +171,8 @@ const productData = {
       </ul>
     </div>
 
-    <!-- Final CTA -->
     <div class="bg-signal-green/10 p-6 rounded-lg border-l-4 border-signal-green">
-      <p class="text-xl font-semibold">Investirajte v opozorilni znak DELO NA CESTI. Pomagajte izboljšati varnost na gradbiščih in cestnih odsekih!</p>
+      <p class="text-xl font-semibold">Investirajte v opozorilni znak {productCoreData.title}. Pomagajte izboljšati varnost na gradbiščih in cestnih odsekih!</p>
     </div>
   </div>
 </ProductLayout>

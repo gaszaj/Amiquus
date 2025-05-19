@@ -1,140 +1,119 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+// Assuming ImageMetadata might be needed if product image prop was 'astro:assets' Image type
+// import type { ImageMetadata } from 'astro:assets';
 
+// --- Type Definitions for Props ---
+export interface ProductSpecification {
+  dimensions: string;
+  material: string;
+  weight: string;
+  visibility: string;
+  windResistance: string;
+  setupTime: string;
+}
+
+export interface RelatedProductInfo {
+  id: string;
+  title: string;
+  image: string; // Assuming string URL for simplicity, adjust if using astro:assets
+  category: string;
+  url: string;
+}
+
+export interface FaqItemData {
+  question: string;
+  answer: string;
+}
+
+// --- Content Props for Sections/UI Elements ---
+export interface ProductLayoutStrings {
+  // Technical Specifications Section
+  techSpecTitle: string;
+  techSpecDimensionsLabel: string;
+  techSpecMaterialLabel: string;
+  techSpecWeightLabel: string;
+  techSpecVisibilityLabel: string;
+  techSpecWindResistanceLabel: string;
+  techSpecSetupTimeLabel: string;
+  // Order Button
+  orderButtonText: string;
+  // Order Form Section
+  orderFormTitle: string;
+  orderFormSubtitleBase: string; // "Prosimo vnesite svoje osebne podatke ali podatke podjetja za oddajo naročila izdelka "
+  orderFormNameLabel: string;
+  orderFormNamePlaceholder: string;
+  orderFormSurnameLabel: string;
+  orderFormSurnamePlaceholder: string;
+  orderFormCompanyLabel: string;
+  orderFormCompanyPlaceholder: string;
+  orderFormVatIdLabel: string;
+  orderFormVatIdPlaceholder: string;
+  orderFormStreetLabel: string;
+  orderFormStreetPlaceholder: string;
+  orderFormCityLabel: string;
+  orderFormCityPlaceholder: string;
+  orderFormZipLabel: string;
+  orderFormZipPlaceholder: string;
+  orderFormEmailLabel: string;
+  orderFormEmailPlaceholder: string;
+  orderFormPhoneLabel: string;
+  orderFormPhonePlaceholder: string;
+  orderFormQuantityLabel: string;
+  orderFormQuantityDefaultOption: string;
+  orderFormPaymentLabelBase: string; // "Plačilo (" needs price + ") DDV)*"
+  orderFormPaymentCod: string; // Po povzetju
+  orderFormPaymentPreInvoice: string; // Predračun
+  orderFormMessageLabel: string;
+  orderFormMessagePlaceholder: string;
+  orderFormTermsLabel: string;
+  orderFormSubmitButtonText: string;
+  // FAQ Section
+  faqSectionTitle: string;
+  faqBackButtonText: string;
+  // Related Products Section
+  relatedProductsTitle: string;
+  relatedProductViewButtonText: string;
+  // Customer Support Section (Sidebar)
+  customerSupportTitle: string;
+  customerSupportEmail: string;
+  // Form Submission Alert
+  formSubmissionAlertText: string;
+}
+
+// --- Main Props Interface ---
 export interface Props {
+  // Product Data (passed through for display)
   title: string;
   subtitle: string;
-  description?: string;
+  description?: string; // Page's meta description
   price: string;
-  image: string;
-  specifications: {
-    dimensions: string;
-    material: string;
-    weight: string;
-    visibility: string;
-    windResistance: string;
-    setupTime: string;
-  };
-  category: string;
-  productId: string;
+  image: string; // Assuming string URL
+  specifications: ProductSpecification;
+  // category: string; // Used for filtering related products, logic moved to page
+  // productId: string; // Used for filtering related products, logic moved to page
+
+  // Data for Layout Sections, sourced from page
+  relatedProducts: RelatedProductInfo[];
+  quantityOptions: number[];
+  faqItems: FaqItemData[];
+
+  // All UI text and configuration for the layout itself
+  layoutStrings: ProductLayoutStrings;
 }
 
 const { 
   title,
-  subtitle, // Add this line
+  subtitle,
   description,
   price,
   image,
   specifications,
-  category,
-  productId
+  relatedProducts, // Now a prop
+  quantityOptions, // Now a prop
+  faqItems,        // Now a prop
+  layoutStrings
 } = Astro.props;
-
-const relatedProducts = [
-  {
-    id: "tp-001",
-    title: "Opozorilna piramida DELO NA CESTI",
-    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp",
-    category: "traffic-road-safety",
-    url: "/si/opozorilna-piramida/delo-na-cesti"
-  },
-  {
-    id: "tp-002",
-    title: "Opozorilna piramida OBVEZNA SMER",
-    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANIVALINACESTI-btXmf.webp",
-    category: "traffic-road-safety",
-    url: "/si/opozorilna-piramida/obvezna-smer"
-  },
-  {
-    id: "tp-003",
-    title: "Opozorilna piramida ZOŽENJE CESTE",
-    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPARKIRNIPROSTOR-YyfIE.webp",
-    category: "construction-maintenance",
-    url: "/si/opozorilna-piramida/zozenje-ceste"
-  },
-  {
-    id: "tp-004",
-    title: "Opozorilna piramida ZAPRTA CESTA",
-    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp",
-    category: "traffic-road-safety",
-    url: "/si/opozorilna-piramida/zaprta-cesta"
-  },
-  {
-    id: "tp-005",
-    title: "Opozorilna piramida OBVOZ",
-    image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANIVALINACESTI-btXmf.webp",
-    category: "traffic-road-safety",
-    url: "/si/opozorilna-piramida/obvoz"
-  }
-];
-
-const filteredProducts = relatedProducts
-  .filter(product => product.id !== productId)
-  .sort((a, b) => {
-    if (a.category === category && b.category !== category) return -1;
-    if (a.category !== category && b.category === category) return 1;
-    return 0;
-  })
-  .slice(0, 3);
-
-const quantityOptions = [
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 30
-];
-
-const faqItems = [
-  {
-    question: "Kaj je opozorilna prometna piramida in zakaj se uporablja?",
-    answer: "Opozorilna prometna piramida (znana tudi pod izrazom triopan) je prenosni varnostni znak trikotne oblike, ki se uporablja za hitro in učinkovito opozarjanje na nevarnosti ali posebne okoliščine na cesti ter v okolici."
-  },
-  {
-    question: "Koliko dni traja rok dobave?",
-    answer: "Rok dobave opozorilne piramide DELO NA CESTI je običajno med 3-14 delovnih dni."
-  },
-  {
-    question: "Kakšne so možnosti plačila?",
-    answer: "Za fizične uporabnike oziroma manjša naročila, omogočamo plačila preko Google Pay, Apple Pay, Visa, Mastercard. Za večja naročila opozorilnih varnostnih piramid in naročila na podjetje vas naprošamo, da izpolnite naročilnico."
-  },
-  {
-    question: "Kakšen je material in kako dolgo zdrži?",
-    answer: "Konstrukcija prometnega piramidnega znaka DELO NA CESTI je iz trpežnih profilov iz aluminija. Preko profilov je napeto UV odporno platno, ki ima odlične odsevne značilnosti in je odporno na vse vremenske vplive."
-  },
-  {
-    question: "Kakšne so dimenzije prometnega troznaka DELO NA CESTI?",
-    answer: "Prometni znak je v obliki piramide, kar pomeni, da pri tleh meri v dimenzijah 100x100x100 cm. Višina je 90 cm."
-  },
-  {
-    question: "Ali je znak DELO NA CESTI viden ponoči in v slabem vremenu?",
-    answer: "Prometni trikotnik je viden tudi ponoči in ima odlične odsevne lastnosti. Odsevno platno omogoča vidljivost tudi v dežju, megli in ob slabši vidljivosti."
-  },
-  {
-    question: "Kako hitro lahko znak DELO NA CESTI postavim?",
-    answer: "Znak je izjemno lahko in hitro postavljiv. Postavitev običajno traja le kakšno minuto ali dve. Znak lahko po prenehanju uporabe enostavno sestavite ali ga premaknete na novo mesto."
-  },
-  {
-    question: "Ali je znak DELO NA CESTI primeren za uporabo na prostem?",
-    answer: "UV platno in trpežni aluminijasti okvir so odporni na vse vremenske vplive: sneg, dež, sonce, meglo, veter (do 70 km/h), zato je znak idealen za uporabo na prostem."
-  },
-  {
-    question: "Ali lahko naročim več kosov z različnimi napisi?",
-    answer: "Seveda. Za večja naročila vam svetujemo, da izpolnite naročilnico."
-  },
-  {
-    question: "Kakšna je stabilnost znaka DELO NA CESTI?",
-    answer: "Zaradi značilne piramidne strukture in stabilnega podnožja je znak DELO NA CESTI izjemno stabilen ne glede na teren na katerem je postavljen."
-  },
-  {
-    question: "Ali lahko naročim znak po meri?",
-    answer: "Za vsa naročila po meri, tiskanje vaših logotipov podjetja in drugih želj, nam prosim pišite na info@eusignal.com."
-  },
-  {
-    question: "Ali lahko znak DELO NA CESTI uporabljam na javnih površinah?",
-    answer: "Da, znak lahko uporabljate na javnih površinah, a se pred tem posvetujte s pristojnimi organi, lokalno samoupravo ali lastniki zemljišč."
-  },
-  {
-    question: "Kakšni so pogoji vračila?",
-    answer: "Vračila izdelkov so možna le v roku prvih 14 dni po nakupu. Kasnejših reklamacij NE upoštevamo."
-  }
-];
 ---
 
 <BaseLayout title={title} description={description}>
@@ -142,10 +121,8 @@ const faqItems = [
     <div class="flex flex-col lg:flex-row gap-8">
       <!-- Product Images and Details -->
       <div class="lg:w-2/3">
-        <!-- Move H1 above the gallery -->
         <h1 class="text-3xl font-bold text-signal-dark mb-6">{title}</h1>
 
-        <!-- Updated Product Gallery -->
         <div class="product-gallery mb-8">
           <div class="border-2 border-signal-green rounded-lg p-8">
             <img
@@ -156,80 +133,66 @@ const faqItems = [
           </div>
         </div>
 
-<!-- Product Subtitle -->
-<p class="text-lg text-gray-600 mb-6">
-  {subtitle}
-</p>
+        <p class="text-lg text-gray-600 mb-6">
+          {subtitle}
+        </p>
 
-        <!-- Technical Specifications for Mobile -->
+        {/* Technical Specifications for Mobile */}
         <div class="lg:hidden mb-8">
           <div class="bg-black text-white rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-semibold mb-4 text-white">Tehnične specifikacije</h3>
+            <h3 class="text-lg font-semibold mb-4 text-white">{layoutStrings.techSpecTitle}</h3>
             <ul class="space-y-4">
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
                 </span>
                 <div>
-                  <span class="block font-medium text-white">Dimenzije</span>
+                  <span class="block font-medium text-white">{layoutStrings.techSpecDimensionsLabel}</span>
                   <span class="text-sm text-gray-300">{specifications.dimensions}</span>
                 </div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                 </span>
                 <div>
-                  <span class="block font-medium text-white">Material</span>
+                  <span class="block font-medium text-white">{layoutStrings.techSpecMaterialLabel}</span>
                   <span class="text-sm text-gray-300">{specifications.material}</span>
                 </div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" /></svg>
                 </span>
                 <div>
-                  <span class="block font-medium text-white">Teža</span>
+                  <span class="block font-medium text-white">{layoutStrings.techSpecWeightLabel}</span>
                   <span class="text-sm text-gray-300">{specifications.weight}</span>
                 </div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                 </span>
                 <div>
-                  <span class="block font-medium text-white">Vidnost</span>
+                  <span class="block font-medium text-white">{layoutStrings.techSpecVisibilityLabel}</span>
                   <span class="text-sm text-gray-300">{specifications.visibility}</span>
                 </div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </span>
                 <div>
-                  <span class="block font-medium text-white">Vetrovne razmere</span>
+                  <span class="block font-medium text-white">{layoutStrings.techSpecWindResistanceLabel}</span>
                   <span class="text-sm text-gray-300">{specifications.windResistance}</span>
                 </div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </span>
                 <div>
-                  <span class="block font-medium text-white">Čas sestavljanja</span>
+                  <span class="block font-medium text-white">{layoutStrings.techSpecSetupTimeLabel}</span>
                   <span class="text-sm text-gray-300">{specifications.setupTime}</span>
                 </div>
               </li>
@@ -245,111 +208,95 @@ const faqItems = [
             class="inline-block bg-black text-signal-green border border-signal-green font-semibold py-3 px-6 rounded-lg hover:bg-signal-green hover:text-black transition-colors mb-8"
           >
             <span class="flex items-center">
-              Izpolnite naročilnico
-              <svg class="w-5 h-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-              </svg>
+              {layoutStrings.orderButtonText}
+              <svg class="w-5 h-5 ml-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
             </span>
           </a>
 
           <div class="prose max-w-none mb-8">
-            <slot />
+            <slot /> {/* Main product description from page */}
           </div>
 
-          <!-- Updated Order Form Section -->
           <section id="narocilnica" class="scroll-mt-24 mb-8">
             <div class="bg-white rounded-lg shadow-sm p-8 border-2 border-signal-green">
-              <h2 class="text-2xl font-bold mb-6 text-black">Naročilnica</h2>
-              <p class="text-signal-gray mb-6">Prosimo vnesite svoje osebne podatke ali podatke podjetja za oddajo naročila izdelka {title}.</p>
+              <h2 class="text-2xl font-bold mb-6 text-black">{layoutStrings.orderFormTitle}</h2>
+              <p class="text-signal-gray mb-6">{layoutStrings.orderFormSubtitleBase} {title}.</p>
 
               <form class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">Ime*</label>
-                  <input type="text" placeholder="Vnesite svoje ime" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormNameLabel}</label>
+                  <input type="text" placeholder={layoutStrings.orderFormNamePlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                 </div>
-
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">Priimek*</label>
-                  <input type="text" placeholder="Vnesite svoj priimek" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormSurnameLabel}</label>
+                  <input type="text" placeholder={layoutStrings.orderFormSurnamePlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                 </div>
-
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">Podjetje (ni obvezno)</label>
-                  <input type="text" placeholder="Vnesite ime podjetja" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormCompanyLabel}</label>
+                  <input type="text" placeholder={layoutStrings.orderFormCompanyPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md">
                 </div>
-
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">ID za DDV (izpolni samo podjetje)</label>
-                  <input type="text" placeholder="Vnesite ID za DDV" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormVatIdLabel}</label>
+                  <input type="text" placeholder={layoutStrings.orderFormVatIdPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md">
                 </div>
-
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">Ulica*</label>
-                  <input type="text" placeholder="Vnesite ime ulice" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormStreetLabel}</label>
+                  <input type="text" placeholder={layoutStrings.orderFormStreetPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                 </div>
-
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">Kraj*</label>
-                  <input type="text" placeholder="Vnesite ime kraja" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormCityLabel}</label>
+                  <input type="text" placeholder={layoutStrings.orderFormCityPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                 </div>
-
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">Poštna številka*</label>
-                  <input type="text" placeholder="Vnesite poštno številko" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormZipLabel}</label>
+                  <input type="text" placeholder={layoutStrings.orderFormZipPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                 </div>
-
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">Elektronski naslov*</label>
-                  <input type="email" placeholder="Vnesite e-naslov" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormEmailLabel}</label>
+                  <input type="email" placeholder={layoutStrings.orderFormEmailPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                 </div>
-
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">Telefonska številka*</label>
-                  <input type="tel" placeholder="Vnesite telefonsko številko" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormPhoneLabel}</label>
+                  <input type="tel" placeholder={layoutStrings.orderFormPhonePlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                 </div>
-
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">Količina*</label>
+                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormQuantityLabel}</label>
                   <select class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
-                    <option value="">Izberite količino</option>
+                    <option value="">{layoutStrings.orderFormQuantityDefaultOption}</option>
                     {quantityOptions.map(qty => (
                       <option value={qty}>{qty}</option>
                     ))}
                   </select>
                 </div>
-
                 <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-signal-gray mb-1">Plačilo (100 EUR + DDV)*</label>
+                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormPaymentLabelBase}{price} + DDV)*</label>
                   <div class="space-y-2">
                     <label class="flex items-center">
                       <input type="radio" name="payment" value="povzetje" class="mr-2" required>
-                      <span>Po povzetju</span>
+                      <span>{layoutStrings.orderFormPaymentCod}</span>
                     </label>
                     <label class="flex items-center">
                       <input type="radio" name="payment" value="predracun" class="mr-2" required>
-                      <span>Predračun</span>
+                      <span>{layoutStrings.orderFormPaymentPreInvoice}</span>
                     </label>
                   </div>
                 </div>
-
                 <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-signal-gray mb-1">Sporočilo</label>
-                  <textarea rows="4" placeholder="Vpišite dodatne informacije ali posebne zahteve" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormMessageLabel}</label>
+                  <textarea rows="4" placeholder={layoutStrings.orderFormMessagePlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
                 </div>
-
                 <div class="md:col-span-2">
                   <label class="flex items-center">
                     <input type="checkbox" required class="mr-2">
-                    <span class="text-sm">Strinjam se s pogoji podjetja.*</span>
+                    <span class="text-sm">{layoutStrings.orderFormTermsLabel}</span>
                   </label>
                 </div>
-
                 <div class="md:col-span-2">
                   <button
                     type="submit"
                     class="w-full bg-black text-signal-green border border-signal-green font-semibold py-3 px-6 rounded-lg hover:bg-signal-green hover:text-black transition-colors flex items-center justify-center relative overflow-hidden"
                   >
-                    <span class="relative z-10">Oddajte naročilnico →</span>
+                    <span class="relative z-10">{layoutStrings.orderFormSubmitButtonText}</span>
                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shine_2s_infinite]"></div>
                   </button>
                 </div>
@@ -357,17 +304,14 @@ const faqItems = [
             </div>
           </section>
 
-          <!-- Updated FAQ Section -->
           <section class="bg-signal-green rounded-xl p-8 mt-12">
-            <h2 class="text-2xl font-bold mb-6 text-black">Pogosta vprašanja (FAQ)</h2>
+            <h2 class="text-2xl font-bold mb-6 text-black">{layoutStrings.faqSectionTitle}</h2>
             <div class="space-y-4">
-              {faqItems.map((item, index) => (
+              {faqItems.map((item) => (
                 <details class="bg-signal-green rounded-lg group">
                   <summary class="p-4 cursor-pointer font-medium text-black hover:bg-[#a5d429] flex items-center justify-between rounded-t-lg border border-black group-open:rounded-b-none">
                     {item.question}
-                    <svg class="w-6 h-6 transform transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <svg class="w-6 h-6 transform transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                   </summary>
                   <div class="p-4 text-white bg-black rounded-b-lg">
                     {item.answer}
@@ -375,51 +319,33 @@ const faqItems = [
                 </details>
               ))}
             </div>
-
-            <!-- Back to form button -->
             <div class="text-center mt-8">
               <a
                 href="#narocilnica"
                 class="inline-flex items-center bg-white text-black border border-black font-medium py-3 px-6 rounded-lg hover:bg-black hover:text-white transition-colors"
               >
-                <svg class="w-5 h-5 mr-2 transition-colors" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
-                </svg>
-                Nazaj na naročilnico
+                <svg class="w-5 h-5 mr-2 transition-colors" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+                {layoutStrings.faqBackButtonText}
               </a>
             </div>
           </section>
         </div>
 
-        <!-- Related Products -->
-        {filteredProducts.length > 0 && (
+        {relatedProducts && relatedProducts.length > 0 && (
           <div class="mt-16">
-            <h2 class="text-2xl font-bold mb-6">Sorodni izdelki</h2>
-
+            <h2 class="text-2xl font-bold mb-6">{layoutStrings.relatedProductsTitle}</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProducts.map(product => (
+              {relatedProducts.map(product => (
                 <div class="product-card bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
                   <a href={product.url} class="block relative overflow-hidden pb-[75%]">
-                    <img
-                      src={product.image}
-                      alt={product.title}
-                      loading="lazy"
-                      class="absolute inset-0 w-full h-full object-cover object-center"
-                    />
+                    <img src={product.image} alt={product.title} loading="lazy" class="absolute inset-0 w-full h-full object-cover object-center"/>
                   </a>
-
                   <div class="p-4">
                     <h3 class="font-medium text-lg mb-4">
-                      <a href={product.url} class="text-signal-dark hover:text-signal-green transition-colors">
-                        {product.title}
-                      </a>
+                      <a href={product.url} class="text-signal-dark hover:text-signal-green transition-colors">{product.title}</a>
                     </h3>
-
-                    <a
-                      href={product.url}
-                      class="inline-block bg-white border border-signal-gray hover:border-signal-green text-signal-dark font-medium py-2 px-4 rounded-md transition-colors w-full text-center"
-                    >
-                      Poglej izdelek
+                    <a href={product.url} class="inline-block bg-white border border-signal-gray hover:border-signal-green text-signal-dark font-medium py-2 px-4 rounded-md transition-colors w-full text-center">
+                      {layoutStrings.relatedProductViewButtonText}
                     </a>
                   </div>
                 </div>
@@ -429,95 +355,46 @@ const faqItems = [
         )}
       </div>
 
-      <!-- Sidebar -->
+      {/* Sidebar */}
       <div class="hidden lg:block lg:w-1/3">
         <div class="bg-black text-white rounded-lg shadow-sm p-6 sticky top-20">
-          <!-- Technical Specifications -->
           <div class="mb-6">
-            <h3 class="text-lg font-semibold mb-4 text-white">Tehnične specifikacije</h3>
+            <h3 class="text-lg font-semibold mb-4 text-white">{layoutStrings.techSpecTitle}</h3>
             <ul class="space-y-4">
               <li class="flex items-start">
-                <span class="text-signal-green mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                  </svg>
-                </span>
-                <div>
-                  <span class="block font-medium text-white">Dimenzije</span>
-                  <span class="text-sm text-gray-300">{specifications.dimensions}</span>
-                </div>
+                <span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg></span>
+                <div><span class="block font-medium text-white">{layoutStrings.techSpecDimensionsLabel}</span><span class="text-sm text-gray-300">{specifications.dimensions}</span></div>
               </li>
               <li class="flex items-start">
-                <span class="text-signal-green mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                </span>
-                <div>
-                  <span class="block font-medium text-white">Material</span>
-                  <span class="text-sm text-gray-300">{specifications.material}</span>
-                </div>
+                <span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg></span>
+                <div><span class="block font-medium text-white">{layoutStrings.techSpecMaterialLabel}</span><span class="text-sm text-gray-300">{specifications.material}</span></div>
               </li>
               <li class="flex items-start">
-                <span class="text-signal-green mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-                  </svg>
-                </span>
-                <div>
-                  <span class="block font-medium text-white">Teža</span>
-                  <span class="text-sm text-gray-300">{specifications.weight}</span>
-                </div>
+                <span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" /></svg></span>
+                <div><span class="block font-medium text-white">{layoutStrings.techSpecWeightLabel}</span><span class="text-sm text-gray-300">{specifications.weight}</span></div>
               </li>
               <li class="flex items-start">
-                <span class="text-signal-green mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </span>
-                <div>
-                  <span class="block font-medium text-white">Vidnost</span>
-                  <span class="text-sm text-gray-300">{specifications.visibility}</span>
-                </div>
+                <span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></span>
+                <div><span class="block font-medium text-white">{layoutStrings.techSpecVisibilityLabel}</span><span class="text-sm text-gray-300">{specifications.visibility}</span></div>
               </li>
               <li class="flex items-start">
-                <span class="text-signal-green mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </span>
-                <div>
-                  <span class="block font-medium text-white">Vetrovne razmere</span>
-                  <span class="text-sm text-gray-300">{specifications.windResistance}</span>
-                </div>
+                <span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
+                <div><span class="block font-medium text-white">{layoutStrings.techSpecWindResistanceLabel}</span><span class="text-sm text-gray-300">{specifications.windResistance}</span></div>
               </li>
               <li class="flex items-start">
-                <span class="text-signal-green mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </span>
-                <div>
-                  <span class="block font-medium text-white">Čas sestavljanja</span>
-                  <span class="text-sm text-gray-300">{specifications.setupTime}</span>
-                </div>
+                <span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
+                <div><span class="block font-medium text-white">{layoutStrings.techSpecSetupTimeLabel}</span><span class="text-sm text-gray-300">{specifications.setupTime}</span></div>
               </li>
             </ul>
           </div>
-
-          <!-- Customer Support -->
           <div class="mb-6 border-t border-gray-700 pt-6">
-            <h3 class="text-lg font-semibold mb-4 text-white">Podpora</h3>
+            <h3 class="text-lg font-semibold mb-4 text-white">{layoutStrings.customerSupportTitle}</h3>
             <div class="flex items-center">
               <span class="text-signal-green mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" /><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" /></svg>
               </span>
-              <a href="mailto:info@eusignal.com" class="text-signal-green hover:underline">
-                info@eusignal.com
+              <a href={`mailto:${layoutStrings.customerSupportEmail}`} class="text-signal-green hover:underline">
+                {layoutStrings.customerSupportEmail}
               </a>
             </div>
           </div>
@@ -528,46 +405,31 @@ const faqItems = [
 </BaseLayout>
 
 <style>
-  @keyframes shine {
-    100% {
-      transform: translateX(100%);
-    }
-  }
-
-  .animate-\[shine\_2s\_infinite\] { /* Escaped Tailwind JIT characters for custom animation */
-    animation: shine 2s infinite;
-  }
-
-  details > summary {
-    list-style: none;
-  }
-  details > summary::-webkit-details-marker {
-    display: none;
-  }
+  @keyframes shine { 100% { transform: translateX(100%); } }
+  .animate-\[shine\_2s\_infinite\] { animation: shine 2s infinite; }
+  details > summary { list-style: none; }
+  details > summary::-webkit-details-marker { display: none; }
 </style>
 
-<script>
+<script define:vars={{ alertText: layoutStrings.formSubmissionAlertText }}>
   document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('form');
+    const form = document.querySelector('#narocilnica form'); // More specific selector
     if (form) {
       form.addEventListener('submit', (e) => {
         e.preventDefault();
-        alert('Hvala za vaše naročilo! Kontaktirali vas bomo v najkrajšem možnem času.');
+        alert(alertText); // Use the passed alert text
         form.reset();
       });
     }
 
-    const details = document.querySelectorAll('details');
-    details.forEach(detail => {
+    const detailsElements = document.querySelectorAll('details'); // Renamed to avoid conflict
+    detailsElements.forEach(detail => {
       detail.addEventListener('toggle', () => {
-        if (detail.open) {
-          const summary = detail.querySelector('summary');
-          if (summary) {
+        const summary = detail.querySelector('summary');
+        if (summary) {
+          if (detail.open) {
             summary.classList.add('group-open:rounded-b-none');
-          }
-        } else {
-          const summary = detail.querySelector('summary');
-           if (summary) {
+          } else {
             summary.classList.remove('group-open:rounded-b-none');
           }
         }
