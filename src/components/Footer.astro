@@ -1,80 +1,88 @@
 ---
+// Import JSON data
+import headerFooterData from '../data/headerfooter.json';
+import commonData from '../data/common.json';
+
 const currentYear = new Date().getFullYear();
+
+// Get the first (and only) object from headerFooterData array
+const headerFooter = headerFooterData[0];
+const common = commonData[0];
 
 // Footer navigation groups
 const footerNavGroups = [
   {
-    title: 'Podjetje',
+    title: headerFooter.FOOTER_EEAT_GROUP_1,
     links: [
-      { text: 'O nas', href: '/si/o-nas' },
-      { text: 'Vizija in misija', href: '/si/vizija-in-misija' },
-      { text: 'Kako delujemo', href: '/si/kako-delujemo' },
-      { text: 'Mediji in znamka', href: '/si/mediji-in-znamka' },
-      { text: 'Avtorji in uredniki', href: '/si/avtorji-in-uredniki' },
-      { text: 'Kontakt', href: '/si/kontakt' }
+      { text: headerFooter.FOOTER_EEAT_GROUP_1_NAME_1, href: headerFooter.FOOTER_EEAT_GROUP_1_PATH_1 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_1_NAME_2, href: headerFooter.FOOTER_EEAT_GROUP_1_PATH_2 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_1_NAME_3, href: headerFooter.FOOTER_EEAT_GROUP_1_PATH_3 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_1_NAME_4, href: headerFooter.FOOTER_EEAT_GROUP_1_PATH_4 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_1_NAME_5, href: headerFooter.FOOTER_EEAT_GROUP_1_PATH_5 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_1_NAME_6, href: headerFooter.FOOTER_EEAT_GROUP_1_PATH_6 }
     ]
   },
   {
-    title: 'Podpora',
+    title: headerFooter.FOOTER_EEAT_GROUP_2,
     links: [
-      { text: 'Pogosta vprašanja FAQ', href: '/si/pogosta-vprasanja-faq' },
-      { text: 'Garancija', href: '/si/garancija' },
-      { text: 'Politika vračil', href: '/si/politika-vracil' },
-      { text: 'Politika poštnin', href: '/si/politika-postnin' },
-      { text: 'Pravilnik o pritožbah', href: '/si/pravilnik-o-pritozbah' },
-      { text: 'Dostopnost', href: '/si/dostopnost' }
+      { text: headerFooter.FOOTER_EEAT_GROUP_2_NAME_1, href: headerFooter.FOOTER_EEAT_GROUP_2_PATH_1 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_2_NAME_2, href: headerFooter.FOOTER_EEAT_GROUP_2_PATH_2 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_2_NAME_3, href: headerFooter.FOOTER_EEAT_GROUP_2_PATH_3 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_2_NAME_4, href: headerFooter.FOOTER_EEAT_GROUP_2_PATH_4 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_2_NAME_5, href: headerFooter.FOOTER_EEAT_GROUP_2_PATH_5 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_2_NAME_6, href: headerFooter.FOOTER_EEAT_GROUP_2_PATH_6 }
     ]
   },
   {
-    title: 'Sodelovanja',
+    title: headerFooter.FOOTER_EEAT_GROUP_3,
     links: [
-      { text: 'Delovna mesta', href: '/si/delovna-mesta' },
-      { text: 'Partnerstva', href: '/si/partnerstva' },
-      { text: 'Affiliate Politika', href: '/si/affiliate-politika' },
-      { text: 'Etični kodeks', href: '/si/eticni-kodeks' },
-      { text: 'Politika EDI', href: '/si/politika-edi' }
+      { text: headerFooter.FOOTER_EEAT_GROUP_3_NAME_1, href: headerFooter.FOOTER_EEAT_GROUP_3_PATH_1 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_3_NAME_2, href: headerFooter.FOOTER_EEAT_GROUP_3_PATH_2 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_3_NAME_3, href: headerFooter.FOOTER_EEAT_GROUP_3_PATH_3 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_3_NAME_4, href: headerFooter.FOOTER_EEAT_GROUP_3_PATH_4 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_3_NAME_5, href: headerFooter.FOOTER_EEAT_GROUP_3_PATH_5 }
     ]
   },
   {
-    title: 'Pravilniki',
+    title: headerFooter.FOOTER_EEAT_GROUP_4,
     links: [
-      { text: 'Pogoji uporabe', href: '/si/pogoji-uporabe' },
-      { text: 'Politika zasebnosti', href: '/si/politika-zasebnosti' },
-      { text: 'Politika piškotkov', href: '/si/politika-piskotkov' },
-      { text: 'Politika GDPR', href: '/si/politika-gdpr' },
-      { text: 'Izjava o omejitvi odgovornosti', href: '/si/izjava-o-omejitvi-odgovornosti' },
-      { text: 'Politika poštene uporabe', href: '/si/politika-postene-uporabe' },
-      { text: 'Uredniška politika', href: '/si/uredniska-politika' }
+      { text: headerFooter.FOOTER_EEAT_GROUP_4_NAME_1, href: headerFooter.FOOTER_EEAT_GROUP_4_PATH_1 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_4_NAME_2, href: headerFooter.FOOTER_EEAT_GROUP_4_PATH_2 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_4_NAME_3, href: headerFooter.FOOTER_EEAT_GROUP_4_PATH_3 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_4_NAME_4, href: headerFooter.FOOTER_EEAT_GROUP_4_PATH_4 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_4_NAME_5, href: headerFooter.FOOTER_EEAT_GROUP_4_PATH_5 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_4_NAME_6, href: headerFooter.FOOTER_EEAT_GROUP_4_PATH_6 },
+      { text: headerFooter.FOOTER_EEAT_GROUP_4_NAME_7, href: headerFooter.FOOTER_EEAT_GROUP_4_PATH_7 }
     ]
   }
 ];
 
 // Social media links
 const socialLinks = [
-  { name: 'LinkedIn', url: 'https://linkedin.com/', icon: 'linkedin' },
-  { name: 'Facebook', url: 'https://facebook.com/', icon: 'facebook' },
-  { name: 'Twitter', url: 'https://twitter.com/', icon: 'twitter' },
-  { name: 'Instagram', url: 'https://instagram.com/', icon: 'instagram' }
+  { name: 'LinkedIn', url: common.PAGE_LINKEDIN_URL, icon: 'linkedin' },
+  { name: 'Facebook', url: common.PAGE_FACEBOOK_URL, icon: 'facebook' },
+  { name: 'Twitter', url: common.PAGE_TWITTER_URL, icon: 'twitter' },
+  { name: 'Instagram', url: common.PAGE_INSTAGRAM_URL, icon: 'instagram' }
 ];
 
-// Najbolj prodajano
+// Best sellers
 const bestSellers = [
-  { text: 'DELO NA CESTI', href: '/si/opozorilna-piramida/delo-na-cesti' },
-  { text: 'POZOR GRADBIŠČE', href: '/si/opozorilna-piramida/pozor-gradbisce' },
-  { text: 'ZAČASNI OBVOZ', href: '/si/opozorilna-piramida/zacasni-obvoz' },
-  { text: 'ZAPRTA CESTA', href: '/si/opozorilna-piramida/zaprta-cesta' },
-  { text: 'KOMUNALNA DELA', href: '/si/opozorilna-piramida/komunalna-dela' },
-  { text: 'VZDRŽEVALNA DELA', href: '/si/opozorilna-piramida/vzdrzevalna-dela' }
+  { text: headerFooter.FOOTER_BESTSELLERS_NAME_1, href: headerFooter.FOOTER_BESTSELLERS_PATH_1 },
+  { text: headerFooter.FOOTER_BESTSELLERS_NAME_2, href: headerFooter.FOOTER_BESTSELLERS_PATH_2 },
+  { text: headerFooter.FOOTER_BESTSELLERS_NAME_3, href: headerFooter.FOOTER_BESTSELLERS_PATH_3 },
+  { text: headerFooter.FOOTER_BESTSELLERS_NAME_4, href: headerFooter.FOOTER_BESTSELLERS_PATH_4 },
+  { text: headerFooter.FOOTER_BESTSELLERS_NAME_5, href: headerFooter.FOOTER_BESTSELLERS_PATH_5 },
+  { text: headerFooter.FOOTER_BESTSELLERS_NAME_6, href: headerFooter.FOOTER_BESTSELLERS_PATH_6 }
 ];
 
-// Kompleti
+// Bundles
 const bundles = [
-  { text: 'Gradbeni varnostni komplet znakov', href: '/si/opozorilni-komplet/gradbeni-varnostni-komplet-znakov' },
-  { text: 'Komunalni varnostni komplet znakov', href: '/si/opozorilni-komplet/komunalni-varnostni-komplet-znakov' },
-  { text: 'Kmetijski varnostni komplet znakov', href: '/si/opozorilni-komplet/kmetijski-varnostni-komplet-znakov' },
-  { text: 'Cestno-varnostni komplet znakov', href: '/si/opozorilni-komplet/cestno-varnostni-komplet-znakov' },
-  { text: 'Skladiščni varnostni komplet znakov', href: '/si/opozorilni-komplet/skladiscni-varnostni-komplet-znakov' },
-  { text: 'Varnostni komplet znakov za intelektualno lastnino', href: '/si/opozorilni-komplet/varnostni-komplet-znakov-za-intelektualno-lastnino' }
+  { text: headerFooter.FOOTER_BUNDLES_NAME_1, href: headerFooter.FOOTER_BUNDLES_PATH_1 },
+  { text: headerFooter.FOOTER_BUNDLES_NAME_2, href: headerFooter.FOOTER_BUNDLES_PATH_2 },
+  { text: headerFooter.FOOTER_BUNDLES_NAME_3, href: headerFooter.FOOTER_BUNDLES_PATH_3 },
+  { text: headerFooter.FOOTER_BUNDLES_NAME_4, href: headerFooter.FOOTER_BUNDLES_PATH_4 },
+  { text: headerFooter.FOOTER_BUNDLES_NAME_5, href: headerFooter.FOOTER_BUNDLES_PATH_5 },
+  { text: headerFooter.FOOTER_BUNDLES_NAME_6, href: headerFooter.FOOTER_BUNDLES_PATH_6 }
 ];
 ---
 
@@ -90,7 +98,7 @@ const bundles = [
           class="h-10 w-auto mb-4"
           style="max-height: 40px;"
         />
-        <p class="mb-4 text-signal-green">#1 v Evropi za varnostne opozorilne znake</p>
+        <p class="mb-4 text-signal-green">{common.PAGE_SLOGAN}</p>
         <!-- Social Links -->
         <div class="flex space-x-4 mt-6">
           {socialLinks.map(social => (
@@ -114,7 +122,7 @@ const bundles = [
 
       <!-- Bestsellers -->
       <div>
-        <h4 class="text-lg font-medium mb-4 text-signal-green">Najbolj prodajano</h4>
+        <h4 class="text-lg font-medium mb-4 text-signal-green">{headerFooter.FOOTER_BESTSELLERS_GROUP}</h4>
         <ul class="space-y-2">
           {bestSellers.map(link => (
             <li>
@@ -131,7 +139,7 @@ const bundles = [
 
       <!-- Bundles -->
       <div>
-        <h4 class="text-lg font-medium mb-4 text-signal-green">Kompleti</h4>
+        <h4 class="text-lg font-medium mb-4 text-signal-green">{headerFooter.FOOTER_BUNDLES_GROUP}</h4>
         <ul class="space-y-2">
           {bundles.map(link => (
             <li>
@@ -183,7 +191,7 @@ const bundles = [
             </svg>
           </div>
           <div>
-            <h5 class="font-medium mb-1">Naslov</h5>
+            <h5 class="font-medium mb-1">{common.M_ADDRESS}</h5>
             <address class="text-gray-300 not-italic">
               Elsav Veržej d.o.o.<br>
               Narcisna ulica 11<br>
@@ -200,10 +208,10 @@ const bundles = [
             </svg>
           </div>
           <div>
-            <h5 class="font-medium mb-1">Email</h5>
+            <h5 class="font-medium mb-1">{common.M_EMAIL}</h5>
             <p class="text-gray-300">
-              <a href="mailto:info@eusignal.com" class="hover:text-signal-green transition-colors">
-                info@eusignal.com
+              <a href={`mailto:${common.PAGE_INFO_EMAIL}`} class="hover:text-signal-green transition-colors">
+                {common.PAGE_INFO_EMAIL}
               </a>
             </p>
           </div>
@@ -223,7 +231,7 @@ const bundles = [
     <div class="border-t border-gray-800 mt-8 pt-6">
       <div class="flex flex-col md:flex-row justify-between items-center">
         <p class="text-gray-400 text-sm mb-4 md:mb-0">
-          &copy; {currentYear} <span class="text-signal-green">EUSIGNAL BRAND</span> | Vse pravice pridržane.
+          &copy; {currentYear} <span class="text-signal-green">EUSIGNAL BRAND</span> | {common.M_COPYRIGHT}
         </p>
       </div>
     </div>

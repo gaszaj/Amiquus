@@ -1,23 +1,69 @@
 ---
+// Import JSON data
+import headerFooterData from '../data/headerfooter.json';
+import commonData from '../data/common.json';
+
+// Get the first (and only) object from headerFooterData array
+const headerFooter = headerFooterData[0];
+const common = commonData[0];
+
 // Header component for the EU Signal website
 const navigation = [
-  { name: 'Domov', href: '/' },
-  { name: 'Product', href: '/product' },
-  { name: 'Author', href: '/author' },
-  { name: 'EEAT', href: '/eeat' },
-  { name: 'Article', href: '/article' },
+  { name: common.M_HOME_NAME, href: headerFooter.HEADER_LOGO_PATH },
+  { name: headerFooter.HEADER_LINK_NAME_1, href: headerFooter.HEADER_LINK_PATH_1 },
+  { name: headerFooter.HEADER_LINK_NAME_2, href: headerFooter.HEADER_LINK_PATH_2 },
+  { name: headerFooter.HEADER_LINK_NAME_3, href: headerFooter.HEADER_LINK_PATH_3 },
 ];
 
 // --- Language Switcher Logic ---
 const supportedLanguages = [
-  { code: 'sl', name: 'Slovenščina', short: 'SL' },
-  { code: 'en', name: 'English', short: 'EN' },
-  { code: 'de', name: 'Deutsch', short: 'DE' },
-  { code: 'it', name: 'Italiano', short: 'IT' },
-  { code: 'hr', name: 'Hrvatski', short: 'HR' },
-  { code: 'fr', name: 'Français', short: 'FR' },
-  { code: 'es', name: 'Español', short: 'ES' }
-  // Add or remove languages as needed
+  { code: 'sl', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_1 },
+  { code: 'hr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_2 },
+  { code: 'es', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_3 },
+  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_4 },
+  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_5 },
+  { code: 'pt', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_6 },
+  { code: 'it', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_7 },
+  { code: 'nl', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_8 },
+  { code: 'sv', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_9 },
+  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_10 },
+  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_11 },
+  { code: 'it', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_12 },
+  { code: 'da', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_13 },
+  { code: 'no', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_14 },
+  { code: 'nl', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_15 },
+  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_16 },
+  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_17 },
+  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_18 },
+  { code: 'fi', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_19 },
+  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_20 },
+  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_21 },
+  { code: 'ru', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_22 },
+  { code: 'tr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_23 },
+  { code: 'cs', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_24 },
+  { code: 'pl', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_25 },
+  { code: 'sk', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_26 },
+  { code: 'sq', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_27 },
+  { code: 'az', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_28 },
+  { code: 'be', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_29 },
+  { code: 'bs', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_30 },
+  { code: 'bg', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_31 },
+  { code: 'el', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_32 },
+  { code: 'et', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_33 },
+  { code: 'ka', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_34 },
+  { code: 'el', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_35 },
+  { code: 'hu', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_36 },
+  { code: 'lv', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_37 },
+  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_38 },
+  { code: 'lt', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_39 },
+  { code: 'ro', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_40 },
+  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_41 },
+  { code: 'sr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_42 },
+  { code: 'mk', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_43 },
+  { code: 'ro', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_44 },
+  { code: 'it', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_45 },
+  { code: 'sr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_46 },
+  { code: 'uk', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_47 }
 ];
 const defaultLangCode = 'sl'; // Your site's default language code
 
@@ -43,16 +89,14 @@ const languageLinks = supportedLanguages.map(lang => {
   } else {
     newPath = `/${lang.code}${baseSlug ? `/${baseSlug}` : ''}`;
   }
-  // Ensure root language paths like /en have a trailing slash if baseSlug is empty
   if (!baseSlug && lang.code !== defaultLangCode && !newPath.endsWith('/')) {
     newPath += '/';
   }
-  if (newPath === `/${defaultLangCode}/` && defaultLangCode) { // Avoid /sl/ if / is the target
-      newPath = '/';
+  if (newPath === `/${defaultLangCode}/` && defaultLangCode) {
+    newPath = '/';
   }
 
-
-  return { ...lang, display: lang.short, href: newPath, isActive: lang.code === currentDetectedLang };
+  return { ...lang, href: newPath, isActive: lang.code === currentDetectedLang };
 });
 
 const currentLanguageObject = supportedLanguages.find(lang => lang.code === currentDetectedLang) || 
@@ -65,17 +109,17 @@ const currentLanguageObject = supportedLanguages.find(lang => lang.code === curr
   <nav class="container mx-auto px-4 py-4 flex items-center justify-between">
     {/* Logo */}
     <a 
-      href="/" 
+      href={headerFooter.HEADER_LOGO_PATH}
       class="flex items-center"
       id="header-logo-link"
     >
       <img 
         src="/EUSIGNAL-PNGFile_Horizontal-Light.png" 
-        alt="EUSIGNAL Logo" 
+        alt={headerFooter.HEADER_LOGO_ALT}
         class="h-6 w-auto"
         style="max-height: 40px;"
       />
-      <span class="sr-only">EUSIGNAL Home</span>
+      <span class="sr-only">{common.M_HOME_NAME}</span>
     </a>
 
     {/* Desktop Navigation & Language Switcher */}
@@ -89,10 +133,10 @@ const currentLanguageObject = supportedLanguages.find(lang => lang.code === curr
         </a>
       ))}
       <a
-        href="/narocilo"
+        href={headerFooter.HEADER_NAME_CTA_PATH}
         class="bg-black text-signal-green border border-signal-green px-6 py-2 hover:bg-signal-green hover:text-black transition-all duration-200"
       >
-        Oddajte naročilo
+        {headerFooter.HEADER_NAME_CTA}
       </a>
 
       {/* Desktop Language Dropdown Switcher */}
@@ -108,7 +152,7 @@ const currentLanguageObject = supportedLanguages.find(lang => lang.code === curr
             <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" d="M48 112h288M192 64v48m80 336l96-224l96 224m-162.5-64h133M281.3 112S257 206 199 277S80 384 80 384"/>
             <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" d="M256 336s-35-27-72-75s-56-85-56-85"/>
           </svg>
-          <span>{currentLanguageObject.short}</span>
+          <span>{currentLanguageObject.name}</span>
           <svg class="ml-1 -mr-1 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
           </svg>
@@ -133,7 +177,7 @@ const currentLanguageObject = supportedLanguages.find(lang => lang.code === curr
                 role="menuitem"
                 title={lang.name}
               >
-                {lang.name} ({lang.short})
+                {lang.name}
               </a>
             ))}
           </div>
@@ -180,7 +224,7 @@ const currentLanguageObject = supportedLanguages.find(lang => lang.code === curr
               <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" d="M48 112h288M192 64v48m80 336l96-224l96 224m-162.5-64h133M281.3 112S257 206 199 277S80 384 80 384"/>
               <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" d="M256 336s-35-27-72-75s-56-85-56-85"/>
             </svg>
-            Jezik: {currentLanguageObject.short} ({currentLanguageObject.name})
+            Jezik: {currentLanguageObject.name}
           </span>
           <svg class="ml-1 h-5 w-5 transform transition-transform duration-150" id="mobile-lang-chevron" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
         </button>
@@ -203,10 +247,10 @@ const currentLanguageObject = supportedLanguages.find(lang => lang.code === curr
       </div>
 
       <a
-        href="/narocilo"
+        href={headerFooter.HEADER_NAME_CTA_PATH}
         class="block mt-4 mx-1 px-3 py-2 bg-black text-signal-green border border-signal-green hover:bg-signal-green hover:text-black transition-all duration-200 text-center rounded-md"
       >
-        Oddajte naročilo
+        {headerFooter.HEADER_NAME_CTA}
       </a>
     </div>
   </div>
