@@ -3,6 +3,8 @@
 import commonData from '../data/common.json';
 const common = commonData[0]; // Get the first (and only) object from commonData array
 
+import manifestData from '../data/site.webmanifest.json';
+
 import '@fontsource-variable/inter';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -17,12 +19,14 @@ export interface Props {
 
 const {
   title,
-  // Use common.PAGE_ORGANISATION_FULL_NAME in the default description
   description = `${common.PAGE_ORGANISATION_FULL_NAME} - Premium safety signs and triopan warning systems manufactured in Slovenia and distributed across Europe.`,
   image = "/images/og-image.jpg",
   keywords = "safety signs, warning signs, triopan, road safety, construction safety, event safety",
   locale = "sl-SI" // Default locale
 } = Astro.props;
+
+// Helper to ensure icon paths are relative to the public directory root
+const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) : src}`;
 ---
 
 <!DOCTYPE html>
@@ -30,7 +34,7 @@ const {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" href="eusignal-favicon-32x32.png" />
     <meta name="generator" content={Astro.generator} />
 
     <!-- Primary Meta Tags -->
@@ -60,13 +64,19 @@ const {
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="format-detection" content="telephone=no" />
+    {/* Theme color from the imported manifest data */}
+    {manifestData.theme_color && <meta name="theme-color" content={manifestData.theme_color} />}
 
-    <!-- Favicon and Icons -->
-    <link rel="icon" type="image/png" href="/favicon-32x32.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="manifest" href="/site.webmanifest" />
+    <!-- Favicon and Icons from imported Manifest Data -->
+    {manifestData.icons && manifestData.icons.map(icon => {
+      const href = publicPath(icon.src);
+      if (icon.src.includes('apple-touch-icon')) {
+        return <link rel="apple-touch-icon" sizes={icon.sizes} href={href} type={icon.type} />;
+      }
+      return <link rel="icon" type={icon.type} sizes={icon.sizes} href={href} />;
+    })}
+    <link rel="manifest" href="/site.webmanifest" crossorigin="anonymous" />
+
 
     <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
