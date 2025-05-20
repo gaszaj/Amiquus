@@ -1,7 +1,5 @@
 ---
 import BaseLayout from './BaseLayout.astro';
-// Assuming ImageMetadata might be needed if product image prop was 'astro:assets' Image type
-// import type { ImageMetadata } from 'astro:assets';
 
 // --- Type Definitions for Props ---
 export interface ProductSpecification {
@@ -16,7 +14,7 @@ export interface ProductSpecification {
 export interface RelatedProductInfo {
   id: string;
   title: string;
-  image: string; // Assuming string URL for simplicity, adjust if using astro:assets
+  image: string;
   category: string;
   url: string;
 }
@@ -40,7 +38,7 @@ export interface ProductLayoutStrings {
   orderButtonText: string;
   // Order Form Section
   orderFormTitle: string;
-  orderFormSubtitleBase: string; // "Prosimo vnesite svoje osebne podatke ali podatke podjetja za oddajo naročila izdelka "
+  orderFormSubtitleBase: string;
   orderFormNameLabel: string;
   orderFormNamePlaceholder: string;
   orderFormSurnameLabel: string;
@@ -61,9 +59,9 @@ export interface ProductLayoutStrings {
   orderFormPhonePlaceholder: string;
   orderFormQuantityLabel: string;
   orderFormQuantityDefaultOption: string;
-  orderFormPaymentLabelBase: string; // "Plačilo (" needs price + ") DDV)*"
-  orderFormPaymentCod: string; // Po povzetju
-  orderFormPaymentPreInvoice: string; // Predračun
+  orderFormPaymentLabelBase: string;
+  orderFormPaymentCod: string;
+  orderFormPaymentPreInvoice: string;
   orderFormMessageLabel: string;
   orderFormMessagePlaceholder: string;
   orderFormTermsLabel: string;
@@ -77,28 +75,35 @@ export interface ProductLayoutStrings {
   // Customer Support Section (Sidebar)
   customerSupportTitle: string;
   customerSupportEmail: string;
-  // Form Submission Alert
-  formSubmissionAlertText: string;
+  
+  // Slovenian Validation Messages
+  validationNameRequired: string;
+  validationSurnameRequired: string;
+  validationStreetRequired: string;
+  validationCityRequired: string;
+  validationZipRequired: string;
+  validationEmailRequired: string;
+  validationEmailInvalid: string;
+  validationPhoneRequired: string;
+  validationQuantityRequired: string;
+  validationPaymentRequired: string;
+  validationTermsRequired: string;
+  
+  // Form Success Message
+  formSuccessMessage: string;
 }
 
 // --- Main Props Interface ---
 export interface Props {
-  // Product Data (passed through for display)
   title: string;
   subtitle: string;
-  description?: string; // Page's meta description
+  description?: string;
   price: string;
-  image: string; // Assuming string URL
+  image: string;
   specifications: ProductSpecification;
-  // category: string; // Used for filtering related products, logic moved to page
-  // productId: string; // Used for filtering related products, logic moved to page
-
-  // Data for Layout Sections, sourced from page
   relatedProducts: RelatedProductInfo[];
   quantityOptions: number[];
   faqItems: FaqItemData[];
-
-  // All UI text and configuration for the layout itself
   layoutStrings: ProductLayoutStrings;
 }
 
@@ -109,11 +114,15 @@ const {
   price,
   image,
   specifications,
-  relatedProducts, // Now a prop
-  quantityOptions, // Now a prop
-  faqItems,        // Now a prop
+  relatedProducts,
+  quantityOptions,
+  faqItems,
   layoutStrings
 } = Astro.props;
+
+// Web3Forms Configuration
+const web3FormsAccessKey = "c8a73c2c-518e-4fd5-9331-2f35e2565315";
+const emailSubject = `New Inquiry: ${title}`;
 ---
 
 <BaseLayout title={title} description={description}>
@@ -151,7 +160,7 @@ const {
                   <span class="text-sm text-gray-300">{specifications.dimensions}</span>
                 </div>
               </li>
-              <li class="flex items-start">
+               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                 </span>
@@ -222,74 +231,98 @@ const {
               <h2 class="text-2xl font-bold mb-6 text-black">{layoutStrings.orderFormTitle}</h2>
               <p class="text-signal-gray mb-6">{layoutStrings.orderFormSubtitleBase} {title}.</p>
 
-              <form class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <form 
+                id="productOrderForm"
+                action="https://api.web3forms.com/submit"
+                method="POST"
+                class="grid grid-cols-1 md:grid-cols-2 gap-4 needs-validation"
+                data-astro-reload
+                novalidate
+              >
+                {/* Web3Forms Hidden Fields */}
+                <input type="hidden" name="access_key" value={web3FormsAccessKey} />
+                <input type="hidden" name="subject" value={emailSubject} />
+                <input type="checkbox" name="botcheck" class="hidden" style="display:none;" />
+                <input type="hidden" name="from_name" value={`Order - ${title}`} /> 
+
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormNameLabel}</label>
-                  <input type="text" placeholder={layoutStrings.orderFormNamePlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                  <label for="form-name" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormNameLabel}</label>
+                  <input id="form-name" type="text" name="Name" placeholder={layoutStrings.orderFormNamePlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required />
+                  <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationNameRequired}</div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormSurnameLabel}</label>
-                  <input type="text" placeholder={layoutStrings.orderFormSurnamePlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                  <label for="form-surname" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormSurnameLabel}</label>
+                  <input id="form-surname" type="text" name="Last Name" placeholder={layoutStrings.orderFormSurnamePlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required />
+                  <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationSurnameRequired}</div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormCompanyLabel}</label>
-                  <input type="text" placeholder={layoutStrings.orderFormCompanyPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                  <label for="form-company" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormCompanyLabel}</label>
+                  <input id="form-company" type="text" name="Company Not Required" placeholder={layoutStrings.orderFormCompanyPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormVatIdLabel}</label>
-                  <input type="text" placeholder={layoutStrings.orderFormVatIdPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                  <label for="form-vatid" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormVatIdLabel}</label>
+                  <input id="form-vatid" type="text" name="VAT ID Fill in Only by Company" placeholder={layoutStrings.orderFormVatIdPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormStreetLabel}</label>
-                  <input type="text" placeholder={layoutStrings.orderFormStreetPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                  <label for="form-street" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormStreetLabel}</label>
+                  <input id="form-street" type="text" name="Street" placeholder={layoutStrings.orderFormStreetPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required />
+                  <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationStreetRequired}</div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormCityLabel}</label>
-                  <input type="text" placeholder={layoutStrings.orderFormCityPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                  <label for="form-city" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormCityLabel}</label>
+                  <input id="form-city" type="text" name="Location" placeholder={layoutStrings.orderFormCityPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required />
+                  <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationCityRequired}</div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormZipLabel}</label>
-                  <input type="text" placeholder={layoutStrings.orderFormZipPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                  <label for="form-zip" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormZipLabel}</label>
+                  <input id="form-zip" type="text" name="Postal Code" placeholder={layoutStrings.orderFormZipPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required />
+                  <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationZipRequired}</div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormEmailLabel}</label>
-                  <input type="email" placeholder={layoutStrings.orderFormEmailPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                  <label for="form-email" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormEmailLabel}</label>
+                  <input id="form-email" type="email" name="Email Address" placeholder={layoutStrings.orderFormEmailPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required />
+                  <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationEmailRequired}</div>
+                  <div class="invalid-feedback text-red-400 text-sm mt-1">{layoutStrings.validationEmailInvalid}</div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormPhoneLabel}</label>
-                  <input type="tel" placeholder={layoutStrings.orderFormPhonePlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                  <label for="form-phone" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormPhoneLabel}</label>
+                  <input id="form-phone" type="tel" name="Telephone Number" placeholder={layoutStrings.orderFormPhonePlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required />
+                  <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationPhoneRequired}</div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormQuantityLabel}</label>
-                  <select class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                  <label for="form-quantity" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormQuantityLabel}</label>
+                  <select id="form-quantity" name="Quantity" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                     <option value="">{layoutStrings.orderFormQuantityDefaultOption}</option>
                     {quantityOptions.map(qty => (
                       <option value={qty}>{qty}</option>
                     ))}
                   </select>
+                  <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationQuantityRequired}</div>
                 </div>
                 <div class="md:col-span-2">
                   <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormPaymentLabelBase}{price} + DDV)*</label>
-                  <div class="space-y-2">
+                  <div id="payment-group"> {/* Added wrapper for radio validation message */}
                     <label class="flex items-center">
-                      <input type="radio" name="payment" value="povzetje" class="mr-2" required>
+                      <input type="radio" name="Payment" value="Cash on Delivery" class="mr-2" required />
                       <span>{layoutStrings.orderFormPaymentCod}</span>
                     </label>
                     <label class="flex items-center">
-                      <input type="radio" name="payment" value="predracun" class="mr-2" required>
+                      <input type="radio" name="Payment" value="Proforma Invoice" class="mr-2" required />
                       <span>{layoutStrings.orderFormPaymentPreInvoice}</span>
                     </label>
+                    <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationPaymentRequired}</div>
                   </div>
                 </div>
                 <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormMessageLabel}</label>
-                  <textarea rows="4" placeholder={layoutStrings.orderFormMessagePlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+                  <label for="form-message" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormMessageLabel}</label>
+                  <textarea id="form-message" name="Message" rows="4" placeholder={layoutStrings.orderFormMessagePlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
                 </div>
                 <div class="md:col-span-2">
                   <label class="flex items-center">
-                    <input type="checkbox" required class="mr-2">
+                    <input id="form-terms" type="checkbox" name="Conditions" required class="mr-2" />
                     <span class="text-sm">{layoutStrings.orderFormTermsLabel}</span>
                   </label>
+                  <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationTermsRequired}</div>
                 </div>
                 <div class="md:col-span-2">
                   <button
@@ -300,6 +333,7 @@ const {
                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shine_2s_infinite]"></div>
                   </button>
                 </div>
+                <div id="productOrderFormResult" class="md:col-span-2 mt-3 text-center"></div>
               </form>
             </div>
           </section>
@@ -361,7 +395,7 @@ const {
           <div class="mb-6">
             <h3 class="text-lg font-semibold mb-4 text-white">{layoutStrings.techSpecTitle}</h3>
             <ul class="space-y-4">
-              <li class="flex items-start">
+             <li class="flex items-start">
                 <span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg></span>
                 <div><span class="block font-medium text-white">{layoutStrings.techSpecDimensionsLabel}</span><span class="text-sm text-gray-300">{specifications.dimensions}</span></div>
               </li>
@@ -409,20 +443,50 @@ const {
   .animate-\[shine\_2s\_infinite\] { animation: shine 2s infinite; }
   details > summary { list-style: none; }
   details > summary::-webkit-details-marker { display: none; }
+
+  /* Styles for Web3Forms validation messages */
+  .invalid-feedback,
+  .empty-feedback {
+    display: none;
+  }
+
+  .was-validated :invalid ~ .empty-feedback,
+  .was-validated :invalid ~ .invalid-feedback { /* Simplified: if it's invalid, show the relevant message */
+    display: block;
+  }
+  
+  /* Specifically for :placeholder-shown to hide empty-feedback if user has typed something but it's still invalid (e.g. bad email format) */
+  .was-validated :not(:placeholder-shown):invalid ~ .empty-feedback {
+      display: none;
+  }
+   .was-validated :placeholder-shown:invalid ~ .invalid-feedback { /* e.g. if email is required and empty, show empty-feedback, not invalid-format-feedback */
+      display: none;
+  }
+
+
+  /* Ensure radio/checkbox validation messages display correctly */
+  .was-validated #payment-group:has(input[type="radio"]:invalid) .empty-feedback,
+  .was-validated label:has(input[type="checkbox"]:invalid) + .empty-feedback {
+     display: block;
+  }
+
+
+  .is-invalid, /* this class can be manually added by JS if needed */
+  .was-validated :invalid {
+    border-color: #dc3545; /* Tailwind's red-600 approx */
+  }
+   .was-validated :invalid:focus {
+    --tw-ring-color: #dc3545;
+     border-color: #dc3545;
+  }
 </style>
 
-<script define:vars={{ alertText: layoutStrings.formSubmissionAlertText }}>
-  document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('#narocilnica form'); // More specific selector
-    if (form) {
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        alert(alertText); // Use the passed alert text
-        form.reset();
-      });
-    }
-
-    const detailsElements = document.querySelectorAll('details'); // Renamed to avoid conflict
+<script define:vars={{ 
+    formSuccessMsg: layoutStrings.formSuccessMessage 
+}}>
+  document.addEventListener('astro:page-load', () => {
+    // FAQ Accordion Logic
+    const detailsElements = document.querySelectorAll('details');
     detailsElements.forEach(detail => {
       detail.addEventListener('toggle', () => {
         const summary = detail.querySelector('summary');
@@ -435,5 +499,77 @@ const {
         }
       });
     });
+
+    // Web3Forms Submission Logic
+    const productOrderForm = document.getElementById("productOrderForm");
+    const productOrderFormResult = document.getElementById("productOrderFormResult");
+
+    if (productOrderForm && productOrderFormResult) {
+      productOrderForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        productOrderForm.classList.add("was-validated");
+        
+        // Check overall form validity
+        if (!productOrderForm.checkValidity()) {
+          // Find the first invalid element and focus it
+          const firstInvalidElement = productOrderForm.querySelector(':invalid');
+          if (firstInvalidElement) {
+            firstInvalidElement.focus();
+            // If it's a radio button, try to scroll its group into view.
+            if (firstInvalidElement.type === 'radio' && firstInvalidElement.name) {
+                const radioGroupContainer = document.getElementById('payment-group'); // ID of the div wrapping radio buttons
+                if(radioGroupContainer) radioGroupContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }
+          return; // Stop submission
+        }
+        
+        // If valid, proceed with submission
+        const formData = new FormData(productOrderForm);
+        const object = Object.fromEntries(formData);
+        const json = JSON.stringify(object);
+
+        productOrderFormResult.innerHTML = "Pošiljanje..."; // Sending...
+        productOrderFormResult.className = "md:col-span-2 mt-3 text-center text-gray-600"; 
+
+        fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: json,
+        })
+          .then(async (response) => {
+            let jsonResponse = await response.json();
+            if (response.status == 200) {
+              productOrderFormResult.innerHTML = `<p class="text-green-600 text-lg font-semibold">${formSuccessMsg}</p>`; // Using passed prop
+              productOrderForm.reset();
+              productOrderForm.classList.remove("was-validated");
+              Array.from(productOrderForm.elements).forEach(el => el.classList.remove('is-invalid'));
+            } else {
+              console.error("Form submission error response:", jsonResponse);
+              productOrderFormResult.innerHTML = `<p class="text-red-500">${jsonResponse.message || "Prišlo je do napake. Prosimo, poskusite znova."}</p>`;
+            }
+          })
+          .catch((error) => {
+            console.error("Fetch error:", error);
+            productOrderFormResult.innerHTML = `<p class="text-red-500">Nekaj je šlo narobe! Preverite povezavo in poskusite znova.</p>`;
+          })
+          .finally(() => { 
+            // Clear message after 5 seconds only if it's not the success message, or always clear?
+            // Let's clear it for error messages, but success can stay.
+            // Or simply make the success message part of the flow that then fades.
+            // For now, the success message will persist until next interaction due to form.reset().
+            // If you want the success message to also disappear after 5s:
+            setTimeout(() => {
+              if (document.body.contains(productOrderFormResult) && productOrderFormResult.querySelector('.text-red-500')) { // only clear if it's an error
+                 productOrderFormResult.innerHTML = ""; 
+                 productOrderFormResult.className = "md:col-span-2 mt-3 text-center"; 
+              }
+            }, 7000); // Increased timeout for error messages
+          });
+      });
+    }
   });
 </script>

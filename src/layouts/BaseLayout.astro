@@ -64,7 +64,6 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="format-detection" content="telephone=no" />
-    {/* Theme color from the imported manifest data */}
     {manifestData.theme_color && <meta name="theme-color" content={manifestData.theme_color} />}
 
     <!-- Favicon and Icons from imported Manifest Data -->

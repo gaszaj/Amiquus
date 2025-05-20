@@ -1,6 +1,6 @@
 ---
-import ProductLayout from '../layouts/ProductLayout.astro';
-import type { RelatedProductInfo, FaqItemData } from '../layouts/ProductLayout.astro';
+import ProductLayout from '../layouts/ProductLayout.astro'; // Adjusted path
+import type { RelatedProductInfo, FaqItemData, ProductLayoutStrings } from '../layouts/ProductLayout.astro'; // Adjusted path
 
 // --- Core Product Data ---
 const productCoreData = {
@@ -58,7 +58,7 @@ const filteredRelatedProducts = allAvailableProducts
 const productQuantityOptions: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 30];
 
 // --- UI Text Strings for the Layout ---
-const productPageLayoutStrings = {
+const productPageLayoutStrings: ProductLayoutStrings = {
   techSpecTitle: "Tehnične specifikacije",
   techSpecDimensionsLabel: "Dimenzije",
   techSpecMaterialLabel: "Material",
@@ -102,7 +102,23 @@ const productPageLayoutStrings = {
   relatedProductViewButtonText: "Poglej izdelek",
   customerSupportTitle: "Podpora",
   customerSupportEmail: "info@eusignal.com",
-  formSubmissionAlertText: "Hvala za vaše naročilo! Kontaktirali vas bomo v najkrajšem možnem času."
+  formSubmissionAlertText: "Hvala za vaše naročilo! Kontaktirali vas bomo v najkrajšem možnem času.", // Original alert, not used by new script
+
+  // Slovenian Validation Messages
+  validationNameRequired: "Prosimo, vnesite svoje ime.",
+  validationSurnameRequired: "Prosimo, vnesite svoj priimek.",
+  validationStreetRequired: "Prosimo, vnesite svojo ulico.",
+  validationCityRequired: "Prosimo, vnesite svoj kraj.",
+  validationZipRequired: "Prosimo, vnesite svojo poštno številko.",
+  validationEmailRequired: "Prosimo, vnesite svoj e-poštni naslov.",
+  validationEmailInvalid: "Prosimo, vnesite veljaven e-poštni naslov.",
+  validationPhoneRequired: "Prosimo, vnesite svojo telefonsko številko.",
+  validationQuantityRequired: "Prosimo, izberite količino.",
+  validationPaymentRequired: "Prosimo, izberite način plačila.",
+  validationTermsRequired: "Prosimo, strinjajte se s pogoji.",
+  
+  // Form Success Message
+  formSuccessMessage: "Vaše povpraševanje je bilo uspešno poslano."
 };
 ---
 
