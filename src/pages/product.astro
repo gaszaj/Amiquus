@@ -1,12 +1,12 @@
 ---
-import ProductLayout from '../layouts/ProductLayout.astro'; // Adjusted path
-import type { RelatedProductInfo, FaqItemData, ProductLayoutStrings } from '../layouts/ProductLayout.astro'; // Adjusted path
+import ProductLayout from '../layouts/ProductLayout.astro'; // Adjust path if necessary
+import type { RelatedProductInfo, FaqItemData, ProductLayoutStrings } from '../layouts/ProductLayout.astro'; // Adjust path
 
 // --- Core Product Data ---
 const productCoreData = {
   title: "Opozorilna piramida DELO NA CESTI",
   subtitle: "Za varnost vseh udeležencev v prometu je postavitev opozorilne piramide DELO NA CESTI ključen korak za zmanjšanje nevarnosti na cestah.",
-  description: "Opozorilna piramida DELO NA CESTI - ključna za varnost na gradbiščih in cestnih delih. Izdelana iz trpežnih materialov, visoka vidljivost, enostavna postavitev.", // Meta description for BaseLayout
+  description: "Opozorilna piramida DELO NA CESTI - ključna za varnost na gradbiščih in cestnih delih. Izdelana iz trpežnih materialov, visoka vidljivost, enostavna postavitev.",
   price: "€149.99",
   image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp",
   specifications: {
@@ -17,8 +17,8 @@ const productCoreData = {
     windResistance: "Do 70 km/h",
     setupTime: "1-2 minuti"
   },
-  category: "traffic-road-safety", // For filtering related products
-  productId: "TP-100" // For filtering related products
+  category: "traffic-road-safety",
+  productId: "TP-100"
 };
 
 // --- Data for Layout Sections (FAQs, Related Products, Quantity Options) ---
@@ -38,7 +38,7 @@ const productFaqItems: FaqItemData[] = [
   { question: "Kakšni so pogoji vračila?", answer: "Vračila izdelkov so možna le v roku prvih 14 dni po nakupu. Kasnejših reklamacij NE upoštevamo." }
 ];
 
-const allAvailableProducts: RelatedProductInfo[] = [ // Master list of all products
+const allAvailableProducts: RelatedProductInfo[] = [
   { id: "tp-001", title: "Opozorilna piramida DELO NA CESTI", image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPOZORVILIAR-ws_5r.webp", category: "traffic-road-safety", url: "/si/opozorilna-piramida/delo-na-cesti" },
   { id: "tp-002", title: "Opozorilna piramida OBVEZNA SMER", image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANIVALINACESTI-btXmf.webp", category: "traffic-road-safety", url: "/si/opozorilna-piramida/obvezna-smer" },
   { id: "tp-003", title: "Opozorilna piramida ZOŽENJE CESTE", image: "https://cdn.dorik.com/668ba3c6a4cdcf002a34c7b8/images/TRIOPANPARKIRNIPROSTOR-YyfIE.webp", category: "construction-maintenance", url: "/si/opozorilna-piramida/zozenje-ceste" },
@@ -48,7 +48,7 @@ const allAvailableProducts: RelatedProductInfo[] = [ // Master list of all produ
 
 const filteredRelatedProducts = allAvailableProducts
   .filter(product => product.id !== productCoreData.productId)
-  .sort((a, b) => { // Prioritize same category
+  .sort((a, b) => {
     if (a.category === productCoreData.category && b.category !== productCoreData.category) return -1;
     if (a.category !== productCoreData.category && b.category === productCoreData.category) return 1;
     return 0;
@@ -57,7 +57,6 @@ const filteredRelatedProducts = allAvailableProducts
 
 const productQuantityOptions: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 30];
 
-// --- UI Text Strings for the Layout ---
 const productPageLayoutStrings: ProductLayoutStrings = {
   techSpecTitle: "Tehnične specifikacije",
   techSpecDimensionsLabel: "Dimenzije",
@@ -68,7 +67,7 @@ const productPageLayoutStrings: ProductLayoutStrings = {
   techSpecSetupTimeLabel: "Čas sestavljanja",
   orderButtonText: "Izpolnite naročilnico",
   orderFormTitle: "Naročilnica",
-  orderFormSubtitleBase: "Prosimo vnesite svoje osebne podatke ali podatke podjetja za oddajo naročila izdelka", // Product title will be appended
+  orderFormSubtitleBase: "Prosimo vnesite svoje osebne podatke ali podatke podjetja za oddajo naročila izdelka",
   orderFormNameLabel: "Ime*",
   orderFormNamePlaceholder: "Vnesite svoje ime",
   orderFormSurnameLabel: "Priimek*",
@@ -89,7 +88,7 @@ const productPageLayoutStrings: ProductLayoutStrings = {
   orderFormPhonePlaceholder: "Vnesite telefonsko številko",
   orderFormQuantityLabel: "Količina*",
   orderFormQuantityDefaultOption: "Izberite količino",
-  orderFormPaymentLabelBase: "Plačilo (", // Price will be inserted here
+  orderFormPaymentLabelBase: "Plačilo (",
   orderFormPaymentCod: "Po povzetju",
   orderFormPaymentPreInvoice: "Predračun",
   orderFormMessageLabel: "Sporočilo",
@@ -102,9 +101,7 @@ const productPageLayoutStrings: ProductLayoutStrings = {
   relatedProductViewButtonText: "Poglej izdelek",
   customerSupportTitle: "Podpora",
   customerSupportEmail: "info@eusignal.com",
-  formSubmissionAlertText: "Hvala za vaše naročilo! Kontaktirali vas bomo v najkrajšem možnem času.", // Original alert, not used by new script
-
-  // Slovenian Validation Messages
+  
   validationNameRequired: "Prosimo, vnesite svoje ime.",
   validationSurnameRequired: "Prosimo, vnesite svoj priimek.",
   validationStreetRequired: "Prosimo, vnesite svojo ulico.",
@@ -116,8 +113,8 @@ const productPageLayoutStrings: ProductLayoutStrings = {
   validationQuantityRequired: "Prosimo, izberite količino.",
   validationPaymentRequired: "Prosimo, izberite način plačila.",
   validationTermsRequired: "Prosimo, strinjajte se s pogoji.",
+  validationHCaptchaRequired: "Prosimo, izpolnite captcha polje.",
   
-  // Form Success Message
   formSuccessMessage: "Vaše povpraševanje je bilo uspešno poslano."
 };
 ---
@@ -134,7 +131,6 @@ const productPageLayoutStrings: ProductLayoutStrings = {
   faqItems={productFaqItems}
   layoutStrings={productPageLayoutStrings}
 >
-  <!-- Main product description and content goes here -->
   <div class="product-description space-y-6">
     <div class="bg-signal-green/5 p-6 rounded-lg border-l-4 border-signal-green mb-8">
       <div class="flex items-center gap-4">
