@@ -1,8 +1,7 @@
 ---
-import ProductLayout from '../layouts/ProductLayout.astro'; // Adjust path if necessary
-import type { RelatedProductInfo, FaqItemData, ProductLayoutStrings } from '../layouts/ProductLayout.astro'; // Adjust path
+import ProductLayout from '../layouts/ProductLayout.astro';
+import type { RelatedProductInfo, FaqItemData, ProductLayoutStrings } from '../layouts/ProductLayout.astro';
 
-// --- Core Product Data ---
 const productCoreData = {
   title: "Opozorilna piramida DELO NA CESTI",
   subtitle: "Za varnost vseh udeležencev v prometu je postavitev opozorilne piramide DELO NA CESTI ključen korak za zmanjšanje nevarnosti na cestah.",
@@ -21,7 +20,6 @@ const productCoreData = {
   productId: "TP-100"
 };
 
-// --- Data for Layout Sections (FAQs, Related Products, Quantity Options) ---
 const productFaqItems: FaqItemData[] = [
   { question: "Kaj je opozorilna prometna piramida in zakaj se uporablja?", answer: "Opozorilna prometna piramida (znana tudi pod izrazom triopan) je prenosni varnostni znak trikotne oblike, ki se uporablja za hitro in učinkovito opozarjanje na nevarnosti ali posebne okoliščine na cesti ter v okolici." },
   { question: "Koliko dni traja rok dobave?", answer: `Rok dobave opozorilne piramide ${productCoreData.title} je običajno med 3-14 delovnih dni.` },
@@ -67,7 +65,7 @@ const productPageLayoutStrings: ProductLayoutStrings = {
   techSpecSetupTimeLabel: "Čas sestavljanja",
   orderButtonText: "Izpolnite naročilnico",
   orderFormTitle: "Naročilnica",
-  orderFormSubtitleBase: "Prosimo vnesite svoje osebne podatke ali podatke podjetja za oddajo naročila izdelka",
+  orderFormSubtitleBase: "Prosimo vnesite svoje osebne podatke ali podatke podjetja za oddajo naročila izdelka", // title prop will be interpolated here by ProductLayout
   orderFormNameLabel: "Ime*",
   orderFormNamePlaceholder: "Vnesite svoje ime",
   orderFormSurnameLabel: "Priimek*",
@@ -113,9 +111,8 @@ const productPageLayoutStrings: ProductLayoutStrings = {
   validationQuantityRequired: "Prosimo, izberite količino.",
   validationPaymentRequired: "Prosimo, izberite način plačila.",
   validationTermsRequired: "Prosimo, strinjajte se s pogoji.",
-  validationHCaptchaRequired: "Prosimo, izpolnite captcha polje.",
   
-  formSuccessMessage: "Vaše povpraševanje je bilo uspešno poslano."
+  formSuccessMessage: "Vaše povpraševanje je bilo uspešno poslano." // This will be unused with current stripped logic
 };
 ---
 
