@@ -3,9 +3,14 @@ import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import { defineConfig, passthroughImageService } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import netlify from '@astrojs/netlify';
 
 // https://astro.build/config
 export default defineConfig({
+  output: 'server',
+  adapter: netlify({
+    imageCDN: false,
+  }),
   integrations: [
     tailwind(),
     (await import("@playform/compress")).default({

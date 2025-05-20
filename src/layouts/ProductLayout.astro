@@ -1,5 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import { actions, isInputError } from 'astro:actions'; // Import Astro Actions utilities
 
 export interface ProductSpecification {
   dimensions: string; material: string; weight: string; visibility: string; windResistance: string; setupTime: string;
@@ -28,7 +29,34 @@ export interface Props {
 
 const { title, subtitle, description, price, image, specifications, relatedProducts, quantityOptions, faqItems, layoutStrings } = Astro.props;
 
-// const emailSubject = `New Inquiry: ${title}`; // Retained for potential use in layoutStrings, though not for submission
+// Get the result of the form submission action
+const submissionResult = await Astro.getActionResult(actions.submitOrder);
+
+// Extract errors for easier use in the template
+const formErrors: Record<string, string[] | undefined> = {};
+let genericError: string | undefined = undefined;
+let successMessage: string | undefined = undefined;
+
+if (submissionResult) {
+  if (submissionResult.error) {
+    if (isInputError(submissionResult.error)) {
+      // Zod validation errors per field
+      for (const fieldName in submissionResult.error.fields) {
+        formErrors[fieldName] = submissionResult.error.fields[fieldName];
+      }
+    } else {
+      // Other ActionError (e.g., from Emailit API failure)
+      genericError = submissionResult.error.message || "Prišlo je do napake.";
+    }
+  } else if (submissionResult.data?.success) {
+    successMessage = layoutStrings.formSuccessMessage;
+  }
+}
+
+// Helper function to get the first error for a field
+function getFieldError(fieldName: string): string | undefined {
+  return formErrors[fieldName]?.[0];
+}
 ---
 
 <BaseLayout title={title} description={description}>
@@ -69,90 +97,115 @@ const { title, subtitle, description, price, image, specifications, relatedProdu
               <h2 class="text-2xl font-bold mb-6 text-black">{layoutStrings.orderFormTitle}</h2>
               <p class="text-signal-gray mb-6">{layoutStrings.orderFormSubtitleBase} {title}.</p>
 
-              {/* Form action points to homepage, method GET. No novalidate, so browser validation will run. */}
-              <form id="productOrderForm" action="/" method="GET" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Hidden inputs for a specific service are removed. Basic hidden inputs might be added later if needed. */}
-                {/* <input type="hidden" name="_subject" value={emailSubject} /> */}
-                {/* <input type="text" name="_honey" style="display:none;" /> */}
-                {/* <input type="hidden" name="_captcha" value="false" /> */}
+              {/* Display Success Message */}
+              {successMessage && !submissionResult?.error && (
+                <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
+                  {successMessage}
+                </div>
+              )}
+
+              {/* Display Generic Error Message */}
+              {genericError && (
+                <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+                  {genericError}
+                </div>
+              )}
+              
+              {/* Hide form on success if desired, or show it again. Current logic keeps it visible. */}
+              {/* You could add: {!successMessage && ( ... form content ... )} */}
+              <form id="productOrderForm" method="POST" action={actions.submitOrder} class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="hidden" name="productTitle" value={title} />
+                {/* Removed old hidden inputs for Formspree/etc. */}
 
                 <div>
                   <label for="form-name" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormNameLabel}</label>
-                  <input id="form-name" type="text" name="Name" placeholder={layoutStrings.orderFormNamePlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required />
-                  <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationNameRequired}</div>
+                  <input id="form-name" type="text" name="Name" placeholder={layoutStrings.orderFormNamePlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Name') }]} required />
+                  {getFieldError('Name') && <div class="text-red-500 text-sm mt-1">{getFieldError('Name')}</div>}
+                  {!getFieldError('Name') && <div class="empty-feedback text-red-400 text-sm mt-1" style="display:none;">{layoutStrings.validationNameRequired}</div>}
                 </div>
                 <div>
                   <label for="form-surname" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormSurnameLabel}</label>
-                  <input id="form-surname" type="text" name="Last Name" placeholder={layoutStrings.orderFormSurnamePlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required />
-                  <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationSurnameRequired}</div>
+                  <input id="form-surname" type="text" name="Last Name" placeholder={layoutStrings.orderFormSurnamePlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Last Name') }]} required />
+                  {getFieldError('Last Name') && <div class="text-red-500 text-sm mt-1">{getFieldError('Last Name')}</div>}
+                  {!getFieldError('Last Name') && <div class="empty-feedback text-red-400 text-sm mt-1" style="display:none;">{layoutStrings.validationSurnameRequired}</div>}
                 </div>
                 <div>
                   <label for="form-company" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormCompanyLabel}</label>
-                  <input id="form-company" type="text" name="Company" placeholder={layoutStrings.orderFormCompanyPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" />
+                  <input id="form-company" type="text" name="Company" placeholder={layoutStrings.orderFormCompanyPlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Company') }]} />
+                  {getFieldError('Company') && <div class="text-red-500 text-sm mt-1">{getFieldError('Company')}</div>}
                 </div>
                 <div>
                   <label for="form-vatid" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormVatIdLabel}</label>
-                  <input id="form-vatid" type="text" name="VAT ID" placeholder={layoutStrings.orderFormVatIdPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" />
+                  <input id="form-vatid" type="text" name="VAT ID" placeholder={layoutStrings.orderFormVatIdPlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('VAT ID') }]} />
+                  {getFieldError('VAT ID') && <div class="text-red-500 text-sm mt-1">{getFieldError('VAT ID')}</div>}
                 </div>
                 <div>
                   <label for="form-street" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormStreetLabel}</label>
-                  <input id="form-street" type="text" name="Street" placeholder={layoutStrings.orderFormStreetPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required />
-                  <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationStreetRequired}</div>
+                  <input id="form-street" type="text" name="Street" placeholder={layoutStrings.orderFormStreetPlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Street') }]} required />
+                  {getFieldError('Street') && <div class="text-red-500 text-sm mt-1">{getFieldError('Street')}</div>}
+                  {!getFieldError('Street') && <div class="empty-feedback text-red-400 text-sm mt-1" style="display:none;">{layoutStrings.validationStreetRequired}</div>}
                 </div>
                 <div>
                   <label for="form-city" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormCityLabel}</label>
-                  <input id="form-city" type="text" name="Location" placeholder={layoutStrings.orderFormCityPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required />
-                  <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationCityRequired}</div>
+                  <input id="form-city" type="text" name="Location" placeholder={layoutStrings.orderFormCityPlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Location') }]} required />
+                  {getFieldError('Location') && <div class="text-red-500 text-sm mt-1">{getFieldError('Location')}</div>}
+                  {!getFieldError('Location') && <div class="empty-feedback text-red-400 text-sm mt-1" style="display:none;">{layoutStrings.validationCityRequired}</div>}
                 </div>
                 <div>
                   <label for="form-zip" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormZipLabel}</label>
-                  <input id="form-zip" type="text" name="Postal Code" placeholder={layoutStrings.orderFormZipPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required />
-                  <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationZipRequired}</div>
+                  <input id="form-zip" type="text" name="Postal Code" placeholder={layoutStrings.orderFormZipPlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Postal Code') }]} required />
+                  {getFieldError('Postal Code') && <div class="text-red-500 text-sm mt-1">{getFieldError('Postal Code')}</div>}
+                  {!getFieldError('Postal Code') && <div class="empty-feedback text-red-400 text-sm mt-1" style="display:none;">{layoutStrings.validationZipRequired}</div>}
                 </div>
                 <div>
                   <label for="form-email" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormEmailLabel}</label>
-                  <input id="form-email" type="email" name="email" placeholder={layoutStrings.orderFormEmailPlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required />
-                  <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationEmailRequired}</div>
-                  <div class="invalid-feedback text-red-400 text-sm mt-1">{layoutStrings.validationEmailInvalid}</div>
+                  <input id="form-email" type="email" name="email" placeholder={layoutStrings.orderFormEmailPlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('email') }]} required />
+                  {getFieldError('email') && <div class="text-red-500 text-sm mt-1">{getFieldError('email')}</div>}
+                  {!getFieldError('email') && <> <div class="empty-feedback text-red-400 text-sm mt-1" style="display:none;">{layoutStrings.validationEmailRequired}</div> <div class="invalid-feedback text-red-400 text-sm mt-1" style="display:none;">{layoutStrings.validationEmailInvalid}</div> </>}
                 </div>
                 <div>
                   <label for="form-phone" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormPhoneLabel}</label>
-                  <input id="form-phone" type="tel" name="Telephone Number" placeholder={layoutStrings.orderFormPhonePlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md" required />
-                  <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationPhoneRequired}</div>
+                  <input id="form-phone" type="tel" name="Telephone Number" placeholder={layoutStrings.orderFormPhonePlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Telephone Number') }]} required />
+                  {getFieldError('Telephone Number') && <div class="text-red-500 text-sm mt-1">{getFieldError('Telephone Number')}</div>}
+                  {!getFieldError('Telephone Number') && <div class="empty-feedback text-red-400 text-sm mt-1" style="display:none;">{layoutStrings.validationPhoneRequired}</div>}
                 </div>
                 <div>
                   <label for="form-quantity" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormQuantityLabel}</label>
-                  <select id="form-quantity" name="Quantity" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                  <select id="form-quantity" name="Quantity" class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Quantity') }]} required>
                     <option value="">{layoutStrings.orderFormQuantityDefaultOption}</option>
-                    {quantityOptions.map(qty => <option value={qty}>{qty}</option>)}
+                    {quantityOptions.map(qty => <option value={String(qty)}>{qty}</option>)}
                   </select>
-                  <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationQuantityRequired}</div>
+                  {getFieldError('Quantity') && <div class="text-red-500 text-sm mt-1">{getFieldError('Quantity')}</div>}
+                  {!getFieldError('Quantity') && <div class="empty-feedback text-red-400 text-sm mt-1" style="display:none;">{layoutStrings.validationQuantityRequired}</div>}
                 </div>
                 <div class="md:col-span-2">
                   <label class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormPaymentLabelBase}{price} + DDV)*</label>
                   <div id="payment-group">
                     <label class="flex items-center">
-                      <input id="payment-cod" type="radio" name="Payment" value="Cash on Delivery" class="mr-2" required />
+                      <input id="payment-cod" type="radio" name="Payment" value="Cash on Delivery" class:list={["mr-2", { "border-red-500": getFieldError('Payment') }]} required />
                       <span>{layoutStrings.orderFormPaymentCod}</span>
                     </label>
                     <label class="flex items-center">
-                      <input id="payment-preinvoice" type="radio" name="Payment" value="Proforma Invoice" class="mr-2" required />
+                      <input id="payment-preinvoice" type="radio" name="Payment" value="Proforma Invoice" class:list={["mr-2", { "border-red-500": getFieldError('Payment') }]} required />
                       <span>{layoutStrings.orderFormPaymentPreInvoice}</span>
                     </label>
-                    <div class="empty-feedback text-red-400 text-sm mt-1">{layoutStrings.validationPaymentRequired}</div>
+                    {getFieldError('Payment') && <div class="text-red-500 text-sm mt-1">{getFieldError('Payment')}</div>}
+                    {!getFieldError('Payment') && <div class="empty-feedback text-red-400 text-sm mt-1" style="display:none;">{layoutStrings.validationPaymentRequired}</div>}
                   </div>
                 </div>
                 <div class="md:col-span-2">
                   <label for="form-message" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormMessageLabel}</label>
-                  <textarea id="form-message" name="Message" rows="4" placeholder={layoutStrings.orderFormMessagePlaceholder} class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+                  <textarea id="form-message" name="Message" rows="4" placeholder={layoutStrings.orderFormMessagePlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Message') }]}></textarea>
+                  {getFieldError('Message') && <div class="text-red-500 text-sm mt-1">{getFieldError('Message')}</div>}
                 </div>
                 
                 <div class="md:col-span-2 terms-wrapper">
                   <label for="form-terms" class="flex items-center">
-                    <input id="form-terms" type="checkbox" name="Conditions" required class="mr-2" />
+                    <input id="form-terms" type="checkbox" name="Conditions" class:list={["mr-2", { "border-red-500": getFieldError('Conditions') }]} required />
                     <span class="text-sm">{layoutStrings.orderFormTermsLabel}</span>
                   </label>
-                   <div class="empty-feedback text-red-400 text-sm mt-1" data-for="form-terms">{layoutStrings.validationTermsRequired}</div>
+                   {getFieldError('Conditions') && <div class="text-red-500 text-sm mt-1">{getFieldError('Conditions')}</div>}
+                   {!getFieldError('Conditions') && <div class="empty-feedback text-red-400 text-sm mt-1" data-for="form-terms" style="display:none;">{layoutStrings.validationTermsRequired}</div>}
                 </div>
 
                 <div class="md:col-span-2">
@@ -162,7 +215,7 @@ const { title, subtitle, description, price, image, specifications, relatedProdu
                   </button>
                 </div>
                 <div id="productOrderFormResult" class="md:col-span-2 mt-3 text-center">
-                  {/* This div will not be populated by JS in this version */}
+                  {/* This div is now handled by the messages above the form */}
                 </div>
               </form>
             </div>
@@ -240,41 +293,47 @@ const { title, subtitle, description, price, image, specifications, relatedProdu
   details > summary { list-style: none; }
   details > summary::-webkit-details-marker { display: none; }
 
-  /* These CSS rules will be dormant as .was-validated is not added by JS anymore in this version */
-  /* However, :invalid pseudo-class might still be used by browser's default validation UI if not overridden */
+  /* Keep :invalid styles for browser's native validation UI */
+  /* HTML5 validation will show messages before POSTing to the action */
   .invalid-feedback,
   .empty-feedback {
-    display: none; /* Default state for custom messages; browser may show its own */
+    /* These were for JS-driven validation, now mostly handled by server-side error display or browser native */
+    /* Kept for potential fallback if browser native validation is styled this way */
+    display: none; 
   }
   
-  .was-validated :placeholder-shown:invalid ~ .empty-feedback,
-  .was-validated input[type="radio"]:invalid ~ .empty-feedback,
-  .was-validated input[type="checkbox"]:invalid ~ .empty-feedback,
-  .was-validated select:invalid ~ .empty-feedback
-   {
-    display: block;
-  }
-  
-  .was-validated :not(:placeholder-shown):invalid ~ .invalid-feedback {
+  /* Browser might use these if not overridden by its own UI */
+  input:user-invalid ~ .empty-feedback, /* :user-invalid is a good pseudo-class for this */
+  input:user-invalid ~ .invalid-feedback,
+  select:user-invalid ~ .empty-feedback,
+  input[type="radio"]:user-invalid ~ .empty-feedback, /* Might need to target parent for radio group */
+  input[type="checkbox"]:user-invalid ~ .empty-feedback {
     display: block;
   }
 
-  .is-invalid,
-  .was-validated :invalid {
-    border-color: #dc3545 !important;
+  input:invalid,
+  select:invalid,
+  textarea:invalid {
+    /* Default browser :invalid style is often a red border already */
+    /* You can enhance it here if needed */
+    /* border-color: #dc3545 !important; */ 
   }
-  .was-validated :invalid:focus {
-    --tw-ring-color: #dc3545 !important;
-    border-color: #dc3545 !important;
-    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
+  input:invalid:focus,
+  select:invalid:focus,
+  textarea:invalid:focus {
+    /* Default browser :invalid:focus style */
+    /* --tw-ring-color: #dc3545 !important; */
+    /* border-color: #dc3545 !important; */
+    /* box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important; */
+  }
+  .border-red-500 { /* Custom class for server-returned errors */
+      border-color: #ef4444; /* Tailwind's red-500 */
   }
 </style>
 
-<!-- All client-side JavaScript for form handling has been removed. -->
-<!-- The script tag for FAQ toggling could be added here if still needed, separate from form logic. -->
 <script>
+  // This script is only for FAQ accordion, not form handling.
   document.addEventListener('astro:page-load', () => {
-    // Handle FAQ details elements
     const detailsElements = document.querySelectorAll('details');
     detailsElements.forEach(detail => {
       detail.addEventListener('toggle', () => {
