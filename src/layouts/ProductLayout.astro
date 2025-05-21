@@ -29,6 +29,8 @@ export interface Props {
 
 const { title, subtitle, description, price, image, specifications, relatedProducts, quantityOptions, faqItems, layoutStrings } = Astro.props;
 
+const currentPageUrl = Astro.url.href; // Get current page URL
+
 // Get the result of the form submission action
 const submissionResult = await Astro.getActionResult(actions.submitOrder);
 
@@ -44,12 +46,18 @@ if (submissionResult) {
       for (const fieldName in submissionResult.error.fields) {
         formErrors[fieldName] = submissionResult.error.fields[fieldName];
       }
+       // Check for pageUrl specific error if you want to display it, though it's hidden
+      if (formErrors.pageUrl) {
+        console.warn("Page URL validation error:", formErrors.pageUrl);
+        // Potentially add to genericError or a specific dev-only message
+      }
     } else {
       // Other ActionError (e.g., from Emailit API failure)
       genericError = submissionResult.error.message || "Prišlo je do napake.";
     }
   } else if (submissionResult.data?.success) {
-    successMessage = layoutStrings.formSuccessMessage;
+    // Use the potentially updated success message from the action
+    successMessage = submissionResult.data.message || layoutStrings.formSuccessMessage;
   }
 }
 
@@ -97,25 +105,21 @@ function getFieldError(fieldName: string): string | undefined {
               <h2 class="text-2xl font-bold mb-6 text-black">{layoutStrings.orderFormTitle}</h2>
               <p class="text-signal-gray mb-6">{layoutStrings.orderFormSubtitleBase} {title}.</p>
 
-              {/* Display Success Message */}
               {successMessage && !submissionResult?.error && (
                 <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
                   {successMessage}
                 </div>
               )}
 
-              {/* Display Generic Error Message */}
               {genericError && (
                 <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
                   {genericError}
                 </div>
               )}
               
-              {/* Hide form on success if desired, or show it again. Current logic keeps it visible. */}
-              {/* You could add: {!successMessage && ( ... form content ... )} */}
               <form id="productOrderForm" method="POST" action={actions.submitOrder} class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input type="hidden" name="productTitle" value={title} />
-                {/* Removed old hidden inputs for Formspree/etc. */}
+                <input type="hidden" name="pageUrl" value={currentPageUrl} /> 
 
                 <div>
                   <label for="form-name" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormNameLabel}</label>
@@ -293,20 +297,15 @@ function getFieldError(fieldName: string): string | undefined {
   details > summary { list-style: none; }
   details > summary::-webkit-details-marker { display: none; }
 
-  /* Keep :invalid styles for browser's native validation UI */
-  /* HTML5 validation will show messages before POSTing to the action */
   .invalid-feedback,
   .empty-feedback {
-    /* These were for JS-driven validation, now mostly handled by server-side error display or browser native */
-    /* Kept for potential fallback if browser native validation is styled this way */
     display: none; 
   }
   
-  /* Browser might use these if not overridden by its own UI */
-  input:user-invalid ~ .empty-feedback, /* :user-invalid is a good pseudo-class for this */
+  input:user-invalid ~ .empty-feedback,
   input:user-invalid ~ .invalid-feedback,
   select:user-invalid ~ .empty-feedback,
-  input[type="radio"]:user-invalid ~ .empty-feedback, /* Might need to target parent for radio group */
+  input[type="radio"]:user-invalid ~ .empty-feedback,
   input[type="checkbox"]:user-invalid ~ .empty-feedback {
     display: block;
   }
@@ -314,25 +313,17 @@ function getFieldError(fieldName: string): string | undefined {
   input:invalid,
   select:invalid,
   textarea:invalid {
-    /* Default browser :invalid style is often a red border already */
-    /* You can enhance it here if needed */
-    /* border-color: #dc3545 !important; */ 
   }
   input:invalid:focus,
   select:invalid:focus,
   textarea:invalid:focus {
-    /* Default browser :invalid:focus style */
-    /* --tw-ring-color: #dc3545 !important; */
-    /* border-color: #dc3545 !important; */
-    /* box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important; */
   }
-  .border-red-500 { /* Custom class for server-returned errors */
-      border-color: #ef4444; /* Tailwind's red-500 */
+  .border-red-500 { 
+      border-color: #ef4444; 
   }
 </style>
 
 <script>
-  // This script is only for FAQ accordion, not form handling.
   document.addEventListener('astro:page-load', () => {
     const detailsElements = document.querySelectorAll('details');
     detailsElements.forEach(detail => {
