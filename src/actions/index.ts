@@ -2,8 +2,6 @@
 import { defineAction, ActionError } from 'astro:actions';
 import { z } from 'astro:schema';
 
-// Define the schema for your form inputs
-// Names should match the 'name' attributes in your form
 const orderFormSchema = z.object({
   productTitle: z.string(),
   Name: z.string().min(1, { message: "Ime je obvezno." }),
@@ -32,7 +30,7 @@ export const server = {
         const fromName = import.meta.env.EMAIL_FROM_NAME;
         const fromAddress = import.meta.env.EMAIL_FROM_ADDRESS;
         const adminToAddress = import.meta.env.EMAIL_TO_ADDRESS;
-        const customerConfirmationSubject = "Hvala za vaše naročilo"; // Hardcoded subject
+        const customerConfirmationSubject = "Hvala za vaše naročilo";
 
         if (!apiKey || !fromName || !fromAddress || !adminToAddress) {
           console.error("Missing one or more email environment variables!");
@@ -64,22 +62,19 @@ export const server = {
           Payment: "Način plačila",
           Message: "Sporočilo",
           Conditions: "Strinjanje s pogoji",
-          // pageUrl will be handled specially for the admin email body
         };
         
         // --- 1. Send Email to Admin ---
         let adminEmailHtmlBody = `<h3>Podatki o naročilu za ${formData.productTitle}:</h3><ul>`;
         
-        // Create an ordered list of keys for admin email, to control sequence if desired
         const adminEmailFieldOrder: (keyof typeof formData)[] = [
             "Name", "Last Name", "Company", "VAT ID", 
             "Street", "Location", "Postal Code", "email", "Telephone Number",
             "Quantity", "Payment", "Message", "Conditions" 
-            // productTitle is in subject, pageUrl and submissionDate handled separately
         ];
 
         for (const key of adminEmailFieldOrder) {
-            const value = formData[key as keyof typeof formData]; // Cast key
+            const value = formData[key as keyof typeof formData];
             const label = fieldLabels[key as keyof typeof fieldLabels] || key;
             let displayValue = String(value);
 
@@ -93,7 +88,6 @@ export const server = {
                 adminEmailHtmlBody += `<li><strong>${label}:</strong> (ni vneseno)</li>`;
             }
         }
-        // Add Submission Date and Page URL to admin email
         adminEmailHtmlBody += `<li><strong>Datum oddaje:</strong> ${submissionDate}</li>`;
         adminEmailHtmlBody += `<li><strong>URL oddaje:</strong> <a href="${formData.pageUrl}">${formData.pageUrl}</a></li>`;
         adminEmailHtmlBody += `</ul>`;
