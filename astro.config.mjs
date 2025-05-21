@@ -17,7 +17,7 @@ export default defineConfig({
       // Enable all compression types
       CSS: true,
       HTML: true,
-      Image: true,
+      Image: false,
       JavaScript: true,
       JSON: true,
       SVG: true,
@@ -31,6 +31,6 @@ export default defineConfig({
   site: 'https://eusignal.com',
   image: {
     service: passthroughImageService(),
-    domains: ['cdn.dorik.com'], // Only allow images from cdn.dorik.com
+    domains: ['cdn.dorik.com'],
   },
 });
