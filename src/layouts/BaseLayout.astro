@@ -128,6 +128,9 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
       <meta name="yandex-verification" content={common.PAGE_YANDEX_VALIDATE} />
     )}
     
+    <!-- Pinterest Verify-->
+    <meta name="p:domain_verify" content="e0ada8b9b555717ad94989fbaec7a340"/>
+    
     <slot name="schema" />
   </head>
   <body class="min-h-screen bg-signal-light flex flex-col">
@@ -143,9 +146,14 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
       class="fixed bottom-[25px] right-[25px] w-10 h-10 bg-[#BCEF2F] rounded-lg shadow-lg flex items-center justify-center opacity-0 invisible transition-all duration-300 hover:bg-[#a5d429] focus:outline-none focus:ring-2 focus:ring-[#BCEF2F] focus:ring-opacity-50"
       aria-label="Move to top"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 19V5M5 12l7-7 7 7"/>
-      </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke-dasharray="20" stroke-dashoffset="20" d="M12 21l0 -17.5">
+        <animate fill="freeze" attributeName="stroke-dashoffset" dur="0.24s" values="20;0"/>
+      </path>
+      <path stroke-dasharray="12" stroke-dashoffset="12" d="M12 3l7 7M12 3l-7 7">
+        <animate fill="freeze" attributeName="stroke-dashoffset" begin="0.24s" dur="0.24s" values="12;0"/>
+      </path>
+    </svg>
     </button>
   </body>
 </html>
