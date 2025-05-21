@@ -31,5 +31,6 @@ export default defineConfig({
   site: 'https://eusignal.com',
   image: {
     service: passthroughImageService(),
+    domains: ['cdn.dorik.com'], // Only allow images from cdn.dorik.com
   },
 });
