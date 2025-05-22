@@ -114,6 +114,117 @@ const productPageLayoutStrings: ProductLayoutStrings = {
   
   formSuccessMessage: "Vaše povpraševanje je bilo uspešno poslano." // This will be unused with current stripped logic
 };
+
+// Product Schema
+const productSchema = {
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": productCoreData.title,
+  "image": productCoreData.image,
+  "mpn": productCoreData.productId,
+  "category": productCoreData.category,
+  "weight": {
+    "@type": "QuantitativeValue",
+    "value": "3.2",
+    "unitCode": "KGM"
+  },
+  "keywords": [
+    productCoreData.title,
+    "Slovenščina",
+    "Opozorilna piramida",
+    "Prometni znak",
+    "Varnostni znak",
+    "Triopan",
+    "DELO NA CESTI",
+    "Triopan"
+  ],
+  "description": productCoreData.description,
+  "brand": {
+    "@type": "Brand",
+    "name": "eusignal.com"
+  },
+  "review": {
+    "@type": "Review",
+    "reviewRating": {
+      "@type": "Rating",
+      "ratingValue": "4.5",
+      "bestRating": 5
+    },
+    "author": {
+      "@type": "Person",
+      "name": "Rastko Skrjanec"
+    }
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.5",
+    "reviewCount": "150"
+  },
+  "offers": {
+    "@type": "Offer",
+    "url": Astro.url.href,
+    "priceCurrency": "EUR",
+    "price": "149.99",
+    "priceValidUntil": "2028-12-31",
+    "availability": "https://schema.org/InStock",
+    "itemCondition": "https://schema.org/NewCondition"
+  }
+};
+
+// FAQ Schema
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": productFaqItems.map(item => ({
+    "@type": "Question",
+    "name": item.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": item.answer
+    }
+  }))
+};
+
+// Organization Schema
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "eusignal.com",
+  "foundingDate": "2020",
+  "logo": "/images/logo.png",
+  "keywords": [
+    "EUSIGNAL",
+    "Slovenija"
+  ],
+  "numberOfEmployees": {
+    "@type": "QuantitativeValue",
+    "minValue": "1",
+    "maxValue": "9"
+  },
+  "slogan": "Premium safety signs and triopan warning systems",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "info@eusignal.com",
+    "contactType": "customer service"
+  },
+  "sameAs": [
+    "https://www.instagram.com/eusignal",
+    "https://www.facebook.com/eusignal",
+    "https://twitter.com/eusignal",
+    "https://www.linkedin.com/company/eusignal",
+    "https://www.tiktok.com/@eusignal",
+    "https://www.youtube.com/@eusignal",
+    "https://www.pinterest.com/eusignal"
+  ],
+  "areaServed": {
+    "@type": "Country",
+    "name": "Slovenia",
+    "identifier": "SI"
+  }
+};
+
+// Combine all schemas
+const combinedSchema = [productSchema, faqSchema, organizationSchema];
 ---
 
 <ProductLayout
@@ -127,6 +238,7 @@ const productPageLayoutStrings: ProductLayoutStrings = {
   quantityOptions={productQuantityOptions}
   faqItems={productFaqItems}
   layoutStrings={productPageLayoutStrings}
+  schema={combinedSchema}
 >
   <div class="product-description space-y-6">
     <div class="bg-signal-green/5 p-6 rounded-lg border-l-4 border-signal-green mb-8">

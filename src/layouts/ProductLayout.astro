@@ -25,9 +25,10 @@ export interface Props {
   title: string; subtitle: string; description?: string; price: string; image: string; specifications: ProductSpecification;
   relatedProducts: RelatedProductInfo[]; quantityOptions: number[]; faqItems: FaqItemData[];
   layoutStrings: ProductLayoutStrings;
+  schema: object | null;
 }
 
-const { title, subtitle, description, price, image, specifications, relatedProducts, quantityOptions, faqItems, layoutStrings } = Astro.props;
+const { title, subtitle, description, price, image, specifications, relatedProducts, quantityOptions, faqItems, layoutStrings, schema } = Astro.props;
 
 const currentPageUrl = Astro.url.href; // Get current page URL
 
@@ -67,7 +68,7 @@ function getFieldError(fieldName: string): string | undefined {
 }
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} schema={schema}>
   <div class="container mx-auto px-4 py-8">
     <div class="flex flex-col lg:flex-row gap-8">
       <div class="lg:w-2/3">

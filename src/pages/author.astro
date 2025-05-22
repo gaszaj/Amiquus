@@ -41,6 +41,132 @@ const layoutStringsData = {
   footerLinkEditorialPolicyText: "Preberite našo uredniško politiko",
   footerLinkEditorialPolicyUrl: "/si/uredniska-politika",
 };
+
+// --- Schema Definition ---
+const currentDate = new Date();
+const formattedDate = currentDate.toISOString().split('T')[0];
+const formattedTime = currentDate.toTimeString().split(' ')[0];
+
+// WebPage and Article Schema
+const webpageSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": authorProfileData.name,
+  "url": Astro.url.href,
+  "description": authorProfileData.description,
+  "inLanguage": "sl-SI",
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "EUSIGNAL",
+        "item": "/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Avtorji in uredniki",
+        "item": "/si/avtorji-in-uredniki"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": authorProfileData.name,
+        "item": Astro.url.href
+      }
+    ]
+  },
+  "mainEntity": {
+    "@type": "Article",
+    "headline": authorProfileData.name,
+    "description": authorProfileData.description,
+    "image": authorProfileData.image,
+    "author": {
+      "@type": "Organization",
+      "name": "EUSIGNAL"
+    },
+    "datePublished": `${formattedDate}+${formattedTime}+02:00`,
+    "dateModified": `${formattedDate}+${formattedTime}+02:00`,
+    "inLanguage": "sl-SI"
+  }
+};
+
+// Person Schema
+const personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": authorProfileData.name,
+  "url": Astro.url.href,
+  "description": authorProfileData.description,
+  "sameAs": [
+    authorProfileData.socialLinks.website,
+    authorProfileData.socialLinks.linkedin,
+    authorProfileData.socialLinks.twitter,
+    "https://www.instagram.com/eusignal",
+    "https://www.youtube.com/@eusignal",
+    "https://www.tiktok.com/@eusignal"
+  ],
+  "jobTitle": authorProfileData.jobTitle,
+  "worksFor": {
+    "@type": "Organization",
+    "name": authorProfileData.company,
+    "url": authorProfileData.socialLinks.website
+  },
+  "image": authorProfileData.image,
+  "nationality": {
+    "@type": "Country",
+    "name": "Slovenia"
+  },
+  "knowsLanguage": languagesData.map(lang => ({
+    "@type": "Language",
+    "name": lang.name
+  })),
+  "disambiguatingDescription": authorProfileData.description
+};
+
+// Organization Schema
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "EUSIGNAL",
+  "foundingDate": "2020",
+  "logo": "/images/logo.png",
+  "keywords": [
+    "EUSIGNAL",
+    authorProfileData.name,
+    "Slovenia"
+  ],
+  "numberOfEmployees": {
+    "@type": "QuantitativeValue",
+    "minValue": "1",
+    "maxValue": "9"
+  },
+  "slogan": "Premium varnostni znaki in opozorilni sistemi",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "info@eusignal.com",
+    "contactType": "customer service"
+  },
+  "sameAs": [
+    "https://www.instagram.com/eusignal",
+    "https://www.facebook.com/eusignal",
+    "https://twitter.com/eusignal",
+    "https://www.linkedin.com/company/eusignal",
+    "https://www.tiktok.com/@eusignal",
+    "https://www.youtube.com/@eusignal",
+    "https://www.pinterest.com/eusignal"
+  ],
+  "areaServed": {
+    "@type": "Country",
+    "name": "Slovenia",
+    "identifier": "SI"
+  }
+};
+
+// Combine all schemas
+const schema = [webpageSchema, personSchema, organizationSchema];
 ---
 
 <AuthorLayout
@@ -52,4 +178,5 @@ const layoutStringsData = {
   company={authorProfileData.company}
   languages={languagesData}
   layoutStrings={layoutStringsData}
+  schema={schema}
 />

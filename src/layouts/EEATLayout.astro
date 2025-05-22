@@ -16,6 +16,7 @@ export interface Props {
   
   // Prop for date formatting locale
   dateLocale: string; 
+  schema: object | null;
 }
 
 const { 
@@ -25,7 +26,8 @@ const {
   updateDate,
   publishedLabel,
   updatedLabel,
-  dateLocale // Destructure the new locale prop
+  dateLocale,
+  schema
 } = Astro.props;
 
 // Format dates - uses the passed locale
@@ -38,7 +40,7 @@ const formatDate = (dateString: string, locale: string) => {
 };
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} schema={schema}>
   <!-- Dark Header Section -->
   <div class="bg-black text-white py-16">
     <div class="container mx-auto px-4">
