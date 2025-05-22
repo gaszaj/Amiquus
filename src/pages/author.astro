@@ -1,13 +1,11 @@
 ---
 import AuthorLayout from '../layouts/AuthorLayout.astro';
-import type { ImageMetadata } from 'astro:assets'; // Import type if not already global
-import authorImage from '../assets/Rastko-Škrjanec.jpeg'; // Adjust path
 
 // --- Author's Core Data ---
 const authorProfileData = {
   name: "Rastko Škrjanec",
-  description: "Rastko Škrjanec je lastnik in direktor ELSAV Veržej, slovenskega podjetja s 25-letno tradicijo proizvodnje prometnovarnostne opreme. Pod njegovim vodstvom je podjetje uvedlo bistvene izboljšave tako v kakovosti izdelkov kot v proizvodnih procesih in doseglo zmogljivost izdelave do 200 prometnih znakov dnevno. Rastko skupaj s sinom Nikom, ki je odraščal v poslovnem okolju, ohranja zavezanost podjetja k odličnosti ob zagotavljanju EU certifikatov in skladnosti s standardi SIST EN. Ko podjetje prehaja v naslednjo generacijo, se Rastko še naprej osredotoča na inovacije na področju varnostnih znakov, medtem ko se njegov sin pripravlja na nadaljevanje poslanstva podjetja varovanja življenj z vrhunskimi opozorilnimi sistemi.",
-  image: authorImage as ImageMetadata, // Cast if necessary, or ensure import is typed
+  description: "Rastko Škrjanec je lastnik in direktor ELSAV Veržej, slovenskega podjetja s 25-letno tradicijo proizvodnje prometnovarnostne opreme. Pod njegovim vodstvom je podjetje uvedlo bistvene izboljšave tako v kakovosti izdelkov kot v proizvodnih procesih in doseglo zmogljivost izdelave do 200 prometnih znakov dnevno. Rastko skupaj s sinom Nikom, ki je odraščal v poslovnem okolju, ohranja zavezanost podjetja k odličnosti ob zagotavljanju EU certifikatov in skladnosti s standardi SIST EN. Ko podjetje prehaja v naslednjo generacijo, se Rastko še napreča na inovacije na področju varnostnih znakov, medtem ko se njegov sin pripravlja na nadaljevanje poslanstva podjetja varovanja življenj z vrhunskimi opozorilnimi sistemi.",
+  image: "/authors/Rastko-Škrjanec.webp",
   socialLinks: {
     linkedin: "https://si.linkedin.com/in/rastko-%C5%A1krjanec-bb8b22176",
     twitter: "https://www.facebook.com/rastko.skrjanec/", // Assuming this is the intended "Twitter/X" link

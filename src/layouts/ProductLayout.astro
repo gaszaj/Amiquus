@@ -73,8 +73,15 @@ function getFieldError(fieldName: string): string | undefined {
       <div class="lg:w-2/3">
         <h1 class="text-3xl font-bold text-signal-dark mb-6">{title}</h1>
         <div class="product-gallery mb-8">
-          <div class="border-2 border-signal-green rounded-lg p-8">
-            <img src={image} alt={title} class="w-full h-[400px] object-contain animate-fade-in" />
+          <div class="border-2 border-signal-green rounded-lg p-2">
+            <img 
+            src={image} 
+            alt={title} 
+            class="w-full h-[350px] object-contain animate-fade-in" 
+            width="350"
+            height="350"
+            fetchpriority="high"
+            />
           </div>
         </div>
         <p class="text-lg text-gray-600 mb-6">{subtitle}</p>
@@ -253,7 +260,16 @@ function getFieldError(fieldName: string): string | undefined {
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {relatedProducts.map(product => (
                 <div class="product-card bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-                  <a href={product.url} class="block relative overflow-hidden pb-[75%]"><img src={product.image} alt={product.title} loading="lazy" class="absolute inset-0 w-full h-full object-cover object-center"/></a>
+                  <a href={product.url} class="block relative overflow-hidden pb-[75%]">
+                    <img 
+                      src={product.image} 
+                      alt={product.title} 
+                      loading="lazy" 
+                      class="absolute inset-0 w-full h-full object-cover object-center"
+                      width="350"
+                      height="350"
+                      />
+                  </a>
                   <div class="p-4">
                     <h3 class="font-medium text-lg mb-4"><a href={product.url} class="text-signal-dark hover:text-signal-green transition-colors">{product.title}</a></h3>
                     <a href={product.url} class="inline-block bg-white border border-signal-gray hover:border-signal-green text-signal-dark font-medium py-2 px-4 rounded-md transition-colors w-full text-center">{layoutStrings.relatedProductViewButtonText}</a>
