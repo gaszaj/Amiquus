@@ -8,6 +8,7 @@ import manifestData from '../data/site.webmanifest.json';
 import '@fontsource-variable/inter';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import Schema from '../components/Schema.astro';
 
 export interface Props {
   title: string;
@@ -15,6 +16,7 @@ export interface Props {
   image?: string;
   keywords?: string;
   locale?: string;
+  schema?: object | null;
 }
 
 const {
@@ -22,7 +24,8 @@ const {
   description = `${common.PAGE_ORGANISATION_FULL_NAME} - Premium safety signs and triopan warning systems manufactured in Slovenia and distributed across Europe.`,
   image = "/images/og-image.jpg",
   keywords = "safety signs, warning signs, triopan, road safety, construction safety, event safety",
-  locale = "sl-SI" // Default locale
+  locale = "sl-SI", // Default locale
+  schema = null
 } = Astro.props;
 
 // Helper to ensure icon paths are relative to the public directory root
@@ -131,7 +134,7 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
     <!-- Pinterest Verify-->
     <meta name="p:domain_verify" content="e0ada8b9b555717ad94989fbaec7a340"/>
     
-    <slot name="schema" />
+    {schema && <Schema schema={schema} />}
   </head>
   <body class="min-h-screen bg-signal-light flex flex-col">
     <Header />

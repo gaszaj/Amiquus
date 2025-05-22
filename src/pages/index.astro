@@ -234,6 +234,159 @@ const formAlertMessages = {
   submissionSuccess: "Vaše sporočilo je bilo uspešno poslano!",
   submissionError: "Prišlo je do napake pri pošiljanju. Prosimo, poskusite znova."
 };
+
+// --- Schema Definition ---
+const currentDate = new Date();
+const formattedDate = currentDate.toISOString().split('T')[0];
+const formattedTime = currentDate.toTimeString().split(' ')[0];
+
+// WebPage and Article Schema
+const webpageSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "EUSIGNAL - Premium varnostni znaki",
+  "url": Astro.url.href,
+  "description": "EU Signal - Slovenski proizvajalec premium varnostnih znakov in opozorilnih sistemov triopan za promet, gradbeništvo, nujne službe in dogodke po vsej Evropi.",
+  "inLanguage": "sl-SI",
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "EUSIGNAL",
+        "item": Astro.url.href
+      }
+    ]
+  },
+  "mainEntity": {
+    "@type": "Article",
+    "headline": heroData.title,
+    "description": heroData.subtitle,
+    "image": marqueeItems[0].image,
+    "author": {
+      "@type": "Organization",
+      "name": "EUSIGNAL"
+    },
+    "datePublished": `${formattedDate}+${formattedTime}+02:00`,
+    "dateModified": `${formattedDate}+${formattedTime}+02:00`,
+    "inLanguage": "sl-SI"
+  }
+};
+
+// FAQ Schema
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": heroData.ctaText,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": heroData.subtitle
+      }
+    },
+    {
+      "@type": "Question",
+      "name": heroData.title,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": heroData.subtitle
+      }
+    },
+    {
+      "@type": "Question",
+      "name": heroData.socialProof.text,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": heroData.subtitle
+      }
+    },
+    {
+      "@type": "Question",
+      "name": featuresSection.title,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": featuresSection.items.map(item => `${item.title}: ${item.description}`).join(' ')
+      }
+    },
+    {
+      "@type": "Question",
+      "name": institutionsSection.title,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": institutionsSection.items.join(', ')
+      }
+    },
+    {
+      "@type": "Question",
+      "name": faqSection.title,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faqSection.items.map(item => `${item.question}: ${item.answer}`).join(' ')
+      }
+    },
+    {
+      "@type": "Question",
+      "name": contactSection.title,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": contactSection.subtitle
+      }
+    },
+    ...faqSection.items.map(item => ({
+      "@type": "Question",
+      "name": item.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": item.answer
+      }
+    }))
+  ]
+};
+
+// Organization Schema
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "EUSIGNAL",
+  "foundingDate": "2020",
+  "logo": "/images/logo.png",
+  "keywords": [
+    "EUSIGNAL",
+    "Premium varnostni znaki",
+    "Slovenija"
+  ],
+  "numberOfEmployees": {
+    "@type": "QuantitativeValue",
+    "minValue": "1",
+    "maxValue": "9"
+  },
+  "slogan": "Premium varnostni znaki in opozorilni sistemi",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "info@eusignal.com",
+    "contactType": "customer service"
+  },
+  "sameAs": [
+    "https://www.instagram.com/eusignal",
+    "https://www.facebook.com/eusignal",
+    "https://twitter.com/eusignal",
+    "https://www.linkedin.com/company/eusignal",
+    "https://www.tiktok.com/@eusignal",
+    "https://www.youtube.com/@eusignal",
+    "https://www.pinterest.com/eusignal"
+  ],
+  "areaServed": {
+    "@type": "Country",
+    "name": "Slovenia",
+    "identifier": "SI"
+  }
+};
+
+// Combine all schemas
+const schema = [webpageSchema, faqSchema, organizationSchema];
 ---
 
 <HomepageLayout 
@@ -247,4 +400,5 @@ const formAlertMessages = {
   faqSection={faqSection}
   contactSection={contactSection}
   formAlerts={formAlertMessages}
+  schema={schema}
 />

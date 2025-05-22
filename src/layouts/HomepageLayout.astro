@@ -87,6 +87,7 @@ interface Props {
     };
   };
   formAlerts: FormAlerts; // Added for JavaScript alert messages
+  schema: object | null;
 }
 
 const { 
@@ -99,11 +100,12 @@ const {
   institutionsSection,
   faqSection,
   contactSection,
-  formAlerts // Destructure new prop for JS alerts
+  formAlerts, // Destructure new prop for JS alerts
+  schema
 } = Astro.props;
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} schema={schema}>
   <!-- Hero Section -->
   <section class="bg-black text-white py-12">
     <div class="container mx-auto px-4">

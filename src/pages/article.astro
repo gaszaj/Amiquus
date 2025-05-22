@@ -120,6 +120,122 @@ const additionalSigns = [
 
 const productButtonText = "Naroči znak"; // UI text for slotted content
 const tableLinkText = "Več informacij →"; // UI text for slotted content
+
+// --- Article Schema ---
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": articleMetadata.title,
+  "url": Astro.url.href,
+  "description": articleMetadata.description,
+  "inLanguage": layoutContent.mainDateLocale,
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": articleMetadata.title,
+        "item": Astro.url.href
+      }
+    ]
+  },
+  "mainEntity": {
+    "@type": "Article",
+    "headline": articleMetadata.title,
+    "description": articleMetadata.description,
+    "image": articleMetadata.author.image,
+    "author": {
+      "@type": "Person",
+      "name": articleMetadata.author.name,
+      "image": articleMetadata.author.image,
+      "url": articleMetadata.author.profileUrl
+    },
+    "datePublished": articleMetadata.publishDate,
+    "dateModified": articleMetadata.updateDate,
+    "inLanguage": layoutContent.mainDateLocale
+  }
+};
+
+// FAQ Schema
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Koliko opozorilnih znakov potrebujemo pri cestnih delih?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Za osnovno gradbišče na lokalni cesti potrebujete običajno 8-10 znakov: 2-3 za najavo del, 2-3 za označitev obvoza in 3-4 za označitev samega gradbišča."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Kdaj je najbolje postaviti opozorilne znake pri cestnih delih?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Znake postavite vsaj dan pred začetkom del."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Kako najbolje označiti gradbišče v križišču?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Križišče mora biti označeno iz vseh smeri: znaki za najavo del, oznake obveznih smeri in po potrebi znaki za obvoz."
+      }
+    }
+  ]
+};
+
+// Organization Schema
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "EUSIGNAL",
+  "foundingDate": "2020",
+  "logo": "/images/logo.png",
+  "keywords": [
+    articleMetadata.title,
+    "EUSIGNAL",
+    "Slovenia"
+  ],
+  "numberOfEmployees": {
+    "@type": "QuantitativeValue",
+    "minValue": "1",
+    "maxValue": "9"
+  },
+  "slogan": "Premium safety signs and triopan warning systems",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "info@eusignal.com",
+    "contactType": "customer service"
+  },
+  "sameAs": [
+    "https://www.instagram.com/eusignal",
+    "https://www.facebook.com/eusignal",
+    "https://twitter.com/eusignal",
+    "https://www.linkedin.com/company/eusignal",
+    "https://www.tiktok.com/@eusignal",
+    "https://www.youtube.com/@eusignal",
+    "https://www.pinterest.com/eusignal"
+  ],
+  "areaServed": {
+    "@type": "Country",
+    "name": "Slovenia",
+    "identifier": "SI"
+  }
+};
+
+// Combine all schemas
+const schema = [articleSchema, faqSchema, organizationSchema];
 ---
 
 <ArticleLayout
@@ -141,6 +257,7 @@ const tableLinkText = "Več informacij →"; // UI text for slotted content
   disclaimerContent={layoutContent.disclaimerContent}
   relatedArticlesContent={relatedArticlesForPage}
   helpBoxContent={layoutContent.helpBoxContent}
+  schema={schema}
 >
   <!-- Main article content (HTML/MDX) goes here -->
   <h2 id="varnost-pri-cestnih-delih">Varnost pri cestnih delih</h2>

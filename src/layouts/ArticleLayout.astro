@@ -78,6 +78,7 @@ export interface Props {
   disclaimerContent: DisclaimerContent;
   relatedArticlesContent: RelatedArticlesContent;
   helpBoxContent: HelpBoxContent;
+  schema: object | null;
 }
 
 const {
@@ -99,6 +100,7 @@ const {
   disclaimerContent,
   relatedArticlesContent,
   helpBoxContent,
+  schema
 } = Astro.props;
 
 // Generic Date Formatter
@@ -110,7 +112,7 @@ const formatDate = (dateString: string, locale: string, options: Intl.DateTimeFo
 const tocHeadings = headings.filter(heading => heading.depth >= 2 && heading.depth <= 3);
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} schema={schema}>
   <!-- Hero Section with Dark Background -->
   <div class="bg-black text-white py-12">
     <div class="container mx-auto px-4">
