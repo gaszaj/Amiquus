@@ -97,11 +97,15 @@ const bundles = [
       <!-- Company Info -->
       <div class="lg:col-span-2">
         <img 
-          src="/EUSIGNAL-PNGFile_Horizontal-Light.png" 
-          alt={`${common.PAGE_ORGANISATION_FULL_NAME} Logo`}
-          class="h-10 w-auto mb-4"
-          style="max-height: 40px;"
-        />
+        src="/EUSIGNAL-PNGFile_Horizontal-Light-450-66.png" 
+        srcset="/EUSIGNAL-PNGFile_Horizontal-Light-450-66.png 1x, /EUSIGNAL-PNGFile_Horizontal-Light-900-132.png 2x"
+        alt={headerFooter.HEADER_LOGO_ALT}
+        class="h-6 w-auto"
+        style="max-height: 40px; height: auto; width: auto;"
+        width="450"
+        height="66"
+        fetchpriority="high"
+      />
         <p class="mb-4 text-signal-green">{common.PAGE_SLOGAN}</p>
         <!-- Social Links -->
         <div class="flex space-x-4 mt-6">
