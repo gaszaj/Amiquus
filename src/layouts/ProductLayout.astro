@@ -74,10 +74,10 @@ function getFieldError(fieldName: string): string | undefined {
         <h1 class="text-3xl font-bold text-signal-dark mb-6">{title}</h1>
         <div class="product-gallery mb-8">
           <div class="border-2 border-signal-green rounded-lg p-2">
-            <img 
-            src={image} 
-            alt={title} 
-            class="w-full h-[350px] object-contain animate-fade-in" 
+            <img
+            src={image}
+            alt={title}
+            class="w-full h-[350px] object-contain animate-fade-in"
             width="350"
             height="350"
             fetchpriority="high"
@@ -90,12 +90,62 @@ function getFieldError(fieldName: string): string | undefined {
           <div class="bg-black text-white rounded-lg shadow-sm p-6">
             <h3 class="text-lg font-semibold mb-4 text-white">{layoutStrings.techSpecTitle}</h3>
             <ul class="space-y-4">
-              <li class="flex items-start"><span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg></span><div><span class="block font-medium text-white">{layoutStrings.techSpecDimensionsLabel}</span><span class="text-sm text-gray-300">{specifications.dimensions}</span></div></li>
-              <li class="flex items-start"><span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg></span><div><span class="block font-medium text-white">{layoutStrings.techSpecMaterialLabel}</span><span class="text-sm text-gray-300">{specifications.material}</span></div></li>
-              <li class="flex items-start"><span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" /></svg></span><div><span class="block font-medium text-white">{layoutStrings.techSpecWeightLabel}</span><span class="text-sm text-gray-300">{specifications.weight}</span></div></li>
-              <li class="flex items-start"><span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></span><div><span class="block font-medium text-white">{layoutStrings.techSpecVisibilityLabel}</span><span class="text-sm text-gray-300">{specifications.visibility}</span></div></li>
-              <li class="flex items-start"><span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span><div><span class="block font-medium text-white">{layoutStrings.techSpecWindResistanceLabel}</span><span class="text-sm text-gray-300">{specifications.windResistance}</span></div></li>
-              <li class="flex items-start"><span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span><div><span class="block font-medium text-white">{layoutStrings.techSpecSetupTimeLabel}</span><span class="text-sm text-gray-300">{specifications.setupTime}</span></div></li>
+              <li class="flex items-start">
+                <span class="text-signal-green mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M3 5h11m-2 2l2-2l-2-2M5 3L3 5l2 2m14 3v11m-2-2l2 2l2-2m0-7l-2-2l-2 2M3 12a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
+                </span>
+                <div><span class="block font-medium text-white">{layoutStrings.techSpecDimensionsLabel}</span><span class="text-sm text-gray-300">{specifications.dimensions}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                </span>
+                <div><span class="block font-medium text-white">{layoutStrings.techSpecMaterialLabel}</span><span class="text-sm text-gray-300">{specifications.material}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24"><path fill="currentColor" d="M12 7q.425 0 .713-.288T13 6t-.288-.712T12 5t-.712.288T11 6t.288.713T12 7m2.825 0h1.75q.75 0 1.3.5t.675 1.225l1.425 10q.125.9-.462 1.588T18 21H6q-.925 0-1.513-.687t-.462-1.588l1.425-10Q5.575 8 6.125 7.5t1.3-.5h1.75q-.075-.25-.125-.487T9 6q0-1.25.875-2.125T12 3t2.125.875T15 6q0 .275-.05.513T14.825 7"/></svg>
+                </span>
+                <div><span class="block font-medium text-white">{layoutStrings.techSpecWeightLabel}</span><span class="text-sm text-gray-300">{specifications.weight}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                </span>
+                <div><span class="block font-medium text-white">{layoutStrings.techSpecVisibilityLabel}</span><span class="text-sm text-gray-300">{specifications.visibility}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 512 512">
+                    <defs>
+                      <symbol id="meteoconsWind_mobile" viewBox="0 0 342 234">
+                        <path fill="none" stroke="currentColor" stroke-dasharray="148" stroke-linecap="round" stroke-miterlimit="10" stroke-width="18" d="M264.2 21.3A40 40 0 1 1 293 89H9">
+                          <animate attributeName="stroke-dashoffset" dur="7.2s" repeatCount="indefinite" values="0; 2960"/>
+                        </path>
+                        <path fill="none" stroke="currentColor" stroke-dasharray="110" stroke-linecap="round" stroke-miterlimit="10" stroke-width="18" d="M148.2 212.7A40 40 0 1 0 177 145H9">
+                          <animate attributeName="stroke-dashoffset" dur="7.2s" repeatCount="indefinite" values="0; 1540"/>
+                        </path>
+                      </symbol>
+                    </defs>
+                    <use width="342" height="234" href="#meteoconsWind_mobile" transform="translate(85 139)"/>
+                  </svg>
+                </span>
+                <div><span class="block font-medium text-white">{layoutStrings.techSpecWindResistanceLabel}</span><span class="text-sm text-gray-300">{specifications.windResistance}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,20a9,9,0,1,1,9-9A9,9,0,0,1,12,21Z"/>
+                    <rect width="2" height="7" x="11" y="6" fill="currentColor" rx="1">
+                      <animateTransform attributeName="transform" dur="10.8s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/>
+                    </rect>
+                    <rect width="2" height="9" x="11" y="11" fill="currentColor" rx="1">
+                      <animateTransform attributeName="transform" dur="0.9s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/>
+                    </rect>
+                  </svg>
+                </span>
+                <div><span class="block font-medium text-white">{layoutStrings.techSpecSetupTimeLabel}</span><span class="text-sm text-gray-300">{specifications.setupTime}</span></div>
+              </li>
             </ul>
           </div>
         </div>
@@ -123,10 +173,10 @@ function getFieldError(fieldName: string): string | undefined {
                   {genericError}
                 </div>
               )}
-              
+
               <form id="productOrderForm" method="POST" action={actions.submitOrder} class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input type="hidden" name="productTitle" value={title} />
-                <input type="hidden" name="pageUrl" value={currentPageUrl} /> 
+                <input type="hidden" name="pageUrl" value={currentPageUrl} />
 
                 <div>
                   <label for="form-name" class="block text-sm font-medium text-signal-gray mb-1">{layoutStrings.orderFormNameLabel}</label>
@@ -209,7 +259,7 @@ function getFieldError(fieldName: string): string | undefined {
                   <textarea id="form-message" name="Message" rows="4" placeholder={layoutStrings.orderFormMessagePlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Message') }]}></textarea>
                   {getFieldError('Message') && <div class="text-red-500 text-sm mt-1">{getFieldError('Message')}</div>}
                 </div>
-                
+
                 <div class="md:col-span-2 terms-wrapper">
                   <label for="form-terms" class="flex items-center">
                     <input id="form-terms" type="checkbox" name="Conditions" class:list={["mr-2", { "border-red-500": getFieldError('Conditions') }]} required />
@@ -261,10 +311,10 @@ function getFieldError(fieldName: string): string | undefined {
               {relatedProducts.map(product => (
                 <div class="product-card bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
                   <a href={product.url} class="block relative overflow-hidden pb-[75%]">
-                    <img 
-                      src={product.image} 
-                      alt={product.title} 
-                      loading="lazy" 
+                    <img
+                      src={product.image}
+                      alt={product.title}
+                      loading="lazy"
                       class="absolute inset-0 w-full h-full object-cover object-center"
                       width="350"
                       height="350"
@@ -286,18 +336,68 @@ function getFieldError(fieldName: string): string | undefined {
           <div class="mb-6">
             <h3 class="text-lg font-semibold mb-4 text-white">{layoutStrings.techSpecTitle}</h3>
             <ul class="space-y-4">
-              <li class="flex items-start"><span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg></span><div><span class="block font-medium text-white">{layoutStrings.techSpecDimensionsLabel}</span><span class="text-sm text-gray-300">{specifications.dimensions}</span></div></li>
-              <li class="flex items-start"><span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg></span><div><span class="block font-medium text-white">{layoutStrings.techSpecMaterialLabel}</span><span class="text-sm text-gray-300">{specifications.material}</span></div></li>
-              <li class="flex items-start"><span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" /></svg></span><div><span class="block font-medium text-white">{layoutStrings.techSpecWeightLabel}</span><span class="text-sm text-gray-300">{specifications.weight}</span></div></li>
-              <li class="flex items-start"><span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></span><div><span class="block font-medium text-white">{layoutStrings.techSpecVisibilityLabel}</span><span class="text-sm text-gray-300">{specifications.visibility}</span></div></li>
-              <li class="flex items-start"><span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span><div><span class="block font-medium text-white">{layoutStrings.techSpecWindResistanceLabel}</span><span class="text-sm text-gray-300">{specifications.windResistance}</span></div></li>
-              <li class="flex items-start"><span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span><div><span class="block font-medium text-white">{layoutStrings.techSpecSetupTimeLabel}</span><span class="text-sm text-gray-300">{specifications.setupTime}</span></div></li>
+              <li class="flex items-start">
+                <span class="text-signal-green mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M3 5h11m-2 2l2-2l-2-2M5 3L3 5l2 2m14 3v11m-2-2l2 2l2-2m0-7l-2-2l-2 2M3 12a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
+                </span>
+                <div><span class="block font-medium text-white">{layoutStrings.techSpecDimensionsLabel}</span><span class="text-sm text-gray-300">{specifications.dimensions}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                </span>
+                <div><span class="block font-medium text-white">{layoutStrings.techSpecMaterialLabel}</span><span class="text-sm text-gray-300">{specifications.material}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24"><path fill="currentColor" d="M12 7q.425 0 .713-.288T13 6t-.288-.712T12 5t-.712.288T11 6t.288.713T12 7m2.825 0h1.75q.75 0 1.3.5t.675 1.225l1.425 10q.125.9-.462 1.588T18 21H6q-.925 0-1.513-.687t-.462-1.588l1.425-10Q5.575 8 6.125 7.5t1.3-.5h1.75q-.075-.25-.125-.487T9 6q0-1.25.875-2.125T12 3t2.125.875T15 6q0 .275-.05.513T14.825 7"/></svg>
+                </span>
+                <div><span class="block font-medium text-white">{layoutStrings.techSpecWeightLabel}</span><span class="text-sm text-gray-300">{specifications.weight}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                </span>
+                <div><span class="block font-medium text-white">{layoutStrings.techSpecVisibilityLabel}</span><span class="text-sm text-gray-300">{specifications.visibility}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 512 512">
+                    <defs>
+                      <symbol id="meteoconsWind_desktop" viewBox="0 0 342 234"> {/* Unique ID for second instance */}
+                        <path fill="none" stroke="currentColor" stroke-dasharray="148" stroke-linecap="round" stroke-miterlimit="10" stroke-width="18" d="M264.2 21.3A40 40 0 1 1 293 89H9">
+                          <animate attributeName="stroke-dashoffset" dur="7.2s" repeatCount="indefinite" values="0; 2960"/>
+                        </path>
+                        <path fill="none" stroke="currentColor" stroke-dasharray="110" stroke-linecap="round" stroke-miterlimit="10" stroke-width="18" d="M148.2 212.7A40 40 0 1 0 177 145H9">
+                          <animate attributeName="stroke-dashoffset" dur="7.2s" repeatCount="indefinite" values="0; 1540"/>
+                        </path>
+                      </symbol>
+                    </defs>
+                    <use width="342" height="234" href="#meteoconsWind_desktop" transform="translate(85 139)"/>
+                  </svg>
+                </span>
+                <div><span class="block font-medium text-white">{layoutStrings.techSpecWindResistanceLabel}</span><span class="text-sm text-gray-300">{specifications.windResistance}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,20a9,9,0,1,1,9-9A9,9,0,0,1,12,21Z"/>
+                    <rect width="2" height="7" x="11" y="6" fill="currentColor" rx="1">
+                      <animateTransform attributeName="transform" dur="10.8s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/>
+                    </rect>
+                    <rect width="2" height="9" x="11" y="11" fill="currentColor" rx="1">
+                      <animateTransform attributeName="transform" dur="0.9s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/>
+                    </rect>
+                  </svg>
+                </span>
+                <div><span class="block font-medium text-white">{layoutStrings.techSpecSetupTimeLabel}</span><span class="text-sm text-gray-300">{specifications.setupTime}</span></div>
+              </li>
             </ul>
           </div>
           <div class="mb-6 border-t border-gray-700 pt-6">
             <h3 class="text-lg font-semibold mb-4 text-white">{layoutStrings.customerSupportTitle}</h3>
             <div class="flex items-center">
-              <span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" /><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" /></svg></span>
+              <span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24"><mask id="lineMdEmailArrowRightFilled_customerSupport"><g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="64" stroke-dashoffset="64" d="M4 5h16c0.55 0 1 0.45 1 1v12c0 0.55 -0.45 1 -1 1h-16c-0.55 0 -1 -0.45 -1 -1v-12c0 -0.55 0.45 -1 1 -1Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.72s" values="64;0"/></path><path stroke-dasharray="24" stroke-dashoffset="24" d="M3 6.5l9 5.5l9 -5.5"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.72s" dur="0.24s" values="24;0"/></path><path fill="#fff" fill-opacity="0" stroke="none" d="M12 11l-8 -5h16l-8 5Z"><animate fill="freeze" attributeName="fill-opacity" begin="1.44s" dur="0.6s" values="0;1"/></path><path fill="#000" fill-opacity="0" stroke="none" d="M19 13c3.31 0 6 2.69 6 6c0 3.31 -2.69 6 -6 6c-3.31 0 -6 -2.69 -6 -6c0 -3.31 2.69 -6 6 -6Z"><set fill="freeze" attributeName="fill-opacity" begin="0.96s" to="1"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M16 19h5"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.96s" dur="0.24s" values="6;0"/></path><path stroke-dasharray="4" stroke-dashoffset="4" d="M21 19l-2 2M21 19l-2 -2"><animate fill="freeze" attributeName="stroke-dashoffset" begin="1.2s" dur="0.24s" values="4;0"/></path></g></mask><rect width="24" height="24" fill="currentColor" mask="url(#lineMdEmailArrowRightFilled_customerSupport)"/></svg></span>
               <a href={`mailto:${layoutStrings.customerSupportEmail}`} class="text-signal-green hover:underline">{layoutStrings.customerSupportEmail}</a>
             </div>
           </div>
@@ -315,9 +415,9 @@ function getFieldError(fieldName: string): string | undefined {
 
   .invalid-feedback,
   .empty-feedback {
-    display: none; 
+    display: none;
   }
-  
+
   input:user-invalid ~ .empty-feedback,
   input:user-invalid ~ .invalid-feedback,
   select:user-invalid ~ .empty-feedback,
@@ -334,8 +434,8 @@ function getFieldError(fieldName: string): string | undefined {
   select:invalid:focus,
   textarea:invalid:focus {
   }
-  .border-red-500 { 
-      border-color: #ef4444; 
+  .border-red-500 {
+      border-color: #ef4444;
   }
 </style>
 

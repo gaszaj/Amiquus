@@ -128,7 +128,10 @@ const tocHeadings = headings.filter(heading => heading.depth >= 2 && heading.dep
               <img 
                 src={author.image} 
                 alt={author.name} 
-                class="w-10 h-10 rounded-full mr-3" 
+                class="w-10 h-10 rounded-full mr-3"
+                width={200}
+                height={200}
+                fetchpriority="high" 
               />
               <span class="text-white group-hover:text-signal-green transition-colors">
                 {author.name}
