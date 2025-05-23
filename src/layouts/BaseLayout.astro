@@ -38,6 +38,9 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="/eusignal-favicon-32x32.png" />
+    <link rel="icon" href="/eusignal-favicon.ico" type="image/x-icon" sizes="any" />
+    <link rel="icon" href="/EUSIGNAL-SVG_Logo_File_Horizontal_Light.svg" type="image/svg+xml" />
+    <link rel="alternateicon" href="/eusignal-favicon.ico" type="image/x-icon" sizes="any" />
     <meta name="generator" content={Astro.generator} />
 
     <!-- Primary Meta Tags -->
@@ -46,20 +49,30 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
     <meta name="description" content={description} />
     <meta name="keywords" content={keywords} />
 
+    <!-- Canonical URL -->
+    <link rel="canonical" href={Astro.url.href} />
+
+    <!-- Robots Meta Tag -->
+    <meta name="robots" content="index, follow" max-image-preview:large />
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content={Astro.url} />
     <meta property="og:title" content={`${title} | ${common.PAGE_ORGANISATION_FULL_NAME}`} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={new URL(image, Astro.url)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content={common.PAGE_ORGANISATION_SHORT_NAME || common.PAGE_ORGANISATION_FULL_NAME} /> 
     <meta property="og:locale" content={locale} />
 
-    <!-- Twitter -->
+    <!-- Twitter / X -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content={Astro.url} />
     <meta property="twitter:title" content={`${title} | ${common.PAGE_ORGANISATION_FULL_NAME}`} />
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content={new URL(image, Astro.url)} />
+    <meta property="twitter:site" content={common.PAGE_ORGANISATION_URL_NAME} />
 
     <!-- Mobile/Web App Metadata -->
     <meta name="application-name" content={common.PAGE_ORGANISATION_FULL_NAME} />
@@ -68,6 +81,7 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="format-detection" content="telephone=no" />
     {manifestData.theme_color && <meta name="theme-color" content={manifestData.theme_color} />}
+    <meta name="msapplication-TileColor" content={manifestData.theme_color} />
 
     <!-- Favicon and Icons from imported Manifest Data -->
     {manifestData.icons && manifestData.icons.map(icon => {
@@ -78,8 +92,7 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
       return <link rel="icon" type={icon.type} sizes={icon.sizes} href={href} />;
     })}
     <link rel="manifest" href="/site.webmanifest" crossorigin="anonymous" />
-
-
+    <link rel="mask-icon" href="/eusignal-favicon.ico" color={manifestData.theme_color} />
     <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -87,6 +100,8 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
       rel="stylesheet"
     />
+
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
 
     <!-- Google Tag Manager -->
     {common.PAGE_GOOGLE_ANALYTICS_ID && (
