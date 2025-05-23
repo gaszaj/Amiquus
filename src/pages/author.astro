@@ -133,13 +133,15 @@ const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": "EUSIGNAL",
+  "url": "https://eusignal.com",
   "foundingDate": "2020",
   "logo": "/images/logo.png",
   "keywords": [
     "EUSIGNAL",
-    authorProfileData.name,
-    "Slovenia"
+    "Premium varnostni znaki",
+    "Slovenija"
   ],
+  "description": "EUSIGNAL is a provider of Premium varnostni znaki (premium safety signs) in Slovenija (Slovenia), established in 2020.",
   "numberOfEmployees": {
     "@type": "QuantitativeValue",
     "minValue": "1",
@@ -164,7 +166,45 @@ const organizationSchema = {
     "@type": "Country",
     "name": "Slovenia",
     "identifier": "SI"
-  }
+  },
+  "potentialAction": [
+    {
+      "@type": "ViewAction",
+      "name": "View our Sitemap",
+      "target": "https://eusignal.com/sitemap.xml"
+    },
+    {
+      "@type": "ViewAction",
+      "name": "View our Slovenian Sitemap (sl-SI)",
+      "target": "https://eusignal.com/sitemap-sl-SI.xml"
+    },
+    {
+      "@type": "ViewAction",
+      "name": "Information for Large Language Models",
+      "target": "https://eusignal.com/llms.txt",
+      "description": "Provides a condensed overview and key information about EUSIGNAL for AI agents and crawlers."
+    }
+  ],
+  "mainEntityOfPage": [
+    {
+      "@type": "WebPage",
+      "@id": "https://eusignal.com/sitemap.xml",
+      "name": "XML Sitemap for EUSIGNAL",
+      "description": "Provides a structured list of pages available on https://eusignal.com for crawlers."
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://eusignal.com/sitemap-sl-SI.xml",
+      "name": "XML Sitemap (sl-SI) for EUSIGNAL",
+      "description": "Provides a structured list of Slovenian (sl-SI) pages available on https://eusignal.com for crawlers."
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://eusignal.com/llms.txt",
+      "name": "LLM Guidance for EUSIGNAL",
+        "description": "A text resource outlining key information about EUSIGNAL (https://eusignal.com) offerings in EUSIGNAL for AI agents and crawlers. For more detailed information, please refer to the main website content and sitemap."
+      }
+  ]
 };
 
 // Combine all schemas
