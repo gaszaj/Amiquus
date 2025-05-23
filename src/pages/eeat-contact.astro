@@ -1,0 +1,191 @@
+---
+import EEATContactLayout from '../layouts/EEATContactLayout.astro';
+
+// Define content for the page, including labels previously in the layout
+const pageTitle = "Vstopite v kontakt";
+const pageDescription = "A comprehensive exploration of triopan warning system technology, design principles, and application scenarios across various safety contexts.";
+const articlePublishDate = "2025-03-10";
+const articleUpdateDate = "2025-03-15";
+const publishedTextLabel = "Objavljeno:";
+const updatedTextLabel = "Posodobljeno:";
+const articleDateLocale = "sl-SI";
+
+// Contact form configuration
+const contactSection = {
+  title: "Kontaktirajte nas",
+  subtitle: "Imate vprašanja o naših triopan warning systems? Vpišite svoje podatke in nam pošljite sporočilo.",
+  formLabels: {
+    fullName: "Ime in priimek",
+    fullNamePlaceholder: "Vnesite vaše ime in priimek",
+    email: "E-poštni naslov",
+    emailPlaceholder: "Vnesite vaš e-poštni naslov",
+    message: "Sporočilo",
+    messagePlaceholder: "Vnesite vaše sporočilo",
+    terms: "Strinjam se s pogoji uporabe",
+    submitButton: "Pošlji sporočilo"
+  }
+};
+
+const formAlerts = {
+  invalidEmail: "Prosim vnesite veljaven e-poštni naslov",
+  termsNotAccepted: "Prosim strinjajte se s pogoji uporabe",
+  submissionSuccess: "Vaše sporočilo je bilo uspešno poslano!",
+  submissionError: "Prišlo je do napake. Prosim poskusite ponovno."
+};
+
+// --- Schema Definition ---
+const currentDate = new Date();
+const formattedDate = currentDate.toISOString().split('T')[0];
+const formattedTime = currentDate.toTimeString().split(' ')[0];
+
+// WebPage and Article Schema
+const webpageSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": pageTitle,
+  "url": Astro.url.href,
+  "description": pageDescription,
+  "inLanguage": articleDateLocale,
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "EUSIGNAL",
+        "item": "/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": pageTitle,
+        "item": Astro.url.href
+      }
+    ]
+  },
+  "mainEntity": {
+    "@type": "Article",
+    "headline": pageTitle,
+    "description": pageDescription,
+    "image": "/images/og-image.jpg",
+    "author": {
+      "@type": "Organization",
+      "name": "EUSIGNAL"
+    },
+    "datePublished": `${formattedDate}+${formattedTime}+02:00`,
+    "dateModified": `${formattedDate}+${formattedTime}+02:00`,
+    "inLanguage": articleDateLocale
+  }
+};
+
+// Organization Schema
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "EUSIGNAL",
+  "url": "https://eusignal.com",
+  "foundingDate": "2020",
+  "logo": "/images/logo.png",
+  "keywords": [
+    "EUSIGNAL",
+    "Premium varnostni znaki",
+    "Slovenija"
+  ],
+  "description": "EUSIGNAL is a provider of Premium varnostni znaki (premium safety signs) in Slovenija (Slovenia), established in 2020.",
+  "numberOfEmployees": {
+    "@type": "QuantitativeValue",
+    "minValue": "1",
+    "maxValue": "9"
+  },
+  "slogan": "Premium varnostni znaki in opozorilni sistemi",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "info@eusignal.com",
+    "contactType": "customer service"
+  },
+  "sameAs": [
+    "https://www.instagram.com/eusignal",
+    "https://www.facebook.com/eusignal",
+    "https://twitter.com/eusignal",
+    "https://www.linkedin.com/company/eusignal",
+    "https://www.tiktok.com/@eusignal",
+    "https://www.youtube.com/@eusignal",
+    "https://www.pinterest.com/eusignal"
+  ],
+  "areaServed": {
+    "@type": "Country",
+    "name": "Slovenia",
+    "identifier": "SI"
+  },
+  "potentialAction": [
+    {
+      "@type": "ViewAction",
+      "name": "View our Sitemap",
+      "target": "https://eusignal.com/sitemap.xml"
+    },
+    {
+      "@type": "ViewAction",
+      "name": "View our Slovenian Sitemap (sl-SI)",
+      "target": "https://eusignal.com/sitemap-sl-SI.xml"
+    },
+    {
+      "@type": "ViewAction",
+      "name": "Information for Large Language Models",
+      "target": "https://eusignal.com/llms.txt",
+      "description": "Provides a condensed overview and key information about EUSIGNAL for AI agents and crawlers."
+    }
+  ],
+  "mainEntityOfPage": [
+    {
+      "@type": "WebPage",
+      "@id": "https://eusignal.com/sitemap.xml",
+      "name": "XML Sitemap for EUSIGNAL",
+      "description": "Provides a structured list of pages available on https://eusignal.com for crawlers."
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://eusignal.com/sitemap-sl-SI.xml",
+      "name": "XML Sitemap (sl-SI) for EUSIGNAL",
+      "description": "Provides a structured list of Slovenian (sl-SI) pages available on https://eusignal.com for crawlers."
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://eusignal.com/llms.txt",
+      "name": "LLM Guidance for EUSIGNAL",
+        "description": "A text resource outlining key information about EUSIGNAL (https://eusignal.com) offerings in EUSIGNAL for AI agents and crawlers. For more detailed information, please refer to the main website content and sitemap."
+      }
+  ]
+};
+
+// Combine schemas into an array
+const schema = [webpageSchema, organizationSchema];
+---
+
+<EEATContactLayout 
+  title={pageTitle}
+  description={pageDescription}
+  publishDate={articlePublishDate}
+  updateDate={articleUpdateDate}
+  publishedLabel={publishedTextLabel}
+  updatedLabel={updatedTextLabel}
+  dateLocale={articleDateLocale}
+  schema={schema}
+  contactSection={contactSection}
+  formAlerts={formAlerts}
+>
+  <!-- Content before the form -->
+  <div slot="before-form">
+    <p class="lead text-xl text-signal-gray mb-8">
+      Vas zanima sodelovanje?
+    </p>
+  </div>
+
+  <!-- Content after the form -->
+  <div slot="after-form">
+    <div class="space-y-6">
+      <p>
+        The effectiveness of triopan warning systems is further enhanced by their aerodynamic properties. The triangular pyramid shape presents a reduced surface area to wind compared to flat signs, allowing them to withstand wind speeds up to 70 km/h without toppling. This stability is crucial in highway environments where passing vehicles create significant air turbulence.
+      </p>
+    </div>
+  </div>
+</EEATContactLayout>

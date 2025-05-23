@@ -1,0 +1,238 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+export interface Props {
+  // Props for BaseLayout
+  title: string;
+  description?: string;
+  
+  // Props for article metadata
+  publishDate: string;
+  updateDate?: string;
+  
+  // Props for metadata labels
+  publishedLabel: string;
+  updatedLabel?: string;
+  
+  // Prop for date formatting locale
+  dateLocale: string; 
+  schema: object | null;
+
+  // Props for contact form
+  contactSection: {
+    title: string;
+    subtitle: string;
+    formLabels: {
+      fullName: string;
+      fullNamePlaceholder: string;
+      email: string;
+      emailPlaceholder: string;
+      message: string;
+      messagePlaceholder: string;
+      terms: string;
+      submitButton: string;
+    };
+  };
+  formAlerts: {
+    invalidEmail: string;
+    termsNotAccepted: string;
+    submissionSuccess: string;
+    submissionError: string;
+  };
+}
+
+const { 
+  title, 
+  description, 
+  publishDate, 
+  updateDate,
+  publishedLabel,
+  updatedLabel,
+  dateLocale,
+  schema,
+  contactSection,
+  formAlerts
+} = Astro.props;
+
+// Format dates - uses the passed locale
+const formatDate = (dateString: string, locale: string) => {
+  return new Date(dateString).toLocaleDateString(locale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+---
+
+<BaseLayout title={title} description={description} schema={schema}>
+  <!-- Dark Header Section -->
+  <div class="bg-black text-white py-16">
+    <div class="container mx-auto px-4">
+      <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl md:text-5xl font-bold mb-6 animate-fade-in text-center">{title}</h1>
+      </div>
+    </div>
+  </div>
+
+  <!-- First Main Content Section -->
+  <div class="container mx-auto px-4 pt-12">
+    <div class="prose prose-lg max-w-4xl mx-auto">
+      <slot name="before-form" />
+    </div>
+  </div>
+
+  <!-- Contact Form Section -->
+  <section class="pt-3 pb-8 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+        {contactSection.subtitle}
+      </p>
+      <div class="max-w-2xl mx-auto">
+        <form class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-1">{contactSection.formLabels.fullName}</label>
+            <input 
+              type="text" 
+              placeholder={contactSection.formLabels.fullNamePlaceholder}
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-signal-green focus:ring-1 focus:ring-signal-green" 
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-1">{contactSection.formLabels.email}</label>
+            <input 
+              type="email" 
+              placeholder={contactSection.formLabels.emailPlaceholder}
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-signal-green focus:ring-1 focus:ring-signal-green" 
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-1">{contactSection.formLabels.message}</label>
+            <textarea 
+              rows="4" 
+              placeholder={contactSection.formLabels.messagePlaceholder}
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-signal-green focus:ring-1 focus:ring-signal-green"
+              required
+            ></textarea>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="terms" required />
+            <label for="terms" class="text-sm text-gray-600">
+              {contactSection.formLabels.terms}
+            </label>
+          </div>
+          <button 
+            type="submit" 
+            class="w-full bg-black text-signal-green border border-signal-green py-3 rounded-lg hover:bg-signal-green hover:text-black transition-all"
+          >
+            {contactSection.formLabels.submitButton}
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Second Main Content Section -->
+  <div class="container mx-auto px-4 py-12">
+    <div class="prose prose-lg max-w-4xl mx-auto">
+      <slot name="after-form" />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .prose {
+    max-width: 65ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .prose h2 {
+    color: var(--signal-dark);
+    margin-top: 2.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.875rem;
+    font-weight: 700;
+  }
+  
+  .prose h3 {
+    color: var(--signal-dark);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .prose p {
+    margin-bottom: 1.5rem;
+    line-height: 1.75;
+  }
+  
+  .prose ul {
+    margin-bottom: 1.5rem;
+    padding-left: 1.25rem;
+  }
+
+  .prose li {
+    margin-bottom: 0.5rem;
+  }
+
+  /* Global animations */
+  :global(.animate-fade-in) {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  :global(.animate-slide-up) {
+    animation: slideUp 0.5s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+</style>
+
+<script define:vars={{ alerts: formAlerts }}>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.querySelector('form');
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const emailInput = form.querySelector('input[type="email"]');
+      if (emailInput && !emailInput.value.includes('@')) {
+        alert(alerts.invalidEmail);
+        return;
+      }
+
+      const termsCheckbox = form.querySelector('#terms');
+      if (termsCheckbox && !termsCheckbox.checked) {
+        alert(alerts.termsNotAccepted);
+        return;
+      }
+
+      try {
+        // Form submission logic here
+        console.log('Form data would be submitted here.');
+        alert(alerts.submissionSuccess);
+        form.reset();
+      } catch (error) {
+        console.error('Form submission error:', error);
+        alert(alerts.submissionError);
+      }
+    });
+  }
+});
+</script>
