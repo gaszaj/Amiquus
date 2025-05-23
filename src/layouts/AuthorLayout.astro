@@ -21,9 +21,9 @@ export interface LayoutStrings {
   socialLinkLabelTwitter: string;
   socialLinkLabelWebsite: string;
   socialLinkLabelEmail: string;
-  jobTitleAtCompanySeparator: string; // e.g., " at "
+  jobTitleAtCompanySeparator: string;
   languagesSectionTitle: string;
-  languagesSectionIcon: string; // e.g., "🌍"
+  languagesSectionIcon: string;
   footerLinkAllAuthorsText: string;
   footerLinkAllAuthorsUrl: string;
   footerLinkEditorialPolicyText: string;
@@ -149,12 +149,11 @@ const {
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               {languages.map((language) => (
-                  <div class="bg-gray-900/50 backdrop-blur-sm rounded-lg p-4 border border-gray-800 hover:border-signal-green transition-all duration-300 group flex items-center">
-                    <span class="text-3xl mr-3 group-hover:scale-110 transition-transform duration-300">{language.flag}</span>
-                    <h3 class="text-white font-semibold text-lg">{language.name}</h3>
-                  </div>
-                )
-              )}
+                <div class="bg-gray-900/50 backdrop-blur-sm rounded-lg p-4 border border-gray-800 hover:border-signal-green transition-all duration-300 group flex items-center">
+                  <span class="w-8 h-6 mr-3" set:html={language.flag}></span>
+                  <h3 class="text-white font-semibold text-lg">{language.name}</h3>
+                </div>
+              ))}
             </div>
           </div>
         </div>

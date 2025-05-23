@@ -344,6 +344,19 @@ const tocHeadings = headings.filter(heading => heading.depth >= 2 && heading.dep
   :global(.basic-signs-grid a) {
     @apply block w-full bg-black text-signal-green border border-signal-green font-medium py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center;
   }
+
+  /* Flag icon styles */
+  .flag-icon {
+    width: 1.5em;
+    height: 1em;
+    object-fit: cover;
+  }
+
+  /* Ensure SVG flags maintain aspect ratio */
+  svg {
+    width: 100%;
+    height: 100%;
+  }
 </style>
 
 <script>

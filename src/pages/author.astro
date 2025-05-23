@@ -1,5 +1,6 @@
 ---
 import AuthorLayout from '../layouts/AuthorLayout.astro';
+import { SI, GB, DE, HR, RS } from 'country-flag-icons/string/3x2';
 
 // --- Author's Core Data ---
 const authorProfileData = {
@@ -20,10 +21,11 @@ const authorProfileData = {
 
 // --- Data for Layout Sections & UI Text ---
 const languagesData = [
-  { name: "Slovenian", flag: "🇸🇮" },
-  { name: "English", flag: "🇬🇧" },
-  { name: "German", flag: "🇩🇪" },
-  { name: "Croatian", flag: "🇭🇷" }
+  { name: "Slovenian", flag: SI },
+  { name: "English", flag: GB },
+  { name: "German", flag: DE },
+  { name: "Croatian", flag: HR },
+  { name: "Serbian", flag: RS }
 ];
 
 const layoutStringsData = {
