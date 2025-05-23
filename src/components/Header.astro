@@ -1,6 +1,7 @@
 ---
 // Import JSON data
 import headerFooterData from '../data/headerfooter.json';
+import { SI, DE, PT, BA, LT, HR, ES, FR, IT, NL, SE, DK, NO, RU, TR, CZ, PL, SK, AL, AZ, BE, BG, CY, EE, GE, HU, LV, MD, ME, MK, RO, RS, UA, FI } from 'country-flag-icons/string/3x2';
 import commonData from '../data/common.json';
 
 // Get the first (and only) object from headerFooterData array
@@ -17,53 +18,53 @@ const navigation = [
 
 // --- Language Switcher Logic ---
 const supportedLanguages = [
-  { code: 'sl', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_1 },
-  { code: 'hr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_2 },
-  { code: 'es', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_3 },
-  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_4 },
-  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_5 },
-  { code: 'pt', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_6 },
-  { code: 'it', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_7 },
-  { code: 'nl', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_8 },
-  { code: 'sv', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_9 },
-  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_10 },
-  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_11 },
-  { code: 'it', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_12 },
-  { code: 'da', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_13 },
-  { code: 'no', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_14 },
-  { code: 'nl', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_15 },
-  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_16 },
-  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_17 },
-  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_18 },
-  { code: 'fi', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_19 },
-  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_20 },
-  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_21 },
-  { code: 'ru', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_22 },
-  { code: 'tr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_23 },
-  { code: 'cs', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_24 },
-  { code: 'pl', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_25 },
-  { code: 'sk', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_26 },
-  { code: 'sq', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_27 },
-  { code: 'az', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_28 },
-  { code: 'be', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_29 },
-  { code: 'bs', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_30 },
-  { code: 'bg', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_31 },
-  { code: 'el', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_32 },
-  { code: 'et', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_33 },
-  { code: 'ka', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_34 },
-  { code: 'el', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_35 },
-  { code: 'hu', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_36 },
-  { code: 'lv', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_37 },
-  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_38 },
-  { code: 'lt', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_39 },
-  { code: 'ro', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_40 },
-  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_41 },
-  { code: 'sr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_42 },
-  { code: 'mk', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_43 },
-  { code: 'ro', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_44 },
-  { code: 'it', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_45 },
-  { code: 'sr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_46 },
-  { code: 'uk', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_47 }
+  { code: 'sl', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_1, flag: SI },
+  { code: 'hr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_2, flag: HR },
+  { code: 'es', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_3, flag: ES },
+  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_4, flag: FR },
+  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_5, flag: DE },
+  { code: 'pt', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_6, flag: PT },
+  { code: 'it', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_7, flag: IT },
+  { code: 'nl', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_8, flag: NL },
+  { code: 'sv', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_9, flag: SE },
+  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_10, flag: DE },
+  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_11, flag: FR },
+  { code: 'it', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_12, flag: IT },
+  { code: 'da', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_13, flag: DK },
+  { code: 'no', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_14, flag: NO },
+  { code: 'nl', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_15, flag: NL },
+  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_16, flag: FR },
+  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_17, flag: DE },
+  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_18, flag: DE },
+  { code: 'fi', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_19, flag: FI },
+  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_20, flag: FR },
+  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_21, flag: DE },
+  { code: 'ru', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_22, flag: RU },
+  { code: 'tr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_23, flag: TR },
+  { code: 'cz', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_24, flag: CZ },
+  { code: 'pl', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_25, flag: PL },
+  { code: 'sk', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_26, flag: SK },
+  { code: 'sq', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_27, flag: AL },
+  { code: 'az', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_28, flag: AZ },
+  { code: 'be', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_29, flag: BE },
+  { code: 'bs', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_30, flag: BA },
+  { code: 'bg', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_31, flag: BG },
+  { code: 'el', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_32, flag: CY },
+  { code: 'et', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_33, flag: EE },
+  { code: 'ka', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_34, flag: GE },
+  { code: 'el', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_35, flag: CY },
+  { code: 'hu', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_36, flag: HU },
+  { code: 'lv', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_37, flag: LV },
+  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_38, flag: DE },
+  { code: 'lt', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_39, flag: LT },
+  { code: 'ro', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_40, flag: RO },
+  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_41, flag: FR },
+  { code: 'sr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_42, flag: RS },
+  { code: 'mk', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_43, flag: MK },
+  { code: 'ro', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_44, flag: MD },
+  { code: 'it', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_45, flag: IT },
+  { code: 'sr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_46, flag: RS },
+  { code: 'ua', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_47, flag: UA }
 ];
 const defaultLangCode = 'sl'; // Your site's default language code
 
@@ -99,8 +100,8 @@ const languageLinks = supportedLanguages.map(lang => {
   return { ...lang, href: newPath, isActive: lang.code === currentDetectedLang };
 });
 
-const currentLanguageObject = supportedLanguages.find(lang => lang.code === currentDetectedLang) || 
-                              supportedLanguages.find(lang => lang.code === defaultLangCode) || 
+const currentLanguageObject = supportedLanguages.find(lang => lang.code === currentDetectedLang) ||
+                              supportedLanguages.find(lang => lang.code === defaultLangCode) ||
                               supportedLanguages[0]; // Fallback
 // --- End Language Switcher Logic ---
 ---
@@ -108,13 +109,13 @@ const currentLanguageObject = supportedLanguages.find(lang => lang.code === curr
 <header class="header-transparent">
   <nav class="container mx-auto px-4 py-4 flex items-center justify-between">
     {/* Logo */}
-    <a 
+    <a
       href={headerFooter.HEADER_LOGO_PATH}
       class="flex items-center"
       id="header-logo-link"
     >
-      <img 
-        src="/EUSIGNAL-SVG File_Horizontal-Light.svg" 
+      <img
+        src="/EUSIGNAL-SVG File_Horizontal-Light.svg"
         alt={headerFooter.HEADER_LOGO_ALT}
         class="h-6 w-auto"
         style="max-height: 25px; height: auto; width: auto;"
@@ -155,7 +156,10 @@ const currentLanguageObject = supportedLanguages.find(lang => lang.code === curr
             <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" d="M48 112h288M192 64v48m80 336l96-224l96 224m-162.5-64h133M281.3 112S257 206 199 277S80 384 80 384"/>
             <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" d="M256 336s-35-27-72-75s-56-85-56-85"/>
           </svg>
-          <span>{currentLanguageObject.name}</span>
+          <span class="flex items-center">
+            {currentLanguageObject.flag && <span class="mr-1 w-6 h-4" set:html={currentLanguageObject.flag} />}
+            <span>{currentLanguageObject.name}</span>
+          </span>
           <svg class="ml-1 -mr-1 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
           </svg>
@@ -180,7 +184,9 @@ const currentLanguageObject = supportedLanguages.find(lang => lang.code === curr
                 role="menuitem"
                 title={lang.name}
               >
-                {lang.name}
+                <span class="flex items-center">
+                  {lang.flag && <span class="mr-2 w-6 h-4" set:html={lang.flag} />} {lang.name}
+                </span>
               </a>
             ))}
           </div>
@@ -223,11 +229,8 @@ const currentLanguageObject = supportedLanguages.find(lang => lang.code === curr
           aria-controls="mobile-lang-dropdown-list"
         >
           <span class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 512 512">
-              <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" d="M48 112h288M192 64v48m80 336l96-224l96 224m-162.5-64h133M281.3 112S257 206 199 277S80 384 80 384"/>
-              <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" d="M256 336s-35-27-72-75s-56-85-56-85"/>
-            </svg>
-            Jezik: {currentLanguageObject.name}
+            {currentLanguageObject.flag && <span class="mr-1 w-6 h-4" set:html={currentLanguageObject.flag} />}
+            {currentLanguageObject.name}
           </span>
           <svg class="ml-1 h-5 w-5 transform transition-transform duration-150" id="mobile-lang-chevron" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
         </button>
@@ -243,7 +246,9 @@ const currentLanguageObject = supportedLanguages.find(lang => lang.code === curr
               ]}
               title={lang.name}
             >
-              {lang.name}
+              <span class="flex items-center">
+                {lang.flag && <span class="mr-2 w-6 h-4" set:html={lang.flag} />} {lang.name}
+              </span>
             </a>
           ))}
         </div>
@@ -309,7 +314,7 @@ const currentLanguageObject = supportedLanguages.find(lang => lang.code === curr
   // --- Scroll Handler for Header Background ---
   document.addEventListener('DOMContentLoaded', () => {
     const header = document.querySelector('.header-transparent');
-    
+
     const updateHeaderBackground = () => {
       if (window.scrollY > 0) {
         header.classList.add('header-scrolled');
