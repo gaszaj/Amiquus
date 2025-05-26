@@ -28,7 +28,7 @@ export default defineConfig({
     }),
     sitemap()
   ],
-  site: 'https://eusignal.com',
+  site: 'https://eusignal.netlify.app',
   image: {
     service: passthroughImageService(),
     domains: ['cdn.dorik.com'],
