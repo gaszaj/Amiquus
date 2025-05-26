@@ -5,7 +5,47 @@ import authorData from '../data/author.json';
 import wwwData from '../data/www.json';
 import commonData from '../data/common.json';
 
-const author = authorData[0];
+// Add type definition for author data
+interface AuthorData {
+  AUTHOR_DATE_PUBLISHED: string;
+  AUTHOR_HOUR_PUBLISHED: string;
+  AUTHOR_DATE_UPDATED: string;
+  AUTHOR_HOUR_UPDATED: string;
+  WWW_AUTHOR: string;
+  WWW_AUTHOR_ASCII: string;
+  WWW_AUTHOR_SLUG: string;
+  WWW_AUTHOR_NUMBER: string;
+  AUTHOR_FULL_SLUG: string;
+  AUTHOR_META_SEO: string;
+  PAGE_LOCALE: string;
+  AUTHOR_OG_IMAGE_PATH: string;
+  AUTHOR_PROFILE_IMAGE_PATH: string;
+  AUTHOR_IMAGE_NAME_ASCII: string;
+  WWW_AUTHOR_BIO: string;
+  WWW_AUTHOR_LINKEDIN: string;
+  WWW_AUTHOR_X: string;
+  WWW_AUTHOR_WEBSITE: string;
+  WWW_AUTHOR_INSTAGRAM: string;
+  WWW_AUTHOR_YOUTUBE: string;
+  WWW_AUTHOR_QUORA_OR_TIKTOK: string;
+  WWW_AUTHOR_EMAIL: string;
+  WWW_AUTHOR_OCCUPATION: string;
+  AUTHOR_WORKS_FOR: string;
+  M_HOME_NAME: string;
+  EEAT_NAME_20: string;
+  EEAT_URL_20: string;
+  WWW_AUTHOR_NATIONALITY: string;
+  WWW_AUTHOR_LANGUAGE1: string;
+  WWW_AUTHOR_LANGUAGE2: string;
+  WWW_AUTHOR_LANGUAGE3: string;
+  WWW_AUTHOR_LANGUAGE4: string;
+  WWW_AUTHOR_LANGUAGE5: string;
+  M_COUNTRY: string;
+  M_COUNTRY_CODE: string;
+  EEAT_SLUG_13: string;
+}
+
+const author = authorData[0] as AuthorData;
 const www = wwwData[0];
 const common = commonData[0];
 
