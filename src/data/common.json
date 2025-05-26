@@ -113,6 +113,7 @@
         "PAGEFIND_SEARCH_SUGGESTION": "Ni zadetkov za [SEARCH_TERM]. Poskusite z enim od teh iskalnih nizov:",
         "PAGEFIND_SEARCHING": "Iščem [SEARCH_TERM]...",
         "AUTHOR_TITLE_EXTENSION": "avtor in urednik",
+        "AUTHOR_TITLE_EXTENSION_EXTENDED": "avtor in urednik pri EUSIGNAL",
         "AUTHOR_OTHER_AUTHORS": "Ostali avtorji",
         "AUTHOR_READ_MORE": "Preberite našo uredniško politiko",
         "AUTHOR_RELATED_AUTHORS": "Preverite ostale avtorje",

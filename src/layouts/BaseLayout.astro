@@ -37,9 +37,9 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href={new URL('/eusignal-favicon.ico', Astro.url)} type="image/x-icon" sizes="any" />
-    <link rel="icon" href={new URL('/EUSIGNAL-SVG_Logo_File_Horizontal_Light.svg', Astro.url)} type="image/svg+xml" />
-    <link href={new URL('/eusignal-favicon.ico', Astro.url)} type="image/x-icon" sizes="any" />
+    <link rel="icon" href={new URL('/logos/eusignal-favicon.ico', Astro.url)} type="image/x-icon" sizes="any" />
+    <link rel="icon" href={new URL('/logos/EUSIGNAL-SVG_Logo_File_Horizontal_Light.svg', Astro.url)} type="image/svg+xml" />
+    <link href={new URL('/logos/eusignal-favicon.ico', Astro.url)} type="image/x-icon" sizes="any" />
     <meta name="generator" content={Astro.generator} />
 
     <!-- Primary Meta Tags -->
@@ -90,7 +90,7 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
       return <link rel="icon" type={icon.type} sizes={icon.sizes} href={href} />;
     })}
     <link rel="manifest" href={new URL('/site.webmanifest', Astro.url)} crossorigin="anonymous" />
-    <link rel="mask-icon" href={new URL('/EUSIGNAL-SVG_Logo_File_Horizontal_Light.svg', Astro.url)} color={manifestData.theme_color} />
+    <link rel="mask-icon" href={new URL('/logos/EUSIGNAL-SVG_Logo_File_Horizontal_Light.svg', Astro.url)} color={manifestData.theme_color} />
 
     <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
