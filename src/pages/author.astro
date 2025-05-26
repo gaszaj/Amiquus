@@ -84,7 +84,7 @@ const languagesData = [
 // --- Data for Layout Sections & UI Text ---
 const layoutStringsData = {
   // Using author data for personalized strings
-  baseLayoutDescriptionPrefix: common.AUTHOR_TITLE_EXTENSION_EXTENDED,
+  baseLayoutDescriptionPrefix: author.AUTHOR_META_SEO,
   authorImageAltText: `${author.WWW_AUTHOR} — ${author.EEAT_NAME_20} | ${www.PAGE_ORGANISATION_FULL_NAME}`,
   
   // Using common data for social media labels
@@ -111,7 +111,7 @@ const webpageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
   "name": author.WWW_AUTHOR,
-  "url": getAbsoluteUrl(author.AUTHOR_FULL_SLUG),
+  "url": getAbsoluteUrl(`/${author.EEAT_URL_20}/${author.WWW_AUTHOR_NUMBER}-${author.WWW_AUTHOR_SLUG}`),
   "description": author.AUTHOR_META_SEO,
   "inLanguage": author.PAGE_LOCALE,
   "breadcrumb": {
