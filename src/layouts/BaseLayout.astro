@@ -1,7 +1,7 @@
 ---
 // Import JSON data
-import commonData from '../data/common.json';
-const common = commonData[0]; // Get the first (and only) object from commonData array
+import wwwData from '../data/www.json';
+const www = wwwData[0]; // Get the first (and only) object from wwwData array
 
 import manifestData from '../data/site.webmanifest.json';
 
@@ -21,7 +21,7 @@ export interface Props {
 
 const {
   title,
-  description = `${common.PAGE_ORGANISATION_FULL_NAME} - Premium safety signs and triopan warning systems manufactured in Slovenia and distributed across Europe.`,
+  description = `${www.PAGE_ORGANISATION_FULL_NAME} - Premium safety signs and triopan warning systems manufactured in Slovenia and distributed across Europe.`,
   image = "/images/og-image.jpg",
   keywords = "safety signs, warning signs, triopan, road safety, construction safety, event safety",
   locale = "sl-SI", // Default locale
@@ -37,15 +37,13 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="/eusignal-favicon-32x32.png" />
-    <link rel="icon" href="/eusignal-favicon.ico" type="image/x-icon" sizes="any" />
-    <link rel="icon" href="/EUSIGNAL-SVG_Logo_File_Horizontal_Light.svg" type="image/svg+xml" />
-    <link rel="alternateicon" href="/eusignal-favicon.ico" type="image/x-icon" sizes="any" />
+    <link rel="icon" href={new URL('/eusignal-favicon.ico', Astro.url)} type="image/x-icon" sizes="any" />
+    <link rel="icon" href={new URL('/EUSIGNAL-SVG_Logo_File_Horizontal_Light.svg', Astro.url)} type="image/svg+xml" />
+    <link href={new URL('/eusignal-favicon.ico', Astro.url)} type="image/x-icon" sizes="any" />
     <meta name="generator" content={Astro.generator} />
 
     <!-- Primary Meta Tags -->
-    <title>{title} | {common.PAGE_ORGANISATION_FULL_NAME}</title>
-    <meta name="title" content={`${title} | ${common.PAGE_ORGANISATION_FULL_NAME}`} />
+    <title>{title} | {www.PAGE_ORGANISATION_FULL_NAME}</title>
     <meta name="description" content={description} />
     <meta name="keywords" content={keywords} />
 
@@ -53,30 +51,30 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
     <link rel="canonical" href={Astro.url.href} />
 
     <!-- Robots Meta Tag -->
-    <meta name="robots" content="index, follow" max-image-preview:large />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content={Astro.url} />
-    <meta property="og:title" content={`${title} | ${common.PAGE_ORGANISATION_FULL_NAME}`} />
+    <meta property="og:title" content={`${title} | ${www.PAGE_ORGANISATION_FULL_NAME}`} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={new URL(image, Astro.url)} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:site_name" content={common.PAGE_ORGANISATION_SHORT_NAME || common.PAGE_ORGANISATION_FULL_NAME} /> 
+    <meta property="og:site_name" content={www.PAGE_ORGANISATION_SHORT_NAME || www.PAGE_ORGANISATION_FULL_NAME} /> 
     <meta property="og:locale" content={locale} />
 
     <!-- Twitter / X -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={Astro.url} />
-    <meta property="twitter:title" content={`${title} | ${common.PAGE_ORGANISATION_FULL_NAME}`} />
-    <meta property="twitter:description" content={description} />
-    <meta property="twitter:image" content={new URL(image, Astro.url)} />
-    <meta property="twitter:site" content={common.PAGE_ORGANISATION_URL_NAME} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={Astro.url} />
+    <meta name="twitter:title" content={`${title} | ${www.PAGE_ORGANISATION_FULL_NAME}`} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(image, Astro.url)} />
+    <meta name="twitter:creator" content={www.PAGE_TWITTER_USERNAME} />
 
     <!-- Mobile/Web App Metadata -->
-    <meta name="application-name" content={common.PAGE_ORGANISATION_FULL_NAME} />
-    <meta name="apple-mobile-web-app-title" content={common.PAGE_ORGANISATION_FULL_NAME} />
+    <meta name="application-name" content={www.PAGE_ORGANISATION_FULL_NAME} />
+    <meta name="apple-mobile-web-app-title" content={www.PAGE_ORGANISATION_FULL_NAME} />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="format-detection" content="telephone=no" />
@@ -85,14 +83,15 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
 
     <!-- Favicon and Icons from imported Manifest Data -->
     {manifestData.icons && manifestData.icons.map(icon => {
-      const href = publicPath(icon.src);
+      const href = new URL(publicPath(icon.src), Astro.url);
       if (icon.src.includes('apple-touch-icon')) {
         return <link rel="apple-touch-icon" sizes={icon.sizes} href={href} type={icon.type} />;
       }
       return <link rel="icon" type={icon.type} sizes={icon.sizes} href={href} />;
     })}
-    <link rel="manifest" href="/site.webmanifest" crossorigin="anonymous" />
-    <link rel="mask-icon" href="/eusignal-favicon.ico" color={manifestData.theme_color} />
+    <link rel="manifest" href={new URL('/site.webmanifest', Astro.url)} crossorigin="anonymous" />
+    <link rel="mask-icon" href={new URL('/EUSIGNAL-SVG_Logo_File_Horizontal_Light.svg', Astro.url)} color={manifestData.theme_color} />
+
     <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -104,10 +103,10 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
     <meta name="referrer" content="strict-origin-when-cross-origin" />
 
     <!-- Google Tag Manager -->
-    {common.PAGE_GOOGLE_ANALYTICS_ID && (
+    {www.PAGE_GOOGLE_ANALYTICS_ID && (
       <>
-        <script async src={`https://www.googletagmanager.com/gtag/js?id=${common.PAGE_GOOGLE_ANALYTICS_ID}`}></script>
-        <script is:inline define:vars={{ gtagId: common.PAGE_GOOGLE_ANALYTICS_ID }}>
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${www.PAGE_GOOGLE_ANALYTICS_ID}`}></script>
+        <script is:inline define:vars={{ gtagId: www.PAGE_GOOGLE_ANALYTICS_ID }}>
           window.dataLayer = window.dataLayer || [];
           function gtag() {
             dataLayer.push(arguments);
@@ -119,8 +118,8 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
     )}
 
     <!-- Microsoft Clarity -->
-    {common.PAGE_MICROSOFT_CLARITY && (
-      <script type="text/javascript" is:inline define:vars={{ clarityId: common.PAGE_MICROSOFT_CLARITY }}>
+    {www.PAGE_MICROSOFT_CLARITY && (
+      <script is:inline define:vars={{ clarityId: www.PAGE_MICROSOFT_CLARITY }}>
         (function (c, l, a, r, i, t, y) {
           c[a] =
             c[a] ||
@@ -129,7 +128,7 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
             };
           t = l.createElement(r);
           t.async = 1;
-          t.src = 'https://www.clarity.ms/tag/' + i; // i is clarityId here
+          t.src = 'https://www.clarity.ms/tag/' + i;
           y = l.getElementsByTagName(r)[0];
           y.parentNode.insertBefore(t, y);
         })(window, document, 'clarity', 'script', clarityId);
@@ -137,13 +136,13 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
     )}
 
     <!-- Bing Webmasters Tools -->
-    {common.PAGE_BING_VALIDATE && (
-      <meta name="msvalidate.01" content={common.PAGE_BING_VALIDATE} />
+    {www.PAGE_BING_VALIDATE && (
+      <meta name="msvalidate.01" content={www.PAGE_BING_VALIDATE} />
     )}
 
     <!-- Yandex Webmasters Tools -->
-    {common.PAGE_YANDEX_VALIDATE && (
-      <meta name="yandex-verification" content={common.PAGE_YANDEX_VALIDATE} />
+    {www.PAGE_YANDEX_VALIDATE && (
+      <meta name="yandex-verification" content={www.PAGE_YANDEX_VALIDATE} />
     )}
     
     <!-- Pinterest Verify-->

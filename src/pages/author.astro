@@ -1,22 +1,65 @@
 ---
 import AuthorLayout from '../layouts/AuthorLayout.astro';
 import { SI, GB, DE, HR, RS } from 'country-flag-icons/string/3x2';
+import authorData from '../data/author.json';
+import wwwData from '../data/www.json';
+import commonData from '../data/common.json';
+
+const author = authorData[0];
+const www = wwwData[0];
+const common = commonData[0];
+
+// Helper function to create absolute URLs
+const getAbsoluteUrl = (path) => {
+  return new URL(path, Astro.url.origin).toString();
+};
+
+// Helper function to generate random date within a range
+function getRandomDate(startDaysAgo, endDaysAgo) {
+  const today = new Date();
+  const startDate = new Date(today);
+  startDate.setDate(today.getDate() - endDaysAgo);
+  const endDate = new Date(today);
+  endDate.setDate(today.getDate() - startDaysAgo);
+  
+  const randomTime = startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime());
+  return new Date(randomTime);
+}
+
+// Helper function to generate random time between 8 AM and 3 PM
+function getRandomTime() {
+  const hours = Math.floor(Math.random() * 8) + 8; // 8-15
+  const minutes = Math.floor(Math.random() * 60);
+  const seconds = Math.floor(Math.random() * 60);
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// Generate published and updated dates
+const publishedDate = getRandomDate(3, 10);
+const updatedDate = new Date(publishedDate);
+updatedDate.setDate(publishedDate.getDate() + Math.floor(Math.random() * 9) + 1);
+
+// Format dates for schema
+const formatDateForSchema = (date) => {
+  return date.toISOString().split('T')[0];
+};
 
 // --- Author's Core Data ---
 const authorProfileData = {
-  name: "Rastko Škrjanec",
-  description: "Rastko Škrjanec je lastnik in direktor ELSAV Veržej, slovenskega podjetja s 25-letno tradicijo proizvodnje prometnovarnostne opreme. Pod njegovim vodstvom je podjetje uvedlo bistvene izboljšave tako v kakovosti izdelkov kot v proizvodnih procesih in doseglo zmogljivost izdelave do 200 prometnih znakov dnevno. Rastko skupaj s sinom Nikom, ki je odraščal v poslovnem okolju, ohranja zavezanost podjetja k odličnosti ob zagotavljanju EU certifikatov in skladnosti s standardi SIST EN. Ko podjetje prehaja v naslednjo generacijo, se Rastko še napreča na inovacije na področju varnostnih znakov, medtem ko se njegov sin pripravlja na nadaljevanje poslanstva podjetja varovanja življenj z vrhunskimi opozorilnimi sistemi.",
-  image: "/authors/Rastko-Škrjanec.webp",
+  name: author.WWW_AUTHOR,
+  description: author.WWW_AUTHOR_BIO,
+  image: getAbsoluteUrl(`/authors/${author.AUTHOR_IMAGE_NAME_ASCII}`),
   socialLinks: {
-    linkedin: "https://si.linkedin.com/in/rastko-%C5%A1krjanec-bb8b22176",
-    twitter: "https://www.facebook.com/rastko.skrjanec/", // Assuming this is the intended "Twitter/X" link
-    website: "https://www.elsaverzej.com/index.php/kontakt.html",
-    email: "rastko.skrjanec@elsaverzej.com"
+    linkedin: author.WWW_AUTHOR_LINKEDIN,
+    twitter: author.WWW_AUTHOR_X,
+    website: author.WWW_AUTHOR_WEBSITE,
+    instagram: author.WWW_AUTHOR_INSTAGRAM,
+    youtube: author.WWW_AUTHOR_YOUTUBE,
+    quora: author.WWW_AUTHOR_QUORA_OR_TIKTOK,
+    email: author.WWW_AUTHOR_EMAIL
   },
-  jobTitle: "CEO & Owner",
-  company: "ELSAV Veržej",
-  // authorId: "rastko-skrjanec", // This ID is for routing/data fetching, not directly for layout
-  // joinDate: "2020-05-15" // Not used by layout currently
+  jobTitle: author.WWW_AUTHOR_OCCUPATION,
+  company: author.AUTHOR_WORKS_FOR,
 };
 
 // --- Data for Layout Sections & UI Text ---
@@ -28,70 +71,74 @@ const languagesData = [
   { name: "Serbian", flag: RS }
 ];
 
+// --- Data for Layout Sections & UI Text ---
 const layoutStringsData = {
-  baseLayoutDescriptionPrefix: "avtor in urednik", // Example, adjust as needed
-  authorImageAltText: "Avtor in urednik - Rastko Škrjanec",
-  socialLinkLabelLinkedIn: "LinkedIn",
-  socialLinkLabelTwitter: "Twitter", // Or "Facebook" if that's what the link points to
-  socialLinkLabelWebsite: "Website",
-  socialLinkLabelEmail: "Email",
-  jobTitleAtCompanySeparator: " at ",
-  languagesSectionTitle: "Jeziki",
+  // Using author data for personalized strings
+  baseLayoutDescriptionPrefix: common.AUTHOR_TITLE_EXTENSION,
+  authorImageAltText: `${author.WWW_AUTHOR} — ${author.EEAT_NAME_20} | ${www.PAGE_ORGANISATION_FULL_NAME}`,
+  
+  // Using common data for social media labels
+  socialLinkLabelLinkedIn: common.AUTHOR_LINKEDIN_LABEL,
+  socialLinkLabelTwitter: author.WWW_AUTHOR_X.includes('facebook') ? common.AUTHOR_FACEBOOK_LABEL : common.AUTHOR_TWITTER_LABEL,
+  socialLinkLabelWebsite: common.AUTHOR_WEBSITE_LABEL,
+  socialLinkLabelEmail: www.M_EMAIL,
+  jobTitleAtCompanySeparator: " — ",
+  
+  // Using common data for section titles and icons
+  languagesSectionTitle: common.AUTHOR_LANGUAGE_LABEL,
   languagesSectionIcon: "🌍",
-  footerLinkAllAuthorsText: "Ostali avtorji",
-  footerLinkAllAuthorsUrl: "/si/avtorji-in-uredniki",
-  footerLinkEditorialPolicyText: "Preberite našo uredniško politiko",
-  footerLinkEditorialPolicyUrl: "/si/uredniska-politika",
+  
+  // Using author data for footer links
+  footerLinkAllAuthorsText: common.AUTHOR_OTHER_AUTHORS,
+  footerLinkAllAuthorsUrl: getAbsoluteUrl(`/${author.EEAT_URL_20}`),
+  footerLinkEditorialPolicyText: common.AUTHOR_READ_MORE,
+  footerLinkEditorialPolicyUrl: getAbsoluteUrl(`/${author.EEAT_SLUG_13}`),
 };
 
 // --- Schema Definition ---
-const currentDate = new Date();
-const formattedDate = currentDate.toISOString().split('T')[0];
-const formattedTime = currentDate.toTimeString().split(' ')[0];
-
 // WebPage and Article Schema
 const webpageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  "name": authorProfileData.name,
-  "url": Astro.url.href,
-  "description": authorProfileData.description,
-  "inLanguage": "sl-SI",
+  "name": author.WWW_AUTHOR,
+  "url": getAbsoluteUrl(author.AUTHOR_FULL_SLUG),
+  "description": author.AUTHOR_META_SEO,
+  "inLanguage": author.PAGE_LOCALE,
   "breadcrumb": {
     "@type": "BreadcrumbList",
     "itemListElement": [
       {
         "@type": "ListItem",
         "position": 1,
-        "name": "EUSIGNAL",
-        "item": "/"
+        "name": author.M_HOME_NAME,
+        "item": Astro.url.origin
       },
       {
         "@type": "ListItem",
         "position": 2,
-        "name": "Avtorji in uredniki",
-        "item": "/si/avtorji-in-uredniki"
+        "name": author.EEAT_NAME_20,
+        "item": getAbsoluteUrl(`/${author.EEAT_URL_20}`)
       },
       {
         "@type": "ListItem",
         "position": 3,
-        "name": authorProfileData.name,
-        "item": Astro.url.href
+        "name": author.WWW_AUTHOR,
+        "item": getAbsoluteUrl(author.AUTHOR_FULL_SLUG)
       }
     ]
   },
   "mainEntity": {
     "@type": "Article",
-    "headline": authorProfileData.name,
-    "description": authorProfileData.description,
-    "image": authorProfileData.image,
+    "headline": author.WWW_AUTHOR,
+    "description": author.AUTHOR_META_SEO,
+    "image": getAbsoluteUrl(author.AUTHOR_OG_IMAGE_PATH),
     "author": {
       "@type": "Organization",
-      "name": "EUSIGNAL"
+      "name": www.PAGE_ORGANISATION_URL_NAME
     },
-    "datePublished": `${formattedDate}+${formattedTime}+02:00`,
-    "dateModified": `${formattedDate}+${formattedTime}+02:00`,
-    "inLanguage": "sl-SI"
+    "datePublished": `${formatDateForSchema(publishedDate)}T${getRandomTime()}+02:00`,
+    "dateModified": `${formatDateForSchema(updatedDate)}T${getRandomTime()}+02:00`,
+    "inLanguage": author.PAGE_LOCALE
   }
 };
 
@@ -99,112 +146,77 @@ const webpageSchema = {
 const personSchema = {
   "@context": "https://schema.org",
   "@type": "Person",
-  "name": authorProfileData.name,
-  "url": Astro.url.href,
-  "description": authorProfileData.description,
+  "name": author.WWW_AUTHOR,
+  "url": getAbsoluteUrl(author.AUTHOR_FULL_SLUG),
+  "description": `${author.WWW_AUTHOR} — ${author.EEAT_NAME_20}: ${www.PAGE_ORGANISATION_FULL_NAME}. Preberite več o tej osebi in kakšna je njegova vloga v podjetju.`,
   "sameAs": [
-    authorProfileData.socialLinks.website,
-    authorProfileData.socialLinks.linkedin,
-    authorProfileData.socialLinks.twitter,
-    "https://www.instagram.com/eusignal",
-    "https://www.youtube.com/@eusignal",
-    "https://www.tiktok.com/@eusignal"
+    author.WWW_AUTHOR_WEBSITE,
+    author.WWW_AUTHOR_LINKEDIN,
+    author.WWW_AUTHOR_X,
+    author.WWW_AUTHOR_INSTAGRAM,
+    author.WWW_AUTHOR_YOUTUBE,
+    author.WWW_AUTHOR_QUORA_OR_TIKTOK,
+    `mailto:${author.WWW_AUTHOR_EMAIL}`
   ],
-  "jobTitle": authorProfileData.jobTitle,
+  "email": author.WWW_AUTHOR_EMAIL,
+  "jobTitle": author.WWW_AUTHOR_OCCUPATION,
   "worksFor": {
     "@type": "Organization",
-    "name": authorProfileData.company,
-    "url": authorProfileData.socialLinks.website
+    "name": www.PAGE_ORGANISATION_URL_NAME,
+    "url": getAbsoluteUrl(www.PAGE_LOGO_IMAGE_PATH_1)
   },
-  "image": authorProfileData.image,
+  "image": getAbsoluteUrl(author.AUTHOR_PROFILE_IMAGE_PATH),
   "nationality": {
     "@type": "Country",
-    "name": "Slovenia"
+    "name": author.WWW_AUTHOR_NATIONALITY
   },
-  "knowsLanguage": languagesData.map(lang => ({
-    "@type": "Language",
-    "name": lang.name
-  })),
-  "disambiguatingDescription": authorProfileData.description
+  "knowsLanguage": [
+    { "@type": "Language", "name": author.WWW_AUTHOR_LANGUAGE1 },
+    { "@type": "Language", "name": author.WWW_AUTHOR_LANGUAGE2 },
+    { "@type": "Language", "name": author.WWW_AUTHOR_LANGUAGE3 },
+    { "@type": "Language", "name": author.WWW_AUTHOR_LANGUAGE4 },
+    { "@type": "Language", "name": author.WWW_AUTHOR_LANGUAGE5 }
+  ].filter(lang => lang.name.trim()),
+  "disambiguatingDescription": author.WWW_AUTHOR_BIO
 };
 
 // Organization Schema
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "EUSIGNAL",
-  "url": "https://eusignal.com",
-  "foundingDate": "2020",
-  "logo": "/images/logo.png",
+  "name": www.PAGE_ORGANISATION_URL_NAME,
+  "foundingDate": www.PAGE_FOUNDING_DATE,
+  "logo": getAbsoluteUrl(www.PAGE_LOGO_IMAGE_PATH_1),
   "keywords": [
-    "EUSIGNAL",
-    "Premium varnostni znaki",
-    "Slovenija"
+    www.PAGE_ORGANISATION_FULL_NAME,
+    author.WWW_AUTHOR_ASCII,
+    author.WWW_AUTHOR
   ],
-  "description": "EUSIGNAL is a provider of Premium varnostni znaki (premium safety signs) in Slovenija (Slovenia), established in 2020.",
   "numberOfEmployees": {
     "@type": "QuantitativeValue",
     "minValue": "1",
     "maxValue": "9"
   },
-  "slogan": "Premium varnostni znaki in opozorilni sistemi",
+  "slogan": www.PAGE_SLOGAN,
   "contactPoint": {
     "@type": "ContactPoint",
-    "email": "info@eusignal.com",
-    "contactType": "customer service"
+    "email": www.PAGE_INFO_EMAIL,
+    "contactType": www.M_CUSTOMER_SUPPORT
   },
   "sameAs": [
-    "https://www.instagram.com/eusignal",
-    "https://www.facebook.com/eusignal",
-    "https://twitter.com/eusignal",
-    "https://www.linkedin.com/company/eusignal",
-    "https://www.tiktok.com/@eusignal",
-    "https://www.youtube.com/@eusignal",
-    "https://www.pinterest.com/eusignal"
+    www.PAGE_INSTAGRAM_URL,
+    www.PAGE_FACEBOOK_URL,
+    www.PAGE_TWITTER_URL,
+    www.PAGE_LINKEDIN_URL,
+    www.PAGE_YOUTUBE_URL,
+    www.PAGE_PINTEREST_URL,
+    www.PAGE_BLUESKY_URL
   ],
   "areaServed": {
     "@type": "Country",
-    "name": "Slovenia",
-    "identifier": "SI"
-  },
-  "potentialAction": [
-    {
-      "@type": "ViewAction",
-      "name": "View our Sitemap",
-      "target": "https://eusignal.com/sitemap.xml"
-    },
-    {
-      "@type": "ViewAction",
-      "name": "View our Slovenian Sitemap (sl-SI)",
-      "target": "https://eusignal.com/sitemap-sl-SI.xml"
-    },
-    {
-      "@type": "ViewAction",
-      "name": "Information for Large Language Models",
-      "target": "https://eusignal.com/llms.txt",
-      "description": "Provides a condensed overview and key information about EUSIGNAL for AI agents and crawlers."
-    }
-  ],
-  "mainEntityOfPage": [
-    {
-      "@type": "WebPage",
-      "@id": "https://eusignal.com/sitemap.xml",
-      "name": "XML Sitemap for EUSIGNAL",
-      "description": "Provides a structured list of pages available on https://eusignal.com for crawlers."
-    },
-    {
-      "@type": "WebPage",
-      "@id": "https://eusignal.com/sitemap-sl-SI.xml",
-      "name": "XML Sitemap (sl-SI) for EUSIGNAL",
-      "description": "Provides a structured list of Slovenian (sl-SI) pages available on https://eusignal.com for crawlers."
-    },
-    {
-      "@type": "WebPage",
-      "@id": "https://eusignal.com/llms.txt",
-      "name": "LLM Guidance for EUSIGNAL",
-        "description": "A text resource outlining key information about EUSIGNAL (https://eusignal.com) offerings in EUSIGNAL for AI agents and crawlers. For more detailed information, please refer to the main website content and sitemap."
-      }
-  ]
+    "name": author.M_COUNTRY,
+    "identifier": author.M_COUNTRY_CODE
+  }
 };
 
 // Combine all schemas
