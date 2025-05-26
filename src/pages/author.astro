@@ -144,7 +144,7 @@ const webpageSchema = {
     "image": getAbsoluteUrl(author.AUTHOR_OG_IMAGE_PATH),
     "author": {
       "@type": "Organization",
-      "name": www.PAGE_ORGANISATION_URL_NAME
+      "name": www.PAGE_ORGANISATION_FULL_NAME
     },
     "datePublished": `${author.AUTHOR_DATE_PUBLISHED}T${author.AUTHOR_HOUR_PUBLISHED}+02:00`,
     "dateModified": `${author.AUTHOR_DATE_UPDATED}T${author.AUTHOR_HOUR_UPDATED}+02:00`,
@@ -158,7 +158,7 @@ const personSchema = {
   "@type": "Person",
   "name": author.WWW_AUTHOR,
   "url": getAbsoluteUrl(author.AUTHOR_FULL_SLUG),
-  "description": `${author.WWW_AUTHOR} — ${author.EEAT_NAME_20}: ${www.PAGE_ORGANISATION_FULL_NAME}. Preberite več o tej osebi in kakšna je njegova vloga v podjetju.`,
+  "description": author.AUTHOR_META_SEO,
   "sameAs": [
     author.WWW_AUTHOR_WEBSITE,
     author.WWW_AUTHOR_LINKEDIN,
@@ -172,8 +172,8 @@ const personSchema = {
   "jobTitle": author.WWW_AUTHOR_OCCUPATION,
   "worksFor": {
     "@type": "Organization",
-    "name": www.PAGE_ORGANISATION_URL_NAME,
-    "url": getAbsoluteUrl(www.PAGE_LOGO_IMAGE_PATH_1)
+    "name": www.PAGE_ORGANISATION_FULL_NAME,
+    "url": www.PAGE_FULL_PERMALINK
   },
   "image": getAbsoluteUrl(author.AUTHOR_PROFILE_IMAGE_PATH),
   "nationality": {
