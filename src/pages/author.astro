@@ -14,36 +14,6 @@ const getAbsoluteUrl = (path) => {
   return new URL(path, Astro.url.origin).toString();
 };
 
-// Helper function to generate random date within a range
-function getRandomDate(startDaysAgo, endDaysAgo) {
-  const today = new Date();
-  const startDate = new Date(today);
-  startDate.setDate(today.getDate() - endDaysAgo);
-  const endDate = new Date(today);
-  endDate.setDate(today.getDate() - startDaysAgo);
-  
-  const randomTime = startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime());
-  return new Date(randomTime);
-}
-
-// Helper function to generate random time between 8 AM and 3 PM
-function getRandomTime() {
-  const hours = Math.floor(Math.random() * 8) + 8; // 8-15
-  const minutes = Math.floor(Math.random() * 60);
-  const seconds = Math.floor(Math.random() * 60);
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
-
-// Generate published and updated dates
-const publishedDate = getRandomDate(3, 10);
-const updatedDate = new Date(publishedDate);
-updatedDate.setDate(publishedDate.getDate() + Math.floor(Math.random() * 9) + 1);
-
-// Format dates for schema
-const formatDateForSchema = (date) => {
-  return date.toISOString().split('T')[0];
-};
-
 // --- Author's Core Data ---
 const authorProfileData = {
   name: author.WWW_AUTHOR,
@@ -123,7 +93,7 @@ const webpageSchema = {
         "@type": "ListItem",
         "position": 3,
         "name": author.WWW_AUTHOR,
-        "item": getAbsoluteUrl(author.AUTHOR_FULL_SLUG)
+        "item": getAbsoluteUrl(`/${author.EEAT_URL_20}/${author.WWW_AUTHOR_NUMBER}-${author.WWW_AUTHOR_SLUG}`)
       }
     ]
   },
@@ -136,8 +106,8 @@ const webpageSchema = {
       "@type": "Organization",
       "name": www.PAGE_ORGANISATION_URL_NAME
     },
-    "datePublished": `${formatDateForSchema(publishedDate)}T${getRandomTime()}+02:00`,
-    "dateModified": `${formatDateForSchema(updatedDate)}T${getRandomTime()}+02:00`,
+    "datePublished": `${author.AUTHOR_DATE_PUBLISHED}T${author.AUTHOR_HOUR_PUBLISHED}+02:00`,
+    "dateModified": `${author.AUTHOR_DATE_UPDATED}T${author.AUTHOR_HOUR_UPDATED}+02:00`,
     "inLanguage": author.PAGE_LOCALE
   }
 };
@@ -201,7 +171,7 @@ const organizationSchema = {
   "contactPoint": {
     "@type": "ContactPoint",
     "email": www.PAGE_INFO_EMAIL,
-    "contactType": www.M_CUSTOMER_SUPPORT
+    "contactType": common.M_CUSTOMER_SUPPORT
   },
   "sameAs": [
     www.PAGE_INSTAGRAM_URL,
