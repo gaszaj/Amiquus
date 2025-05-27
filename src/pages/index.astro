@@ -1,21 +1,34 @@
 ---
 import HomepageLayout from '../layouts/HomepageLayout.astro';
+import homeData from '../data/home.json';
+import wwwData from '../data/www.json';
+import commonData from '../data/common.json';
+
+// Get the first (and only) object from each JSON array
+const home = homeData[0];
+const www = wwwData[0];
+const common = commonData[0];
+
+// Helper function for absolute URLs
+const getAbsoluteUrl = (path) => {
+  return new URL(path, Astro.url.origin).toString();
+};
 
 // --- Data for the Homepage ---
 
 // Hero section data
 const heroData = {
-  title: "Široka ponudba opozorilnih piramidnih znakov",
-  subtitle: "Prometni troznak ali zložljivi trinožec ali prometna zložljiva piramida je znak za obveščanje udeležencev v cestnem prometu.",
-  ctaText: "Preverite ponudbo",
+  title: home.HOME_H1,
+  subtitle: home.HOME_SUBTITLE,
+  ctaText: home.HOME_HERO_BUTTON,
   ctaLink: "#best-sellers",
   features: [
-    "V skladu z regulativo EU",
-    "Trpežno in kakovostno", 
-    "Priporočajo varnostni inšpektorji"
+    home.PAGE_SOCIAL_SHARING_FEATURE_1,
+    home.PAGE_SOCIAL_SHARING_FEATURE_2,
+    home.PAGE_SOCIAL_SHARING_FEATURE_3
   ],
   socialProof: {
-    text: "Zaupa nam že 1763 kupcev po vsej Evropi!",
+    text: home.HOME_HERO_SOCIAL_PROOF,
     rating: 5,
     userPhotos: [
       '/socialproof/sp6.webp',
@@ -30,209 +43,209 @@ const heroData = {
 // Marquee items data
 const marqueeItems = [
   { 
-    url: "/si/opozorilna-piramida/pozor-visece-breme", 
-    image: '/productimg/triopan-pozor-viseče-breme.webp', 
-    alt: 'Triopan / trinožec POZOR VISEČE BREME'
+    url: home.HOME_BESTSELLER_NAME_1, 
+    image: home.HOME_BESTSELLER_IMAGE_PATH_1,
+    alt: home.HOME_BESTSELLER_NAME_1
   },
   { 
-    url: "/si/opozorilna-piramida/omejitev-hitrosti-30", 
-    image: '/productimg/triopan-omejitev-hitrosti-30.webp', 
-    alt: 'Triopan / trinožec OMEJITEV HITROSTI 30' 
+    url: home.HOME_BESTSELLER_PATH_2, 
+    image: home.HOME_BESTSELLER_IMAGE_PATH_2, 
+    alt: home.HOME_BESTSELLER_NAME_2
   },
   { 
-    url: "/si/opozorilna-piramida/parkirni-prostor", 
-    image: '/productimg/triopan-parkirni-prostor.webp', 
-    alt: 'Triopan / trinožec PARKIRNI PROSTOR' 
+    url: home.HOME_BESTSELLER_PATH_3, 
+    image: home.HOME_BESTSELLER_IMAGE_PATH_3, 
+    alt: home.HOME_BESTSELLER_NAME_3
   },
   { 
-    url: "/si/opozorilna-piramida/maraton", 
-    image: '/productimg/triopan-maraton.webp', 
-    alt: 'Triopan / trinožec MARATON' 
+    url: home.HOME_BESTSELLER_PATH_4, 
+    image: home.HOME_BESTSELLER_IMAGE_PATH_4, 
+    alt: home.HOME_BESTSELLER_NAME_4
   },
   { 
-    url: "/si/opozorilna-piramida/pozor-vilicar", 
-    image: '/productimg/triopan-pozor-viličar.webp', 
-    alt: 'Triopan / trinožec POZOR VILIČAR' 
+    url: home.HOME_BESTSELLER_PATH_5, 
+    image: home.HOME_BESTSELLER_IMAGE_PATH_5, 
+    alt: home.HOME_BESTSELLER_NAME_5
   }
 ];
 
 // Bestsellers section data
 const bestsellersSection = {
-  title: "Najbolj prodajano",
-  productCtaText: "Oddajte naročilo",
+  title: home.HOME_H2_1,
+  productCtaText: home.HOME_HERO_BUTTON,
   products: [
     {
-      title: "Opozorilna piramida DELO NA CESTI",
-      image: "/productimg/triopan-delo-na-cesti.webp",
-      url: "/si/opozorilna-piramida/delo-na-cesti"
+      title: home.HOME_BESTSELLER_NAME_1,
+      image: home.HOME_BESTSELLER_IMAGE_PATH_1,
+      url: home.HOME_BESTSELLER_PATH_1
     },
     {
-      title: "Opozorilna piramida POLNJENJE BAZENOV",
-      image: "/productimg/triopan-polnjenje-bazenov.webp",
-      url: "/si/opozorilna-piramida/polnjenje-bazenov"
+      title: home.HOME_BESTSELLER_NAME_2,
+      image: home.HOME_BESTSELLER_IMAGE_PATH_2,
+      url: home.HOME_BESTSELLER_PATH_2
     },
     {
-      title: "Opozorilna piramida PREPOVEDANO PARKIRANJE IN USTAVLJANJE",
-      image: "/productimg/triopan-prepovedano-parkiranje-in-ustavljanje.webp",
-      url: "/si/opozorilna-piramida/prepovedano-parkiranje"
+      title: home.HOME_BESTSELLER_NAME_3,
+      image: home.HOME_BESTSELLER_IMAGE_PATH_3,
+      url: home.HOME_BESTSELLER_PATH_3
     },
     {
-      title: "Opozorilna piramida ŠOLSKA POT",
-      image: "/productimg/triopan-šolska-pot.webp",
-      url: "/si/opozorilna-piramida/solska-pot"
+      title: home.HOME_BESTSELLER_NAME_4,
+      image: home.HOME_BESTSELLER_IMAGE_PATH_4,
+      url: home.HOME_BESTSELLER_PATH_4
     },
     {
-      title: "Opozorilna piramida KOLESARSKI IZPIT",
-      image: "/productimg/triopan-kolesarski-izpit.webp",
-      url: "/si/opozorilna-piramida/kolesarski-izpit"
+      title: home.HOME_BESTSELLER_NAME_5,
+      image: home.HOME_BESTSELLER_IMAGE_PATH_5,
+      url: home.HOME_BESTSELLER_PATH_5
     },
     {
-      title: "Opozorilna piramida OMEJITEV HITROSTI 30",
-      image: "/productimg/triopan-omejitev-hitrosti-30.webp",
-      url: "/si/opozorilna-piramida/omejitev-hitrosti-30"
+      title: home.HOME_BESTSELLER_NAME_6,
+      image: home.HOME_BESTSELLER_IMAGE_PATH_6,
+      url: home.HOME_BESTSELLER_PATH_6
     },
     {
-      title: "Opozorilna piramida STOP",
-      image: "/productimg/triopan-stop.webp",
-      url: "/si/opozorilna-piramida/stop"
+      title: home.HOME_BESTSELLER_NAME_7,
+      image: home.HOME_BESTSELLER_IMAGE_PATH_7,
+      url: home.HOME_BESTSELLER_PATH_7
     },
     {
-      title: "Opozorilna piramida PARKIRNI PROSTOR",
-      image: "/productimg/triopan-parkirni-prostor.webp",
-      url: "/si/opozorilna-piramida/parkirni-prostor"
+      title: home.HOME_BESTSELLER_NAME_8,
+      image: home.HOME_BESTSELLER_IMAGE_PATH_8,
+      url: home.HOME_BESTSELLER_PATH_8
     },
     {
-      title: "Opozorilna piramida POZOR VILIČAR",
-      image: "/productimg/triopan-pozor-viličar.webp",
-      url: "/si/opozorilna-piramida/pozor-vilicar"
+      title: home.HOME_BESTSELLER_NAME_9,
+      image: home.HOME_BESTSELLER_IMAGE_PATH_9,
+      url: home.HOME_BESTSELLER_PATH_9
     }
   ]
 };
 
 // Features section data
 const featuresSection = {
-  title: "Zložljivi, trpežni in vidljivi",
+  title: home.HOME_H2_2,
   items: [
     {
       icon: "⚡",
-      title: "Hitra postavitev",
-      description: "Postavite v manj kot minuti"
+      title: home.HOME_STRING_14,
+      description: home.HOME_STRING_17
     },
     {
       icon: "🔄",
-      title: "Enostavno premikanje",
-      description: "Preprosto prenašanje in premikanje"
+      title: home.HOME_STRING_15,
+      description: home.HOME_STRING_18
     },
     {
       icon: "📦",
-      title: "Še enostavneje zlaganje",
-      description: "Kompaktno zlaganje za shranjevanje"
+      title: home.HOME_STRING_16,
+      description: home.HOME_STRING_19
     }
   ]
 };
 
 // Institutions section data
 const institutionsSection = {
-  title: "Naše izdelke potrjuje strokovno osebje iz priznanih organizacij",
+  title: home.HOME_H2_4,
   items: [
-    "Zavarovalnica Triglav",
-    "Generali",
-    "Zavarovalnica Sava",
-    "Vzajemna",
-    "Inšektorat RS za delo",
-    "Slovenska Policija"
+    home.INSTITUTION_1,
+    home.INSTITUTION_2,
+    home.INSTITUTION_3,
+    home.INSTITUTION_4,
+    home.INSTITUTION_5,
+    home.INSTITUTION_6
   ]
 };
 
 // FAQ section data
 const faqSection = {
-  title: "Pogosta vprašanja (FAQ)",
+  title: home.HOME_H2_5,
   items: [
     {
-      question: "Kakšne so dimenzije in teža?",
-      answer: "Osnovne dimenzije so 100x100x100 cm z višino 90 cm, zasnovano za optimalno stabilnost in prenosljivost."
+      question: home.HOME_Q1,
+      answer: home.HOME_A1
     },
     {
-      question: "Iz katerih materialov je izdelan in kako trpežen je?",
-      answer: "Izdelan iz vzdržljivih aluminijastih profilov, prekritih z UV-odporno tkanino, ki zagotavlja odlične odsevne lastnosti in odpornost na vse vremenske vplive."
+      question: home.HOME_Q2,
+      answer: home.HOME_A2
     },
     {
-      question: "Kako stabilen je znak?",
-      answer: "Zaradi piramidne strukture in stabilnega podnožja zagotavlja odlično stabilnost na vseh površinah."
+      question: home.HOME_Q3,
+      answer: home.HOME_A3
     },
     {
-      question: "Ali je znak viden ponoči in v slabem vremenu?",
-      answer: "Da, visoko odsevni material zagotavlja odlično vidljivost v dežju, megli in pri slabi vidljivosti."
+      question: home.HOME_Q4,
+      answer: home.HOME_A4
     },
     {
-      question: "Ali je znak odporen na vremenske vplive?",
-      answer: "Da, UV-odporna tkanina in trpežen aluminijast okvir sta odporna na vse vremenske razmere: sneg, dež, sonce, meglo in vetrove do 70 km/h."
+      question: home.HOME_Q5,
+      answer: home.HOME_A5
     },
     {
-      question: "Ali je znak primeren za uporabo v ekstremnih vremenskih razmerah?",
-      answer: "Da, zasnovan je za uporabo v vseh vremenskih razmerah, vključno s snegom, dežjem in močnimi vetrovi do 70 km/h."
+      question: home.HOME_Q6,
+      answer: home.HOME_A6
     },
     {
-      question: "Kako hitro lahko znak postavim?",
-      answer: "Postavitev traja le 1-2 minuti - enostavno ga razprete, pritrdite in namestite. Preprosto ga je tudi premestiti ali pospraviti."
+      question: home.HOME_Q7,
+      answer: home.HOME_A7
     },
     {
-      question: "Kakšni so pogoji shranjevanja?",
-      answer: "Shranjujte v suhem prostoru, zloženo v priloženi torbi za prenašanje."
+      question: home.HOME_Q8,
+      answer: home.HOME_A8
     },
     {
-      question: "Kakšna je garancijska doba?",
-      answer: "24-mesečna garancija na material in proizvodne napake."
+      question: home.HOME_Q9,
+      answer: home.HOME_A9
     },
     {
-      question: "Ali lahko prilagodim opozorilno sporočilo?",
-      answer: "Da, omogočamo prilagojeno besedilo in dodajanje logotipov podjetij. Za ponudbo nas kontaktirajte na info@eusignal.com."
+      question: home.HOME_Q10,
+      answer: home.HOME_A10
     },
     {
-      question: "Ali lahko naročim več znakov z različnimi napisi?",
-      answer: "Da, za večja naročila z različnimi napisi izpolnite naročilnico."
+      question: home.HOME_Q11,
+      answer: home.HOME_A11
     },
     {
-      question: "Ali lahko znak uporabljam na javnih površinah?",
-      answer: "Da, vendar se pred uporabo posvetujte s pristojnimi organi, lokalno upravo ali lastniki zemljišč."
+      question: home.HOME_Q12,
+      answer: home.HOME_A12
     },
     {
-      question: "Kakšen je dobavni rok?",
-      answer: "Standardna dostava traja 3-14 delovnih dni znotraj EU."
+      question: home.HOME_Q13,
+      answer: home.HOME_A13
     },
     {
-      question: "Kakšni so načini plačila?",
-      answer: "Sprejemamo Google Pay, Apple Pay, Visa in Mastercard za individualna naročila. Za večja poslovna naročila vas prosimo za izpolnitev naročilnice."
+      question: home.HOME_Q14,
+      answer: home.HOME_A14
     },
     {
-      question: "Kakšni so pogoji vračila?",
-      answer: "14-dnevni rok za vračilo neuporabljenih izdelkov v originalni embalaži. Kasnejših reklamacij ne upoštevamo."
+      question: home.HOME_Q15,
+      answer: home.HOME_A15
     }
   ]
 };
 
 // Contact section data
 const contactSection = {
-  title: "Vstopite v kontakt",
-  subtitle: "Imate vprašanje ali predlog za sodelovanje? Izpolnite spodnji obrazec in odgovorili vam bomo v najkrajšem možnem času.",
+  title: home.HOME_H2_6,
+  subtitle: home.HOME_CONTACT_SUBTITLE,
   formLabels: {
-    fullName: "Vaše polno ime",
-    fullNamePlaceholder: "npr.: Matej Kovac",
-    email: "Vaš email",
-    emailPlaceholder: "npr.: matej.kovac@gmail.com",
-    message: "Vaše sporočilo",
-    messagePlaceholder: "Tukaj vpišite sporočilo, v katerem na kratko opišite svoje predloge",
-    terms: "Strinjam se s pogoji uporabe",
-    submitButton: "Pošlji"
+    fullName: common.M_FULL_NAME,
+    fullNamePlaceholder: common.M_FULLNAME_PLACEHOLDER,
+    email: common.M_EMAIL,
+    emailPlaceholder: common.M_EMAIL_PLACEHOLDER,
+    message: common.M_MESSAGE,
+    messagePlaceholder: common.M_PARTNERSHIP_MESSAGE_PLACEHOLDER,
+    terms: common.M_TERMS_REQUIRED,
+    submitButton: common.M_SEND_BUTTON
   }
 };
 
 // Form alert messages for client-side script
 const formAlertMessages = {
-  invalidEmail: "Vnesite veljaven e-poštni naslov.",
-  termsNotAccepted: "Potrdite, da se strinjate s pogoji.",
-  submissionSuccess: "Vaše sporočilo je bilo uspešno poslano!",
-  submissionError: "Prišlo je do napake pri pošiljanju. Prosimo, poskusite znova."
+  invalidEmail: common.M_EMAIL_INVALID,
+  termsNotAccepted: common.M_TERMS_REQUIRED,
+  submissionSuccess: common.M_CONFIRMATION_TEXT,
+  submissionError: common.M_FORM_ERROR
 };
 
 // --- Schema Definition ---
@@ -244,33 +257,33 @@ const formattedTime = currentDate.toTimeString().split(' ')[0];
 const webpageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  "name": "EUSIGNAL - Premium varnostni znaki",
+  "name": home.HOME_H1,
   "url": Astro.url.href,
-  "description": "EU Signal - Slovenski proizvajalec premium varnostnih znakov in opozorilnih sistemov triopan za promet, gradbeništvo, nujne službe in dogodke po vsej Evropi.",
-  "inLanguage": "sl-SI",
+  "description": home.HOME_META_SEO,
+  "inLanguage": home.PAGE_LOCALE,
   "breadcrumb": {
     "@type": "BreadcrumbList",
     "itemListElement": [
       {
         "@type": "ListItem",
         "position": 1,
-        "name": "EUSIGNAL",
+        "name": home.M_HOME_NAME,
         "item": Astro.url.href
       }
     ]
   },
   "mainEntity": {
     "@type": "Article",
-    "headline": heroData.title,
-    "description": heroData.subtitle,
-    "image": marqueeItems[0].image,
+    "headline": home.HOME_H1,
+    "description": home.HOME_META_SEO,
+    "image": getAbsoluteUrl(home.HOME_OG_IMAGE_PATH),
     "author": {
       "@type": "Organization",
-      "name": "EUSIGNAL"
+      "name": www.PAGE_ORGANISATION_FULL_NAME
     },
-    "datePublished": `${formattedDate}+${formattedTime}+02:00`,
-    "dateModified": `${formattedDate}+${formattedTime}+02:00`,
-    "inLanguage": "sl-SI"
+    "datePublished": `${home.DATE_PUBLISHED}T${home.HOUR_PUBLISHED}+02:00`,
+    "dateModified": `${home.DATE_UPDATED}T${home.HOUR_UPDATED}+02:00`,
+    "inLanguage": home.PAGE_LOCALE
   }
 };
 
@@ -278,150 +291,92 @@ const webpageSchema = {
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": heroData.ctaText,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": heroData.subtitle
-      }
-    },
-    {
-      "@type": "Question",
-      "name": heroData.title,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": heroData.subtitle
-      }
-    },
-    {
-      "@type": "Question",
-      "name": heroData.socialProof.text,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": heroData.subtitle
-      }
-    },
-    {
-      "@type": "Question",
-      "name": featuresSection.title,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": featuresSection.items.map(item => `${item.title}: ${item.description}`).join(' ')
-      }
-    },
-    {
-      "@type": "Question",
-      "name": institutionsSection.title,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": institutionsSection.items.join(', ')
-      }
-    },
-    {
-      "@type": "Question",
-      "name": faqSection.title,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": faqSection.items.map(item => `${item.question}: ${item.answer}`).join(' ')
-      }
-    },
-    {
-      "@type": "Question",
-      "name": contactSection.title,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": contactSection.subtitle
-      }
-    },
-    ...faqSection.items.map(item => ({
-      "@type": "Question",
-      "name": item.question,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": item.answer
-      }
-    }))
-  ]
+  "mainEntity": faqSection.items.map(item => ({
+    "@type": "Question",
+    "name": item.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": item.answer
+    }
+  }))
 };
 
-// Organization Schema
+// Organization Schema with dynamic links
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "EUSIGNAL",
-  "url": "https://eusignal.com",
-  "foundingDate": "2020",
-  "logo": "/images/logo.png",
+  "name": www.PAGE_ORGANISATION_FULL_NAME,
+  "url": getAbsoluteUrl('/'),
+  "foundingDate": www.PAGE_FOUNDING_DATE,
+  "logo": getAbsoluteUrl(www.PAGE_LOGO_IMAGE_PATH_1),
   "keywords": [
-    "EUSIGNAL",
-    "Premium varnostni znaki",
-    "Slovenija"
+    www.PAGE_ORGANISATION_FULL_NAME,
+    home.HOME_KEYWORD_1,
+    www.M_COUNTRY_NATIVE
   ],
-  "description": "EUSIGNAL is a provider of Premium varnostni znaki (premium safety signs) in Slovenija (Slovenia), established in 2020.",
+  "description": www.PAGE_DESCRIPTION,
   "numberOfEmployees": {
     "@type": "QuantitativeValue",
     "minValue": "1",
     "maxValue": "9"
   },
-  "slogan": "Premium varnostni znaki in opozorilni sistemi",
+  "slogan": www.PAGE_SLOGAN,
   "contactPoint": {
     "@type": "ContactPoint",
-    "email": "info@eusignal.com",
-    "contactType": "customer service"
+    "email": www.PAGE_INFO_EMAIL,
+    "contactType": common.M_CUSTOMER_SUPPORT
   },
   "sameAs": [
-    "https://www.instagram.com/eusignal",
-    "https://www.facebook.com/eusignal",
-    "https://twitter.com/eusignal",
-    "https://www.linkedin.com/company/eusignal",
-    "https://www.tiktok.com/@eusignal",
-    "https://www.youtube.com/@eusignal",
-    "https://www.pinterest.com/eusignal"
+    www.PAGE_INSTAGRAM_URL,
+    www.PAGE_FACEBOOK_URL,
+    www.PAGE_TWITTER_URL,
+    www.PAGE_LINKEDIN_URL,
+    www.PAGE_YOUTUBE_URL,
+    www.PAGE_PINTEREST_URL,
+    www.PAGE_BLUESKY_URL
   ],
   "areaServed": {
     "@type": "Country",
-    "name": "Slovenia",
-    "identifier": "SI"
+    "name": www.M_COUNTRY,
+    "identifier": www.M_COUNTRY_CODE
   },
   "potentialAction": [
     {
       "@type": "ViewAction",
-      "name": "View our Sitemap",
-      "target": "https://eusignal.com/sitemap.xml"
+      "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
+      "target": getAbsoluteUrl('/sitemap.xml')
     },
     {
       "@type": "ViewAction",
-      "name": "View our Slovenian Sitemap (sl-SI)",
-      "target": "https://eusignal.com/sitemap-sl-SI.xml"
+      "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
+      "target": getAbsoluteUrl('/sitemap-sl-SI.xml')
     },
     {
       "@type": "ViewAction",
-      "name": "Information for Large Language Models",
-      "target": "https://eusignal.com/llms.txt",
-      "description": "Provides a condensed overview and key information about EUSIGNAL for AI agents and crawlers."
+      "name": www.PAGE_LLM_INSTRUCTIONS,
+      "target": getAbsoluteUrl('/llms.txt'),
+      "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
     }
   ],
   "mainEntityOfPage": [
     {
       "@type": "WebPage",
-      "@id": "https://eusignal.com/sitemap.xml",
-      "name": "XML Sitemap for EUSIGNAL",
-      "description": "Provides a structured list of pages available on https://eusignal.com for crawlers."
+      "@id": getAbsoluteUrl('/sitemap.xml'),
+      "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
+      "description": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS_DESCRIPTION
     },
     {
       "@type": "WebPage",
-      "@id": "https://eusignal.com/sitemap-sl-SI.xml",
-      "name": "XML Sitemap (sl-SI) for EUSIGNAL",
-      "description": "Provides a structured list of Slovenian (sl-SI) pages available on https://eusignal.com for crawlers."
+      "@id": getAbsoluteUrl('/sitemap-sl-SI.xml'),
+      "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
+      "description": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS_DESCRIPTION
     },
     {
       "@type": "WebPage",
-      "@id": "https://eusignal.com/llms.txt",
-      "name": "LLM Guidance for EUSIGNAL",
-        "description": "A text resource outlining key information about EUSIGNAL (https://eusignal.com) offerings in EUSIGNAL for AI agents and crawlers. For more detailed information, please refer to the main website content and sitemap."
-      }
+      "@id": getAbsoluteUrl('/llms.txt'),
+      "name": www.PAGE_LLM_INSTRUCTIONS,
+      "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
+    }
   ]
 };
 
@@ -430,8 +385,8 @@ const schema = [webpageSchema, faqSchema, organizationSchema];
 ---
 
 <HomepageLayout 
-  title="Premium varnostni znaki in opozorilni sistemi"
-  description="EU Signal - Slovenski proizvajalec premium varnostnih znakov in opozorilnih sistemov triopan za promet, gradbeništvo, nujne službe in dogodke po vsej Evropi."
+  title={home.HOME_H1}
+  description={home.HOME_META_SEO}
   heroData={heroData}
   marqueeItems={marqueeItems}
   bestsellersSection={bestsellersSection}

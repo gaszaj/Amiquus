@@ -1,4 +1,4 @@
-# Data Structure Documentation for author.astro
+# Data Structure Documentation for author.astro and index.astro
 
 ## Overview
 The `author.astro` file is structured to handle three main data sources:
@@ -155,3 +155,140 @@ socialLinks: {
    - Include required fields
    - Format dates correctly
    - Provide complete metadata
+
+
+### 1. home.json
+Contains homepage-specific information including:
+- Hero section content
+- Bestsellers data
+- Features and benefits
+- FAQ content
+- Institution references
+- Contact form text
+- SEO metadata
+
+Key fields used in schema:
+```json
+{
+  "HOME_H1": "Široka ponudba opozorilnih piramidnih znakov",
+  "HOME_META_SEO": "EUSIGNAL - Vodilni proizvajalec opozorilnih piramidnih znakov v EU. 185+ profesionalnih znakov za gradbišča, dogodke in cestna dela.",
+  "HOME_HERO_BUTTON": "Oddajte naročilo",
+  "HOME_SUBTITLE": "Prometni troznak ali zložljivi trinožec ali prometna zložljiva piramida je znak za obveščanje udeležencev v cestnem prometu."
+}
+```
+
+### 2. common.json
+Provides UI strings and labels for:
+- Form labels and placeholders
+- Alert messages
+- Common UI elements
+- Contact form text
+
+### 3. www.json
+Contains website-wide configuration:
+- Organization details
+- Social media links
+- Contact information
+- Brand assets
+- Analytics IDs
+
+## Schema Implementation
+
+### Schema Structure
+The file implements three main schemas:
+
+1. **WebPage Schema**
+   - Uses home data for content
+   - Implements breadcrumb navigation
+   - Includes article metadata
+
+2. **FAQ Schema**
+   - Dynamic FAQ content from home.json
+   - Structured questions and answers
+   - Schema.org compliant format
+
+3. **Organization Schema**
+   - Company information
+   - Contact details
+   - Social media presence
+   - Sitemap and LLM instructions
+   - Brand assets
+
+### Data Integration
+
+#### URL Handling
+```typescript
+const getAbsoluteUrl = (path) => {
+  return new URL(path, Astro.url.origin).toString();
+};
+```
+
+#### Section Data Structure
+Content is organized into clear sections:
+```typescript
+const heroData = {
+  title: home.HOME_H1,
+  subtitle: home.HOME_SUBTITLE,
+  ctaText: home.HOME_HERO_BUTTON,
+  // ... other hero properties
+};
+
+const bestsellersSection = {
+  title: home.HOME_H2_1,
+  productCtaText: home.HOME_HERO_BUTTON,
+  products: [
+    {
+      title: home.HOME_BESTSELLER_NAME_1,
+      image: home.HOME_BESTSELLER_IMAGE_PATH_1,
+      url: home.HOME_BESTSELLER_PATH_1
+    },
+    // ... other products
+  ]
+};
+```
+
+## Data Flow
+
+1. **Initialization**
+   - Import JSON data files
+   - Create helper functions
+   - Initialize section data structures
+
+2. **Data Processing**
+   - Format URLs using `getAbsoluteUrl`
+   - Structure section data
+   - Prepare schema data
+
+3. **Schema Generation**
+   - Combine data from all sources
+   - Format dates and times
+   - Generate absolute URLs
+   - Create structured schema objects
+
+4. **Layout Integration**
+   - Pass processed data to `HomepageLayout`
+   - Include schema data
+   - Provide section-specific content
+
+## Best Practices
+
+1. **Content Organization**
+   - Separate content into logical sections
+   - Use clear naming conventions
+   - Maintain consistent data structure
+
+2. **URL Management**
+   - Use absolute URLs for external links
+   - Generate dynamic URLs for internal links
+   - Maintain consistent URL structure
+
+3. **Schema Compliance**
+   - Follow Schema.org guidelines
+   - Include required fields
+   - Format dates correctly
+   - Provide complete metadata
+
+4. **Data Reusability**
+   - Centralize common strings in JSON files
+   - Use consistent key naming
+   - Maintain single source of truth for content
