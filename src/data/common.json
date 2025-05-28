@@ -125,6 +125,25 @@
         "AUTHOR_YOUTUBE_LABEL": "YouTube",
         "AUTHOR_PINTEREST_LABEL": "Pinterest",
         "AUTHOR_TIKTOK_LABEL": "TikTok",
-        "AUTHOR_LANGUAGE_LABEL": "Jezik"
-    }
+        "AUTHOR_LANGUAGE_LABEL": "Jezik",
+        "ARTICLE_RELATED_ARTICLES": "Povezani članki",
+        "ARTICLE_PREPARED_BY": "Članek je pripravil",
+        "ARTICLE_READ_MORE": "Preberite več",
+        "ARTICLE_DISCLAIMER": "Vsebina tega članka je zgolj informativne narave in ne predstavlja uradnih navodil. Za točne podatke o varnostnih zahtevah se posvetujte s pristojnimi institucijami.",
+        "ARTICLE_AUTHOR_LABEL": "Članek je pripravil:",
+        "ARTICLE_PUBLISHED_LABEL": "Objavljeno:",
+        "ARTICLE_UPDATED_LABEL": "Posodobljeno:",
+        "ARTICLE_TOC_TITLE": "Na tej strani",
+        "ARTICLE_EDITORIAL_POLICY_TITLE": "Uredniška politika",
+        "ARTICLE_EDITORIAL_POLICY_DESC": "Naši članki so skrbno pripravljeni in preverjeni s strani strokovnjakov. Preberite našo uredniško politiko za več informacij o našem procesu.",
+        "ARTICLE_EDITORIAL_POLICY_CTA": "Preberite več →",
+        "ARTICLE_HELP_BOX_TITLE": "Potrebujete pomoč?",
+        "ARTICLE_HELP_BOX_DESC": "Kontaktirajte naše strokovno osebje, ki vam bo pomagalo pri ustreznem zavarovanju območja.",
+        "ARTICLE_HELP_BOX_CTA": "Vprašajte nas",
+        "ARTICLE_PRODUCT_BUTTON": "Naroči znak",
+        "ARTICLE_TABLE_LINK": "Več informacij →",
+        "ARTICLE_TABLE_HEADER_IMAGE": "Slika",
+        "ARTICLE_TABLE_HEADER_NAME": "Ime znaka",
+        "ARTICLE_TABLE_HEADER_LINK": "Povezava"
+      }
 ]

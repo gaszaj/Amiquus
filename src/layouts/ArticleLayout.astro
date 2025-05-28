@@ -48,6 +48,28 @@ export interface HelpBoxContent {
   ctaLink: string;
 }
 
+export interface BasicSign {
+  name: string;
+  image: string;
+  url: string;
+}
+
+export interface AdditionalSign {
+  image: string;
+  name: string;
+  url: string;
+}
+
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+export interface FaqSection {
+  title: string;
+  items: FaqItem[];
+}
+
 // --- Main Props Interface ---
 export interface Props {
   // Base Layout Props
@@ -79,6 +101,62 @@ export interface Props {
   relatedArticlesContent: RelatedArticlesContent;
   helpBoxContent: HelpBoxContent;
   schema: object | null;
+
+  // Content sections
+  basicSigns: BasicSign[];
+  additionalSigns: AdditionalSign[];
+  faqSection: FaqSection;
+  productButtonText: string;
+  tableLinkText: string;
+  fearBannerText: string;
+  helpfulBannerText: string;
+
+  // Content sections
+  mainContent: {
+    h1: {
+      id: string;
+      text: string;
+      content: string;
+    };
+    h2_1: {
+      id: string;
+      text: string;
+      content: string;
+      conclusion: string;
+    };
+    h2_2: {
+      id: string;
+      text: string;
+      content: string;
+    };
+    h2_3: {
+      id: string;
+      text: string;
+      content: string;
+      conclusion: string;
+    };
+    h2_4: {
+      id: string;
+      text: string;
+      content: string;
+    };
+    h2_6: {
+      id: string;
+      text: string;
+      content: string;
+    };
+  };
+
+  // Table headers
+  tableHeaders: {
+    image: string;
+    name: string;
+    link: string;
+  };
+
+  // Additional content
+  warningTrianglesText: string;
+  checkOfferText: string;
 }
 
 const {
@@ -100,7 +178,18 @@ const {
   disclaimerContent,
   relatedArticlesContent,
   helpBoxContent,
-  schema
+  schema,
+  basicSigns,
+  additionalSigns,
+  faqSection,
+  productButtonText,
+  tableLinkText,
+  fearBannerText,
+  helpfulBannerText,
+  mainContent,
+  tableHeaders,
+  warningTrianglesText,
+  checkOfferText
 } = Astro.props;
 
 // Generic Date Formatter
@@ -185,11 +274,135 @@ const tocHeadings = headings.filter(heading => heading.depth >= 2 && heading.dep
         </div>
       </aside>
 
-      <!-- Main Article Content -->
-      <div class="lg:w-3/5">
-        <div class="prose prose-lg max-w-none">
-          <slot />
+      <!-- In ArticleLayout.astro, inside the main content div -->
+<div class="lg:w-3/5">
+  <div class="prose prose-lg max-w-none">
+    <!-- Main article content -->
+    <h2 id={mainContent.h1.id}>{mainContent.h1.text}</h2>
+    <p>{mainContent.h1.content}</p>
+
+    <div class="fear-banner">
+      {fearBannerText}
+    </div>
+
+    <h3 id={mainContent.h2_1.id}>{mainContent.h2_1.text}</h3>
+    <p>{mainContent.h2_1.content}</p>
+
+    <div class="basic-signs-grid">
+      {basicSigns.map(sign => (
+        <div class="product-card">
+          <img 
+            src={sign.image} 
+            alt={sign.name}
+            class="w-full h-48 object-contain p-4"
+          />
+          <div class="p-4 text-center product-card-content">
+            <h4 class="font-medium text-signal-dark mb-4 product-title">{sign.name}</h4>
+            <a 
+              href={sign.url}
+              class="block w-full bg-black text-signal-green border border-signal-green font-medium py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center"
+            >
+              {productButtonText}
+            </a>
+          </div>
         </div>
+      ))}
+    </div>
+
+    <p>{mainContent.h2_1.conclusion}</p>
+
+    <h2 id={mainContent.h2_2.id}>{mainContent.h2_2.text}</h2>
+    <p>{mainContent.h2_2.content}</p>
+
+    <h3 id={mainContent.h2_3.id}>{mainContent.h2_3.text}</h3>
+
+    <div class="overflow-x-auto my-8">
+      <table class="w-full bg-white rounded-lg shadow-sm">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="p-4 text-left">{tableHeaders.image}</th>
+            <th class="p-4 text-left">{tableHeaders.name}</th>
+            <th class="p-4 text-left">{tableHeaders.link}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {additionalSigns.map((sign, index) => (
+            <tr class={index % 2 === 0 ? 'bg-gray-50' : ''}>
+              <td class="p-4">
+                <img 
+                  src={sign.image} 
+                  alt={sign.name}
+                  class="w-20 h-20 object-contain"
+                />
+              </td>
+              <td class="p-4 font-medium text-signal-dark">{sign.name}</td>
+              <td class="p-4">
+                <a 
+                  href={sign.url}
+                  class="text-black underline decoration-signal-green hover:text-signal-green hover:decoration-black transition-colors"
+                >
+                  {tableLinkText}
+                </a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <p>{mainContent.h2_3.conclusion}</p>
+
+    <p>{warningTrianglesText}</p>
+
+    <h2 id={mainContent.h2_4.id}>{mainContent.h2_4.text}</h2>
+    <p>{mainContent.h2_4.content}</p>
+
+    <div class="helpful-banner">
+      {helpfulBannerText}
+    </div>
+
+    <section class="faq-section" aria-labelledby="faq-heading">
+      <h2 id="faq-heading" class="faq-title">{faqSection.title}</h2>
+      <dl class="faq-list">
+        {faqSection.items.map(item => (
+          <div class="faq-item">
+            <dt class="faq-question">
+              <h3>{item.question}</h3>
+            </dt>
+            <dd class="faq-answer">
+              <p>{item.answer}</p>
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    <h3 id={mainContent.h2_6.id}>{mainContent.h2_6.text}</h3>
+    <p>{checkOfferText}</p>
+    
+    <div class="basic-signs-grid">
+      {[...basicSigns, ...additionalSigns.slice(0, 3)].map(sign => (
+        <div class="product-card">
+          <img 
+            src={sign.image} 
+            alt={sign.name}
+            class="w-full h-48 object-contain p-4"
+            width={225}
+            height={225}
+          />
+          <div class="p-4 text-center product-card-content">
+            <h4 class="font-medium text-signal-dark mb-4 product-title">{sign.name}</h4>
+            <a 
+              href={sign.url}
+              class="block w-full bg-black text-signal-green border border-signal-green font-medium py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center"
+            >
+              {productButtonText}
+            </a>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
 
         <!-- Editorial Policy Section -->
         <div class="bg-black text-white rounded-xl p-8 my-12">
