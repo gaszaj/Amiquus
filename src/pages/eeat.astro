@@ -1,14 +1,29 @@
 ---
 import EEATLayout from '../layouts/EEATLayout.astro';
+import eeatData from '../data/eeat.json';
+import wwwData from '../data/www.json';
+import commonData from '../data/common.json';
 
-// Define content for the page, including labels previously in the layout
-const pageTitle = "Understanding Triopan Warning System Technology";
-const pageDescription = "A comprehensive exploration of triopan warning system technology, design principles, and application scenarios across various safety contexts.";
-const articlePublishDate = "2025-03-10";
-const articleUpdateDate = "2025-03-15";
-const publishedTextLabel = "Objavljeno:";
-const updatedTextLabel = "Posodobljeno:";
-const articleDateLocale = "sl-SI"; // Moved from layout's formatDate function
+// Get the third object from eeatData and first from others
+const eeat = eeatData[3];
+const www = wwwData[0];
+const common = commonData[0];
+
+// Helper function for absolute URLs
+const getAbsoluteUrl = (path: string) => {
+  return new URL(path, Astro.url.origin).toString();
+};
+
+// Define content for the page
+const pageTitle = eeat.EEAT_H1;
+const pageDescription = eeat.EEAT_META_SEO;
+const pageContent = eeat.EEAT_CONTENT;
+const pageogImage = eeat.EEAT_OG_IMAGE_PATH;
+const articlePublishDate = eeat.DATE_PUBLISHED;
+const articleUpdateDate = eeat.DATE_UPDATED;
+const publishedTextLabel = common.M_PUBLISHED;
+const updatedTextLabel = common.M_UPDATED;
+const articleDateLocale = eeat.PAGE_LOCALE;
 
 // --- Schema Definition ---
 const currentDate = new Date();
@@ -19,39 +34,39 @@ const formattedTime = currentDate.toTimeString().split(' ')[0];
 const webpageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  "name": pageTitle,
+  "name": eeat.EEAT_H1,
   "url": Astro.url.href,
-  "description": pageDescription,
-  "inLanguage": articleDateLocale,
+  "description": eeat.EEAT_META_SEO,
+  "inLanguage": eeat.PAGE_LOCALE,
   "breadcrumb": {
     "@type": "BreadcrumbList",
     "itemListElement": [
       {
         "@type": "ListItem",
         "position": 1,
-        "name": "EUSIGNAL",
+        "name": common.M_HOME_NAME,
         "item": "/"
       },
       {
         "@type": "ListItem",
         "position": 2,
-        "name": pageTitle,
+        "name": eeat.EEAT_H1,
         "item": Astro.url.href
       }
     ]
   },
   "mainEntity": {
     "@type": "Article",
-    "headline": pageTitle,
-    "description": pageDescription,
-    "image": "/images/og-image.jpg",
+    "headline": eeat.EEAT_H1,
+    "description": eeat.EEAT_META_SEO,
+    "image": getAbsoluteUrl(eeat.EEAT_OG_IMAGE_PATH),
     "author": {
       "@type": "Organization",
-      "name": "EUSIGNAL"
+      "name": www.PAGE_ORGANISATION_FULL_NAME
     },
-    "datePublished": `${formattedDate}+${formattedTime}+02:00`,
-    "dateModified": `${formattedDate}+${formattedTime}+02:00`,
-    "inLanguage": articleDateLocale
+    "datePublished": `${eeat.DATE_PUBLISHED}T${eeat.HOUR_PUBLISHED}+02:00`,
+    "dateModified": `${eeat.DATE_UPDATED}T${eeat.HOUR_UPDATED}+02:00`,
+    "inLanguage": eeat.PAGE_LOCALE
   }
 };
 
@@ -59,78 +74,83 @@ const webpageSchema = {
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "EUSIGNAL",
-  "url": "https://eusignal.com",
-  "foundingDate": "2020",
-  "logo": "/images/logo.png",
+  "name": www.PAGE_ORGANISATION_FULL_NAME,
+  "url": getAbsoluteUrl('/'),
+  "foundingDate": www.PAGE_FOUNDING_DATE,
+  "logo": getAbsoluteUrl(www.PAGE_LOGO_IMAGE_PATH_1),
   "keywords": [
-    "EUSIGNAL",
-    "Premium varnostni znaki",
-    "Slovenija"
+    www.PAGE_ORGANISATION_FULL_NAME,
+    www.M_COUNTRY_NATIVE,
+    www.PAGE_KEYWORD_1,
+    www.PAGE_KEYWORD_2,
+    www.PAGE_KEYWORD_3,
+    www.PAGE_KEYWORD_4,
+    www.PAGE_KEYWORD_5,
+    www.PAGE_KEYWORD_6
   ],
-  "description": "EUSIGNAL is a provider of Premium varnostni znaki (premium safety signs) in Slovenija (Slovenia), established in 2020.",
+  "description": www.PAGE_DESCRIPTION,
   "numberOfEmployees": {
     "@type": "QuantitativeValue",
     "minValue": "1",
     "maxValue": "9"
   },
-  "slogan": "Premium varnostni znaki in opozorilni sistemi",
+  "slogan": www.PAGE_SLOGAN,
   "contactPoint": {
     "@type": "ContactPoint",
-    "email": "info@eusignal.com",
-    "contactType": "customer service"
+    "email": www.PAGE_INFO_EMAIL,
+    "contactType": common.M_CUSTOMER_SUPPORT
   },
   "sameAs": [
-    "https://www.instagram.com/eusignal",
-    "https://www.facebook.com/eusignal",
-    "https://twitter.com/eusignal",
-    "https://www.linkedin.com/company/eusignal",
-    "https://www.tiktok.com/@eusignal",
-    "https://www.youtube.com/@eusignal",
-    "https://www.pinterest.com/eusignal"
+    www.PAGE_INSTAGRAM_URL,
+    www.PAGE_FACEBOOK_URL,
+    www.PAGE_TWITTER_URL,
+    www.PAGE_LINKEDIN_URL,
+    www.PAGE_YOUTUBE_URL,
+    www.PAGE_PINTEREST_URL,
+    www.PAGE_BLUESKY_URL
   ],
   "areaServed": {
     "@type": "Country",
-    "name": "Slovenia",
-    "identifier": "SI"
+    "name": www.M_COUNTRY,
+    "identifier": www.M_COUNTRY_CODE
   },
   "potentialAction": [
     {
       "@type": "ViewAction",
-      "name": "View our Sitemap",
-      "target": "https://eusignal.com/sitemap.xml"
+      "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
+      "target": getAbsoluteUrl('/sitemap.xml')
     },
     {
       "@type": "ViewAction",
-      "name": "View our Slovenian Sitemap (sl-SI)",
-      "target": "https://eusignal.com/sitemap-sl-SI.xml"
+      "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
+      "target": getAbsoluteUrl('/sitemap-sl-SI.xml')
     },
     {
       "@type": "ViewAction",
-      "name": "Information for Large Language Models",
-      "target": "https://eusignal.com/llms.txt",
-      "description": "Provides a condensed overview and key information about EUSIGNAL for AI agents and crawlers."
+      "name": www.PAGE_LLM_INSTRUCTIONS,
+      "target": getAbsoluteUrl('/llms.txt'),
+      "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
     }
   ],
   "mainEntityOfPage": [
     {
       "@type": "WebPage",
-      "@id": "https://eusignal.com/sitemap.xml",
-      "name": "XML Sitemap for EUSIGNAL",
-      "description": "Provides a structured list of pages available on https://eusignal.com for crawlers."
+      "@id": getAbsoluteUrl('/sitemap.xml'),
+      "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
+      "description": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS_DESCRIPTION
     },
     {
       "@type": "WebPage",
-      "@id": "https://eusignal.com/sitemap-sl-SI.xml",
-      "name": "XML Sitemap (sl-SI) for EUSIGNAL",
-      "description": "Provides a structured list of Slovenian (sl-SI) pages available on https://eusignal.com for crawlers."
+      "@id": getAbsoluteUrl('/sitemap-sl-SI.xml'),
+      "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
+      "description": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS_DESCRIPTION
     },
     {
       "@type": "WebPage",
-      "@id": "https://eusignal.com/llms.txt",
-      "name": "LLM Guidance for EUSIGNAL",
-        "description": "A text resource outlining key information about EUSIGNAL (https://eusignal.com) offerings in EUSIGNAL for AI agents and crawlers. For more detailed information, please refer to the main website content and sitemap."
-      }
+      "@id": getAbsoluteUrl('/llms.txt'),
+      "name": www.PAGE_LLM_INSTRUCTIONS,
+      "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
+    }
   ]
 };
 
@@ -141,6 +161,7 @@ const schema = [webpageSchema, organizationSchema];
 <EEATLayout 
   title={pageTitle}
   description={pageDescription}
+  ogImage={pageogImage}
   publishDate={articlePublishDate}
   updateDate={articleUpdateDate}
   publishedLabel={publishedTextLabel}
@@ -148,71 +169,5 @@ const schema = [webpageSchema, organizationSchema];
   dateLocale={articleDateLocale}
   schema={schema}
 >
-  <!-- The actual article content goes here, into the slot -->
-  <p class="lead text-xl text-signal-gray mb-8">
-    Triopan warning systems represent a significant advancement in portable safety signage, offering superior visibility, stability, and ease of deployment compared to traditional warning signs. This guide explores the technology behind these systems and their various applications across safety contexts.
-  </p>
-
-  <div class="space-y-6">
-    <p>
-      At the core of triopan warning system effectiveness is their unique triangular pyramid design, which provides multiple planes of visibility from different angles while maintaining structural stability in adverse weather conditions. This design, perfected through decades of engineering refinement, has become the gold standard for portable warning signage across Europe.
-    </p>
-
-    <p>
-      The construction of premium triopan systems typically involves a lightweight yet durable aluminum frame that provides the structural foundation. This frame supports high-visibility fabric panels made from specialized UV-resistant canvas materials. These materials are specifically engineered to maintain color brightness and reflectivity over extended periods, even when exposed to harsh environmental conditions including ultraviolet radiation, moisture, and temperature extremes.
-    </p>
-
-    <p>
-      Modern triopan warning systems incorporate advanced reflective technologies that significantly enhance visibility in low-light conditions. These retroreflective materials contain thousands of microscopic glass beads or prismatic reflectors that return light directly to its source, making them exceptionally visible to vehicle headlights at night. Premium systems offer reflectivity ratings exceeding 300 candelas per lux per square meter (cd/lx/m²), ensuring visibility at distances over 300 meters even in challenging conditions.
-    </p>
-
-    <p>
-      The effectiveness of triopan warning systems is further enhanced by their aerodynamic properties. The triangular pyramid shape presents a reduced surface area to wind compared to flat signs, allowing them to withstand wind speeds up to 70 km/h without toppling. This stability is crucial in highway environments where passing vehicles create significant air turbulence.
-    </p>
-
-    <p>
-      Deployment mechanisms have been continuously refined to enable quick setup, typically requiring only 1-2 minutes without special tools. This rapid deployment capability is essential in emergency scenarios where warning systems must be established quickly to prevent accidents. The same mechanisms allow for compact folding, with premium systems reducing to less than 10% of their deployed size for easy transport and storage.
-    </p>
-
-    <p>
-      Advanced triopan systems may incorporate supplementary technologies including LED lighting systems for enhanced visibility, electronic displays for changeable messaging, and even connectivity features that allow remote monitoring or control in sophisticated traffic management systems.
-    </p>
-
-    <p>
-      The versatility of triopan warning systems makes them ideal for numerous applications across various sectors:
-    </p>
-
-    <ul class="list-disc pl-6 space-y-2 my-4">
-      <li>
-        <strong>Road Safety:</strong> Warning of accidents, obstacles, or road work ahead, providing critical reaction time for approaching drivers
-      </li>
-      <li>
-        <strong>Construction Sites:</strong> Delineating hazardous areas and guiding safe traffic flow around work zones
-      </li>
-      <li>
-        <strong>Emergency Services:</strong> Securing accident scenes and creating safety perimeters during incident response
-      </li>
-      <li>
-        <strong>Event Management:</strong> Directing pedestrian and vehicular traffic during public gatherings, sporting events, or festivals
-      </li>
-      <li>
-        <strong>Utility Work:</strong> Marking underground maintenance activities or overhead line work
-      </li>
-      <li>
-        <strong>Railway Operations:</strong> Providing warning signals for track maintenance or at level crossings during system failures
-      </li>
-    </ul>
-
-    <p>
-      The effectiveness of triopan warning systems is recognized across European safety standards and regulations, with many jurisdictions specifically requiring their use in certain safety contexts. Their adoption continues to expand as organizations prioritize higher visibility safety solutions that can be rapidly deployed in emergency situations.
-    </p>
-
-    <p>
-      As technology continues to advance, triopan warning systems are likely to incorporate even more sophisticated features including smart connectivity, automated deployment mechanisms, and enhanced material science innovations that further improve visibility and durability. These advancements will ensure that triopan systems remain at the forefront of portable safety signage solutions for decades to come.
-    </p>
-
-    <p>
-      Regular maintenance and proper storage significantly extend the service life of triopan warning systems. Premium systems are designed for thousands of deployment cycles when properly maintained, representing an excellent long-term investment in safety infrastructure. This durability, combined with their effectiveness and versatility, explains why triopan warning systems have become the preferred choice for safety professionals across Europe.
-    </p>
-  </div>
+  <Fragment set:html={pageContent} />
 </EEATLayout>

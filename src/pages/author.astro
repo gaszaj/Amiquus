@@ -234,7 +234,50 @@ const organizationSchema = {
     "@type": "Country",
     "name": author.M_COUNTRY,
     "identifier": author.M_COUNTRY_CODE
-  }
+  },
+  "areaServed": {
+    "@type": "Country",
+    "name": www.M_COUNTRY,
+    "identifier": www.M_COUNTRY_CODE
+  },
+  "potentialAction": [
+    {
+      "@type": "ViewAction",
+      "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
+      "target": getAbsoluteUrl('/sitemap.xml')
+    },
+    {
+      "@type": "ViewAction",
+      "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
+      "target": getAbsoluteUrl('/sitemap-sl-SI.xml')
+    },
+    {
+      "@type": "ViewAction",
+      "name": www.PAGE_LLM_INSTRUCTIONS,
+      "target": getAbsoluteUrl('/llms.txt'),
+      "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
+    }
+  ],
+  "mainEntityOfPage": [
+    {
+      "@type": "WebPage",
+      "@id": getAbsoluteUrl('/sitemap.xml'),
+      "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
+      "description": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS_DESCRIPTION
+    },
+    {
+      "@type": "WebPage",
+      "@id": getAbsoluteUrl('/sitemap-sl-SI.xml'),
+      "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
+      "description": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS_DESCRIPTION
+    },
+    {
+      "@type": "WebPage",
+      "@id": getAbsoluteUrl('/llms.txt'),
+      "name": www.PAGE_LLM_INSTRUCTIONS,
+      "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
+    }
+  ]
 };
 
 // Combine all schemas

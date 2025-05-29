@@ -5,6 +5,7 @@ export interface Props {
   // Props for BaseLayout
   title: string;
   description?: string;
+  ogImage?: string;
   
   // Props for article metadata
   publishDate: string;
@@ -22,6 +23,7 @@ export interface Props {
 const { 
   title, 
   description, 
+  ogImage,
   publishDate, 
   updateDate,
   publishedLabel,
@@ -32,7 +34,7 @@ const {
 
 // Format dates - uses the passed locale
 const formatDate = (dateString: string, locale: string) => {
-  return new Date(dateString).toLocaleDateString(locale, { // Use the locale prop here
+  return new Date(dateString).toLocaleDateString(locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
@@ -40,7 +42,7 @@ const formatDate = (dateString: string, locale: string) => {
 };
 ---
 
-<BaseLayout title={title} description={description} schema={schema}>
+<BaseLayout title={title} description={description} ogImage={ogImage} schema={schema}>
   <!-- Dark Header Section -->
   <div class="bg-black text-white py-16">
     <div class="container mx-auto px-4">
@@ -70,43 +72,115 @@ const formatDate = (dateString: string, locale: string) => {
 </BaseLayout>
 
 <style>
+  /* Base prose container */
   .prose {
     max-width: 65ch;
     margin-left: auto;
     margin-right: auto;
   }
 
-  .prose h2 {
-    color: var(--signal-dark); /* Assuming --signal-dark is defined globally or in BaseLayout */
+  /* Headings */
+  .prose :global(h2) {
+    color: black;
+    font-size: 1.875rem;
+    font-weight: 700;
     margin-top: 2.5rem;
     margin-bottom: 1.5rem;
-    font-size: 1.875rem; /* Equivalent to text-3xl in Tailwind default */
-    font-weight: 700;
   }
   
-  .prose h3 {
-    color: var(--signal-dark); /* Assuming --signal-dark is defined globally or in BaseLayout */
+  .prose :global(h3) {
+    color: black;
     margin-top: 2rem;
     margin-bottom: 1rem;
-    font-size: 1.5rem; /* Equivalent to text-2xl */
+    font-size: 1.5rem;
     font-weight: 600;
   }
   
-  .prose p {
-    margin-bottom: 1.5rem;
+  /* Paragraphs */
+  .prose :global(p) {
+    color: #374151;
+    margin-bottom: 1.25rem;
     line-height: 1.75;
   }
   
-  .prose ul {
-    margin-bottom: 1.5rem;
-    padding-left: 1.25rem; /* Equivalent to pl-5 */
+  /* Links */
+  .prose :global(a) {
+    color: black;
+    text-decoration: underline;
+    text-decoration-color: #BCEF2F;
+    text-underline-offset: 2px;
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
   }
 
-  .prose li {
-    margin-bottom: 0.5rem;
+  .prose :global(a:hover) {
+    color: #BCEF2F;
+    text-decoration-color: black;
+  }
+  
+  /* Lists */
+  .prose :global(ul) {
+    list-style-type: none;
+    margin-left: 1.25rem;
+    margin-bottom: 1.25rem;
   }
 
-  /* Global animations - if not already defined in BaseLayout or a global CSS file */
+  .prose :global(li) {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.75;
+  }
+
+  .prose :global(li::before) {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.75rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #BCEF2F;
+    border: 2px solid black;
+  }
+
+  /* Underline */
+  .prose :global(u) {
+    text-decoration: none;
+    position: relative;
+  }
+
+  .prose :global(u::after) {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 2px;
+    background: repeating-linear-gradient(
+      45deg,
+      #BCEF2F,
+      #BCEF2F 2px,
+      transparent 2px,
+      transparent 4px
+    );
+  }
+
+  /* List items with links */
+  .prose :global(li a) {
+    display: inline-block;
+    margin-left: -0.25rem;
+  }
+
+  /* Spacing between sections */
+  .prose :global(h2 + p) {
+    margin-top: 1rem;
+  }
+
+  .prose :global(p + ul) {
+    margin-top: 0.5rem;
+  }
+
+  /* Animations */
   :global(.animate-fade-in) {
     animation: fadeIn 0.5s ease-in-out;
   }
