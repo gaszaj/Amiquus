@@ -19,6 +19,7 @@ const getAbsoluteUrl = (path) => {
 const articleMetadata = {
   title: article.ARTICLE_TITLE,
   description: article.ARTICLE_DESCRIPTION,
+  ogImage: article.ARTICLE_OG_IMAGE,
   publishDate: article.ARTICLE_PUBLISH_DATE,
   updateDate: article.ARTICLE_UPDATE_DATE,
   author: {
@@ -186,7 +187,7 @@ const articleSchema = {
     "@type": "Article",
     "headline": articleMetadata.title,
     "description": articleMetadata.description,
-    "image": getAbsoluteUrl(articleMetadata.author.image),
+    "image": getAbsoluteUrl(articleMetadata.ogImage),
     "author": {
       "@type": "Person",
       "name": articleMetadata.author.name,
@@ -223,8 +224,13 @@ const organizationSchema = {
   "logo": getAbsoluteUrl(www.PAGE_LOGO_IMAGE_PATH_1),
   "keywords": [
     www.PAGE_ORGANISATION_FULL_NAME,
-    article.ARTICLE_TITLE,
-    www.M_COUNTRY_NATIVE
+    www.M_COUNTRY_NATIVE,
+    www.PAGE_KEYWORD_1,
+    www.PAGE_KEYWORD_2,
+    www.PAGE_KEYWORD_3,
+    www.PAGE_KEYWORD_4,
+    www.PAGE_KEYWORD_5,
+    www.PAGE_KEYWORD_6
   ],
   "description": www.PAGE_DESCRIPTION,
   "numberOfEmployees": {

@@ -1,47 +1,61 @@
 ---
 import ProductLayout from '../../layouts/ProductLayout.astro';
 import type { RelatedProductInfo, FaqItemData, ProductLayoutStrings } from '../../layouts/ProductLayout.astro';
+import productData from '../../data/product.json';
+import wwwData from '../../data/www.json';
+import commonData from '../../data/common.json';
+
+// Get the first (and only) object from each JSON array
+const product = productData[0];
+const www = wwwData[0];
+const common = commonData[0];
+
+// Helper function for absolute URLs
+const getAbsoluteUrl = (path) => {
+  return new URL(path, Astro.url.origin).toString();
+};
 
 const productCoreData = {
-  title: "Opozorilna piramida DELO NA CESTI",
-  subtitle: "Za varnost vseh udeležencev v prometu je postavitev opozorilne piramide DELO NA CESTI ključen korak za zmanjšanje nevarnosti na cestah.",
-  description: "Opozorilna piramida DELO NA CESTI - ključna za varnost na gradbiščih in cestnih delih. Izdelana iz trpežnih materialov, visoka vidljivost, enostavna postavitev.",
-  price: "€149.99",
-  image: "/productimg/bigger-350/triopan-omejitev-hitrosti-30.webp",
+  title: product.PRODUCT_H1,
+  subtitle: product.PRODUCT_SUBTITLE,
+  description: product.PRODUCT_META_SEO,
+  price: product.M_PRODUCT_PRICE,
+  image: product.PRODUCT_IMAGE_PATH,
   specifications: {
-    dimensions: "100x100x100 cm (osnova), 90 cm višine",
-    material: "Aluminijev okvir z UV odpornim platnom",
-    weight: "3.2 kg",
-    visibility: "Do 300 metrov",
-    windResistance: "Do 70 km/h",
-    setupTime: "1-2 minuti"
+    dimensions: common.PRODUCT_SPECIFICATIONS_VALUE_1,
+    material: common.PRODUCT_SPECIFICATIONS_VALUE_2,
+    weight: common.PRODUCT_SPECIFICATIONS_VALUE_3,
+    visibility: common.PRODUCT_SPECIFICATIONS_VALUE_4,
+    windResistance: common.PRODUCT_SPECIFICATIONS_VALUE_5,
+    setupTime: common.PRODUCT_SPECIFICATIONS_VALUE_6
   },
-  category: "traffic-road-safety",
-  productId: "TP-100"
+  category: product.PRODUCT_CATEGORY_1_SLUG,
+  productId: product.PRODUCT_ID
 };
 
 const productFaqItems: FaqItemData[] = [
-  { question: "Kaj je opozorilna prometna piramida in zakaj se uporablja?", answer: "Opozorilna prometna piramida (znana tudi pod izrazom triopan) je prenosni varnostni znak trikotne oblike, ki se uporablja za hitro in učinkovito opozarjanje na nevarnosti ali posebne okoliščine na cesti ter v okolici." },
-  { question: "Koliko dni traja rok dobave?", answer: `Rok dobave opozorilne piramide ${productCoreData.title} je običajno med 3-14 delovnih dni.` },
-  { question: "Kakšne so možnosti plačila?", answer: "Za fizične uporabnike oziroma manjša naročila, omogočamo plačila preko Google Pay, Apple Pay, Visa, Mastercard. Za večja naročila opozorilnih varnostnih piramid in naročila na podjetje vas naprošamo, da izpolnite naročilnico." },
-  { question: `Kakšen je material in kako dolgo zdrži ${productCoreData.title}?`, answer: `Konstrukcija prometnega piramidnega znaka ${productCoreData.title} je iz trpežnih profilov iz aluminija. Preko profilov je napeto UV odporno platno, ki ima odlične odsevne značilnosti in je odporno na vse vremenske vplive.` },
-  { question: `Kakšne so dimenzije prometnega troznaka ${productCoreData.title}?`, answer: "Prometni znak je v obliki piramide, kar pomeni, da pri tleh meri v dimenzijah 100x100x100 cm. Višina je 90 cm." },
-  { question: `Ali je znak ${productCoreData.title} viden ponoči in v slabem vremenu?`, answer: "Prometni trikotnik je viden tudi ponoči in ima odlične odsevne lastnosti. Odsevno platno omogoča vidljivost tudi v dežju, megli in ob slabši vidljivosti." },
-  { question: `Kako hitro lahko znak ${productCoreData.title} postavim?`, answer: "Znak je izjemno lahko in hitro postavljiv. Postavitev običajno traja le kakšno minuto ali dve. Znak lahko po prenehanju uporabe enostavno sestavite ali ga premaknete na novo mesto." },
-  { question: `Ali je znak ${productCoreData.title} primeren za uporabo na prostem?`, answer: "UV platno in trpežni aluminijasti okvir so odporni na vse vremenske vplive: sneg, dež, sonce, meglo, veter (do 70 km/h), zato je znak idealen za uporabo na prostem." },
-  { question: "Ali lahko naročim več kosov z različnimi napisi?", answer: "Seveda. Za večja naročila vam svetujemo, da izpolnite naročilnico." },
-  { question: `Kakšna je stabilnost znaka ${productCoreData.title}?`, answer: `Zaradi značilne piramidne strukture in stabilnega podnožja je znak ${productCoreData.title} izjemno stabilen ne glede na teren na katerem je postavljen.` },
-  { question: "Ali lahko naročim znak po meri?", answer: "Za vsa naročila po meri, tiskanje vaših logotipov podjetja in drugih želj, nam prosim pišite na info@eusignal.com." },
-  { question: `Ali lahko znak ${productCoreData.title} uporabljam na javnih površinah?`, answer: "Da, znak lahko uporabljate na javnih površinah, a se pred tem posvetujte s pristojnimi organi, lokalno samoupravo ali lastniki zemljišč." },
-  { question: "Kakšni so pogoji vračila?", answer: "Vračila izdelkov so možna le v roku prvih 14 dni po nakupu. Kasnejših reklamacij NE upoštevamo." }
+  { question: product.PRODUCT_Q1, answer: product.PRODUCT_A1 },
+  { question: product.PRODUCT_Q2, answer: product.PRODUCT_A2 },
+  { question: product.PRODUCT_Q3, answer: product.PRODUCT_A3 },
+  { question: product.PRODUCT_Q4, answer: product.PRODUCT_A4 },
+  { question: product.PRODUCT_Q5, answer: product.PRODUCT_A5 },
+  { question: product.PRODUCT_Q6, answer: product.PRODUCT_A6 },
+  { question: product.PRODUCT_Q7, answer: product.PRODUCT_A7 },
+  { question: product.PRODUCT_Q8, answer: product.PRODUCT_A8 },
+  { question: product.PRODUCT_Q9, answer: product.PRODUCT_A9 },
+  { question: product.PRODUCT_Q10, answer: product.PRODUCT_A10 },
+  { question: product.PRODUCT_Q11, answer: product.PRODUCT_A11 },
+  { question: product.PRODUCT_Q12, answer: product.PRODUCT_A12 },
+  { question: product.PRODUCT_Q13, answer: product.PRODUCT_A13 }
 ];
 
 const allAvailableProducts: RelatedProductInfo[] = [
-  { id: "tp-001", title: "Opozorilna piramida ČIŠČENJE BAZENOV", image: "/productimg/bigger-350/triopan-čiščenje-bazenov.webp", category: "traffic-road-safety", url: "/si/opozorilna-piramida/ciscenje-bazenov" },
-  { id: "tp-002", title: "Opozorilna piramida OBVEZNA SMER LEVO", image: "/productimg/bigger-350/triopan-obvezna-smer-levo.webp", category: "traffic-road-safety", url: "/si/opozorilna-piramida/obvezna-smer-levo" },
-  { id: "tp-003", title: "Opozorilna piramida ZOŽENJE Z LEVE", image: "/productimg/bigger-350/triopan-zoženje-z-leve.webp", category: "construction-maintenance", url: "/si/opozorilna-piramida/zoženje-z-leve" },
-  { id: "tp-004", title: "Opozorilna piramida PREPOVED USTAVLJANJA", image: "/productimg/bigger-350/triopan-prepoved-ustavljanja.webp", category: "traffic-road-safety", url: "/si/opozorilna-piramida/prepoved-ustavljanja" },
-  { id: "tp-005", title: "Opozorilna piramida KOŠNJA TRAVE", image: "/productimg/bigger-350/triopan-košnja-trave.webp", category: "traffic-road-safety", url: "/si/opozorilna-piramida/kosnja-trave" }
+  { id: product.PRODUCT_RELATEDP1, title: "Opozorilna piramida ČIŠČENJE BAZENOV", image: "/productimg/bigger-350/triopan-čiščenje-bazenov.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/ciscenje-bazenov" },
+  { id: product.PRODUCT_RELATEDP2, title: "Opozorilna piramida OBVEZNA SMER LEVO", image: "/productimg/bigger-350/triopan-obvezna-smer-levo.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/obvezna-smer-levo" },
+  { id: product.PRODUCT_RELATEDP3, title: "Opozorilna piramida ZOŽENJE Z LEVE", image: "/productimg/bigger-350/triopan-zoženje-z-leve.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/zoženje-z-leve" },
+  { id: product.PRODUCT_RELATEDP4, title: "Opozorilna piramida PREPOVED USTAVLJANJA", image: "/productimg/bigger-350/triopan-prepoved-ustavljanja.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/prepoved-ustavljanja" },
+  { id: product.PRODUCT_RELATEDP5, title: "Opozorilna piramida KOŠNJA TRAVE", image: "/productimg/bigger-350/triopan-košnja-trave.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/kosnja-trave" },
+  { id: product.PRODUCT_RELATEDP6, title: "Opozorilna piramida KOLESARSKI IZPIT", image: "/productimg/bigger-350/triopan-kolesarski-izpit.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/kolesarski-izpit" }
 ];
 
 const filteredRelatedProducts = allAvailableProducts
@@ -56,116 +70,117 @@ const filteredRelatedProducts = allAvailableProducts
 const productQuantityOptions: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 30];
 
 const productPageLayoutStrings: ProductLayoutStrings = {
-  techSpecTitle: "Tehnične specifikacije",
-  techSpecDimensionsLabel: "Dimenzije",
-  techSpecMaterialLabel: "Material",
-  techSpecWeightLabel: "Teža",
-  techSpecVisibilityLabel: "Vidnost",
-  techSpecWindResistanceLabel: "Vetrovne razmere",
-  techSpecSetupTimeLabel: "Čas postavitve",
-  orderButtonText: "Izpolnite naročilnico",
-  orderFormTitle: "Naročilnica",
-  orderFormSubtitleBase: "Prosimo vnesite svoje osebne podatke ali podatke podjetja za oddajo naročila izdelka", // title prop will be interpolated here by ProductLayout
-  orderFormNameLabel: "Ime*",
-  orderFormNamePlaceholder: "Vnesite svoje ime",
-  orderFormSurnameLabel: "Priimek*",
-  orderFormSurnamePlaceholder: "Vnesite svoj priimek",
-  orderFormCompanyLabel: "Podjetje (ni obvezno)",
-  orderFormCompanyPlaceholder: "Vnesite ime podjetja",
-  orderFormVatIdLabel: "ID za DDV (izpolni samo podjetje)",
-  orderFormVatIdPlaceholder: "Vnesite ID za DDV",
-  orderFormStreetLabel: "Ulica*",
-  orderFormStreetPlaceholder: "Vnesite ime ulice",
-  orderFormCityLabel: "Kraj*",
-  orderFormCityPlaceholder: "Vnesite ime kraja",
-  orderFormZipLabel: "Poštna številka*",
-  orderFormZipPlaceholder: "Vnesite poštno številko",
-  orderFormEmailLabel: "Elektronski naslov*",
-  orderFormEmailPlaceholder: "Vnesite e-naslov",
-  orderFormPhoneLabel: "Telefonska številka*",
-  orderFormPhonePlaceholder: "Vnesite telefonsko številko",
-  orderFormQuantityLabel: "Količina*",
-  orderFormQuantityDefaultOption: "Izberite količino",
-  orderFormPaymentLabelBase: "Plačilo (",
-  orderFormPaymentCod: "Po povzetju",
-  orderFormPaymentPreInvoice: "Predračun",
-  orderFormMessageLabel: "Sporočilo",
-  orderFormMessagePlaceholder: "Vpišite dodatne informacije ali posebne zahteve",
-  orderFormTermsLabel: "Strinjam se s pogoji podjetja.*",
-  orderFormSubmitButtonText: "Oddajte naročilnico →",
-  faqSectionTitle: "Pogosta vprašanja (FAQ)",
-  faqBackButtonText: "Nazaj na naročilnico",
-  relatedProductsTitle: "Sorodni izdelki",
-  relatedProductViewButtonText: "Poglej izdelek",
-  customerSupportTitle: "Podpora",
-  customerSupportEmail: "info@eusignal.com",
+  techSpecTitle: common.PRODUCT_SPECIFICATIONS_TITLE,
+  techSpecDimensionsLabel: common.PRODUCT_SPECIFICATIONS_LABEL_1,
+  techSpecMaterialLabel: common.PRODUCT_SPECIFICATIONS_LABEL_2,
+  techSpecWeightLabel: common.PRODUCT_SPECIFICATIONS_LABEL_3,
+  techSpecVisibilityLabel: common.PRODUCT_SPECIFICATIONS_LABEL_4,
+  techSpecWindResistanceLabel: common.PRODUCT_SPECIFICATIONS_LABEL_5,
+  techSpecSetupTimeLabel: common.PRODUCT_SPECIFICATIONS_LABEL_6,
+  orderButtonText: common.PRODUCT_PAGE_ORDER_BUTTON_TEXT,
+  orderFormTitle: common.PRODUCT_INQUIRY_LABEL,
+  orderFormSubtitleBase: common.PRODUCT_PAGE_ORDER_FORM_SUBTITLE_BASE,
+  orderFormNameLabel: common.PRODUCT_PAGE_ORDER_FORM_NAME_LABEL,
+  orderFormNamePlaceholder: common.PRODUCT_PAGE_ORDER_FORM_NAME_PLACEHOLDER,
+  orderFormSurnameLabel: common.PRODUCT_PAGE_ORDER_FORM_SURNAME_LABEL,
+  orderFormSurnamePlaceholder: common.PRODUCT_PAGE_ORDER_FORM_SURNAME_PLACEHOLDER,
+  orderFormCompanyLabel: common.PRODUCT_PAGE_ORDER_FORM_COMPANY_LABEL,
+  orderFormCompanyPlaceholder: common.PRODUCT_PAGE_ORDER_FORM_COMPANY_PLACEHOLDER,
+  orderFormVatIdLabel: common.PRODUCT_PAGE_ORDER_FORM_VAT_ID_LABEL,
+  orderFormVatIdPlaceholder: common.PRODUCT_PAGE_ORDER_FORM_VAT_ID_PLACEHOLDER,
+  orderFormStreetLabel: common.PRODUCT_PAGE_ORDER_FORM_STREET_LABEL,
+  orderFormStreetPlaceholder: common.PRODUCT_PAGE_ORDER_FORM_STREET_PLACEHOLDER,
+  orderFormCityLabel: common.PRODUCT_PAGE_ORDER_FORM_CITY_LABEL,
+  orderFormCityPlaceholder: common.PRODUCT_PAGE_ORDER_FORM_CITY_PLACEHOLDER,
+  orderFormZipLabel: common.PRODUCT_PAGE_ORDER_FORM_ZIP_LABEL,
+  orderFormZipPlaceholder: common.PRODUCT_PAGE_ORDER_FORM_ZIP_PLACEHOLDER,
+  orderFormEmailLabel: common.PRODUCT_PAGE_ORDER_FORM_EMAIL_LABEL,
+  orderFormEmailPlaceholder: common.PRODUCT_PAGE_ORDER_FORM_EMAIL_PLACEHOLDER,
+  orderFormPhoneLabel: common.PRODUCT_PAGE_ORDER_FORM_PHONE_LABEL,
+  orderFormPhonePlaceholder: common.PRODUCT_PAGE_ORDER_FORM_PHONE_PLACEHOLDER,
+  orderFormQuantityLabel: common.PRODUCT_PAGE_ORDER_FORM_QUANTITY_LABEL,
+  orderFormQuantityDefaultOption: common.PRODUCT_PAGE_ORDER_FORM_QUANTITY_DEFAULT_OPTION,
+  orderFormPaymentLabelBase: common.PRODUCT_PAGE_ORDER_FORM_PAYMENT_LABEL_BASE,
+  orderFormPaymentCod: common.PRODUCT_PAGE_ORDER_FORM_PAYMENT_COD,
+  orderFormPaymentPreInvoice: common.PRODUCT_PAGE_ORDER_FORM_PAYMENT_PRE_INVOICE,
+  orderFormMessageLabel: common.PRODUCT_PAGE_ORDER_FORM_MESSAGE_LABEL,
+  orderFormMessagePlaceholder: common.PRODUCT_PAGE_ORDER_FORM_MESSAGE_PLACEHOLDER,
+  orderFormTermsLabel: common.PRODUCT_PAGE_ORDER_FORM_TERMS_LABEL,
+  orderFormSubmitButtonText: common.PRODUCT_PAGE_ORDER_FORM_SUBMIT_BUTTON_TEXT,
+  faqSectionTitle: common.PRODUCT_PAGE_FAQ_SECTION_TITLE,
+  faqBackButtonText: common.PRODUCT_PAGE_FAQ_BACK_BUTTON_TEXT,
+  relatedProductsTitle: common.PRODUCT_PAGE_RELATED_PRODUCTS_TITLE,
+  relatedProductViewButtonText: common.PRODUCT_PAGE_RELATED_PRODUCT_VIEW_BUTTON_TEXT,
+  customerSupportTitle: common.PRODUCT_PAGE_CUSTOMER_SUPPORT_SECTION_TITLE,
+  customerSupportEmail: www.PAGE_INFO_EMAIL,
   
-  validationNameRequired: "Prosimo, vnesite svoje ime.",
-  validationSurnameRequired: "Prosimo, vnesite svoj priimek.",
-  validationStreetRequired: "Prosimo, vnesite svojo ulico.",
-  validationCityRequired: "Prosimo, vnesite svoj kraj.",
-  validationZipRequired: "Prosimo, vnesite svojo poštno številko.",
-  validationEmailRequired: "Prosimo, vnesite svoj e-poštni naslov.",
-  validationEmailInvalid: "Prosimo, vnesite veljaven e-poštni naslov.",
-  validationPhoneRequired: "Prosimo, vnesite svojo telefonsko številko.",
-  validationQuantityRequired: "Prosimo, izberite količino.",
-  validationPaymentRequired: "Prosimo, izberite način plačila.",
-  validationTermsRequired: "Prosimo, strinjajte se s pogoji.",
+  validationNameRequired: common.PRODUCT_PAGE_VALIDATION_NAME_REQUIRED,
+  validationSurnameRequired: common.PRODUCT_PAGE_VALIDATION_SURNAME_REQUIRED,
+  validationStreetRequired: common.PRODUCT_PAGE_VALIDATION_STREET_REQUIRED,
+  validationCityRequired: common.PRODUCT_PAGE_VALIDATION_CITY_REQUIRED,
+  validationZipRequired: common.PRODUCT_PAGE_VALIDATION_ZIP_REQUIRED,
+  validationEmailRequired: common.PRODUCT_PAGE_VALIDATION_EMAIL_REQUIRED,
+  validationEmailInvalid: common.M_EMAIL_INVALID,
+  validationPhoneRequired: common.PRODUCT_PAGE_VALIDATION_PHONE_REQUIRED,
+  validationQuantityRequired: common.PRODUCT_PAGE_VALIDATION_QUANTITY_REQUIRED,
+  validationPaymentRequired: common.PRODUCT_PAGE_VALIDATION_PAYMENT_REQUIRED,
+  validationTermsRequired: common.PRODUCT_PAGE_VALIDATION_TERMS_REQUIRED,
   
-  formSuccessMessage: "Vaše povpraševanje je bilo uspešno poslano." // This will be unused with current stripped logic
+  formSuccessMessage: common.M_CONFIRMATION_TEXT
 };
 
 // Product Schema
 const productSchema = {
   "@context": "https://schema.org/",
   "@type": "Product",
-  "name": productCoreData.title,
-  "image": productCoreData.image,
-  "mpn": productCoreData.productId,
-  "category": productCoreData.category,
+  "name": product.PRODUCT_H1,
+  "image": getAbsoluteUrl(product.PRODUCT_IMAGE_PATH),
+  "mpn": product.PRODUCT_MPN,
+  "category": product.PRODUCT_CATEGORY_1,
   "weight": {
     "@type": "QuantitativeValue",
-    "value": "3.2",
+    "value": common.PRODUCT_SPECIFICATIONS_VALUE_3.replace(/[^0-9.]/g, ''),
     "unitCode": "KGM"
   },
   "keywords": [
-    productCoreData.title,
-    "Slovenščina",
-    "Opozorilna piramida",
-    "Prometni znak",
-    "Varnostni znak",
-    "Triopan",
-    "DELO NA CESTI",
-    "Triopan"
+    product.PRODUCT_NAME,
+    product.M_LANGUAGE_NATIVE,
+    product.PRODUCT_KEYWORD_1,
+    product.PRODUCT_KEYWORD_2,
+    product.PRODUCT_KEYWORD_3,
+    product.PRODUCT_KEYWORD_4,
+    product.PRODUCT_KEYWORD_5,
+    product.PRODUCT_KEYWORD_6,
+    product.PRODUCT_KEYWORD_7
   ],
-  "description": productCoreData.description,
+  "description": product.PRODUCT_META_SEO,
   "brand": {
     "@type": "Brand",
-    "name": "eusignal.com"
+    "name": www.PAGE_ORGANISATION_URL_NAME
   },
   "review": {
     "@type": "Review",
     "reviewRating": {
       "@type": "Rating",
-      "ratingValue": "4.5",
+      "ratingValue": product.PRODUCT_RATING_VALUE,
       "bestRating": 5
     },
     "author": {
       "@type": "Person",
-      "name": "Rastko Skrjanec"
+      "name": product.PRODUCT_AUTHOR
     }
   },
   "aggregateRating": {
     "@type": "AggregateRating",
-    "ratingValue": "4.5",
-    "reviewCount": "150"
+    "ratingValue": product.PRODUCT_RATING_VALUE,
+    "reviewCount": product.PRODUCT_REVIEW_COUNT
   },
   "offers": {
     "@type": "Offer",
     "url": Astro.url.href,
-    "priceCurrency": "EUR",
-    "price": "149.99",
-    "priceValidUntil": "2028-12-31",
+    "priceCurrency": product.M_CURRENCY_CODE,
+    "price": product.M_PRODUCT_PRICE,
+    "priceValidUntil": product.PRODUCT_EXPIRATION_DATE,
     "availability": "https://schema.org/InStock",
     "itemCondition": "https://schema.org/NewCondition"
   }
@@ -189,78 +204,83 @@ const faqSchema = {
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "EUSIGNAL",
-  "url": "https://eusignal.com",
-  "foundingDate": "2020",
-  "logo": "/images/logo.png",
+  "name": www.PAGE_ORGANISATION_FULL_NAME,
+  "url": getAbsoluteUrl('/'),
+  "foundingDate": www.PAGE_FOUNDING_DATE,
+  "logo": getAbsoluteUrl(www.PAGE_LOGO_IMAGE_PATH_1),
   "keywords": [
-    "EUSIGNAL",
-    "Premium varnostni znaki",
-    "Slovenija"
+    www.PAGE_ORGANISATION_FULL_NAME,
+    www.M_COUNTRY_NATIVE,
+    www.PAGE_KEYWORD_1,
+    www.PAGE_KEYWORD_2,
+    www.PAGE_KEYWORD_3,
+    www.PAGE_KEYWORD_4,
+    www.PAGE_KEYWORD_5,
+    www.PAGE_KEYWORD_6
   ],
-  "description": "EUSIGNAL is a provider of Premium varnostni znaki (premium safety signs) in Slovenija (Slovenia), established in 2020.",
+  "description": www.PAGE_DESCRIPTION,
   "numberOfEmployees": {
     "@type": "QuantitativeValue",
     "minValue": "1",
     "maxValue": "9"
   },
-  "slogan": "Premium varnostni znaki in opozorilni sistemi",
+  "slogan": www.PAGE_SLOGAN,
   "contactPoint": {
     "@type": "ContactPoint",
-    "email": "info@eusignal.com",
-    "contactType": "customer service"
+    "email": www.PAGE_INFO_EMAIL,
+    "contactType": common.M_CUSTOMER_SUPPORT
   },
   "sameAs": [
-    "https://www.instagram.com/eusignal",
-    "https://www.facebook.com/eusignal",
-    "https://twitter.com/eusignal",
-    "https://www.linkedin.com/company/eusignal",
-    "https://www.tiktok.com/@eusignal",
-    "https://www.youtube.com/@eusignal",
-    "https://www.pinterest.com/eusignal"
+    www.PAGE_INSTAGRAM_URL,
+    www.PAGE_FACEBOOK_URL,
+    www.PAGE_TWITTER_URL,
+    www.PAGE_LINKEDIN_URL,
+    www.PAGE_TIKTOK_URL,
+    www.PAGE_YOUTUBE_URL,
+    www.PAGE_PINTEREST_URL
   ],
   "areaServed": {
     "@type": "Country",
-    "name": "Slovenia",
-    "identifier": "SI"
+    "name": www.M_COUNTRY,
+    "identifier": www.M_COUNTRY_CODE
   },
   "potentialAction": [
     {
       "@type": "ViewAction",
-      "name": "View our Sitemap",
-      "target": "https://eusignal.com/sitemap.xml"
+      "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
+      "target": getAbsoluteUrl('/sitemap.xml')
     },
     {
       "@type": "ViewAction",
-      "name": "View our Slovenian Sitemap (sl-SI)",
-      "target": "https://eusignal.com/sitemap-sl-SI.xml"
+      "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
+      "target": getAbsoluteUrl('/sitemap-sl-SI.xml')
     },
     {
       "@type": "ViewAction",
-      "name": "Information for Large Language Models",
-      "target": "https://eusignal.com/llms.txt",
-      "description": "Provides a condensed overview and key information about EUSIGNAL for AI agents and crawlers."
+      "name": www.PAGE_LLM_INSTRUCTIONS,
+      "target": getAbsoluteUrl('/llms.txt'),
+      "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
     }
   ],
   "mainEntityOfPage": [
     {
       "@type": "WebPage",
-      "@id": "https://eusignal.com/sitemap.xml",
-      "name": "XML Sitemap for EUSIGNAL",
-      "description": "Provides a structured list of pages available on https://eusignal.com for crawlers."
+      "@id": getAbsoluteUrl('/sitemap.xml'),
+      "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
+      "description": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS_DESCRIPTION
     },
     {
       "@type": "WebPage",
-      "@id": "https://eusignal.com/sitemap-sl-SI.xml",
-      "name": "XML Sitemap (sl-SI) for EUSIGNAL",
-      "description": "Provides a structured list of Slovenian (sl-SI) pages available on https://eusignal.com for crawlers."
+      "@id": getAbsoluteUrl('/sitemap-sl-SI.xml'),
+      "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
+      "description": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS_DESCRIPTION
     },
     {
       "@type": "WebPage",
-      "@id": "https://eusignal.com/llms.txt",
-      "name": "LLM Guidance for EUSIGNAL",
-        "description": "A text resource outlining key information about EUSIGNAL (https://eusignal.com) offerings in EUSIGNAL for AI agents and crawlers. For more detailed information, please refer to the main website content and sitemap."
-      }
+      "@id": getAbsoluteUrl('/llms.txt'),
+      "name": www.PAGE_LLM_INSTRUCTIONS,
+      "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
+    }
   ]
 };
 
@@ -290,24 +310,24 @@ const combinedSchema = [productSchema, faqSchema, organizationSchema];
             <path d="M8.256 14a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z"/>
           </g>
         </svg>
-        <p class="text-xl font-semibold">Prometni trikotnik {productCoreData.title} priporoča 9/10 strokovnjakov za cestno varnost!</p>
+        <p class="text-xl font-semibold">{product.PRODUCT_PEER_PRESSURE_1}</p>
       </div>
     </div>
 
     <div class="bg-gray-50 p-6 rounded-lg">
-      <h2 class="text-xl font-semibold mb-4">Prometni trikotnik {productCoreData.title} priporočajo ali uporabljajo:</h2>
+      <h2 class="text-xl font-semibold mb-4">{product.PRODUCT_AUTHORITY_PROOF_H2}</h2>
       <ul class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <li class="flex items-center gap-4">
           <svg class="w-10 h-10 text-green-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-          <span class="text-lg">20+ prometnih inženirjev</span>
+          <span class="text-lg">{product.PRODUCT_AUTHORITY_PROOF_1}</span>
         </li>
         <li class="flex items-center gap-4">
           <svg class="w-10 h-10 text-green-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-          <span class="text-lg">Osebje Direkcije RS za infrastrukturo</span>
+          <span class="text-lg">{product.PRODUCT_AUTHORITY_PROOF_2}</span>
         </li>
         <li class="flex items-center gap-4">
           <svg class="w-10 h-10 text-green-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-          <span class="text-lg">Osebje iz Inšpektorata RS za promet</span>
+          <span class="text-lg">{product.PRODUCT_AUTHORITY_PROOF_3}</span>
         </li>
       </ul>
     </div>
@@ -316,25 +336,25 @@ const combinedSchema = [productSchema, faqSchema, organizationSchema];
       <div class="flex flex-col space-y-4">
         <div class="flex items-center gap-4">
           <svg class="w-12 h-12 text-yellow-700" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2m0 2a8 8 0 1 0 0 16a8 8 0 0 0 0-16m0 11a1 1 0 1 1 0 2a1 1 0 0 1 0-2m0-9a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1"/></svg>
-          <h3 class="text-xl font-semibold text-yellow-800">Se strinjate, da je varnost na gradbiščih ključnega pomena?</h3>
+          <h3 class="text-xl font-semibold text-yellow-800">{product.PRODUCT_FEAR_TRIGGER_1}</h3>
         </div>
         <p class="text-yellow-700 ml-16">
-          Opozorilna piramida se uporablja pri deloviščih za izboljšanje varnosti in opozarjanje voznikov na spremembe na cesti.
+          {product.PRODUCT_FEAR_TRIGGER_2}
         </p>
       </div>
     </div>
 
     <div class="space-y-4">
-      <p>Opozorilni piramidni znak lahko namestite na gradbiščih, zoženih odsekih ali cestnih križiščih, kjer potekajo dela.</p>
+      <p>{product.PRODUCT_USE_CASES_COMPILED}</p>
       <ul class="list-disc pl-6 space-y-2">
-        <li>Postavite ga pred gradbišči na cestah.</li>
-        <li>Postavite ga na odsekih z zoženimi voznimi pasovi.</li>
-        <li>Postavite ga v bližini delovišč na cestni infrastrukturi.</li>
+        <li>{product.PRODUCT_USE_CASE_1}</li>
+        <li>{product.PRODUCT_USE_CASE_2}</li>
+        <li>{product.PRODUCT_USE_CASE_3}</li>
       </ul>
     </div>
 
     <div class="bg-signal-green/10 p-6 rounded-lg border-l-4 border-signal-green">
-      <p class="text-xl font-semibold">Investirajte v opozorilni znak {productCoreData.title}. Pomagajte izboljšati varnost na gradbiščih in cestnih odsekih!</p>
+      <p class="text-xl font-semibold">{product.PRODUCT_PUSH_TRIGGER_1}</p>
     </div>
   </div>
 </ProductLayout>
