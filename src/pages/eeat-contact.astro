@@ -24,6 +24,7 @@ const articleUpdateDate = eeat.DATE_UPDATED;
 const publishedTextLabel = common.M_PUBLISHED;
 const updatedTextLabel = common.M_UPDATED;
 const articleDateLocale = eeat.PAGE_LOCALE;
+const ogImage = eeat.EEAT_OG_IMAGE_PATH;
 
 // Contact form configuration using common.json values
 const contactSection = {
@@ -53,6 +54,13 @@ const formAlerts = {
 const currentDate = new Date();
 const formattedDate = currentDate.toISOString().split('T')[0];
 const formattedTime = currentDate.toTimeString().split(' ')[0];
+
+// Define keywords for the page
+const pageKeywords = [
+  eeat.EEAT_NAME,
+  eeat.M_COUNTRY_NATIVE,
+  www.PAGE_ORGANISATION_FULL_NAME
+].join(', ');
 
 // WebPage and Article Schema
 const webpageSchema = {
@@ -186,6 +194,8 @@ const schema = [webpageSchema, organizationSchema];
   title={seoTitle}
   headline={headline}
   description={pageDescription}
+  keywords={pageKeywords}
+  ogImage={pageogImage}
   publishDate={articlePublishDate}
   updateDate={articleUpdateDate}
   publishedLabel={publishedTextLabel}
