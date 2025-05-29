@@ -41,6 +41,13 @@ const heroData = {
   }
 };
 
+// Define keywords for the page
+const pageKeywords = [
+  home.M_HOME_NAME,
+  www.M_COUNTRY_NATIVE,
+  www.PAGE_ORGANISATION_FULL_NAME
+].join(', ');
+
 // Marquee items data
 const marqueeItems = [
   { 
@@ -394,6 +401,7 @@ const schema = [webpageSchema, faqSchema, organizationSchema];
   title={home.HOME_H1}
   description={home.HOME_META_SEO}
   ogImage={home.HOME_OG_IMAGE_PATH}
+  keywords={pageKeywords}
   heroData={heroData}
   marqueeItems={marqueeItems}
   bestsellersSection={bestsellersSection}

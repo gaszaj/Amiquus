@@ -37,6 +37,7 @@ export interface Props {
   description: string; // This is the author's bio, part of their data
   image: ImageMetadata;
   ogImage: string;
+  keywords?: string;
   socialLinks: SocialLinksInfo;
   jobTitle?: string;
   company?: string;
@@ -55,6 +56,7 @@ const {
   description,
   image,
   ogImage,
+  keywords,
   socialLinks,
   jobTitle,
   company,
@@ -64,7 +66,7 @@ const {
 } = Astro.props;
 ---
 
-<BaseLayout title={name} description={layoutStrings.baseLayoutDescriptionPrefix} ogImage={ogImage} schema={schema}>
+<BaseLayout title={name} description={layoutStrings.baseLayoutDescriptionPrefix} ogImage={ogImage} keywords={keywords} schema={schema}>
   <!-- Dark Hero Section -->
   <div class="bg-black text-white py-16">
     <div class="container mx-auto px-4">

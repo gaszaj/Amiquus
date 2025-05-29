@@ -84,6 +84,16 @@ const languagesData = [
   { name: "Serbian", flag: RS }
 ];
 
+// Define keywords for the page
+const pageKeywords = [
+  author.WWW_AUTHOR,
+  author.EEAT_NAME_20,
+  author.WWW_AUTHOR_OCCUPATION,
+  author.WWW_AUTHOR_NATIONALITY,
+  www.M_COUNTRY_NATIVE,
+  www.PAGE_ORGANISATION_FULL_NAME
+].join(', ');
+
 // --- Data for Layout Sections & UI Text ---
 const layoutStringsData = {
   // Using author data for personalized strings
@@ -289,6 +299,7 @@ const schema = [webpageSchema, personSchema, organizationSchema];
   description={authorProfileData.description}
   image={authorProfileData.image}
   ogImage={author.AUTHOR_OG_IMAGE_PATH}
+  keywords={pageKeywords}
   socialLinks={authorProfileData.socialLinks}
   jobTitle={authorProfileData.jobTitle}
   company={authorProfileData.company}

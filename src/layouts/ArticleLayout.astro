@@ -76,6 +76,7 @@ export interface Props {
   title: string;
   description?: string;
   ogImage?: string;
+  keywords?: string;
 
   // Article Metadata (passed through)
   publishDate: string;
@@ -164,6 +165,7 @@ const {
   title,
   description,
   ogImage,
+  keywords,
   publishDate,
   updateDate,
   author,
@@ -203,7 +205,7 @@ const formatDate = (dateString: string, locale: string, options: Intl.DateTimeFo
 const tocHeadings = headings.filter(heading => heading.depth >= 2 && heading.depth <= 3);
 ---
 
-<BaseLayout title={title} description={description} ogImage={ogImage} schema={schema}>
+<BaseLayout title={title} description={description} ogImage={ogImage} keywords={keywords} schema={schema}>
   <!-- Hero Section with Dark Background -->
   <div class="bg-black text-white py-12">
     <div class="container mx-auto px-4">

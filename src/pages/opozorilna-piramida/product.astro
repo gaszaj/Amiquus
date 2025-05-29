@@ -70,6 +70,20 @@ const filteredRelatedProducts = allAvailableProducts
 
 const ogImage = product.PRODUCT_OG_IMAGE_PATH;
 
+// Define keywords for the page
+const pageKeywords = [
+  product.PRODUCT_NAME,
+  product.PRODUCT_KEYWORD_1,
+  product.PRODUCT_KEYWORD_2,
+  product.PRODUCT_KEYWORD_3,
+  product.PRODUCT_KEYWORD_4,
+  product.PRODUCT_KEYWORD_5,
+  product.PRODUCT_KEYWORD_6,
+  product.PRODUCT_KEYWORD_7,
+  www.M_COUNTRY_NATIVE,
+  www.PAGE_ORGANISATION_FULL_NAME
+].join(', ');
+
 const productQuantityOptions: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 30];
 
 const productPageLayoutStrings: ProductLayoutStrings = {
@@ -304,6 +318,7 @@ const combinedSchema = [productSchema, faqSchema, organizationSchema];
   faqItems={productFaqItems}
   layoutStrings={productPageLayoutStrings}
   schema={combinedSchema}
+  keywords={pageKeywords}
 >
   <div class="product-description space-y-6">
     <div class="bg-signal-green/5 p-6 rounded-lg border-l-4 border-signal-green mb-8">

@@ -67,6 +67,14 @@ const layoutContent = {
   }
 };
 
+// Define keywords for the page
+const pageKeywords = [
+  article.ARTICLE_H1,
+  www.M_COUNTRY_NATIVE,
+  www.PAGE_ORGANISATION_FULL_NAME
+].join(', ');
+
+
 // --- Related Articles Data and Logic ---
 const allDomainArticles: RelatedArticleInfo[] = [ // Simulating a larger pool of articles
   { title: "Varnost, označevanje in opozarjanje pri tekaških dogodkih", url: "/articles/safety-signs-visibility-night", date: "2025-03-15" },
@@ -341,6 +349,7 @@ const mainContent = {
   title={articleMetadata.title}
   description={articleMetadata.description}
   ogImage={articleMetadata.ogImage}
+  keywords={pageKeywords}
   publishDate={articleMetadata.publishDate}
   updateDate={articleMetadata.updateDate}
   author={articleMetadata.author}

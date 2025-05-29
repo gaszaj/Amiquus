@@ -52,6 +52,7 @@ interface Props {
   title: string;
   description?: string;
   ogImage?: string;
+  keywords?: string;
 
   // Props for page content
   heroData: HeroData;
@@ -95,6 +96,7 @@ const {
   title, 
   description,
   ogImage,
+  keywords,
   heroData,
   marqueeItems,
   bestsellersSection,
@@ -107,7 +109,7 @@ const {
 } = Astro.props;
 ---
 
-<BaseLayout title={title} description={description} ogImage={ogImage} schema={schema}>
+<BaseLayout title={title} description={description} ogImage={ogImage} keywords={keywords} schema={schema}>
   <!-- Hero Section -->
   <section class="bg-black text-white py-12">
     <div class="container mx-auto px-4">
