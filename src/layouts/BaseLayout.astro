@@ -33,7 +33,7 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
 
 // Helper to create absolute URL for OG images
 const getAbsoluteOgImageUrl = (imagePath: string) => {
-  return new URL(imagePath, Astro.url).toString();
+  return `${Astro.url.origin}${imagePath}`;
 };
 ---
 
