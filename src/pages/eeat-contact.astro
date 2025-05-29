@@ -1,36 +1,52 @@
 ---
 import EEATContactLayout from '../layouts/EEATContactLayout.astro';
+import eeatData from '../data/eeat.json';
+import wwwData from '../data/www.json';
+import commonData from '../data/common.json';
 
-// Define content for the page, including labels previously in the layout
-const pageTitle = "Vstopite v kontakt";
-const pageDescription = "A comprehensive exploration of triopan warning system technology, design principles, and application scenarios across various safety contexts.";
-const articlePublishDate = "2025-03-10";
-const articleUpdateDate = "2025-03-15";
-const publishedTextLabel = "Objavljeno:";
-const updatedTextLabel = "Posodobljeno:";
-const articleDateLocale = "sl-SI";
+// Get the eighteenth object from eeatData and first from others
+const eeat = eeatData[23];
+const www = wwwData[0];
+const common = commonData[0];
 
-// Contact form configuration
+// Helper function for absolute URLs
+const getAbsoluteUrl = (path: string) => {
+  return new URL(path, Astro.url.origin).toString();
+};
+
+// Define content for the page
+const seoTitle = eeat.EEAT_NAME;
+const headline = eeat.EEAT_H1;
+const pageDescription = eeat.EEAT_META_SEO;
+const pageogImage = eeat.EEAT_OG_IMAGE_PATH;
+const articlePublishDate = eeat.DATE_PUBLISHED;
+const articleUpdateDate = eeat.DATE_UPDATED;
+const publishedTextLabel = common.M_PUBLISHED;
+const updatedTextLabel = common.M_UPDATED;
+const articleDateLocale = eeat.PAGE_LOCALE;
+
+// Contact form configuration using common.json values
 const contactSection = {
-  title: "Kontaktirajte nas",
-  subtitle: "Imate vprašanja o naših triopan warning systems? Vpišite svoje podatke in nam pošljite sporočilo.",
+  title: eeat.EEAT_NAME,
+  headline: eeat.EEAT_H1,
+  subtitle: eeat.EEAT_META_SEO,
   formLabels: {
-    fullName: "Ime in priimek",
-    fullNamePlaceholder: "Vnesite vaše ime in priimek",
-    email: "E-poštni naslov",
-    emailPlaceholder: "Vnesite vaš e-poštni naslov",
-    message: "Sporočilo",
-    messagePlaceholder: "Vnesite vaše sporočilo",
-    terms: "Strinjam se s pogoji uporabe",
-    submitButton: "Pošlji sporočilo"
+    fullName: common.M_FULL_NAME,
+    fullNamePlaceholder: common.M_FULLNAME_PLACEHOLDER,
+    email: common.M_EMAIL,
+    emailPlaceholder: common.M_EMAIL_PLACEHOLDER,
+    message: common.M_MESSAGE,
+    messagePlaceholder: common.M_MESSAGE_PLACEHOLDER,
+    terms: common.PRODUCT_PAGE_ORDER_FORM_TERMS_LABEL,
+    submitButton: common.M_SEND_BUTTON
   }
 };
 
 const formAlerts = {
-  invalidEmail: "Prosim vnesite veljaven e-poštni naslov",
-  termsNotAccepted: "Prosim strinjajte se s pogoji uporabe",
-  submissionSuccess: "Vaše sporočilo je bilo uspešno poslano!",
-  submissionError: "Prišlo je do napake. Prosim poskusite ponovno."
+  invalidEmail: common.M_EMAIL_INVALID,
+  termsNotAccepted: common.M_TERMS_REQUIRED,
+  submissionSuccess: common.M_CONFIRMATION_TEXT,
+  submissionError: common.M_FORM_ERROR
 };
 
 // --- Schema Definition ---
@@ -42,7 +58,7 @@ const formattedTime = currentDate.toTimeString().split(' ')[0];
 const webpageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  "name": pageTitle,
+  "name": seoTitle,
   "url": Astro.url.href,
   "description": pageDescription,
   "inLanguage": articleDateLocale,
@@ -52,28 +68,28 @@ const webpageSchema = {
       {
         "@type": "ListItem",
         "position": 1,
-        "name": "EUSIGNAL",
+        "name": common.M_HOME_NAME,
         "item": "/"
       },
       {
         "@type": "ListItem",
         "position": 2,
-        "name": pageTitle,
+        "name": seoTitle,
         "item": Astro.url.href
       }
     ]
   },
   "mainEntity": {
     "@type": "Article",
-    "headline": pageTitle,
+    "headline": seoTitle,
     "description": pageDescription,
-    "image": "/images/og-image.jpg",
+    "image": getAbsoluteUrl(pageogImage),
     "author": {
       "@type": "Organization",
-      "name": "EUSIGNAL"
+      "name": www.PAGE_ORGANISATION_FULL_NAME
     },
-    "datePublished": `${formattedDate}+${formattedTime}+02:00`,
-    "dateModified": `${formattedDate}+${formattedTime}+02:00`,
+    "datePublished": `${articlePublishDate}T${eeat.HOUR_PUBLISHED}+02:00`,
+    "dateModified": `${articleUpdateDate}T${eeat.HOUR_UPDATED}+02:00`,
     "inLanguage": articleDateLocale
   }
 };
@@ -82,78 +98,83 @@ const webpageSchema = {
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "EUSIGNAL",
-  "url": "https://eusignal.com",
-  "foundingDate": "2020",
-  "logo": "/images/logo.png",
+  "name": www.PAGE_ORGANISATION_FULL_NAME,
+  "url": getAbsoluteUrl('/'),
+  "foundingDate": www.PAGE_FOUNDING_DATE,
+  "logo": getAbsoluteUrl(www.PAGE_LOGO_IMAGE_PATH_1),
   "keywords": [
-    "EUSIGNAL",
-    "Premium varnostni znaki",
-    "Slovenija"
+    www.PAGE_ORGANISATION_FULL_NAME,
+    www.M_COUNTRY_NATIVE,
+    www.PAGE_KEYWORD_1,
+    www.PAGE_KEYWORD_2,
+    www.PAGE_KEYWORD_3,
+    www.PAGE_KEYWORD_4,
+    www.PAGE_KEYWORD_5,
+    www.PAGE_KEYWORD_6
   ],
-  "description": "EUSIGNAL is a provider of Premium varnostni znaki (premium safety signs) in Slovenija (Slovenia), established in 2020.",
+  "description": www.PAGE_DESCRIPTION,
   "numberOfEmployees": {
     "@type": "QuantitativeValue",
     "minValue": "1",
     "maxValue": "9"
   },
-  "slogan": "Premium varnostni znaki in opozorilni sistemi",
+  "slogan": www.PAGE_SLOGAN,
   "contactPoint": {
     "@type": "ContactPoint",
-    "email": "info@eusignal.com",
-    "contactType": "customer service"
+    "email": www.PAGE_INFO_EMAIL,
+    "contactType": common.M_CUSTOMER_SUPPORT
   },
   "sameAs": [
-    "https://www.instagram.com/eusignal",
-    "https://www.facebook.com/eusignal",
-    "https://twitter.com/eusignal",
-    "https://www.linkedin.com/company/eusignal",
-    "https://www.tiktok.com/@eusignal",
-    "https://www.youtube.com/@eusignal",
-    "https://www.pinterest.com/eusignal"
+    www.PAGE_INSTAGRAM_URL,
+    www.PAGE_FACEBOOK_URL,
+    www.PAGE_TWITTER_URL,
+    www.PAGE_LINKEDIN_URL,
+    www.PAGE_YOUTUBE_URL,
+    www.PAGE_PINTEREST_URL,
+    www.PAGE_BLUESKY_URL
   ],
   "areaServed": {
     "@type": "Country",
-    "name": "Slovenia",
-    "identifier": "SI"
+    "name": www.M_COUNTRY,
+    "identifier": www.M_COUNTRY_CODE
   },
   "potentialAction": [
     {
       "@type": "ViewAction",
-      "name": "View our Sitemap",
-      "target": "https://eusignal.com/sitemap.xml"
+      "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
+      "target": getAbsoluteUrl('/sitemap.xml')
     },
     {
       "@type": "ViewAction",
-      "name": "View our Slovenian Sitemap (sl-SI)",
-      "target": "https://eusignal.com/sitemap-sl-SI.xml"
+      "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
+      "target": getAbsoluteUrl('/sitemap-sl-SI.xml')
     },
     {
       "@type": "ViewAction",
-      "name": "Information for Large Language Models",
-      "target": "https://eusignal.com/llms.txt",
-      "description": "Provides a condensed overview and key information about EUSIGNAL for AI agents and crawlers."
+      "name": www.PAGE_LLM_INSTRUCTIONS,
+      "target": getAbsoluteUrl('/llms.txt'),
+      "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
     }
   ],
   "mainEntityOfPage": [
     {
       "@type": "WebPage",
-      "@id": "https://eusignal.com/sitemap.xml",
-      "name": "XML Sitemap for EUSIGNAL",
-      "description": "Provides a structured list of pages available on https://eusignal.com for crawlers."
+      "@id": getAbsoluteUrl('/sitemap.xml'),
+      "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
+      "description": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS_DESCRIPTION
     },
     {
       "@type": "WebPage",
-      "@id": "https://eusignal.com/sitemap-sl-SI.xml",
-      "name": "XML Sitemap (sl-SI) for EUSIGNAL",
-      "description": "Provides a structured list of Slovenian (sl-SI) pages available on https://eusignal.com for crawlers."
+      "@id": getAbsoluteUrl('/sitemap-sl-SI.xml'),
+      "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
+      "description": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS_DESCRIPTION
     },
     {
       "@type": "WebPage",
-      "@id": "https://eusignal.com/llms.txt",
-      "name": "LLM Guidance for EUSIGNAL",
-        "description": "A text resource outlining key information about EUSIGNAL (https://eusignal.com) offerings in EUSIGNAL for AI agents and crawlers. For more detailed information, please refer to the main website content and sitemap."
-      }
+      "@id": getAbsoluteUrl('/llms.txt'),
+      "name": www.PAGE_LLM_INSTRUCTIONS,
+      "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
+    }
   ]
 };
 
@@ -162,7 +183,8 @@ const schema = [webpageSchema, organizationSchema];
 ---
 
 <EEATContactLayout 
-  title={pageTitle}
+  title={seoTitle}
+  headline={headline}
   description={pageDescription}
   publishDate={articlePublishDate}
   updateDate={articleUpdateDate}
@@ -175,17 +197,13 @@ const schema = [webpageSchema, organizationSchema];
 >
   <!-- Content before the form -->
   <div slot="before-form">
-    <p class="lead text-xl text-signal-gray mb-8">
-      Vas zanima sodelovanje?
-    </p>
+    <Fragment set:html={eeat.EEAT_CONTENT} />
   </div>
 
   <!-- Content after the form -->
   <div slot="after-form">
     <div class="space-y-6">
-      <p>
-        The effectiveness of triopan warning systems is further enhanced by their aerodynamic properties. The triangular pyramid shape presents a reduced surface area to wind compared to flat signs, allowing them to withstand wind speeds up to 70 km/h without toppling. This stability is crucial in highway environments where passing vehicles create significant air turbulence.
-      </p>
+      <Fragment set:html={eeat.EEAT_CONTENT_2} />
     </div>
   </div>
 </EEATContactLayout>
