@@ -20,7 +20,7 @@ const getAbsoluteUrl = (path) => {
 const heroData = {
   title: home.HOME_H1,
   subtitle: home.HOME_SUBTITLE,
-  ogImage: getAbsoluteUrl(home.HOME_OG_IMAGE_PATH),
+  ogImage: home.HOME_OG_IMAGE_PATH,
   ctaText: home.HOME_HERO_BUTTON,
   ctaLink: "#best-sellers",
   features: [
@@ -393,6 +393,7 @@ const schema = [webpageSchema, faqSchema, organizationSchema];
 <HomepageLayout 
   title={home.HOME_H1}
   description={home.HOME_META_SEO}
+  ogImage={home.HOME_OG_IMAGE_PATH}
   heroData={heroData}
   marqueeItems={marqueeItems}
   bestsellersSection={bestsellersSection}

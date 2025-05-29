@@ -13,7 +13,7 @@ import Schema from '../components/Schema.astro';
 export interface Props {
   title: string;
   description?: string;
-  image?: string;
+  ogImage?: string;
   keywords?: string;
   locale?: string;
   schema?: object | null;
@@ -22,7 +22,7 @@ export interface Props {
 const {
   title,
   description = `${www.PAGE_ORGANISATION_FULL_NAME} - Premium safety signs and triopan warning systems manufactured in Slovenia and distributed across Europe.`,
-  image = "/images/og-image.jpg",
+  ogImage = "/images/og-image.jpg",
   keywords = "safety signs, warning signs, triopan, road safety, construction safety, event safety",
   locale = "sl-SI", // Default locale
   schema = null
@@ -30,6 +30,11 @@ const {
 
 // Helper to ensure icon paths are relative to the public directory root
 const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) : src}`;
+
+// Helper to create absolute URL for OG images
+const getAbsoluteOgImageUrl = (imagePath: string) => {
+  return new URL(imagePath, Astro.url).toString();
+};
 ---
 
 <!DOCTYPE html>
@@ -58,7 +63,7 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
     <meta property="og:url" content={Astro.url} />
     <meta property="og:title" content={`${title} | ${www.PAGE_ORGANISATION_FULL_NAME}`} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={new URL(image, Astro.url)} />
+    <meta property="og:image" content={getAbsoluteOgImageUrl(ogImage)} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:site_name" content={www.PAGE_ORGANISATION_SHORT_NAME || www.PAGE_ORGANISATION_FULL_NAME} /> 
@@ -69,7 +74,7 @@ const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) :
     <meta name="twitter:url" content={Astro.url} />
     <meta name="twitter:title" content={`${title} | ${www.PAGE_ORGANISATION_FULL_NAME}`} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={new URL(image, Astro.url)} />
+    <meta name="twitter:image" content={getAbsoluteOgImageUrl(ogImage)} />
     <meta name="twitter:creator" content={www.PAGE_TWITTER_USERNAME} />
 
     <!-- Mobile/Web App Metadata -->

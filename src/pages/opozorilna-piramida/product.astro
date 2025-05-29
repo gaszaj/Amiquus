@@ -20,6 +20,7 @@ const productCoreData = {
   subtitle: product.PRODUCT_SUBTITLE,
   description: product.PRODUCT_META_SEO,
   price: product.M_PRODUCT_PRICE,
+  ogImage: product.PRODUCT_OG_IMAGE_PATH,
   image: product.PRODUCT_IMAGE_PATH,
   specifications: {
     dimensions: common.PRODUCT_SPECIFICATIONS_VALUE_1,
@@ -293,6 +294,7 @@ const combinedSchema = [productSchema, faqSchema, organizationSchema];
   subtitle={productCoreData.subtitle}
   description={productCoreData.description}
   price={productCoreData.price}
+  ogImage={productCoreData.ogImage}
   image={productCoreData.image}
   specifications={productCoreData.specifications}
   relatedProducts={filteredRelatedProducts}
