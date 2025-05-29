@@ -44,7 +44,7 @@ interface AuthorData {
   M_COUNTRY_CODE: string;
   EEAT_SLUG_13: string;
   AUTHOR_FULL_BIO: string;
-  AUTHOR_OG_IMAGE: string;
+  AUTHOR_OG_IMAGE_PATH: string;
 }
 
 const author = authorData[0] as AuthorData;
@@ -61,7 +61,7 @@ const authorProfileData = {
   name: author.WWW_AUTHOR,
   description: author.AUTHOR_FULL_BIO,
   image: getAbsoluteUrl(`/authors/${author.AUTHOR_IMAGE_NAME_ASCII}`),
-  ogImage: getAbsoluteUrl(author.AUTHOR_OG_IMAGE_PATH),
+  ogImage: author.AUTHOR_OG_IMAGE_PATH,
   socialLinks: {
     linkedin: author.WWW_AUTHOR_LINKEDIN,
     twitter: author.WWW_AUTHOR_X,
@@ -144,7 +144,7 @@ const webpageSchema = {
     "@type": "Article",
     "headline": author.WWW_AUTHOR,
     "description": author.AUTHOR_META_SEO,
-    "image": getAbsoluteUrl(author.AUTHOR_OG_IMAGE),
+    "image": getAbsoluteUrl(author.AUTHOR_OG_IMAGE_PATH),
     "author": {
       "@type": "Organization",
       "name": www.PAGE_ORGANISATION_FULL_NAME
@@ -245,7 +245,7 @@ const schema = [webpageSchema, personSchema, organizationSchema];
   name={authorProfileData.name}
   description={authorProfileData.description}
   image={authorProfileData.image}
-  ogImage={authorProfileData.ogImage}
+  ogImage={author.AUTHOR_OG_IMAGE_PATH}
   socialLinks={authorProfileData.socialLinks}
   jobTitle={authorProfileData.jobTitle}
   company={authorProfileData.company}
