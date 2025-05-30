@@ -99,6 +99,7 @@ const heroData: HeroData = {
 // Define keywords for the page
 const pageKeywords: string = [
   home.M_HOME_NAME,
+  home.HOME_KEYWORD_1,
   www.M_COUNTRY_NATIVE,
   www.PAGE_ORGANISATION_FULL_NAME
 ].join(', ');
@@ -223,6 +224,7 @@ const institutionsSection = {
 // FAQ section data
 const faqSection = {
   title: home.HOME_H2_5,
+  subtitle: home.HOME_FAQ_TEXT,
   items: [
     { question: home.HOME_Q1, answer: home.HOME_A1 },
     { question: home.HOME_Q2, answer: home.HOME_A2 },
@@ -573,6 +575,7 @@ const pageOgImage: string | undefined = home.HOME_OG_IMAGE_PATH;
   <section class="py-16 bg-white">
     <div class="container mx-auto px-4">
       <h2 class="text-3xl font-bold text-black mb-4 text-center">{faqSection.title}</h2>
+      <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">{faqSection.subtitle}</p>
       <div class="max-w-3xl mx-auto space-y-4">
         {faqSection.items.map(item => (
           <details class="bg-gray-50 rounded-lg group">

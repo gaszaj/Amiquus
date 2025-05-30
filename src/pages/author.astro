@@ -53,7 +53,6 @@ interface AuthorData {
   AUTHOR_OG_IMAGE_PATH: string;
   AUTHOR_PROFILE_IMAGE_PATH: string;
   AUTHOR_IMAGE_NAME_ASCII: string;
-  WWW_AUTHOR_BIO: string;
   WWW_AUTHOR_LINKEDIN: string;
   WWW_AUTHOR_X: string;
   WWW_AUTHOR_WEBSITE: string;
@@ -63,7 +62,6 @@ interface AuthorData {
   WWW_AUTHOR_EMAIL: string;
   WWW_AUTHOR_OCCUPATION: string;
   AUTHOR_WORKS_FOR: string;
-  M_HOME_NAME: string;
   EEAT_NAME_20: string;
   EEAT_NAME_20_SINGULAR: string;
   EEAT_URL_20: string;
@@ -200,7 +198,7 @@ const webpageSchema = {
       {
         "@type": "ListItem",
         "position": 1,
-        "name": author.M_HOME_NAME,
+        "name": common.M_HOME_NAME,
         "item": Astro.url.origin
       },
       {
@@ -310,8 +308,8 @@ const organizationSchema = {
   "areaServed": [
     {
       "@type": "Country",
-      "name": author.M_COUNTRY,
-      "identifier": author.M_COUNTRY_CODE
+      "name": common.M_COUNTRY,
+      "identifier": common.M_COUNTRY_CODE
     }
   ],
   "potentialAction": [
