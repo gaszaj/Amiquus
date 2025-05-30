@@ -33,9 +33,13 @@ export interface LayoutStrings {
 // --- Main Props Interface ---
 export interface Props {
   // Author Data (passed through for display)
+  languageIso: string;
+  countryCode: string;
+  contentOrientation: string;
   name: string;
   description: string; // This is the author's bio, part of their data
   image: ImageMetadata;
+  imageAltText: string;
   ogImage: string;
   keywords?: string;
   socialLinks: SocialLinksInfo;
@@ -52,9 +56,13 @@ export interface Props {
 }
 
 const {
+  languageIso,
+  countryCode,
+  contentOrientation,
   name,
   description,
   image,
+  imageAltText,
   ogImage,
   keywords,
   socialLinks,
@@ -66,7 +74,7 @@ const {
 } = Astro.props;
 ---
 
-<BaseLayout title={name} description={layoutStrings.baseLayoutDescriptionPrefix} ogImage={ogImage} keywords={keywords} schema={schema}>
+<BaseLayout languageIso={languageIso} countryCode={countryCode} contentOrientation={contentOrientation} title={name} description={layoutStrings.baseLayoutDescriptionPrefix} ogImage={ogImage} keywords={keywords} schema={schema}>
   <!-- Dark Hero Section -->
   <div class="bg-black text-white py-16">
     <div class="container mx-auto px-4">
@@ -77,7 +85,7 @@ const {
             <div class="absolute inset-0 bg-signal-green/20 rounded-full blur-2xl"></div>
             <img 
               src={image} 
-              alt={name}
+              alt={imageAltText}
               class="relative w-48 h-48 object-cover rounded-full border-4 border-signal-green shadow-xl"
               width={200}
               height={200}

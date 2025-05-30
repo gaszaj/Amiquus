@@ -15,6 +15,16 @@ const getAbsoluteUrl = (path) => {
   return new URL(path, Astro.url.origin).toString();
 };
 
+// Get language data
+const languageIso = product.M_LANGUAGE_ISO;
+const countryCode = product.M_COUNTRY_CODE;
+
+// Find matching content orientation from common.json
+const contentOrientation = commonData.find(item => 
+  item.M_LANGUAGE_ISO === languageIso && 
+  item.M_COUNTRY_CODE === countryCode
+)?.M_CONTENT_ORIENTATION || 'ltr'; // Default to 'ltr' if no match found
+
 const productCoreData = {
   title: product.PRODUCT_H1,
   subtitle: product.PRODUCT_SUBTITLE,
@@ -306,6 +316,9 @@ const combinedSchema = [productSchema, faqSchema, organizationSchema];
 ---
 
 <ProductLayout
+  languageIso={languageIso}
+  countryCode={countryCode}
+  contentOrientation={contentOrientation}
   title={productCoreData.title}
   subtitle={productCoreData.subtitle}
   description={productCoreData.description}

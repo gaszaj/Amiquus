@@ -73,6 +73,9 @@ export interface FaqSection {
 // --- Main Props Interface ---
 export interface Props {
   // Base Layout Props
+  languageIso: string;
+  countryCode: string;
+  contentOrientation: string;
   title: string;
   description?: string;
   ogImage?: string;
@@ -162,6 +165,9 @@ export interface Props {
 }
 
 const {
+  languageIso,
+  countryCode,
+  contentOrientation,
   title,
   description,
   ogImage,
@@ -205,7 +211,7 @@ const formatDate = (dateString: string, locale: string, options: Intl.DateTimeFo
 const tocHeadings = headings.filter(heading => heading.depth >= 2 && heading.depth <= 3);
 ---
 
-<BaseLayout title={title} description={description} ogImage={ogImage} keywords={keywords} schema={schema}>
+<BaseLayout languageIso={languageIso} countryCode={countryCode} contentOrientation={contentOrientation} title={title} description={description} ogImage={ogImage} keywords={keywords} schema={schema}>
   <!-- Hero Section with Dark Background -->
   <div class="bg-black text-white py-12">
     <div class="container mx-auto px-4">

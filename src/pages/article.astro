@@ -15,6 +15,16 @@ const getAbsoluteUrl = (path) => {
   return new URL(path, Astro.url.origin).toString();
 };
 
+// Get language data
+const languageIso = article.M_LANGUAGE_ISO;
+const countryCode = article.M_COUNTRY_CODE;
+
+// Find matching content orientation from common.json
+const contentOrientation = commonData.find(item => 
+  item.M_LANGUAGE_ISO === languageIso && 
+  item.M_COUNTRY_CODE === countryCode
+)?.M_CONTENT_ORIENTATION || 'ltr'; // Default to 'ltr' if no match found
+
 // --- Article Specific Metadata ---
 const articleMetadata = {
   title: article.ARTICLE_TITLE,
@@ -346,6 +356,9 @@ const mainContent = {
 ---
 
 <ArticleLayout
+  languageIso={languageIso}
+  countryCode={countryCode}
+  contentOrientation={contentOrientation}
   title={articleMetadata.title}
   description={articleMetadata.description}
   ogImage={articleMetadata.ogImage}

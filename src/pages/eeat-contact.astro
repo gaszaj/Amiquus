@@ -14,6 +14,16 @@ const getAbsoluteUrl = (path: string) => {
   return new URL(path, Astro.url.origin).toString();
 };
 
+// Get language data
+const languageIso = eeat.M_LANGUAGE_ISO;
+const countryCode = eeat.M_COUNTRY_CODE;
+
+// Find matching content orientation from common.json
+const contentOrientation = commonData.find(item => 
+  item.M_LANGUAGE_ISO === languageIso && 
+  item.M_COUNTRY_CODE === countryCode
+)?.M_CONTENT_ORIENTATION || 'ltr'; // Default to 'ltr' if no match found
+
 // Define content for the page
 const seoTitle = eeat.EEAT_NAME;
 const headline = eeat.EEAT_H1;
@@ -82,7 +92,7 @@ const webpageSchema = {
       {
         "@type": "ListItem",
         "position": 2,
-        "name": seoTitle,
+        "name": eeat.EEAT_NAME,
         "item": Astro.url.href
       }
     ]
@@ -191,6 +201,9 @@ const schema = [webpageSchema, organizationSchema];
 ---
 
 <EEATContactLayout 
+  languageIso={languageIso}
+  countryCode={countryCode}
+  contentOrientation={contentOrientation}
   title={seoTitle}
   headline={headline}
   description={pageDescription}

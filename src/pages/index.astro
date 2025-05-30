@@ -14,6 +14,16 @@ const getAbsoluteUrl = (path) => {
   return new URL(path, Astro.url.origin).toString();
 };
 
+// Get language data
+const languageIso = home.M_LANGUAGE_ISO;
+const countryCode = home.M_COUNTRY_CODE;
+
+// Find matching content orientation from common.json
+const contentOrientation = commonData.find(item => 
+  item.M_LANGUAGE_ISO === languageIso && 
+  item.M_COUNTRY_CODE === countryCode
+)?.M_CONTENT_ORIENTATION || 'ltr'; // Default to 'ltr' if no match found
+
 // --- Data for the Homepage ---
 
 // Hero section data
@@ -398,6 +408,9 @@ const schema = [webpageSchema, faqSchema, organizationSchema];
 ---
 
 <HomepageLayout 
+  languageIso={languageIso}
+  countryCode={countryCode}
+  contentOrientation={contentOrientation}
   title={home.HOME_H1}
   description={home.HOME_META_SEO}
   ogImage={home.HOME_OG_IMAGE_PATH}

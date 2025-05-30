@@ -1,6 +1,13 @@
 [
     {
         "PAGE_LOCALE": "SI-sl",
+        "M_COUNTRY_CODE": "SI",
+        "M_COUNTRY_CODE_URL": "SI/",
+        "M_LANGUAGE_ISO": "sl",
+        "M_SUBDIRECTORY_PATH": "si-sl/",
+        "M_HREFLANG_CODE": "sl-SI",
+        "M_SLUG_1": "si/",
+        "M_SLUG": "si",
         "HEADER_LOGO_ALT": "EUSIGNAL Logotip",
         "HEADER_LOGO_PATH": "/",
         "HEADER_LINK_NAME_1": "Kompleti",

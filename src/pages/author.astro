@@ -45,6 +45,9 @@ interface AuthorData {
   EEAT_SLUG_13: string;
   AUTHOR_FULL_BIO: string;
   AUTHOR_OG_IMAGE_PATH: string;
+  M_LANGUAGE_ISO: string;
+  M_COUNTRY_CODE: string;
+  M_CONTENT_ORIENTATION: string;
 }
 
 const author = authorData[0] as AuthorData;
@@ -56,12 +59,23 @@ const getAbsoluteUrl = (path) => {
   return new URL(path, Astro.url.origin).toString();
 };
 
+// Get language data
+const languageIso = author.M_LANGUAGE_ISO;
+const countryCode = author.M_COUNTRY_CODE;
+
+// Find matching content orientation from common.json
+const contentOrientation = commonData.find(item => 
+  item.M_LANGUAGE_ISO === languageIso && 
+  item.M_COUNTRY_CODE === countryCode
+)?.M_CONTENT_ORIENTATION || 'ltr'; // Default to 'ltr' if no match found
+
 // --- Author's Core Data ---
 const authorProfileData = {
   name: author.WWW_AUTHOR,
   description: author.AUTHOR_FULL_BIO,
   image: getAbsoluteUrl(`/authors/${author.AUTHOR_IMAGE_NAME_ASCII}`),
   ogImage: author.AUTHOR_OG_IMAGE_PATH,
+  imageAltText: `${author.WWW_AUTHOR} — ${author.EEAT_NAME_20} | ${www.PAGE_ORGANISATION_FULL_NAME}`,
   socialLinks: {
     linkedin: author.WWW_AUTHOR_LINKEDIN,
     twitter: author.WWW_AUTHOR_X,
@@ -295,9 +309,13 @@ const schema = [webpageSchema, personSchema, organizationSchema];
 ---
 
 <AuthorLayout
+  languageIso={languageIso}
+  countryCode={countryCode}
+  contentOrientation={contentOrientation}
   name={authorProfileData.name}
   description={authorProfileData.description}
   image={authorProfileData.image}
+  imageAltText={authorProfileData.imageAltText}
   ogImage={author.AUTHOR_OG_IMAGE_PATH}
   keywords={pageKeywords}
   socialLinks={authorProfileData.socialLinks}

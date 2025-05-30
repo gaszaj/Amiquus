@@ -49,6 +49,9 @@ interface FormAlerts {
 
 interface Props {
   // Props for BaseLayout
+  languageIso: string;
+  countryCode: string;
+  contentOrientation: string;
   title: string;
   description?: string;
   ogImage?: string;
@@ -60,7 +63,7 @@ interface Props {
   bestsellersSection: {
     title: string;
     products: Product[];
-    productCtaText: string; // Added for the "Oddajte naročilo" button on product cards
+    productCtaText: string;
   };
   featuresSection: {
     title: string;
@@ -88,11 +91,14 @@ interface Props {
       submitButton: string;
     };
   };
-  formAlerts: FormAlerts; // Added for JavaScript alert messages
+  formAlerts: FormAlerts;
   schema: object | null;
 }
 
 const { 
+  languageIso,
+  countryCode,
+  contentOrientation,
   title, 
   description,
   ogImage,
@@ -104,12 +110,12 @@ const {
   institutionsSection,
   faqSection,
   contactSection,
-  formAlerts, // Destructure new prop for JS alerts
+  formAlerts, 
   schema
 } = Astro.props;
 ---
 
-<BaseLayout title={title} description={description} ogImage={ogImage} keywords={keywords} schema={schema}>
+<BaseLayout languageIso={languageIso} countryCode={countryCode} contentOrientation={contentOrientation} title={title} description={description} ogImage={ogImage} keywords={keywords} schema={schema}>
   <!-- Hero Section -->
   <section class="bg-black text-white py-12">
     <div class="container mx-auto px-4">

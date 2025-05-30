@@ -11,6 +11,9 @@ import Footer from '../components/Footer.astro';
 import Schema from '../components/Schema.astro';
 
 export interface Props {
+  languageIso: string;
+  countryCode: string;
+  contentOrientation: string;
   title: string;
   description?: string;
   ogImage?: string;
@@ -20,6 +23,9 @@ export interface Props {
 }
 
 const {
+  languageIso,
+  countryCode,
+  contentOrientation,
   title,
   description = `${www.PAGE_ORGANISATION_FULL_NAME} - Premium safety signs and triopan warning systems manufactured in Slovenia and distributed across Europe.`,
   ogImage = "/images/og-image.jpg",
@@ -27,6 +33,9 @@ const {
   locale = "sl-SI", // Default locale
   schema = null
 } = Astro.props;
+
+// Create the locale string from language and country code
+const fullLocale = `${languageIso}-${countryCode}`;
 
 // Helper to ensure icon paths are relative to the public directory root
 const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) : src}`;
@@ -38,7 +47,7 @@ const getAbsoluteOgImageUrl = (imagePath: string) => {
 ---
 
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang={languageIso} dir={contentOrientation}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -67,7 +76,7 @@ const getAbsoluteOgImageUrl = (imagePath: string) => {
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:site_name" content={www.PAGE_ORGANISATION_SHORT_NAME || www.PAGE_ORGANISATION_FULL_NAME} /> 
-    <meta property="og:locale" content={locale} />
+    <meta property="og:locale" content={fullLocale} />
 
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />

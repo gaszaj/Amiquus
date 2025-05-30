@@ -1,6 +1,7 @@
 [
     {
         "PAGE_LOCALE": "SI-sl",
+        "M_CONTENT_ORIENTATION": "ltr",
         "M_COUNTRY": "Slovenia",
         "M_COUNTRY_NATIVE": "Slovenija",
         "M_COUNTRY_NUMBER": "01",
@@ -47,8 +48,8 @@
         "M_CUSTOMER_SUPPORT": "Podpora kupcem",
         "M_CONTACT_FORM": "Kontaktni obrazec",
         "M_FULL_NAME": "Vaše polno ime",
-        "M_EMAIL": "Vaš email",
-        "M_MESSAGE": "Vaše sporočilo",
+        "M_EMAIL_LABEL": "Vaš email",
+        "M_MESSAGE_LABEL": "Vaše sporočilo",
         "M_MESSAGE_PLACEHOLDER": "Vnesite sporočilo tukaj",
         "M_SEND_BUTTON": "Pošlji",
         "M_CONFIRMATION_TEXT": "Vaše sporočilo je bilo uspešno poslano",
