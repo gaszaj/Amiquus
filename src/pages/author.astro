@@ -1,9 +1,41 @@
 ---
-import AuthorLayout from '../layouts/AuthorLayout.astro';
-import { SI, GB, DE, HR, RS } from 'country-flag-icons/string/3x2';
+import BaseLayout from '../layouts/BaseLayout.astro'; // Assumed path
 import authorData from '../data/author.json';
 import wwwData from '../data/www.json';
 import commonData from '../data/common.json';
+
+// --- Type Definitions (originally from AuthorLayout.astro) ---
+export interface SocialLinksInfo {
+  linkedin?: string;
+  twitter?: string;
+  website?: string;
+  email?: string;
+  // Added from authorProfileData structure for completeness if used directly
+  instagram?: string;
+  youtube?: string;
+  quora?: string;
+}
+
+export interface LanguageInfo {
+  name: string;
+  flag: string;
+}
+
+// --- Content Props for Sections/UI Elements (originally from AuthorLayout.astro) ---
+export interface LayoutStrings {
+  baseLayoutDescriptionPrefix: string;
+  socialLinkLabelLinkedIn: string;
+  socialLinkLabelTwitter: string;
+  socialLinkLabelWebsite: string;
+  socialLinkLabelEmail: string;
+  jobTitleAtCompanySeparator: string;
+  languagesSectionTitle: string;
+  languagesSectionIcon: string;
+  footerLinkAllAuthorsText: string;
+  footerLinkAllAuthorsUrl: string;
+  footerLinkEditorialPolicyText: string;
+  footerLinkEditorialPolicyUrl: string;
+}
 
 // Add type definition for author data
 interface AuthorData {
@@ -33,6 +65,7 @@ interface AuthorData {
   AUTHOR_WORKS_FOR: string;
   M_HOME_NAME: string;
   EEAT_NAME_20: string;
+  EEAT_NAME_20_SINGULAR: string;
   EEAT_URL_20: string;
   WWW_AUTHOR_NATIONALITY: string;
   WWW_AUTHOR_LANGUAGE1: string;
@@ -40,14 +73,18 @@ interface AuthorData {
   WWW_AUTHOR_LANGUAGE3: string;
   WWW_AUTHOR_LANGUAGE4: string;
   WWW_AUTHOR_LANGUAGE5: string;
+  WWW_AUTHOR_LANGUAGE6: string;
+  WWW_AUTHOR_LANGUAGE1_COUNTRY_CODE: string;
+  WWW_AUTHOR_LANGUAGE2_COUNTRY_CODE: string;
+  WWW_AUTHOR_LANGUAGE3_COUNTRY_CODE: string;
+  WWW_AUTHOR_LANGUAGE4_COUNTRY_CODE: string;
+  WWW_AUTHOR_LANGUAGE5_COUNTRY_CODE: string;
+  WWW_AUTHOR_LANGUAGE6_COUNTRY_CODE: string;
   M_COUNTRY: string;
   M_COUNTRY_CODE: string;
   EEAT_SLUG_13: string;
   AUTHOR_FULL_BIO: string;
-  AUTHOR_OG_IMAGE_PATH: string;
   M_LANGUAGE_ISO: string;
-  M_COUNTRY_CODE: string;
-  M_CONTENT_ORIENTATION: string;
 }
 
 const author = authorData[0] as AuthorData;
@@ -64,18 +101,19 @@ const languageIso = author.M_LANGUAGE_ISO;
 const countryCode = author.M_COUNTRY_CODE;
 
 // Find matching content orientation from common.json
-const contentOrientation = commonData.find(item => 
-  item.M_LANGUAGE_ISO === languageIso && 
+const contentOrientation = commonData.find(item =>
+  item.M_LANGUAGE_ISO === languageIso &&
   item.M_COUNTRY_CODE === countryCode
-)?.M_CONTENT_ORIENTATION || 'ltr'; // Default to 'ltr' if no match found
+)?.M_CONTENT_ORIENTATION || 'ltr'; 
 
 // --- Author's Core Data ---
 const authorProfileData = {
   name: author.WWW_AUTHOR,
+  seoTitle: `${author.WWW_AUTHOR} — ${author.EEAT_NAME_20_SINGULAR}`,
   description: author.AUTHOR_FULL_BIO,
   image: getAbsoluteUrl(`/authors/${author.AUTHOR_IMAGE_NAME_ASCII}`),
   ogImage: author.AUTHOR_OG_IMAGE_PATH,
-  imageAltText: `${author.WWW_AUTHOR} — ${author.EEAT_NAME_20} | ${www.PAGE_ORGANISATION_FULL_NAME}`,
+  imageAltText: `${author.WWW_AUTHOR} — ${author.EEAT_NAME_20_SINGULAR} | ${www.PAGE_ORGANISATION_FULL_NAME}`,
   socialLinks: {
     linkedin: author.WWW_AUTHOR_LINKEDIN,
     twitter: author.WWW_AUTHOR_X,
@@ -84,19 +122,37 @@ const authorProfileData = {
     youtube: author.WWW_AUTHOR_YOUTUBE,
     quora: author.WWW_AUTHOR_QUORA_OR_TIKTOK,
     email: author.WWW_AUTHOR_EMAIL
-  },
+  } as SocialLinksInfo,
   jobTitle: author.WWW_AUTHOR_OCCUPATION,
   company: author.AUTHOR_WORKS_FOR,
 };
 
+// --- Dynamic Flag Imports ---
+// Get all unique country codes from author data
+const countryCodes = [
+  author.WWW_AUTHOR_LANGUAGE1_COUNTRY_CODE,
+  author.WWW_AUTHOR_LANGUAGE2_COUNTRY_CODE,
+  author.WWW_AUTHOR_LANGUAGE3_COUNTRY_CODE,
+  author.WWW_AUTHOR_LANGUAGE4_COUNTRY_CODE,
+  author.WWW_AUTHOR_LANGUAGE5_COUNTRY_CODE,
+  author.WWW_AUTHOR_LANGUAGE6_COUNTRY_CODE
+].filter(code => code && code.trim()); // Filter out empty codes
+
+// Dynamically import flags for all country codes
+const flagModule = await import('country-flag-icons/string/3x2');
+const countryCodeToFlag = Object.fromEntries(
+  countryCodes.map(code => [code, flagModule[code]])
+);
+
 // --- Data for Layout Sections & UI Text ---
-const languagesData = [
-  { name: "Slovenian", flag: SI },
-  { name: "English", flag: GB },
-  { name: "German", flag: DE },
-  { name: "Croatian", flag: HR },
-  { name: "Serbian", flag: RS }
-];
+const languagesData: LanguageInfo[] = [
+  { name: author.WWW_AUTHOR_LANGUAGE1, flag: countryCodeToFlag[author.WWW_AUTHOR_LANGUAGE1_COUNTRY_CODE] },
+  { name: author.WWW_AUTHOR_LANGUAGE2, flag: countryCodeToFlag[author.WWW_AUTHOR_LANGUAGE2_COUNTRY_CODE] },
+  { name: author.WWW_AUTHOR_LANGUAGE3, flag: countryCodeToFlag[author.WWW_AUTHOR_LANGUAGE3_COUNTRY_CODE] },
+  { name: author.WWW_AUTHOR_LANGUAGE4, flag: countryCodeToFlag[author.WWW_AUTHOR_LANGUAGE4_COUNTRY_CODE] },
+  { name: author.WWW_AUTHOR_LANGUAGE5, flag: countryCodeToFlag[author.WWW_AUTHOR_LANGUAGE5_COUNTRY_CODE] },
+  { name: author.WWW_AUTHOR_LANGUAGE6, flag: countryCodeToFlag[author.WWW_AUTHOR_LANGUAGE6_COUNTRY_CODE] }
+].filter(lang => lang.name && lang.name.trim() && lang.flag); // Filter out empty languages and missing flags
 
 // Define keywords for the page
 const pageKeywords = [
@@ -109,22 +165,19 @@ const pageKeywords = [
 ].join(', ');
 
 // --- Data for Layout Sections & UI Text ---
-const layoutStringsData = {
-  // Using author data for personalized strings
+const layoutStringsData: LayoutStrings = { 
   baseLayoutDescriptionPrefix: author.AUTHOR_META_SEO,
-  authorImageAltText: `${author.WWW_AUTHOR} — ${author.EEAT_NAME_20} | ${www.PAGE_ORGANISATION_FULL_NAME}`,
-  
   // Using common data for social media labels
   socialLinkLabelLinkedIn: common.AUTHOR_LINKEDIN_LABEL,
   socialLinkLabelTwitter: author.WWW_AUTHOR_X.includes('facebook') ? common.AUTHOR_FACEBOOK_LABEL : common.AUTHOR_TWITTER_LABEL,
   socialLinkLabelWebsite: common.AUTHOR_WEBSITE_LABEL,
   socialLinkLabelEmail: www.M_EMAIL,
   jobTitleAtCompanySeparator: " — ",
-  
+
   // Using common data for section titles and icons
   languagesSectionTitle: common.AUTHOR_LANGUAGE_LABEL,
   languagesSectionIcon: "🌍",
-  
+
   // Using author data for footer links
   footerLinkAllAuthorsText: common.AUTHOR_OTHER_AUTHORS,
   footerLinkAllAuthorsUrl: getAbsoluteUrl(`/${author.EEAT_URL_20}`),
@@ -140,7 +193,7 @@ const webpageSchema = {
   "name": author.WWW_AUTHOR,
   "url": getAbsoluteUrl(`/${author.EEAT_URL_20}/${author.WWW_AUTHOR_NUMBER}-${author.WWW_AUTHOR_SLUG}`),
   "description": author.AUTHOR_META_SEO,
-  "inLanguage": author.PAGE_LOCALE,
+  "inLanguage": `${author.M_LANGUAGE_ISO}-${author.M_COUNTRY_CODE}`,
   "breadcrumb": {
     "@type": "BreadcrumbList",
     "itemListElement": [
@@ -165,7 +218,7 @@ const webpageSchema = {
     ]
   },
   "mainEntity": {
-    "@type": "Article",
+    "@type": "Article", // Semantically, an author page is more of a ProfilePage or AboutPage, but Article is used here.
     "headline": author.WWW_AUTHOR,
     "description": author.AUTHOR_META_SEO,
     "image": getAbsoluteUrl(author.AUTHOR_OG_IMAGE_PATH),
@@ -175,7 +228,7 @@ const webpageSchema = {
     },
     "datePublished": `${author.AUTHOR_DATE_PUBLISHED}T${author.AUTHOR_HOUR_PUBLISHED}+02:00`,
     "dateModified": `${author.AUTHOR_DATE_UPDATED}T${author.AUTHOR_HOUR_UPDATED}+02:00`,
-    "inLanguage": author.PAGE_LOCALE
+    "inLanguage": `${author.M_LANGUAGE_ISO}-${author.M_COUNTRY_CODE}`
   }
 };
 
@@ -194,7 +247,7 @@ const personSchema = {
     author.WWW_AUTHOR_YOUTUBE,
     author.WWW_AUTHOR_QUORA_OR_TIKTOK,
     `mailto:${author.WWW_AUTHOR_EMAIL}`
-  ],
+  ].filter(Boolean),
   "email": author.WWW_AUTHOR_EMAIL,
   "jobTitle": author.WWW_AUTHOR_OCCUPATION,
   "worksFor": {
@@ -213,7 +266,7 @@ const personSchema = {
     { "@type": "Language", "name": author.WWW_AUTHOR_LANGUAGE3 },
     { "@type": "Language", "name": author.WWW_AUTHOR_LANGUAGE4 },
     { "@type": "Language", "name": author.WWW_AUTHOR_LANGUAGE5 }
-  ].filter(lang => lang.name.trim()),
+  ].filter(lang => lang.name && lang.name.trim()),
   "disambiguatingDescription": author.AUTHOR_FULL_BIO
 };
 
@@ -253,17 +306,14 @@ const organizationSchema = {
     www.PAGE_YOUTUBE_URL,
     www.PAGE_PINTEREST_URL,
     www.PAGE_BLUESKY_URL
+  ].filter(Boolean),
+  "areaServed": [
+    {
+      "@type": "Country",
+      "name": author.M_COUNTRY,
+      "identifier": author.M_COUNTRY_CODE
+    }
   ],
-  "areaServed": {
-    "@type": "Country",
-    "name": author.M_COUNTRY,
-    "identifier": author.M_COUNTRY_CODE
-  },
-  "areaServed": {
-    "@type": "Country",
-    "name": www.M_COUNTRY,
-    "identifier": www.M_COUNTRY_CODE
-  },
   "potentialAction": [
     {
       "@type": "ViewAction",
@@ -305,23 +355,140 @@ const organizationSchema = {
 };
 
 // Combine all schemas
-const schema = [webpageSchema, personSchema, organizationSchema];
+const combinedSchema = [webpageSchema, personSchema, organizationSchema];
 ---
 
-<AuthorLayout
+<BaseLayout
   languageIso={languageIso}
   countryCode={countryCode}
   contentOrientation={contentOrientation}
-  name={authorProfileData.name}
-  description={authorProfileData.description}
-  image={authorProfileData.image}
-  imageAltText={authorProfileData.imageAltText}
-  ogImage={author.AUTHOR_OG_IMAGE_PATH}
+  title={authorProfileData.seoTitle}
+  description={layoutStringsData.baseLayoutDescriptionPrefix}
+  ogImage={authorProfileData.ogImage}
   keywords={pageKeywords}
-  socialLinks={authorProfileData.socialLinks}
-  jobTitle={authorProfileData.jobTitle}
-  company={authorProfileData.company}
-  languages={languagesData}
-  layoutStrings={layoutStringsData}
-  schema={schema}
-/>
+  schema={combinedSchema}
+>
+  <!-- Dark Hero Section -->
+  <div class="bg-black text-white py-16">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row items-center gap-8">
+        <!-- Author Image -->
+        <div class="md:w-1/3 flex-shrink-0">
+          <div class="relative">
+            <div class="absolute inset-0 bg-signal-green/20 rounded-full blur-2xl"></div>
+            <img
+              src={authorProfileData.image}
+              alt={authorProfileData.imageAltText}
+              class="relative w-48 h-48 object-cover rounded-full border-4 border-signal-green shadow-xl"
+              width={200}
+              height={200}
+              fetchpriority="high"
+            />
+          </div>
+        </div>
+
+        <!-- Author Info -->
+        <div class="md:w-2/3">
+          <h1 class="text-4xl md:text-5xl font-bold mb-4">{authorProfileData.name}</h1>
+
+          {authorProfileData.jobTitle && (
+            <p class="text-xl text-signal-green mb-6">
+              {authorProfileData.jobTitle}{authorProfileData.company && `${layoutStringsData.jobTitleAtCompanySeparator}${authorProfileData.company}`}
+            </p>
+          )}
+
+          <!-- Social Links -->
+          <div class="flex items-center space-x-4 mb-6">
+            {authorProfileData.socialLinks.linkedin && (
+              <a href={authorProfileData.socialLinks.linkedin} class="text-gray-400 hover:text-signal-green transition-colors" target="_blank" rel="noopener">
+                <span class="sr-only">{layoutStringsData.socialLinkLabelLinkedIn}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+              </a>
+            )}
+
+            {authorProfileData.socialLinks.twitter && (
+              <a href={authorProfileData.socialLinks.twitter} class="text-gray-400 hover:text-signal-green transition-colors" target="_blank" rel="noopener">
+                <span class="sr-only">{layoutStringsData.socialLinkLabelTwitter}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><g fill="currentColor"><path d="M1 2h2.5L3.5 2h-2.5zM5.5 2h2.5L7.2 2h-2.5z"><animate fill="freeze" attributeName="d" dur="0.48s" values="M1 2h2.5L3.5 2h-2.5zM5.5 2h2.5L7.2 2h-2.5z;M1 2h2.5L18.5 22h-2.5zM5.5 2h2.5L23 22h-2.5z"/></path><path d="M3 2h5v0h-5zM16 22h5v0h-5z"><animate fill="freeze" attributeName="d" begin="0.48s" dur="0.48s" values="M3 2h5v0h-5zM16 22h5v0h-5z;M3 2h5v2h-5zM16 22h5v-2h-5z"/></path><path d="M18.5 2h3.5L22 2h-3.5z"><animate fill="freeze" attributeName="d" begin="0.6s" dur="0.48s" values="M18.5 2h3.5L22 2h-3.5z;M18.5 2h3.5L5 22h-3.5z"/></path></g></svg>
+              </a>
+            )}
+
+            {authorProfileData.socialLinks.website && (
+              <a href={authorProfileData.socialLinks.website} class="text-gray-400 hover:text-signal-green transition-colors" target="_blank" rel="noopener">
+                <span class="sr-only">{layoutStringsData.socialLinkLabelWebsite}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm1 16.057v-3.057h2.994c-.059 1.143-.212 2.24-.456 3.279-.823-.12-1.674-.188-2.538-.222zm1.957 2.162c-.499 1.33-1.159 2.497-1.957 3.456v-3.62c.666.028 1.319.081 1.957.164zm-1.957-7.219v-3.015c.868-.034 1.721-.103 2.548-.224.238 1.027.389 2.111.446 3.239h-2.994zm0-5.014v-3.661c.806.969 1.471 2.15 1.971 3.496-.642.084-1.3.137-1.971.165zm2.703-3.267c1.237.496 2.354 1.228 3.29 2.146-.642.234-1.311.442-2.019.607-.344-.992-.775-1.91-1.271-2.753zm-7.241 13.56c-.244-1.039-.398-2.136-.456-3.279h2.994v3.057c-.865.034-1.714.102-2.538.222zm2.538 1.776v3.62c-.798-.959-1.458-2.126-1.957-3.456.638-.083 1.291-.136 1.957-.164zm-2.994-7.055c.057-1.128.207-2.212.446-3.239.827.121 1.68.19 2.548.224v3.015h-2.994zm1.024-5.179c.5-1.346 1.165-2.527 1.97-3.496v3.661c-.671-.028-1.329-.081-1.97-.165zm-2.005-.35c-.708-.165-1.377-.373-2.018-.607.937-.918 2.053-1.65 3.29-2.146-.496.844-.927 1.762-1.272 2.753zm-.549 1.918c-.264 1.151-.434 2.36-.492 3.611h-3.933c.165-1.658.739-3.197 1.617-4.518.88.361 1.816.67 2.808.907zm.009 9.262c-.988.236-1.92.542-2.797.9-.89-1.328-1.471-2.879-1.637-4.551h3.934c.058 1.265.231 2.488.5 3.651zm.553 1.917c.342.976.768 1.881 1.257 2.712-1.223-.49-2.326-1.211-3.256-2.115.636-.229 1.299-.435 1.999-.597zm9.924 0c.7.163 1.362.367 1.999.597-.931.903-2.034 1.625-3.257 2.116.489-.832.915-1.737 1.258-2.713zm.553-1.917c.27-1.163.442-2.386.501-3.651h3.934c-.167 1.672-.748 3.223-1.638 4.551-.877-.358-1.81-.664-2.797-.9zm.501-5.651c-.058-1.251-.229-2.46-.492-3.611.992-.237 1.929-.546 2.809-.907.877 1.321 1.451 2.86 1.616 4.518h-3.933z"/></svg>
+              </a>
+            )}
+
+            {authorProfileData.socialLinks.email && (
+              <a href={`mailto:${authorProfileData.socialLinks.email}`} class="text-gray-400 hover:text-signal-green transition-colors" target="_blank" rel="noopener">
+                <span class="sr-only">{layoutStringsData.socialLinkLabelEmail}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><mask id="lineMdEmailArrowUpTwotone0"><g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="64" stroke-dashoffset="64" d="M4 5h16c.55 0 1 .45 1 1v12c0 .55-.45 1-1 1H4c-.55 0-1-.45-1-1V6c0-.55.45-1 1-1Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur=".72s" values="64;0"/></path><path stroke-dasharray="24" stroke-dashoffset="24" d="M3 6.5l9 5.5l9-5.5"><animate fill="freeze" attributeName="stroke-dashoffset" begin=".72s" dur=".24s" values="24;0"/></path><path fill="#fff" fill-opacity="0" stroke="none" d="M12 11l-8-5h16l-8 5Z"><animate fill="freeze" attributeName="fill-opacity" begin="1.44s" dur=".18s" values="0;.25"/></path><path fill="#000" fill-opacity="0" stroke="none" d="M19 13c3.31 0 6 2.69 6 6c0 3.31-2.69 6-6 6c-3.31 0-6-2.69-6-6c0-3.31 2.69-6 6-6Z"><set fill="freeze" attributeName="fill-opacity" begin=".96s" to="1"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M19 21v-5"><animate fill="freeze" attributeName="stroke-dashoffset" begin=".96s" dur=".24s" values="6;0"/></path><path stroke-dasharray="4" stroke-dashoffset="4" d="M19 16l2 2M19 16l-2 2"><animate fill="freeze" attributeName="stroke-dashoffset" begin="1.2s" dur=".24s" values="4;0"/></path></g></mask><rect width="24" height="24" fill="currentColor" mask="url(#lineMdEmailArrowUpTwotone0)"/></svg>
+              </a>
+            )}
+             {/* Placeholder for Instagram, YouTube, Quora if SVGs are added */}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Section -->
+  <div class="container mx-auto px-4 py-12">
+    <div class="max-w-4xl mx-auto">
+      <!-- Description Card (Author's Bio) -->
+      <div class="bg-black text-white p-8 rounded-xl mb-12 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-signal-green/10 rounded-full blur-3xl"></div>
+        <div class="relative z-10">
+          <p class="text-gray-300 leading-relaxed">{authorProfileData.description}</p>
+        </div>
+      </div>
+
+      <!-- Languages Section -->
+      {languagesData && languagesData.length > 0 && (
+        <div class="bg-black rounded-xl p-8 shadow-lg relative overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-br from-signal-green/10 to-transparent"></div>
+          <div class="relative z-10">
+            <h2 class="text-2xl font-semibold mb-8 flex items-center text-white">
+              <span class="text-signal-green mr-3">{layoutStringsData.languagesSectionIcon}</span>
+              {layoutStringsData.languagesSectionTitle}
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {languagesData.map((language) => (
+                <div class="bg-gray-900/50 backdrop-blur-sm rounded-lg p-4 border border-gray-800 hover:border-signal-green transition-all duration-300 group flex items-center">
+                  <span class="w-8 h-6 mr-3" set:html={language.flag}></span>
+                  <h3 class="text-white font-semibold text-lg">{language.name}</h3>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <!-- Footer Links -->
+      <div class="mt-12 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-gray-200 pt-8">
+        <a href={layoutStringsData.footerLinkAllAuthorsUrl} class="text-signal-dark hover:text-signal-green transition-colors">
+          {layoutStringsData.footerLinkAllAuthorsText}
+        </a>
+        <a href={layoutStringsData.footerLinkEditorialPolicyUrl} class="text-signal-dark hover:text-signal-green transition-colors">
+          {layoutStringsData.footerLinkEditorialPolicyText}
+        </a>
+      </div>
+
+      {/* Slot for any additional content specific to an author page, if needed in the future */}
+      <slot />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  /* Smooth animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .container { /* Applied to outer container, not each section individually for better performance */
+    animation: fadeIn 0.5s ease-out;
+  }
+</style>

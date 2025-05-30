@@ -1,8 +1,53 @@
 ---
-import HomepageLayout from '../layouts/HomepageLayout.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
 import homeData from '../data/home.json';
 import wwwData from '../data/www.json';
 import commonData from '../data/common.json';
+
+// --- Interface Definitions  ---
+interface HeroData {
+  title: string;
+  subtitle: string;
+  ctaText: string;
+  ctaLink: string;
+  features: string[];
+  socialProof: {
+    text: string;
+    rating: number; 
+    userPhotos: string[];
+  };
+  ogImage?: string;
+}
+
+interface Product {
+  title: string;
+  image: string;
+  url: string;
+}
+
+interface FeatureItem {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+interface MarqueeItem {
+  url: string;
+  image: string;
+  alt: string;
+}
+
+interface FormAlerts {
+  invalidEmail: string;
+  termsNotAccepted: string;
+  submissionSuccess: string;
+  submissionError: string;
+}
 
 // Get the first (and only) object from each JSON array
 const home = homeData[0];
@@ -10,16 +55,16 @@ const www = wwwData[0];
 const common = commonData[0];
 
 // Helper function for absolute URLs
-const getAbsoluteUrl = (path) => {
+const getAbsoluteUrl = (path: string) => {
   return new URL(path, Astro.url.origin).toString();
 };
 
 // Get language data
-const languageIso = home.M_LANGUAGE_ISO;
-const countryCode = home.M_COUNTRY_CODE;
+const languageIso: string = home.M_LANGUAGE_ISO;
+const countryCode: string = home.M_COUNTRY_CODE;
 
 // Find matching content orientation from common.json
-const contentOrientation = commonData.find(item => 
+const contentOrientation: string = commonData.find(item => 
   item.M_LANGUAGE_ISO === languageIso && 
   item.M_COUNTRY_CODE === countryCode
 )?.M_CONTENT_ORIENTATION || 'ltr'; // Default to 'ltr' if no match found
@@ -27,7 +72,7 @@ const contentOrientation = commonData.find(item =>
 // --- Data for the Homepage ---
 
 // Hero section data
-const heroData = {
+const heroData: HeroData = {
   title: home.HOME_H1,
   subtitle: home.HOME_SUBTITLE,
   ogImage: home.HOME_OG_IMAGE_PATH,
@@ -52,16 +97,16 @@ const heroData = {
 };
 
 // Define keywords for the page
-const pageKeywords = [
+const pageKeywords: string = [
   home.M_HOME_NAME,
   www.M_COUNTRY_NATIVE,
   www.PAGE_ORGANISATION_FULL_NAME
 ].join(', ');
 
 // Marquee items data
-const marqueeItems = [
+const marqueeItems: MarqueeItem[] = [ 
   { 
-    url: home.HOME_BESTSELLER_NAME_1, 
+    url: home.HOME_BESTSELLER_PATH_1,
     image: home.HOME_BESTSELLER_IMAGE_PATH_1,
     alt: home.HOME_BESTSELLER_NAME_1
   },
@@ -88,7 +133,7 @@ const marqueeItems = [
 ];
 
 // Bestsellers section data
-const bestsellersSection = {
+const bestsellersSection = { 
   title: home.HOME_H2_1,
   productCtaText: home.HOME_HERO_BUTTON,
   products: [
@@ -137,7 +182,7 @@ const bestsellersSection = {
       image: home.HOME_BESTSELLER_IMAGE_PATH_9,
       url: home.HOME_BESTSELLER_PATH_9
     }
-  ]
+  ] as Product[]
 };
 
 // Features section data
@@ -159,7 +204,7 @@ const featuresSection = {
       title: home.HOME_STRING_16,
       description: home.HOME_STRING_19
     }
-  ]
+  ] as FeatureItem[] 
 };
 
 // Institutions section data
@@ -179,71 +224,26 @@ const institutionsSection = {
 const faqSection = {
   title: home.HOME_H2_5,
   items: [
-    {
-      question: home.HOME_Q1,
-      answer: home.HOME_A1
-    },
-    {
-      question: home.HOME_Q2,
-      answer: home.HOME_A2
-    },
-    {
-      question: home.HOME_Q3,
-      answer: home.HOME_A3
-    },
-    {
-      question: home.HOME_Q4,
-      answer: home.HOME_A4
-    },
-    {
-      question: home.HOME_Q5,
-      answer: home.HOME_A5
-    },
-    {
-      question: home.HOME_Q6,
-      answer: home.HOME_A6
-    },
-    {
-      question: home.HOME_Q7,
-      answer: home.HOME_A7
-    },
-    {
-      question: home.HOME_Q8,
-      answer: home.HOME_A8
-    },
-    {
-      question: home.HOME_Q9,
-      answer: home.HOME_A9
-    },
-    {
-      question: home.HOME_Q10,
-      answer: home.HOME_A10
-    },
-    {
-      question: home.HOME_Q11,
-      answer: home.HOME_A11
-    },
-    {
-      question: home.HOME_Q12,
-      answer: home.HOME_A12
-    },
-    {
-      question: home.HOME_Q13,
-      answer: home.HOME_A13
-    },
-    {
-      question: home.HOME_Q14,
-      answer: home.HOME_A14
-    },
-    {
-      question: home.HOME_Q15,
-      answer: home.HOME_A15
-    }
-  ]
+    { question: home.HOME_Q1, answer: home.HOME_A1 },
+    { question: home.HOME_Q2, answer: home.HOME_A2 },
+    { question: home.HOME_Q3, answer: home.HOME_A3 },
+    { question: home.HOME_Q4, answer: home.HOME_A4 },
+    { question: home.HOME_Q5, answer: home.HOME_A5 },
+    { question: home.HOME_Q6, answer: home.HOME_A6 },
+    { question: home.HOME_Q7, answer: home.HOME_A7 },
+    { question: home.HOME_Q8, answer: home.HOME_A8 },
+    { question: home.HOME_Q9, answer: home.HOME_A9 },
+    { question: home.HOME_Q10, answer: home.HOME_A10 },
+    { question: home.HOME_Q11, answer: home.HOME_A11 },
+    { question: home.HOME_Q12, answer: home.HOME_A12 },
+    { question: home.HOME_Q13, answer: home.HOME_A13 },
+    { question: home.HOME_Q14, answer: home.HOME_A14 },
+    { question: home.HOME_Q15, answer: home.HOME_A15 }
+  ] as FaqItem[] // Type assertion
 };
 
 // Contact section data
-const contactSection = {
+const contactSection = { // Type assertion can be added
   title: home.HOME_H2_6,
   subtitle: home.HOME_CONTACT_SUBTITLE,
   formLabels: {
@@ -251,7 +251,7 @@ const contactSection = {
     fullNamePlaceholder: common.M_FULLNAME_PLACEHOLDER,
     email: common.M_EMAIL,
     emailPlaceholder: common.M_EMAIL_PLACEHOLDER,
-    message: common.M_MESSAGE,
+    message: common.M_MESSAGE_LABEL,
     messagePlaceholder: common.M_PARTNERSHIP_MESSAGE_PLACEHOLDER,
     terms: common.M_TERMS_REQUIRED,
     submitButton: common.M_SEND_BUTTON
@@ -259,7 +259,7 @@ const contactSection = {
 };
 
 // Form alert messages for client-side script
-const formAlertMessages = {
+const formAlertMessages: FormAlerts = { // Type assertion
   invalidEmail: common.M_EMAIL_INVALID,
   termsNotAccepted: common.M_TERMS_REQUIRED,
   submissionSuccess: common.M_CONFIRMATION_TEXT,
@@ -267,10 +267,6 @@ const formAlertMessages = {
 };
 
 // --- Schema Definition ---
-const currentDate = new Date();
-const formattedDate = currentDate.toISOString().split('T')[0];
-const formattedTime = currentDate.toTimeString().split(' ')[0];
-
 // WebPage and Article Schema
 const webpageSchema = {
   "@context": "https://schema.org",
@@ -278,7 +274,7 @@ const webpageSchema = {
   "name": home.HOME_H1,
   "url": Astro.url.href,
   "description": home.HOME_META_SEO,
-  "inLanguage": home.PAGE_LOCALE,
+  "inLanguage": `${home.M_LANGUAGE_ISO}-${home.M_COUNTRY_CODE}`,
   "breadcrumb": {
     "@type": "BreadcrumbList",
     "itemListElement": [
@@ -301,7 +297,7 @@ const webpageSchema = {
     },
     "datePublished": `${home.DATE_PUBLISHED}T${home.HOUR_PUBLISHED}+02:00`,
     "dateModified": `${home.DATE_UPDATED}T${home.HOUR_UPDATED}+02:00`,
-    "inLanguage": home.PAGE_LOCALE
+    "inLanguage": `${home.M_LANGUAGE_ISO}-${home.M_COUNTRY_CODE}`
   }
 };
 
@@ -319,7 +315,7 @@ const faqSchema = {
   }))
 };
 
-// Organization Schema with dynamic links
+// Organization Schema 
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
@@ -404,24 +400,374 @@ const organizationSchema = {
 };
 
 // Combine all schemas
-const schema = [webpageSchema, faqSchema, organizationSchema];
+const schema: object[] | null = [webpageSchema, faqSchema, organizationSchema];
+
+// --- Props for BaseLayout (to be used directly in the template below) ---
+const pageTitle: string = home.HOME_H1;
+const pageDescription: string | undefined = home.HOME_META_SEO;
+const pageOgImage: string | undefined = home.HOME_OG_IMAGE_PATH;
 ---
 
-<HomepageLayout 
-  languageIso={languageIso}
-  countryCode={countryCode}
-  contentOrientation={contentOrientation}
-  title={home.HOME_H1}
-  description={home.HOME_META_SEO}
-  ogImage={home.HOME_OG_IMAGE_PATH}
-  keywords={pageKeywords}
-  heroData={heroData}
-  marqueeItems={marqueeItems}
-  bestsellersSection={bestsellersSection}
-  featuresSection={featuresSection}
-  institutionsSection={institutionsSection}
-  faqSection={faqSection}
-  contactSection={contactSection}
-  formAlerts={formAlertMessages}
+<BaseLayout 
+  languageIso={languageIso} 
+  countryCode={countryCode} 
+  contentOrientation={contentOrientation} 
+  title={pageTitle} 
+  description={pageDescription} 
+  ogImage={pageOgImage} 
+  keywords={pageKeywords} 
   schema={schema}
-/>
+>
+  <!-- Hero Section -->
+  <section class="bg-black text-white py-12">
+    <div class="container mx-auto px-4">
+      <div class="max-w-3xl">
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4">
+          {heroData.title}
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-300 mb-6 leading-relaxed">
+          {heroData.subtitle}
+        </p>
+        
+        <ul class="space-y-2 mb-6">
+          {heroData.features.map(feature => (
+            <li class="flex items-center gap-2">
+              <span class="text-signal-green">✓</span>
+              <span class="text-lg">{feature}</span>
+            </li>
+          ))}
+        </ul>
+        
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-8">
+          <div class="flex -space-x-3 mb-2 sm:mb-0">
+            {heroData.socialProof.userPhotos.map(photo => (
+              <img 
+                src={photo} 
+                alt="User" 
+                class="w-10 h-10 rounded-full border-2 border-black"
+                width="50"
+                height="50"
+                loading="lazy"
+                decoding="async"
+              />
+            ))}
+          </div>
+          <p class="text-lg text-signal-green">{heroData.socialProof.text}</p>
+        </div>
+        
+        <a 
+          href={heroData.ctaLink} 
+          class="inline-block bg-signal-green text-black font-semibold px-8 py-3 hover:bg-[#a5d429] transition-colors"
+        >
+          {heroData.ctaText}
+        </a>
+      </div>
+    </div>
+
+    <!-- Marquee Section -->
+    <div class="overflow-x-hidden width-100 relative mt-12">
+      <div class="pseo-marquee-container">
+        <div class="pseo-marquee">
+          <div class="pseo-marquee__group">
+            {[...Array(2)].map(() => (
+              <div class="flex gap-4">
+                {marqueeItems.map(item => (
+                  <a href={item.url}>
+                    <img 
+                      src={item.image} 
+                      alt={item.alt} 
+                      width= "50" 
+                      height= "50" 
+                    />
+                  </a>
+                ))}
+              </div>
+            ))}
+          </div>
+          <div aria-hidden="true" class="pseo-marquee__group">
+            {[...Array(2)].map(() => (
+              <div class="flex gap-4">
+                {marqueeItems.map(item => (
+                  <a href={item.url}>
+                    <img 
+                      src={item.image} 
+                      alt={item.alt}
+                      width= "50" 
+                      height= "50" 
+                    />
+                  </a>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bestsellers Section -->
+  <section id="best-sellers" class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-black mb-12 text-center">{bestsellersSection.title}</h2>
+      <div class="grid grid-cols-2 lg:grid-cols-3 gap-2">
+        {bestsellersSection.products.map(product => (
+          <div class="bg-white border border-gray-100 overflow-hidden group">
+            <a href={product.url} class="block">
+              <img 
+                src={product.image} 
+                alt={product.title}
+                class="w-full h-56 object-contain p-4"
+                width="225"
+                height="225"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="p-4 border-t border-gray-100">
+                <h3 class="font-medium text-black group-hover:text-signal-green transition-colors mb-4">
+                  {product.title}
+                </h3>
+                <span class="block w-full bg-black text-signal-green border border-signal-green py-2 px-4 hover:bg-signal-green hover:text-black transition-all text-center">
+                  {bestsellersSection.productCtaText}
+                </span>
+              </div>
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-black mb-12 text-center">{featuresSection.title}</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {featuresSection.items.map(feature => (
+          <div class="text-center p-6 bg-white rounded-lg shadow-sm">
+            <div class="text-4xl mb-4">{feature.icon}</div>
+            <h3 class="text-xl font-semibold mb-2">{feature.title}</h3>
+            <p class="text-gray-600">{feature.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Institutions Section -->
+  <section class="py-16 bg-black">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-white mb-12 text-center">
+        {institutionsSection.title}
+      </h2>
+      <div class="flex flex-wrap justify-center items-center gap-12">
+        {institutionsSection.items.map(institution => (
+          <div class="text-xl font-medium text-signal-green">
+            {institution}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-black mb-4 text-center">{faqSection.title}</h2>
+      <div class="max-w-3xl mx-auto space-y-4">
+        {faqSection.items.map(item => (
+          <details class="bg-gray-50 rounded-lg group">
+            <summary class="p-4 cursor-pointer font-medium flex items-center justify-between">
+              <span>{item.question}</span>
+              <svg 
+                class="w-5 h-5 transform transition-transform group-open:rotate-180" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </summary>
+            <div class="p-4 pt-0 text-gray-600">
+              {item.answer}
+            </div>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-black mb-4 text-center">{contactSection.title}</h2>
+      <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+        {contactSection.subtitle}
+      </p>
+
+      <div class="max-w-2xl mx-auto">
+        <form class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-1">{contactSection.formLabels.fullName}</label>
+            <input 
+              type="text" 
+              placeholder={contactSection.formLabels.fullNamePlaceholder}
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-signal-green focus:ring-1 focus:ring-signal-green" 
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-1">{contactSection.formLabels.email}</label>
+            <input 
+              type="email" 
+              placeholder={contactSection.formLabels.emailPlaceholder}
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-signal-green focus:ring-1 focus:ring-signal-green" 
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-1">{contactSection.formLabels.message}</label>
+            <textarea 
+              rows="4" 
+              placeholder={contactSection.formLabels.messagePlaceholder}
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-signal-green focus:ring-1 focus:ring-signal-green"
+              required
+            ></textarea>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="terms" required />
+            <label for="terms" class="text-sm text-gray-600">
+              {contactSection.formLabels.terms}
+            </label>
+          </div>
+          <button 
+            type="submit" 
+            class="w-full bg-black text-signal-green border border-signal-green py-3 rounded-lg hover:bg-signal-green hover:text-black transition-all"
+          >
+            {contactSection.formLabels.submitButton}
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+.pseo-marquee-container {
+  --space: clamp(1rem, 2vw, 2rem);
+  --gap: var(--space);
+  --duration: 25s;
+  position: relative;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  padding: 20px 0;
+  box-sizing: border-box;
+}
+
+.pseo-marquee {
+  display: flex;
+  overflow: hidden;
+  user-select: none;
+  gap: var(--gap);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  mask-image: linear-gradient(
+    to right,
+    hsl(0 0% 0% / 0),
+    hsl(0 0% 0% / 1) 10%,
+    hsl(0 0% 0% / 1) 90%,
+    hsl(0 0% 0% / 0)
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    hsl(0 0% 0% / 0),
+    hsl(0 0% 0% / 1) 10%,
+    hsl(0 0% 0% / 1) 90%,
+    hsl(0 0% 0% / 0)
+  );
+}
+
+.pseo-marquee-container:hover .pseo-marquee__group {
+  animation-play-state: paused;
+}
+
+.pseo-marquee__group {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: var(--gap);
+  min-width: 100%;
+  animation: pseo-scroll var(--duration) linear infinite;
+  will-change: transform;
+  animation-play-state: running;
+}
+
+.pseo-marquee__group img {
+  max-width: clamp(8rem, 20vw, 20rem);
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 1rem;
+  width: 100%;
+  height: auto;
+  flex-shrink: 0;
+}
+
+@keyframes pseo-scroll {
+  0%{
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-100% - var(--gap)));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pseo-marquee__group {
+    animation-play-state: paused;
+  }
+}
+
+details > summary {
+  list-style: none;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
+</style>
+
+<script define:vars={{ alerts: formAlertMessages }}>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.querySelector('section.py-16.bg-gray-50 form');
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const emailInput = form.querySelector('input[type="email"]');
+      // Basic check, consider more robust validation
+      if (emailInput && (!emailInput.value || !emailInput.value.includes('@'))) { 
+        alert(alerts.invalidEmail); 
+        return;
+      }
+
+      const termsCheckbox = form.querySelector('#terms');
+      if (termsCheckbox && !termsCheckbox.checked) {
+        alert(alerts.termsNotAccepted);
+        return;
+      }
+
+      try {
+        // Form submission logic here (e.g., send data to a server)
+        // For now, we just show the success message
+        console.log('Form data would be submitted here.');
+        alert(alerts.submissionSuccess);
+        form.reset();
+      } catch (error) {
+        console.error('Form submission error:', error);
+        alert(alerts.submissionError);
+      }
+    });
+  }
+});
+</script>
