@@ -451,8 +451,8 @@ const tocHeadings = articleMetadata.headings.filter(heading => heading.depth >= 
       <div class="max-w-3xl animate-fade-in">
         <h1 class="text-4xl md:text-5xl font-bold mb-4">{articleMetadata.h1}</h1>
 
-        {articleMetadata.description && (
-          <p class="text-xl text-gray-300 mb-6">{articleMetadata.description}</p>
+        {article.ARTICLE_SUBTITLE && (
+          <p class="text-xl text-gray-300 mb-6">{article.ARTICLE_SUBTITLE}</p>
         )}
 
         <div class="flex flex-col sm:flex-row flex-wrap gap-2 sm:items-center">
