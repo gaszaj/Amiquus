@@ -8,6 +8,7 @@ import commonData from '../data/common.json';
 export interface SocialLinksInfo {
   linkedin?: string;
   facebook?: string;
+  github?: string;
   twitter?: string;
   website?: string;
   email?: string;
@@ -32,6 +33,7 @@ export interface LayoutStrings {
   baseLayoutDescriptionPrefix: string;
   socialLinkLabelLinkedIn: string;
   socialLinkLabelFacebook: string;
+  socialLinkLabelGithub: string;
   socialLinkLabelTwitter: string;
   socialLinkLabelWebsite: string;
   socialLinkLabelEmail: string;
@@ -71,6 +73,7 @@ interface AuthorData {
   AUTHOR_IMAGE_NAME_ASCII: string;
   WWW_AUTHOR_LINKEDIN: string;
   WWW_AUTHOR_FACEBOOK: string;
+  WWW_AUTHOR_GITHUB: string;
   WWW_AUTHOR_X: string;
   WWW_AUTHOR_WEBSITE: string;
   WWW_AUTHOR_INSTAGRAM: string;
@@ -138,6 +141,7 @@ const authorProfileData = {
   socialLinks: {
     linkedin: author.WWW_AUTHOR_LINKEDIN,
     facebook: author.WWW_AUTHOR_FACEBOOK,
+    github: author.WWW_AUTHOR_GITHUB,
     twitter: author.WWW_AUTHOR_X,
     website: author.WWW_AUTHOR_WEBSITE,
     instagram: author.WWW_AUTHOR_INSTAGRAM,
@@ -281,6 +285,7 @@ const personSchema = {
     author.WWW_AUTHOR_WEBSITE,
     author.WWW_AUTHOR_LINKEDIN,
     author.WWW_AUTHOR_FACEBOOK,
+    author.WWW_AUTHOR_GITHUB,
     author.WWW_AUTHOR_X,
     author.WWW_AUTHOR_INSTAGRAM,
     author.WWW_AUTHOR_YOUTUBE,
@@ -451,17 +456,17 @@ const combinedSchema = [webpageSchema, personSchema, organizationSchema];
               </a>
             )}
 
-            {authorProfileData.socialLinks.facebook && (
-              <a href={authorProfileData.socialLinks.facebook} class="text-gray-400 hover:text-signal-green transition-colors" target="_blank" rel="noopener">
-                <span class="sr-only">{layoutStringsData.socialLinkLabelFacebook}</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M15.725 22v-7.745h2.6l.389-3.018h-2.99V9.31c0-.874.243-1.47 1.497-1.47h1.598v-2.7a21 21 0 0 0-2.33-.12c-2.304 0-3.881 1.407-3.881 3.99v2.227H10v3.018h2.607V22H3.104C2.494 22 2 21.506 2 20.896V3.104C2 2.494 2.494 2 3.104 2h17.792C21.506 2 22 2.494 22 3.104v17.792c0 .61-.494 1.104-1.104 1.104z"/></svg>
+            {authorProfileData.socialLinks.github && (
+              <a href={authorProfileData.socialLinks.github} class="text-gray-400 hover:text-signal-green transition-colors" target="_blank" rel="noopener">
+                <span class="sr-only">{layoutStringsData.socialLinkLabelGithub}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M15 4.5c-0.39 -0.1 -1.33 -0.5 -3 -0.5c-1.67 0 -2.61 0.4 -3 0.5c-0.53 -0.43 -1.94 -1.5 -3.5 -1.5c-0.34 1 -0.29 2.22 0 3c-0.75 1 -1 2 -1 3.5c0 2.19 0.48 3.58 1.5 4.5c1.02 0.92 2.11 1.37 3.5 1.5c-0.65 0.54 -0.5 1.87 -0.5 2.5v4h6v-4c0 -0.63 0.15 -1.96 -0.5 -2.5c1.39 -0.13 2.48 -0.58 3.5 -1.5c1.02 -0.92 1.5 -2.31 1.5 -4.5c0 -1.5 -0.25 -2.5 -1 -3.5c0.29 -0.78 0.34 -2 0 -3c-1.56 0 -2.97 1.07 -3.5 1.5Z"><animate fill="freeze" attributeName="fill-opacity" begin="0.96s" dur="0.18s" values="0;0.25"/></path><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="32" stroke-dashoffset="32" d="M12 4c1.67 0 2.61 0.4 3 0.5c0.53 -0.43 1.94 -1.5 3.5 -1.5c0.34 1 0.29 2.22 0 3c0.75 1 1 2 1 3.5c0 2.19 -0.48 3.58 -1.5 4.5c-1.02 0.92 -2.11 1.37 -3.5 1.5c0.65 0.54 0.5 1.87 0.5 2.5c0 0.73 0 3 0 3M12 4c-1.67 0 -2.61 0.4 -3 0.5c-0.53 -0.43 -1.94 -1.5 -3.5 -1.5c-0.34 1 -0.29 2.22 0 3c-0.75 1 -1 2 -1 3.5c0 2.19 0.48 3.58 1.5 4.5c1.02 0.92 2.11 1.37 3.5 1.5c-0.65 0.54 -0.5 1.87 -0.5 2.5c0 0.73 0 3 0 3"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.84s" values="32;0"/></path><path stroke-dasharray="10" stroke-dashoffset="10" d="M9 19c-1.41 0 -2.84 -0.56 -3.69 -1.19c-0.84 -0.63 -1.09 -1.66 -2.31 -2.31"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.96s" dur="0.24s" values="10;0"/></path></g></svg>
               </a>
             )}
 
             {authorProfileData.socialLinks.twitter && (
               <a href={authorProfileData.socialLinks.twitter} class="text-gray-400 hover:text-signal-green transition-colors" target="_blank" rel="noopener">
                 <span class="sr-only">{layoutStringsData.socialLinkLabelTwitter}</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><g fill="currentColor"><path d="M1 2h2.5L3.5 2h-2.5zM5.5 2h2.5L7.2 2h-2.5z"><animate fill="freeze" attributeName="d" dur="0.48s" values="M1 2h2.5L3.5 2h-2.5zM5.5 2h2.5L7.2 2h-2.5z;M1 2h2.5L18.5 22h-2.5zM5.5 2h2.5L23 22h-2.5z"/></path><path d="M3 2h5v0h-5zM16 22h5v0h-5z"><animate fill="freeze" attributeName="d" begin="0.48s" dur="0.48s" values="M3 2h5v0h-5zM16 22h5v0h-5z;M3 2h5v2h-5zM16 22h5v-2h-5z"/></path><path d="M18.5 2h3.5L22 2h-3.5z"><animate fill="freeze" attributeName="d" begin="0.6s" dur="0.48s" values="M18.5 2h3.5L22 2h-3.5z;M18.5 2h3.5L5 22h-3.5z"/></path></g></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><g fill="currentColor"><path d="M1 2h2.5L3.5 2h-2.5zM5.5 2h2.5L7.2 2h-2.5z"><animate fill="freeze" attributeName="d" dur="0.48s" values="M1 2h2.5L3.5 2h-2.5zM5.5 2h2.5L7.2 2h-2.5z;M1 2h2.5L18.5 22h-2.5zM5.5 2h2.5L23 22h-2.5z"/></path><path d="M3 2h5v0h-5zM16 22h5v0h-5z"><animate fill="freeze" attributeName="d" begin="0.48s" dur="0.48s" values="24;0"/></path><path stroke-dasharray="14" stroke-dashoffset="14" d="M18.5 2h3.5L22 2h-3.5z"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.48s" values="14;0"/></path></g></svg>
               </a>
             )}
 
