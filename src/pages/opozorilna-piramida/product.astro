@@ -52,7 +52,7 @@ const productCoreData = {
   description: product.PRODUCT_META_SEO,
   price: product.M_PRODUCT_PRICE,
   ogImage: product.PRODUCT_OG_IMAGE_PATH,
-  image: product.PRODUCT_IMAGE_PATH,
+  image: product.PRODUCT_IMAGE_PATH_L,
   specifications: {
     dimensions: common.PRODUCT_SPECIFICATIONS_VALUE_1,
     material: common.PRODUCT_SPECIFICATIONS_VALUE_2,
@@ -82,12 +82,12 @@ const productFaqItems: FaqItemData[] = [
 ];
 
 const allAvailableProducts: RelatedProductInfo[] = [
-  { id: product.PRODUCT_RELATEDP1, title: "Opozorilna piramida ČIŠČENJE BAZENOV", image: "/productimg/bigger-350/triopan-čiščenje-bazenov.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/ciscenje-bazenov" },
-  { id: product.PRODUCT_RELATEDP2, title: "Opozorilna piramida OBVEZNA SMER LEVO", image: "/productimg/bigger-350/triopan-obvezna-smer-levo.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/obvezna-smer-levo" },
-  { id: product.PRODUCT_RELATEDP3, title: "Opozorilna piramida ZOŽENJE Z LEVE", image: "/productimg/bigger-350/triopan-zoženje-z-leve.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/zoženje-z-leve" },
-  { id: product.PRODUCT_RELATEDP4, title: "Opozorilna piramida PREPOVED USTAVLJANJA", image: "/productimg/bigger-350/triopan-prepoved-ustavljanja.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/prepoved-ustavljanja" },
-  { id: product.PRODUCT_RELATEDP5, title: "Opozorilna piramida KOŠNJA TRAVE", image: "/productimg/bigger-350/triopan-košnja-trave.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/kosnja-trave" },
-  { id: product.PRODUCT_RELATEDP6, title: "Opozorilna piramida KOLESARSKI IZPIT", image: "/productimg/bigger-350/triopan-kolesarski-izpit.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/kolesarski-izpit" }
+  { id: product.PRODUCT_RELATEDP1, title: "Opozorilna piramida ČIŠČENJE BAZENOV", image: "/productimg/l/triopan-čiščenje-bazenov.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/ciscenje-bazenov" },
+  { id: product.PRODUCT_RELATEDP2, title: "Opozorilna piramida OBVEZNA SMER LEVO", image: "/productimg/l/triopan-obvezna-smer-levo.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/obvezna-smer-levo" },
+  { id: product.PRODUCT_RELATEDP3, title: "Opozorilna piramida ZOŽENJE Z LEVE", image: "/productimg/l/triopan-zoženje-z-leve.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/zoženje-z-leve" },
+  { id: product.PRODUCT_RELATEDP4, title: "Opozorilna piramida PREPOVED USTAVLJANJA", image: "/productimg/l/triopan-prepoved-ustavljanja.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/prepoved-ustavljanja" },
+  { id: product.PRODUCT_RELATEDP5, title: "Opozorilna piramida KOŠNJA TRAVE", image: "/productimg/l/triopan-košnja-trave.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/kosnja-trave" },
+  { id: product.PRODUCT_RELATEDP6, title: "Opozorilna piramida KOLESARSKI IZPIT", image: "/productimg/l/triopan-kolesarski-izpit.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/kolesarski-izpit" }
 ];
 
 const filteredRelatedProducts = allAvailableProducts
@@ -178,7 +178,7 @@ const productSchema = {
   "@context": "https://schema.org/",
   "@type": "Product",
   "name": product.PRODUCT_H1,
-  "image": getAbsoluteUrl(product.PRODUCT_IMAGE_PATH),
+  "image": getAbsoluteUrl(product.PRODUCT_IMAGE_PATH_L),
   "mpn": product.PRODUCT_MPN,
   "category": product.PRODUCT_CATEGORY_1,
   "weight": {
@@ -253,12 +253,12 @@ const organizationSchema = {
   "keywords": [
     www.PAGE_ORGANISATION_FULL_NAME,
     www.M_COUNTRY_NATIVE,
-    www.PAGE_KEYWORD_1,
-    www.PAGE_KEYWORD_2,
-    www.PAGE_KEYWORD_3,
-    www.PAGE_KEYWORD_4,
-    www.PAGE_KEYWORD_5,
-    www.PAGE_KEYWORD_6
+    common.PAGE_KEYWORD_1,
+    common.PAGE_KEYWORD_2,
+    common.PAGE_KEYWORD_3,
+    common.PAGE_KEYWORD_4,
+    common.PAGE_KEYWORD_5,
+    common.PAGE_KEYWORD_6
   ],
   "description": www.PAGE_DESCRIPTION,
   "numberOfEmployees": {

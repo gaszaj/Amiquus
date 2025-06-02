@@ -297,8 +297,8 @@ const webpageSchema = {
       "@type": "Organization",
       "name": www.PAGE_ORGANISATION_FULL_NAME
     },
-    "datePublished": `${home.DATE_PUBLISHED}T${home.HOUR_PUBLISHED}+02:00`,
-    "dateModified": `${home.DATE_UPDATED}T${home.HOUR_UPDATED}+02:00`,
+    "datePublished": `${home.HOME_DATE_PUBLISHED}T${home.HOME_HOUR_PUBLISHED}+02:00`,
+    "dateModified": `${home.HOME_DATE_UPDATED}T${home.HOME_HOUR_UPDATED}+02:00`,
     "inLanguage": `${home.M_LANGUAGE_ISO}-${home.M_COUNTRY_CODE}`
   }
 };
@@ -328,12 +328,12 @@ const organizationSchema = {
   "keywords": [
     www.PAGE_ORGANISATION_FULL_NAME,
     www.M_COUNTRY_NATIVE,
-    www.PAGE_KEYWORD_1,
-    www.PAGE_KEYWORD_2,
-    www.PAGE_KEYWORD_3,
-    www.PAGE_KEYWORD_4,
-    www.PAGE_KEYWORD_5,
-    www.PAGE_KEYWORD_6
+    common.PAGE_KEYWORD_1,
+    common.PAGE_KEYWORD_2,
+    common.PAGE_KEYWORD_3,
+    common.PAGE_KEYWORD_4,
+    common.PAGE_KEYWORD_5,
+    common.PAGE_KEYWORD_6
   ],
   "description": www.PAGE_DESCRIPTION,
   "numberOfEmployees": {

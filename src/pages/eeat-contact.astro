@@ -28,8 +28,8 @@ const seoTitle = eeat.EEAT_NAME;
 const headline = eeat.EEAT_H1;
 const pageDescription = eeat.EEAT_META_SEO;
 const pageogImage = eeat.EEAT_OG_IMAGE_PATH;
-const articlePublishDate = eeat.DATE_PUBLISHED;
-const articleUpdateDate = eeat.DATE_UPDATED;
+const articlePublishDate = eeat.EEAT_DATE_PUBLISHED;
+const articleUpdateDate = eeat.EEAT_DATE_UPDATED;
 const publishedTextLabel = common.M_PUBLISHED;
 const updatedTextLabel = common.M_UPDATED;
 const articleDateLocale = `${eeat.M_LANGUAGE_ISO}-${eeat.M_COUNTRY_CODE}`;
@@ -100,8 +100,8 @@ const webpageSchema = {
       "@type": "Organization",
       "name": www.PAGE_ORGANISATION_FULL_NAME
     },
-    "datePublished": `${articlePublishDate}T${eeat.HOUR_PUBLISHED}+02:00`,
-    "dateModified": `${articleUpdateDate}T${eeat.HOUR_UPDATED}+02:00`,
+    "datePublished": `${articlePublishDate}T${eeat.EEAT_HOUR_PUBLISHED}+02:00`,
+    "dateModified": `${articleUpdateDate}T${eeat.EEAT_HOUR_UPDATED}+02:00`,
     "inLanguage": articleDateLocale
   }
 };
@@ -117,12 +117,12 @@ const organizationSchema = {
   "keywords": [
     www.PAGE_ORGANISATION_FULL_NAME,
     www.M_COUNTRY_NATIVE,
-    www.PAGE_KEYWORD_1,
-    www.PAGE_KEYWORD_2,
-    www.PAGE_KEYWORD_3,
-    www.PAGE_KEYWORD_4,
-    www.PAGE_KEYWORD_5,
-    www.PAGE_KEYWORD_6
+    common.PAGE_KEYWORD_1,
+    common.PAGE_KEYWORD_2,
+    common.PAGE_KEYWORD_3,
+    common.PAGE_KEYWORD_4,
+    common.PAGE_KEYWORD_5,
+    common.PAGE_KEYWORD_6
   ],
   "description": www.PAGE_DESCRIPTION,
   "numberOfEmployees": {

@@ -96,9 +96,9 @@ const contentOrientation = commonData.find(item =>
 
 // --- Article Specific Metadata ---
 const articleMetadata = {
-  seoTitle: article.ARTICLE_TITLE,
+  seoTitle: article.ARTICLE_PAGE_TITLE,
   h1: article.ARTICLE_H1,
-  description: article.ARTICLE_DESCRIPTION,
+  description: article.ARTICLE_META_SEO,
   ogImage: article.ARTICLE_OG_IMAGE_PATH,
   publishDate: article.ARTICLE_PUBLISH_DATE,
   updateDate: article.ARTICLE_UPDATE_DATE,
@@ -108,13 +108,13 @@ const articleMetadata = {
     image: article.ARTICLE_AUTHOR_IMAGE
   } as AuthorInfo,
   headings: [
-    { depth: 2, slug: article.ARTICLE_H1_ID, text: article.ARTICLE_H1 },
-    { depth: 3, slug: article.ARTICLE_H2_1_ID, text: article.ARTICLE_H2_1 },
-    { depth: 2, slug: article.ARTICLE_H2_2_ID, text: article.ARTICLE_H2_2 },
-    { depth: 3, slug: article.ARTICLE_H2_3_ID, text: article.ARTICLE_H2_3 },
-    { depth: 2, slug: article.ARTICLE_H2_4_ID, text: article.ARTICLE_H2_4 },
-    { depth: 2, slug: article.ARTICLE_H2_5_ID, text: article.ARTICLE_H2_5 },
-    { depth: 3, slug: article.ARTICLE_H2_6_ID, text: article.ARTICLE_H2_6 }
+    { depth: 2, slug: common.ARTICLE_H2_1_ID, text: article.ARTICLE_H2_1 },
+    { depth: 3, slug: common.ARTICLE_H2_2_ID, text: article.ARTICLE_H2_2 },
+    { depth: 2, slug: common.ARTICLE_H2_3_ID, text: article.ARTICLE_H2_3 },
+    { depth: 3, slug: common.ARTICLE_H2_4_ID, text: article.ARTICLE_H2_4 },
+    { depth: 2, slug: common.ARTICLE_H2_5_ID, text: article.ARTICLE_H2_5 },
+    { depth: 2, slug: common.ARTICLE_H2_6_ID, text: article.ARTICLE_H2_6 },
+    { depth: 2, slug: common.ARTICLE_H2_7_ID, text: article.ARTICLE_H2_7 }
   ] as HeadingInfo[]
 };
 
@@ -170,7 +170,7 @@ const allDomainArticles: RelatedArticleInfo[] = [
 const relatedArticlesForPage: RelatedArticlesContent = { // Structure matches RelatedArticlesContent
   title: common.ARTICLE_RELATED_ARTICLES,
   articles: allDomainArticles
-    .filter(articleItem => articleItem.title !== articleMetadata.h1) // Renamed 'article' to 'articleItem' to avoid conflict
+    .filter(articleItem => articleItem.title !== articleMetadata.h1)
     .slice(0, 9)
 };
 
@@ -188,37 +188,37 @@ const additionalSigns: AdditionalSign[] = [
     url: article.ARTICLE_ADD_SIGN_1_URL
   },
   {
-    image: "/productimg/triopan-pozor-viličar.webp",
+    image: "/productimg/s/triopan-pozor-viličar.webp",
     name: "Opozorilna piramida DELO NA CESTI 250m",
     url: "/si/opozorilna-piramida/delo-na-cesti-250m"
   },
   {
-    image: "/productimg/triopan-delo-na-cesti.webp",
+    image: "/productimg/s/triopan-delo-na-cesti.webp",
     name: "Opozorilna piramida DELO NA CESTI 500m",
     url: "/si/opozorilna-piramida/delo-na-cesti-500m"
   },
   {
-    image: "/productimg/triopan-parkirni-prostor.webp",
+    image: "/productimg/s/triopan-parkirni-prostor.webp",
     name: "Opozorilna piramida OBVOZ",
     url: "/si/opozorilna-piramida/obvoz"
   },
   {
-    image: "/productimg/triopan-šolska-pot.webp",
+    image: "/productimg/s/triopan-šolska-pot.webp",
     name: "Opozorilna piramida ŠOLSKA POT",
     url: "/si/opozorilna-piramida/šolska-pot"
   },
   {
-    image: "/productimg/triopan-zoženje-z-desne.webp",
+    image: "/productimg/s/triopan-zoženje-z-desne.webp",
     name: "Opozorilna piramida ZOŽENJE Z DESNE",
     url: "/si/opozorilna-piramida/zozenje-z-desne"
   },
   {
-    image: "/productimg/triopan-zoženje-z-leve.webp",
+    image: "/productimg/s/triopan-zoženje-z-leve.webp",
     name: "Opozorilna piramida ZOŽENJE Z LEVE",
     url: "/si/opozorilna-piramida/zozenje-z-leve"
   },
   {
-    image: "/productimg/triopan-omejitev-hitrosti-10.webp",
+    image: "/productimg/s/triopan-omejitev-hitrosti-10.webp",
     name: "Opozorilna piramida OMEJITEV HITROSTI",
     url: "/si/opozorilna-piramida/omejitev-hitrosti"
   }
@@ -226,7 +226,7 @@ const additionalSigns: AdditionalSign[] = [
 
 // --- FAQ Data Structure ---
 const faqSection: FaqSection = {
-  title: article.ARTICLE_H2_5,
+  title: article.ARTICLE_H2_6, // This text is used for the H2 of the FAQ section
   items: [
     {
       question: article.ARTICLE_FAQ_Q1,
@@ -245,7 +245,6 @@ const faqSection: FaqSection = {
 
 const productButtonText = common.ARTICLE_PRODUCT_BUTTON;
 const tableLinkText = common.ARTICLE_TABLE_LINK;
-// const ogImage = article.ARTICLE_OG_IMAGE_PATH; // This is now part of articleMetadata
 
 // --- Article Schema ---
 const articleSchema = {
@@ -314,12 +313,12 @@ const organizationSchema = {
   "keywords": [
     www.PAGE_ORGANISATION_FULL_NAME,
     www.M_COUNTRY_NATIVE,
-    www.PAGE_KEYWORD_1,
-    www.PAGE_KEYWORD_2,
-    www.PAGE_KEYWORD_3,
-    www.PAGE_KEYWORD_4,
-    www.PAGE_KEYWORD_5,
-    www.PAGE_KEYWORD_6
+    common.PAGE_KEYWORD_1,
+    common.PAGE_KEYWORD_2,
+    common.PAGE_KEYWORD_3,
+    common.PAGE_KEYWORD_4,
+    common.PAGE_KEYWORD_5,
+    common.PAGE_KEYWORD_6
   ],
   "description": www.PAGE_DESCRIPTION,
   "numberOfEmployees": {
@@ -388,57 +387,51 @@ const organizationSchema = {
 };
 
 // Combine all schemas
-const combinedSchema = [articleSchema, faqSchema, organizationSchema]; // Renamed to avoid conflict with schema prop for BaseLayout
+const combinedSchema = [articleSchema, faqSchema, organizationSchema];
 
-const mainContent = {
+const mainContent = { // Content for the main article body
   h1: {
-    id: article.ARTICLE_H1_ID,
     text: article.ARTICLE_H1,
     content: article.ARTICLE_MAIN_CONTENT_1
   },
   h2_1: {
-    id: article.ARTICLE_H2_1_ID,
     text: article.ARTICLE_H2_1,
     content: article.ARTICLE_MAIN_CONTENT_2,
     conclusion: article.ARTICLE_MAIN_CONTENT_3
   },
   h2_2: {
-    id: article.ARTICLE_H2_2_ID,
     text: article.ARTICLE_H2_2,
     content: article.ARTICLE_MAIN_CONTENT_4
   },
   h2_3: {
-    id: article.ARTICLE_H2_3_ID,
     text: article.ARTICLE_H2_3,
-    content: article.ARTICLE_MAIN_CONTENT_5 // This is also warningTrianglesText
-    // conclusion is not defined here in the original article.astro's mainContent object
+    content: article.ARTICLE_MAIN_CONTENT_5
   },
   h2_4: {
-    id: article.ARTICLE_H2_4_ID,
     text: article.ARTICLE_H2_4,
     content: article.ARTICLE_MAIN_CONTENT_6
   },
+  // h2_5 content is handled by faqSection structure
   h2_6: {
-    id: article.ARTICLE_H2_6_ID,
     text: article.ARTICLE_H2_6,
     content: article.ARTICLE_MAIN_CONTENT_7
   }
 };
 
-// Table headers 
+// Table headers
 const tableHeaders = {
-    image: article.ARTICLE_TABLE_HEADER_IMAGE,
-    name: article.ARTICLE_TABLE_HEADER_NAME,
-    link: article.ARTICLE_TABLE_HEADER_LINK
+    image: common.ARTICLE_TABLE_HEADER_IMAGE,
+    name: common.ARTICLE_TABLE_HEADER_NAME,
+    link: common.ARTICLE_TABLE_HEADER_LINK
 };
 
 
-// Generic Date Formatter 
+// Generic Date Formatter
 const formatDate = (dateString: string, locale: string, options: Intl.DateTimeFormatOptions) => {
   return new Date(dateString).toLocaleDateString(locale, options);
 };
 
-// Filter headings for TOC 
+// Filter headings for TOC
 const tocHeadings = articleMetadata.headings.filter(heading => heading.depth >= 2 && heading.depth <= 3);
 ---
 
@@ -527,137 +520,152 @@ const tocHeadings = articleMetadata.headings.filter(heading => heading.depth >= 
       <!-- Main article content container -->
       <article class="lg:w-3/5">
         <div class="prose prose-lg max-w-none">
-          <!-- Main article content -->
-          <h2 id={mainContent.h1.id}>{mainContent.h1.text}</h2>
-          <p>{mainContent.h1.content}</p>
 
-          <div class="fear-banner">
-            {article.ARTICLE_FEAR_BANNER}
-          </div>
-
-          <h3 id={mainContent.h2_1.id}>{mainContent.h2_1.text}</h3>
-          <p>{mainContent.h2_1.content}</p>
-
-          <div class="basic-signs-grid">
-            {basicSigns.map(sign => (
-              <div class="product-card">
-                <img
-                  src={sign.image}
-                  alt={sign.name}
-                  class="w-full h-48 object-contain p-4"
-                />
-                <div class="p-4 text-center product-card-content">
-                  <h4 class="font-medium text-signal-dark mb-4 product-title">{sign.name}</h4>
-                  <a
-                    href={sign.url}
-                    class="block w-full bg-black text-signal-green border border-signal-green font-medium py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center"
-                  >
-                    {productButtonText}
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <p>{mainContent.h2_1.conclusion}</p>
-
-          <h2 id={mainContent.h2_2.id}>{mainContent.h2_2.text}</h2>
-          <p>{mainContent.h2_2.content}</p>
-
-          <h3 id={mainContent.h2_3.id}>{mainContent.h2_3.text}</h3>
-          {/* mainContent.h2_3.content is not rendered here directly from mainContent object, but via warningTrianglesText below */}
-          {/* mainContent.h2_3.conclusion would be rendered here if it was defined in the mainContent object in the frontmatter */}
-          {mainContent.h2_3.conclusion && <p>{mainContent.h2_3.conclusion}</p>}
-
-
-          <div class="overflow-x-auto my-8">
-            <table class="w-full bg-white rounded-lg shadow-sm">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="p-4 text-left">{tableHeaders.image}</th>
-                  <th class="p-4 text-left">{tableHeaders.name}</th>
-                  <th class="p-4 text-left">{tableHeaders.link}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {additionalSigns.map((sign, index) => (
-                  <tr class={index % 2 === 0 ? 'bg-gray-50' : ''}>
-                    <td class="p-4">
-                      <img
-                        src={sign.image}
-                        alt={sign.name}
-                        class="w-20 h-20 object-contain"
-                      />
-                    </td>
-                    <td class="p-4 font-medium text-signal-dark">{sign.name}</td>
-                    <td class="p-4">
-                      <a
-                        href={sign.url}
-                        class="text-black underline decoration-signal-green hover:text-signal-green hover:decoration-black transition-colors"
-                      >
-                        {tableLinkText}
-                      </a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* This paragraph corresponds to the 'warningTrianglesText' prop from original ArticleLayout */}
-          <p>{article.ARTICLE_MAIN_CONTENT_5}</p>
-
-          <h2 id={mainContent.h2_4.id}>{mainContent.h2_4.text}</h2>
-          <p>{mainContent.h2_4.content}</p>
-
-          <div class="helpful-banner">
-            {article.ARTICLE_HELPFUL_BANNER}
-          </div>
-
-          <section class="faq-section" aria-labelledby="faq-heading">
-            <h2 id="faq-heading" class="faq-title">{faqSection.title}</h2>
-            <dl class="faq-list">
-              {faqSection.items.map(item => (
-                <div class="faq-item">
-                  <dt class="faq-question">{item.question}</dt>
-                  <dd class="faq-answer">
-                    <p>{item.answer}</p>
-                  </dd>
-                </div>
-              ))}
-            </dl>
+            <h2>{article.ARTICLE_H2_1}</h2>
+            <p>{mainContent.h1.content}</p>
+            <div class="fear-banner">
+              {article.ARTICLE_FEAR_BANNER}
+            </div>
           </section>
 
-          <h3 id={mainContent.h2_6.id}>{mainContent.h2_6.text}</h3>
-          {/* mainContent.h2_6.content is not rendered here directly from mainContent object, but via checkOfferText below */}
-          {/* This paragraph corresponds to the 'checkOfferText' prop from original ArticleLayout */}
-          <p>{article.ARTICLE_MAIN_CONTENT_7}</p>
-
-          <div class="basic-signs-grid">
-            {[...basicSigns, ...additionalSigns.slice(0, 3)].map(sign => (
-              <div class="product-card">
-                <img
-                  src={sign.image}
-                  alt={sign.name}
-                  class="w-full h-48 object-contain p-4"
-                  width={225}
-                  height={225}
-                />
-                <div class="p-4 text-center product-card-content">
-                  <h4 class="font-medium text-signal-dark mb-4 product-title">{sign.name}</h4>
-                  <a
-                    href={sign.url}
-                    class="block w-full bg-black text-signal-green border border-signal-green font-medium py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center"
-                  >
-                    {productButtonText}
-                  </a>
+          <section id={common.ARTICLE_H2_2_ID}>
+            <h3>{article.ARTICLE_H2_2}</h3>
+            <p>{mainContent.h2_1.content}</p>
+            <div class="basic-signs-grid">
+              {basicSigns.map(sign => (
+                <div class="product-card">
+                  <img
+                    src={sign.image}
+                    alt={sign.name}
+                    class="w-full h-48 object-contain p-4"
+                  />
+                  <div class="p-4 text-center product-card-content">
+                    <h4 class="font-medium text-signal-dark mb-4 product-title">{sign.name}</h4>
+                    <a
+                      href={sign.url}
+                      class="block w-full bg-black text-signal-green border border-signal-green font-medium py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center"
+                    >
+                      {productButtonText}
+                    </a>
+                  </div>
                 </div>
+              ))}
+            </div>
+            {mainContent.h2_1.conclusion && <p>{mainContent.h2_1.conclusion}</p>}
+          </section>
+
+          {/* Section for H2_2 (actual H2 tag in HTML) */}
+          <section id={common.ARTICLE_H2_3_ID}>
+            <h2>{article.ARTICLE_H2_3}</h2>
+            <p>{mainContent.h2_2.content}</p>
+          </section>
+
+          {/* Section for H2_3 (actual H3 tag in HTML) */}
+          <section id={common.ARTICLE_H2_4_ID}>
+            <h3>{article.ARTICLE_H2_4}</h3>
+            <div class="overflow-x-auto my-8">
+              <table class="w-full bg-white rounded-lg shadow-sm">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="p-4 text-left">{tableHeaders.image}</th>
+                    <th class="p-4 text-left">{tableHeaders.name}</th>
+                    <th class="p-4 text-left">{tableHeaders.link}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {additionalSigns.map((sign, index) => (
+                    <tr class={index % 2 === 0 ? 'bg-gray-50' : ''}>
+                      <td class="p-4">
+                        <img
+                          src={sign.image}
+                          alt={sign.name}
+                          class="w-20 h-20 object-contain"
+                        />
+                      </td>
+                      <td class="p-4 font-medium text-signal-dark">{sign.name}</td>
+                      <td class="p-4">
+                        <a
+                          href={sign.url}
+                          class="text-black underline decoration-signal-green hover:text-signal-green hover:decoration-black transition-colors"
+                        >
+                          {tableLinkText}
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p>{mainContent.h2_3.content}</p>
+            {mainContent.h2_3.conclusion && <p>{mainContent.h2_3.conclusion}</p>}
+          </section>
+
+          {/* Section for H2_4 (actual H2 tag in HTML) */}
+          <section id={common.ARTICLE_H2_5_ID}>
+            <h2>{article.ARTICLE_H2_5}</h2>
+            <p>{mainContent.h2_4.content}</p>
+            <div class="helpful-banner">
+              {article.ARTICLE_HELPFUL_BANNER}
+            </div>
+          </section>
+
+          {/* FAQ Section */}
+          <section id={common.ARTICLE_H2_6_ID} class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+              <h2 class="text-3xl font-bold text-black mb-4 text-center">{faqSection.title}</h2>
+              <div class="max-w-3xl mx-auto space-y-4">
+                {faqSection.items.map(item => (
+                  <details class="bg-gray-50 rounded-lg group">
+                    <summary class="p-4 cursor-pointer font-medium flex items-center justify-between">
+                      <span>{item.question}</span>
+                      <svg 
+                        class="w-5 h-5 transform transition-transform group-open:rotate-180 faq-chevron" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                      </svg>
+                    </summary>
+                    <div class="p-4 pt-0 text-gray-600">
+                      {item.answer}
+                    </div>
+                  </details>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          </section>
+
+          {/* Section for H2_6 (actual H3 tag in HTML) */}
+          <section id={common.ARTICLE_H2_7_ID}>
+            <h3>{article.ARTICLE_H2_7}</h3>
+            <p>{mainContent.h2_6.content}</p>
+            <div class="basic-signs-grid">
+              {[...basicSigns, ...additionalSigns.slice(0, 3)].map(sign => (
+                <div class="product-card">
+                  <img
+                    src={sign.image}
+                    alt={sign.name}
+                    class="w-full h-48 object-contain p-4"
+                    width={225}
+                    height={225}
+                  />
+                  <div class="p-4 text-center product-card-content">
+                    <h4 class="font-medium text-signal-dark mb-4 product-title">{sign.name}</h4>
+                    <a
+                      href={sign.url}
+                      class="block w-full bg-black text-signal-green border border-signal-green font-medium py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center"
+                    >
+                      {productButtonText}
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
         </div>
 
-        <!-- Editorial Policy Section -->
+        {/* Editorial Policy Section */}
         <section class="bg-black text-white rounded-xl p-8 my-12" aria-labelledby="editorial-policy-heading">
           <h3 id="editorial-policy-heading" class="text-2xl font-bold mb-4">{layoutContent.editorialPolicyContent.title}</h3>
           <p class="text-gray-300 mb-6">
@@ -671,19 +679,19 @@ const tocHeadings = articleMetadata.headings.filter(heading => heading.depth >= 
           </a>
         </section>
 
-        <!-- Disclaimer Section -->
+        {/* Disclaimer Section */}
         <aside class="bg-red-50 border border-red-100 rounded-xl p-6 mt-6">
           <p class="text-red-800 text-sm">
             {layoutContent.disclaimerContent.text}
           </p>
         </aside>
 
-        <!-- Related Articles Section -->
+        {/* Related Articles Section */}
         {relatedArticlesForPage.articles && relatedArticlesForPage.articles.length > 0 && (
            <section class="border-t border-gray-200 pt-12 mt-12" aria-labelledby="related-articles-heading">
             <h2 id="related-articles-heading" class="text-2xl font-bold mb-8">{relatedArticlesForPage.title}</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {relatedArticlesForPage.articles.map(relatedArticle => ( // Renamed to avoid conflict
+              {relatedArticlesForPage.articles.map(relatedArticle => (
                 <article class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                   <h3 class="font-semibold text-lg mb-2">
                     <a href={relatedArticle.url} class="text-signal-dark hover:text-signal-green transition-colors">
@@ -729,10 +737,10 @@ const tocHeadings = articleMetadata.headings.filter(heading => heading.depth >= 
     font-weight: 600;
   }
 
-  .toc-link.active:where([class*="border-l-4"]) {  
+  .toc-link.active:where([class*="border-l-4"]) {
     border-left-color: var(--signal-green);
   }
-  .toc-link.active:where([class*="border-l-2"]) { 
+  .toc-link.active:where([class*="border-l-2"]) {
     border-left-color: var(--signal-green);
   }
 
@@ -757,11 +765,11 @@ const tocHeadings = articleMetadata.headings.filter(heading => heading.depth >= 
   }
 
   /* FAQ section styles */
-  :global(.faq-section) {
+  :global(.faq-section) { /* This class is on the <section id={common.ARTICLE_H2_5_ID}> */
     @apply bg-gray-50 rounded-xl p-6 my-8;
   }
 
-  :global(.faq-section h2) { 
+  :global(.faq-section h2) { /* This targets the <h2 id="faq-section-title-for-aria"> */
     @apply text-2xl font-bold mb-6;
   }
 
@@ -769,7 +777,7 @@ const tocHeadings = articleMetadata.headings.filter(heading => heading.depth >= 
     @apply mb-4;
   }
 
-  :global(.faq-question) { 
+  :global(.faq-question) {
     @apply font-semibold text-lg mb-2;
   }
 
@@ -778,11 +786,11 @@ const tocHeadings = articleMetadata.headings.filter(heading => heading.depth >= 
   }
 
   /* Product grid styles */
-  :global(.product-grid) { 
+  :global(.product-grid) {
     @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 my-8;
   }
 
-  :global(.product-card) { 
+  :global(.product-card) {
     @apply bg-white rounded-lg shadow-md overflow-hidden border border-gray-200;
   }
 
@@ -794,11 +802,11 @@ const tocHeadings = articleMetadata.headings.filter(heading => heading.depth >= 
     @apply p-4;
   }
 
-  :global(.product-title) { 
+  :global(.product-title) {
     @apply font-medium text-lg mb-4;
   }
 
-  :global(.product-button) { 
+  :global(.product-button) {
     @apply inline-block w-full bg-black text-signal-green border border-signal-green font-medium py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center;
   }
 
@@ -807,11 +815,11 @@ const tocHeadings = articleMetadata.headings.filter(heading => heading.depth >= 
     @apply grid grid-cols-1 md:grid-cols-3 gap-6 my-8;
   }
 
-  :global(.basic-signs-grid .product-card) { 
+  :global(.basic-signs-grid .product-card) {
     @apply bg-white rounded-lg shadow-md overflow-hidden border border-gray-200;
   }
 
-  :global(.basic-signs-grid a) { 
+  :global(.basic-signs-grid a) {
     @apply block w-full bg-black text-signal-green border border-signal-green font-medium py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center;
   }
 
@@ -826,12 +834,27 @@ const tocHeadings = articleMetadata.headings.filter(heading => heading.depth >= 
     width: 100%;
     height: 100%;
   }
+
+  /* FAQ accordion styles */
+  details > summary {
+    list-style: none;
+  }
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* Specific style for FAQ chevron to override global SVG styles */
+  .faq-chevron {
+    width: 1.25rem !important; /* 20px */
+    height: 1.25rem !important; /* 20px */
+    flex-shrink: 0;
+  }
 </style>
 
 <script>
   // Highlight TOC items when scrolling to section
   document.addEventListener('DOMContentLoaded', () => {
-    const headings = Array.from(document.querySelectorAll('h2[id], h3[id], h4[id]')); // h4 might not be present in current structure
+    const headings = Array.from(document.querySelectorAll('h2[id], h3[id], h4[id]'));
     const tocLinks = Array.from(document.querySelectorAll('.toc-link'));
 
     if (headings.length > 0 && tocLinks.length > 0) {
