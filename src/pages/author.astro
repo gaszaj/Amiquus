@@ -70,7 +70,6 @@ interface AuthorData {
   PAGE_LOCALE: string;
   AUTHOR_OG_IMAGE_PATH: string;
   AUTHOR_PROFILE_IMAGE_PATH: string;
-  AUTHOR_IMAGE_NAME_ASCII: string;
   WWW_AUTHOR_LINKEDIN: string;
   WWW_AUTHOR_FACEBOOK: string;
   WWW_AUTHOR_GITHUB: string;
@@ -135,7 +134,7 @@ const authorProfileData = {
   name: author.WWW_AUTHOR,
   seoTitle: `${author.WWW_AUTHOR} — ${author.EEAT_NAME_20_SINGULAR}`,
   description: author.AUTHOR_FULL_BIO,
-  image: getAbsoluteUrl(`/authors/${author.AUTHOR_IMAGE_NAME_ASCII}`),
+  image: getAbsoluteUrl(author.AUTHOR_PROFILE_IMAGE_PATH),
   ogImage: author.AUTHOR_OG_IMAGE_PATH,
   imageAltText: `${author.WWW_AUTHOR} — ${author.EEAT_NAME_20_SINGULAR} | ${www.PAGE_ORGANISATION_FULL_NAME}`,
   socialLinks: {

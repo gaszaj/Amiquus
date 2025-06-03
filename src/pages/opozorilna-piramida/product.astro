@@ -108,7 +108,7 @@ const pageKeywords = [
   product.PRODUCT_KEYWORD_5,
   product.PRODUCT_KEYWORD_6,
   product.PRODUCT_KEYWORD_7,
-  www.M_COUNTRY_NATIVE,
+  common.M_COUNTRY_NATIVE,
   www.PAGE_ORGANISATION_FULL_NAME
 ].join(', ');
 
@@ -188,7 +188,7 @@ const productSchema = {
   },
   "keywords": [
     product.PRODUCT_NAME,
-    product.M_LANGUAGE_NATIVE,
+    common.M_LANGUAGE_NATIVE,
     product.PRODUCT_KEYWORD_1,
     product.PRODUCT_KEYWORD_2,
     product.PRODUCT_KEYWORD_3,
@@ -252,7 +252,7 @@ const organizationSchema = {
   "logo": getAbsoluteUrl(www.PAGE_LOGO_IMAGE_PATH_1),
   "keywords": [
     www.PAGE_ORGANISATION_FULL_NAME,
-    www.M_COUNTRY_NATIVE,
+    common.M_COUNTRY_NATIVE,
     common.PAGE_KEYWORD_1,
     common.PAGE_KEYWORD_2,
     common.PAGE_KEYWORD_3,
@@ -283,8 +283,8 @@ const organizationSchema = {
   ],
   "areaServed": {
     "@type": "Country",
-    "name": www.M_COUNTRY,
-    "identifier": www.M_COUNTRY_CODE
+    "name": common.M_COUNTRY,
+    "identifier": common.M_COUNTRY_CODE
   },
   "potentialAction": [
     {
