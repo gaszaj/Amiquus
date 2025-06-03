@@ -33,4 +33,5 @@ export default defineConfig({
     service: passthroughImageService(),
     domains: ['cdn.dorik.com'],
   },
+  actions: true
 });

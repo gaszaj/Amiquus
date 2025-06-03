@@ -1,0 +1,560 @@
+---
+// import { getEntry } from 'astro:content'; // Removed as it's not used; data comes from JSON
+import { actions, type ActionError } from 'astro:actions'; // Import actions
+import BaseLayout from '../layouts/BaseLayout.astro'; // Adjusted path assuming layouts is one level up
+import wwwData from '../data/www.json'; // Adjusted path
+import commonData from '../data/common.json'; // Adjusted path
+import eeatData from '../data/eeat.json'; // Adjusted path
+
+export const prerender = false;
+
+// Get the slug from the URL
+const { slug } = Astro.params;
+
+// Find the matching EEAT entry
+const eeatEntry = eeatData.find(entry => entry.EEAT_SLUG === slug);
+
+// Check if entry exists
+if (!eeatEntry) {
+  return Astro.redirect('/404');
+}
+
+const filteringNumber = parseInt(eeatEntry.EEAT_FILTERING);
+
+// Check if entry is published and has a valid filtering number (1-26)
+const isValidPage = eeatEntry.PUBLISH_Y_N === "1" &&
+  filteringNumber >= 1 && filteringNumber <= 26;
+
+if (!isValidPage) {
+  return Astro.redirect('/404');
+}
+
+// Determine if the page should display a contact form
+const isContactPage = filteringNumber === 24 || filteringNumber === 25;
+
+const eeat = eeatEntry;
+
+// Get the first object from other data files
+const www = wwwData[0];
+const common = commonData.find(c => c.M_LANGUAGE_ISO === eeat.M_LANGUAGE_ISO && c.M_COUNTRY_CODE === eeat.M_COUNTRY_CODE) || commonData[0]; // Ensure common matches language, fallback to first
+
+// Helper function for absolute URLs
+const getAbsoluteUrl = (path: string) => {
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  return new URL(path, Astro.url.origin).toString();
+};
+
+// Get language data
+const languageIso = eeat.M_LANGUAGE_ISO;
+const countryCode = eeat.M_COUNTRY_CODE;
+
+// Find matching content orientation from commonData (already refined above)
+const contentOrientation = common.M_CONTENT_ORIENTATION || 'ltr';
+
+// Define content for the page
+const seoTitle = eeat.EEAT_NAME;
+const headline = eeat.EEAT_H1;
+const pageDescription = eeat.EEAT_META_SEO;
+const pageContent = eeat.EEAT_CONTENT;
+const pageContent2 = eeat.EEAT_CONTENT_2;
+const pageogImage = eeat.EEAT_OG_IMAGE_PATH;
+const articlePublishDate = eeat.EEAT_DATE_PUBLISHED;
+const articleUpdateDate = eeat.EEAT_DATE_UPDATED;
+const publishedTextLabel = common.M_PUBLISHED;
+const updatedTextLabel = common.M_UPDATED;
+const articleDateLocale = `${eeat.M_LANGUAGE_ISO}-${eeat.M_COUNTRY_CODE}`; // Corrected template literal
+
+// Define keywords for the page
+const pageKeywords = [
+  eeat.EEAT_NAME,
+  eeat.M_COUNTRY_NATIVE,
+  www.PAGE_ORGANISATION_FULL_NAME
+].join(', ');
+
+// Contact form configuration (only used if isContactPage is true)
+let contactSection;
+if (isContactPage) {
+  contactSection = {
+    title: seoTitle,
+    subtitle: pageDescription,
+    formLabels: {
+      fullName: common.M_FULL_NAME,
+      fullNamePlaceholder: common.M_FULLNAME_PLACEHOLDER,
+      email: common.M_EMAIL, // Using M_EMAIL for label "Elektronski naslov"
+      emailPlaceholder: common.M_EMAIL_PLACEHOLDER,
+      message: common.M_MESSAGE_LABEL,
+      messagePlaceholder: common.M_MESSAGE_PLACEHOLDER,
+      terms: common.PRODUCT_PAGE_ORDER_FORM_TERMS_LABEL, // Or a more generic common.M_TERMS_LABEL if available
+      submitButton: common.M_SEND_BUTTON
+    }
+  };
+}
+
+// Astro Action form result handling
+const formResult = Astro.locals.actions?.submitContactForm; // Check if actions exist
+let formSuccessMessage: string | null = null;
+let formErrorMessage: string | null = null;
+let fieldErrors: Record<string, string | undefined> = {};
+
+if (formResult) {
+  if (formResult.data?.success) {
+    formSuccessMessage = common.M_CONFIRMATION_TEXT;
+  } else if (formResult.error) {
+    formErrorMessage = formResult.error.message || common.M_FORM_ERROR;
+    if (formResult.errors) { // Zod field-specific errors
+      formResult.errors.forEach(err => {
+        if (err.path && err.path.length > 0) {
+          fieldErrors[err.path.join('.')] = err.message;
+        }
+      });
+    }
+  }
+}
+
+
+// WebPage and Article Schema
+const webpageSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": eeat.EEAT_H1,
+  "url": Astro.url.href,
+  "description": pageDescription,
+  "inLanguage": articleDateLocale,
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": common.M_HOME_NAME,
+        "item": getAbsoluteUrl("/")
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": seoTitle,
+        "item": Astro.url.href
+      }
+    ]
+  },
+  "mainEntity": {
+    "@type": "Article",
+    "headline": headline,
+    "description": pageDescription,
+    "image": getAbsoluteUrl(pageogImage),
+    "author": {
+      "@type": "Organization",
+      "name": www.PAGE_ORGANISATION_FULL_NAME
+    },
+    // Assuming EEAT_HOUR_PUBLISHED and _UPDATED are in HH:MM format
+    "datePublished": `${articlePublishDate}T${eeat.EEAT_HOUR_PUBLISHED || '00:00'}:00+02:00`, // Added :00 for seconds, ensure format
+    "dateModified": `${articleUpdateDate}T${eeat.EEAT_HOUR_UPDATED || '00:00'}:00+02:00`,   // Added :00 for seconds
+    "inLanguage": articleDateLocale
+  }
+};
+
+// Organization Schema
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": www.PAGE_ORGANISATION_FULL_NAME,
+  "url": getAbsoluteUrl('/'),
+  "foundingDate": www.PAGE_FOUNDING_DATE,
+  "logo": getAbsoluteUrl(www.PAGE_LOGO_IMAGE_PATH_1),
+  "keywords": [
+    www.PAGE_ORGANISATION_FULL_NAME,
+    www.M_COUNTRY_NATIVE, // This is from www, common also has M_COUNTRY_NATIVE
+    common.PAGE_KEYWORD_1,
+    common.PAGE_KEYWORD_2,
+    common.PAGE_KEYWORD_3,
+    common.PAGE_KEYWORD_4,
+    common.PAGE_KEYWORD_5,
+    common.PAGE_KEYWORD_6
+  ].filter(Boolean),
+  "description": www.PAGE_DESCRIPTION,
+  "numberOfEmployees": {
+    "@type": "QuantitativeValue",
+    "minValue": "1",
+    "maxValue": "9"
+  },
+  "slogan": www.PAGE_SLOGAN,
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": www.PAGE_INFO_EMAIL,
+    "contactType": common.M_CUSTOMER_SUPPORT
+  },
+  "sameAs": [
+    www.PAGE_INSTAGRAM_URL,
+    www.PAGE_FACEBOOK_URL,
+    www.PAGE_TWITTER_URL,
+    www.PAGE_LINKEDIN_URL,
+    www.PAGE_YOUTUBE_URL,
+    www.PAGE_PINTEREST_URL,
+    www.PAGE_BLUESKY_URL
+  ].filter(Boolean),
+  "areaServed": {
+    "@type": "Country",
+    "name": www.M_COUNTRY,
+    "identifier": www.M_COUNTRY_CODE
+  },
+  "potentialAction": [
+    {
+      "@type": "ViewAction",
+      "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
+      "target": getAbsoluteUrl('/sitemap.xml')
+    },
+    {
+      "@type": "ViewAction",
+      "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
+      // Corrected regex literal to string literal
+      "target": getAbsoluteUrl( languageIso && countryCode ? `sitemap-${languageIso}-${countryCode}.xml` : '/sitemap-local.xml')
+    },
+    {
+      "@type": "ViewAction",
+      "name": www.PAGE_LLM_INSTRUCTIONS,
+      "target": getAbsoluteUrl('/llms.txt'),
+      "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
+    }
+  ],
+  "mainEntityOfPage": [
+    {
+      "@type": "WebPage",
+      "@id": getAbsoluteUrl('/sitemap.xml'),
+      "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
+      "description": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS_DESCRIPTION
+    },
+    {
+      "@type": "WebPage",
+      // Corrected regex literal to string literal
+      "@id": getAbsoluteUrl( languageIso && countryCode ? `sitemap-${languageIso}-${countryCode}.xml` : '/sitemap-local.xml'),
+      "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
+      "description": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS_DESCRIPTION
+    },
+    {
+      "@type": "WebPage",
+      "@id": getAbsoluteUrl('/llms.txt'),
+      "name": www.PAGE_LLM_INSTRUCTIONS,
+      "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
+    }
+  ]
+};
+
+// Combine schemas into an array
+const combinedSchema = [webpageSchema, organizationSchema];
+
+// Format dates
+const formatDate = (dateString: string, locale: string) => {
+  if (!dateString) return '';
+  return new Date(dateString).toLocaleDateString(locale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+---
+
+<BaseLayout
+  languageIso={languageIso}
+  countryCode={countryCode}
+  contentOrientation={contentOrientation}
+  title={seoTitle}
+  description={pageDescription}
+  ogImage={pageogImage}
+  keywords={pageKeywords}
+  schema={combinedSchema}
+>
+  <!-- Dark Header Section -->
+  <div class="bg-black text-white py-16">
+    <div class="container mx-auto px-4">
+      <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl md:text-5xl font-bold mb-6 animate-fade-in">{headline}</h1>
+        <div class="flex flex-wrap items-center gap-2 text-lg animate-slide-up">
+          <span class="text-signal-green">{publishedTextLabel} {formatDate(articlePublishDate, articleDateLocale)}</span>
+          {articleUpdateDate && updatedTextLabel && (
+            <>
+              <span class="text-gray-400">•</span>
+              <span class="text-signal-green">{updatedTextLabel} {formatDate(articleUpdateDate, articleDateLocale)}</span>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Part 1 (eeat.EEAT_CONTENT) -->
+  <div class={`container mx-auto px-4 ${isContactPage ? 'pt-12' : 'py-12'}`}>
+    <div class="prose prose-lg max-w-4xl mx-auto">
+      <Fragment set:html={pageContent} />
+      <!-- If NOT a contact page, and pageContent2 exists, render it here -->
+      {!isContactPage && pageContent2 && (
+        <Fragment set:html={pageContent2} />
+      )}
+    </div>
+  </div>
+
+  <!-- If Contact Page: Form + Main Content Part 2 (eeat.EEAT_CONTENT_2) -->
+  {isContactPage && contactSection && (
+    <>
+      <!-- Contact Form Section -->
+      <section class="pt-3 pb-8 bg-gray-50">
+        <div class="container mx-auto px-4">
+          <div class="max-w-2xl mx-auto">
+            {/* Display Success/Error Messages */}
+            {formSuccessMessage && (
+              <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
+                {formSuccessMessage}
+              </div>
+            )}
+            {formErrorMessage && (
+              <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+                {formErrorMessage}
+                 {Object.keys(fieldErrors).length > 0 && (
+                  <ul class="mt-2 list-disc list-inside">
+                    {Object.entries(fieldErrors).map(([field, error]) => (
+                      <li>{field}: {error}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+
+            {/* Conditionally render form if no success message or always show and reset */}
+            {/* For now, always showing the form; Astro Actions cause a page reload, effectively resetting. */}
+            <form method="POST" action={actions.submitContactForm}>
+              <input type="hidden" name="pageUrl" value={Astro.url.href} />
+              <input type="hidden" name="pageTitle" value={seoTitle} />
+
+              <div>
+                <label for="fullName" class="block text-sm font-medium text-gray-600 mb-1">{contactSection.formLabels.fullName}</label>
+                <input
+                  type="text"
+                  id="fullName"
+                  name="fullName"
+                  placeholder={contactSection.formLabels.fullNamePlaceholder}
+                  class:list={[
+                    "w-full px-4 py-2 rounded-lg border focus:ring-1 focus:ring-signal-green",
+                    fieldErrors.fullName ? "border-red-500" : "border-gray-300 focus:border-signal-green"
+                  ]}
+                  required
+                />
+                {fieldErrors.fullName && <p class="text-red-500 text-xs mt-1">{fieldErrors.fullName}</p>}
+              </div>
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-600 mb-1">{contactSection.formLabels.email}</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder={contactSection.formLabels.emailPlaceholder}
+                  class:list={[
+                    "w-full px-4 py-2 rounded-lg border focus:ring-1 focus:ring-signal-green",
+                    fieldErrors.email ? "border-red-500" : "border-gray-300 focus:border-signal-green"
+                  ]}
+                  required
+                />
+                {fieldErrors.email && <p class="text-red-500 text-xs mt-1">{fieldErrors.email}</p>}
+              </div>
+              <div>
+                <label for="message" class="block text-sm font-medium text-gray-600 mb-1">{contactSection.formLabels.message}</label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows="4"
+                  placeholder={contactSection.formLabels.messagePlaceholder}
+                  class:list={[
+                    "w-full px-4 py-2 rounded-lg border focus:ring-1 focus:ring-signal-green",
+                    fieldErrors.message ? "border-red-500" : "border-gray-300 focus:border-signal-green"
+                  ]}
+                  required
+                ></textarea>
+                {fieldErrors.message && <p class="text-red-500 text-xs mt-1">{fieldErrors.message}</p>}
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="checkbox" id="terms" name="terms" required 
+                  class:list={[ fieldErrors.terms ? "border-red-500" : ""]}/>
+                <label for="terms" class="text-sm text-gray-600">
+                  {contactSection.formLabels.terms}
+                </label>
+              </div>
+               {fieldErrors.terms && <p class="text-red-500 text-xs mt-1">{fieldErrors.terms}</p>}
+              <button
+                type="submit"
+                class="w-full bg-black text-signal-green border border-signal-green py-3 rounded-lg hover:bg-signal-green hover:text-black transition-all"
+              >
+                {contactSection.formLabels.submitButton}
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Content Part 2 (eeat.EEAT_CONTENT_2) for contact pages -->
+      {pageContent2 && (
+        <div class="container mx-auto px-4 py-12">
+          <div class="prose prose-lg max-w-4xl mx-auto">
+            <div class="space-y-6">
+              <Fragment set:html={pageContent2} />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )}
+</BaseLayout>
+
+<style>
+  /* Base prose container */
+  .prose {
+    max-width: 65ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Headings */
+  .prose :global(h2) {
+    color: black;
+    font-size: 1.875rem; /* 30px */
+    font-weight: 700;
+    margin-top: 2.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .prose :global(h3) {
+    color: black;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem; /* 24px */
+    font-weight: 600;
+  }
+
+  /* Paragraphs */
+  .prose :global(p) {
+    color: #374151; /* Tailwind gray-700 */
+    margin-bottom: 1.25rem;
+    line-height: 1.75;
+  }
+
+  /* Links */
+  .prose :global(a) {
+    color: black;
+    text-decoration: underline;
+    text-decoration-color: #BCEF2F; /* signal-green */
+    text-underline-offset: 2px;
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
+  }
+
+  .prose :global(a:hover) {
+    color: #BCEF2F; /* signal-green */
+    text-decoration-color: black;
+  }
+
+  /* Lists */
+  .prose :global(ul) {
+    list-style-type: none;
+    margin-left: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .prose :global(ol) { 
+    margin-left: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .prose :global(li) {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.75;
+  }
+
+  .prose :global(ul li::before) {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.75rem; /* Adjusted for line-height */
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #BCEF2F; /* signal-green */
+    border: 2px solid black;
+  }
+  
+  /* Underline */
+  .prose :global(u) {
+    text-decoration: none;
+    position: relative;
+  }
+
+  .prose :global(u::after) {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 2px;
+    background: repeating-linear-gradient(
+      45deg,
+      #BCEF2F,
+      #BCEF2F 2px,
+      transparent 2px,
+      transparent 4px
+    );
+  }
+
+  /* Bold text */
+  .prose :global(b) {
+    font-weight: 700;
+  }
+
+  /* List items with links */
+  .prose :global(li a) {
+    display: inline-block;
+  }
+
+  /* Spacing between sections */
+  .prose :global(h2 + p) {
+    margin-top: 1rem;
+  }
+
+  .prose :global(p + ul) {
+    margin-top: 0.5rem;
+  }
+  
+  /* FAQ Section styling */
+  .prose :global(.faq-section) {
+    margin-top: 2rem;
+  }
+
+  .prose :global(.faq-section p) {
+    margin-bottom: 1.5rem;
+  }
+
+  /* Animations */
+  :global(.animate-fade-in) {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  :global(.animate-slide-up) {
+    animation: slideUp 0.5s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+</style>
+
+<!-- Removed the old client-side script tag as Astro Actions handles submission and validation -->
