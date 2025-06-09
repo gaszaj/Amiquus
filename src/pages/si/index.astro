@@ -49,10 +49,16 @@ interface FormAlerts {
   submissionError: string;
 }
 
-// Get the first (and only) object from each JSON array
-const home = homeData[0];
+// Get the locale from the URL path (e.g., 'si' from /si/)
+const locale = Astro.url.pathname.split('/')[1];
+
+// Find the matching common data object based on M_SLUG
+const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
+
+// Find the matching home data object based on M_SLUG
+const home = homeData.find(item => item.M_SLUG === locale) || homeData[0];
+
 const www = wwwData[0];
-const common = commonData[0];
 
 // Helper function for absolute URLs with locale
 const getAbsoluteUrl = (path: string) => {

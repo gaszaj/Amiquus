@@ -29,13 +29,20 @@ export interface ProductLayoutStrings {
   formSuccessMessage: string;
 }
 
-const product = productData[0];
+// Get the locale from the URL path (e.g., 'si' from '/si/opozorilna-piramida/product')
+const locale = Astro.url.pathname.split('/')[1];
+
+// Find the matching common data object based on M_SLUG
+const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
+
+// Get the first object from wwwData
 const www = wwwData[0];
-const common = commonData[0];
+
+// Get the first product from productData
+const product = productData[0];
 
 // Helper function for absolute URLs with locale
 const getAbsoluteUrl = (path: string) => {
-    const locale = Astro.url.pathname.split('/')[1];
     return new URL(`/${locale}${path}`, Astro.url.origin).toString();
 };
 
@@ -44,9 +51,11 @@ const getBaseUrl = (path: string) => {
     return new URL(path, Astro.url.origin).toString();
 };
 
+// Get language data
 const languageIso = product.M_LANGUAGE_ISO;
 const countryCode = product.M_COUNTRY_CODE;
 
+// Find matching content orientation from common.json
 const contentOrientation = commonData.find(item =>
   item.M_LANGUAGE_ISO === languageIso &&
   item.M_COUNTRY_CODE === countryCode

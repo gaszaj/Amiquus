@@ -1,9 +1,13 @@
 ---
-// src/pages/[listSlug]/[authorSlug].astro
-import BaseLayout from '../../../layouts/BaseLayout.astro'; // Adjusted path
-import authorDataJson from '../../../data/author.json';   // Adjusted path
-import wwwData from '../../../data/www.json';             // Adjusted path
-import commonData from '../../../data/common.json';       // Adjusted path
+// Path: src/pages/si/avtorji-in-uredniki/[authorSlug].astro
+// Purpose: Author profile page with dynamic language support
+// Data: author.json, www.json, common.json
+// Dependencies: BaseLayout.astro
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import authorDataJson from '../../../data/author.json';
+import wwwData from '../../../data/www.json';
+import commonData from '../../../data/common.json';
 
 // Type Definitions (from original author.astro)
 export interface SocialLinksInfo {
@@ -119,32 +123,27 @@ interface AuthorDataEntry {
 
 export const prerender = false; // Enable SSR
 
-const { AuthorlistSlug, authorSlug } = Astro.params;
+const { authorSlug } = Astro.params;
 
+// Get the locale from the URL path (e.g., 'si' from /si/avtorji-in-uredniki/...)
+const locale = Astro.url.pathname.split('/')[1];
+
+// Find the matching common data object based on M_SLUG
+const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
+
+// Find author data
 const author = authorDataJson.find(
   (entry: AuthorDataEntry) => entry.WWW_AUTHOR_SLUG === authorSlug
 );
 
-if (!author || author.PUBLISH_Y_N !== "1" || author.EEAT_SLUG_20 !== AuthorlistSlug) {
+if (!author || author.PUBLISH_Y_N !== "1")  {
   return Astro.redirect('/404');
 }
 
 const www = wwwData[0];
 
-const common =
-  commonData.find(
-    (c) =>
-      c.M_LANGUAGE_ISO === author.M_LANGUAGE_ISO &&
-      c.M_COUNTRY_CODE === author.M_COUNTRY_CODE
-  ) ||
-  commonData.find(
-    (c) => c.M_LANGUAGE_ISO === 'sl' && c.M_COUNTRY_CODE === 'SI'
-  ) ||
-  commonData[0];
-
 // Helper function for absolute URLs with locale
 const getAbsoluteUrl = (path: string): string => {
-  const locale = Astro.url.pathname.split('/')[1];
   return new URL(`/${locale}${path}`, Astro.url.origin).toString();
 };
 
@@ -153,8 +152,11 @@ const getBaseUrl = (path: string): string => {
   return new URL(path, Astro.url.origin).toString();
 };
 
+// Get language data
 const languageIso = author.M_LANGUAGE_ISO;
 const countryCode = author.M_COUNTRY_CODE;
+
+// Find matching content orientation from common.json
 const contentOrientation = common.M_CONTENT_ORIENTATION || 'ltr';
 
 const authorProfileData = {
@@ -238,13 +240,13 @@ const layoutStringsData: LayoutStrings = {
   languagesSectionTitle: common.AUTHOR_LANGUAGE_LABEL || "Languages",
   languagesSectionIcon: "🌍",
   footerLinkAllAuthorsText: common.AUTHOR_OTHER_AUTHORS || "All Authors",
-  footerLinkAllAuthorsUrl: getAbsoluteUrl(author.EEAT_SLUG_20),
+  footerLinkAllAuthorsUrl: getAbsoluteUrl(`/${common.EEAT_SLUG_20}`),
   footerLinkEditorialPolicyText: common.AUTHOR_READ_MORE || "Read More (Editorial Policy)",
   footerLinkEditorialPolicyUrl: getAbsoluteUrl(author.EEAT_SLUG_13),
 };
 
 const pageLocale = `${author.M_LANGUAGE_ISO}-${author.M_COUNTRY_CODE}`;
-const authorListUrl = getAbsoluteUrl(AuthorlistSlug);
+const authorListUrl = getAbsoluteUrl('/avtorji-in-uredniki');
 
 const webpageSchema = {
   "@context": "https://schema.org",
@@ -578,7 +580,7 @@ const combinedSchema = [webpageSchema, personSchema, organizationSchema];
                 <span class="sr-only">{layoutStringsData.socialLinkLabelDiscord}</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                   <g fill="currentColor" fill-opacity="0"><circle cx="9" cy="12" r="1.5"><animate fill="freeze" attributeName="fill-opacity" begin="1.56s" dur="0.18s" values="0;1"/></circle><circle cx="15" cy="12" r="1.5"><animate fill="freeze" attributeName="fill-opacity" begin="1.74s" dur="0.18s" values="0;1"/></circle><path d="M5 5l7 0.2l7 -0.2l3 10l-3 3.4h-14l-3.5 -3.4l3.5 -10Z"><animate fill="freeze" attributeName="fill-opacity" begin="2.04s" dur="0.18s" values="0;0.25"/></path></g>
-                  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="32" stroke-dashoffset="32" d="M12 6h2l1 -2c0 0 2.5 0.5 4 1.5c3.53 2.35 3 9.5 3 10.5c-1.33 2.17 -5.5 3.5 -5.5 3.5l-1 -2M12 6h-2l-0.97 -2c0 0 -2.5 0.5 -4 1.5c-3.53 2.35 -3 9.5 -3 10.5c1.33 2.17 5.5 3.5 5.5 3.5l1 -2"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.84s" values="32;0"/></path><path stroke-dasharray="16" stroke-dashoffset="16" d="M5.5 16c5 2.5 8 2.5 13 0"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.96s" dur="0.48s" values="16;0"/></path></g>
+                  <g fill="none" stroke="currentColor" stroke-dasharray="32" stroke-dashoffset="32" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 6h2l1 -2c0 0 2.5 0.5 4 1.5c3.53 2.35 3 9.5 3 10.5c-1.33 2.17 -5.5 3.5 -5.5 3.5l-1 -2M12 6h-2l-0.97 -2c0 0 -2.5 0.5 -4 1.5c-3.53 2.35 -3 9.5 -3 10.5c1.33 2.17 5.5 3.5 5.5 3.5l1 -2"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.84s" values="32;0"/></path><path stroke-dasharray="16" stroke-dashoffset="16" d="M5.5 16c5 2.5 8 2.5 13 0"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.96s" dur="0.48s" values="16;0"/></path></g>
                 </svg>
               </a>
             )}

@@ -76,18 +76,23 @@ export interface FaqSection {
 
 export const prerender = false;
 
-const { ArticlelistSlug, articleSlug } = Astro.params;
+const { articleSlug } = Astro.params;
+
+// Get the locale from the URL path (e.g., 'si' from /si/clanki/...)
+const locale = Astro.url.pathname.split('/')[1];
+
+// Find the matching common data object based on M_SLUG
+const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
 
 const article = articleDataJson.find(
   (entry: ArticleJsonEntry) => entry.ARTICLE_SLUG === articleSlug
 );
 
-if (!article || article.PUBLISH_Y_N !== "1" || article.ARTICLE_LIST_SLUG !== ArticlelistSlug) {
+if (!article || article.PUBLISH_Y_N !== "1") {
   return Astro.redirect('/404');
 }
 
 const www = wwwData[0];
-const common = commonData[0];
 
 // Find the author data from author.json based on matching AUTHOR_ID with PAGE_ID
 const authorData = authorDataJson.find(
@@ -291,8 +296,8 @@ const articleSchema = {
       {
         "@type": "ListItem",
         "position": 2,
-        "name": ArticlelistSlug,
-        "item": getAbsoluteUrl(`/${ArticlelistSlug}`)
+        "name": "Članki",
+        "item": getAbsoluteUrl('/clanki')
       },
       {
         "@type": "ListItem",

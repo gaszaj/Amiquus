@@ -8,6 +8,9 @@ import eeatData from '../../data/eeat.json'; // Adjusted path
 
 export const prerender = false;
 
+// Get the locale from the URL path (e.g., 'si' from /si/)
+const locale = Astro.url.pathname.split('/')[1];
+
 // Get the slug from the URL
 const { EEATslug } = Astro.params;  
 
@@ -34,9 +37,11 @@ const isContactPage = filteringNumber === 24 || filteringNumber === 25;
 
 const eeat = eeatEntry;
 
-// Get the first object from other data files
+// Get the first object from www data (keeping as is)
 const www = wwwData[0];
-const common = commonData.find(c => c.M_LANGUAGE_ISO === eeat.M_LANGUAGE_ISO && c.M_COUNTRY_CODE === eeat.M_COUNTRY_CODE) || commonData[0]; // Ensure common matches language, fallback to first
+
+// Find the matching common data object based on M_SLUG
+const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
 
 // Helper function for absolute URLs with locale
 const getAbsoluteUrl = (path: string) => {
