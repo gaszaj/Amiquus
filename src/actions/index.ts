@@ -1,6 +1,9 @@
-// src/actions/index.ts
+// Path: src/actions/index.ts
+// Purpose: Server-side actions for form submissions and email handling
+// Dependencies: astro:actions, zod
+
 import { defineAction, ActionError } from 'astro:actions';
-import { z }from 'zod'; // Use direct zod import
+import { z } from 'zod';
 
 // --- Existing Order Form Schema ---
 const orderFormSchema = z.object({
@@ -31,7 +34,8 @@ const contactFormSchema = z.object({
   pageTitle: z.string().min(1, { message: "Naslov strani je obvezen." }), // For email subject
 });
 
-export const server = {
+// Export actions as a default export
+export default {
   // --- Existing submitOrder Action ---
   submitOrder: defineAction({
     accept: 'form',

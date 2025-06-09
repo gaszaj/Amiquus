@@ -1,9 +1,8 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro'; // Assuming BaseLayout is in src/layouts/
-import type { RelatedArticleInfo as ArticleLayout_RelatedArticleInfo } from '../layouts/ArticleLayout.astro'; // Original type, will be replaced/inlined
-import articleData from '../data/article.json';
-import wwwData from '../data/www.json';
-import commonData from '../data/common.json';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import articleDataJson from '../../../data/article.json';
+import wwwData from '../../../data/www.json';
+import commonData from '../../../data/common.json';
 
 // --- Type Definitions for Props (originally from ArticleLayout.astro) ---
 export interface AuthorInfo {
@@ -74,14 +73,30 @@ export interface FaqSection {
   items: FaqItem[];
 }
 
-// Get the first (and only) object from each JSON array
-const article = articleData[0];
+export const prerender = false;
+
+const { ArticlelistSlug, articleSlug } = Astro.params;
+
+const article = articleDataJson.find(
+  (entry: ArticleJsonEntry) => entry.ARTICLE_SLUG === articleSlug
+);
+
+if (!article || article.PUBLISH_Y_N !== "1" || article.ARTICLE_LIST_SLUG !== ArticlelistSlug) {
+  return Astro.redirect('/404');
+}
+
 const www = wwwData[0];
 const common = commonData[0];
 
-// Helper function for absolute URLs
-const getAbsoluteUrl = (path) => {
-  return new URL(path, Astro.url.origin).toString();
+// Helper function for absolute URLs with locale
+const getAbsoluteUrl = (path: string): string => {
+    const locale = Astro.url.pathname.split('/')[1];
+    return new URL(`/${locale}${path}`, Astro.url.origin).toString();
+};
+
+// Helper function for base-level URLs (without locale)
+const getBaseUrl = (path: string): string => {
+    return new URL(path, Astro.url.origin).toString();
 };
 
 // Get language data
@@ -261,11 +276,17 @@ const articleSchema = {
         "@type": "ListItem",
         "position": 1,
         "name": article.M_HOME_NAME,
-        "item": Astro.url.origin
+        "item": getBaseUrl('/')
       },
       {
         "@type": "ListItem",
         "position": 2,
+        "name": ArticlelistSlug,
+        "item": getAbsoluteUrl(`/${ArticlelistSlug}`)
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
         "name": articleMetadata.seoTitle,
         "item": Astro.url.href
       }
@@ -275,11 +296,11 @@ const articleSchema = {
     "@type": "Article",
     "headline": articleMetadata.h1,
     "description": articleMetadata.description,
-    "image": getAbsoluteUrl(articleMetadata.ogImage),
+    "image": getBaseUrl(articleMetadata.ogImage),
     "author": {
       "@type": "Person",
       "name": articleMetadata.author.name,
-      "image": getAbsoluteUrl(articleMetadata.author.image),
+      "image": getBaseUrl(articleMetadata.author.image),
       "url": getAbsoluteUrl(articleMetadata.author.profileUrl)
     },
     "datePublished": articleMetadata.publishDate,
@@ -307,9 +328,9 @@ const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": www.PAGE_ORGANISATION_FULL_NAME,
-  "url": getAbsoluteUrl('/'),
+  "url": getBaseUrl('/'),
   "foundingDate": www.PAGE_FOUNDING_DATE,
-  "logo": getAbsoluteUrl(www.PAGE_LOGO_IMAGE_PATH_1),
+  "logo": getBaseUrl(www.PAGE_LOGO_IMAGE_PATH_1),
   "keywords": [
     www.PAGE_ORGANISATION_FULL_NAME,
     www.M_COUNTRY_NATIVE,
@@ -350,36 +371,36 @@ const organizationSchema = {
     {
       "@type": "ViewAction",
       "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
-      "target": getAbsoluteUrl('/sitemap.xml')
+      "target": getBaseUrl('/sitemap.xml')
     },
     {
       "@type": "ViewAction",
       "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
-      "target": getAbsoluteUrl('/sitemap-sl-SI.xml')
+      "target": getBaseUrl(`/sitemap-${languageIso}-${countryCode}.xml`)
     },
     {
       "@type": "ViewAction",
       "name": www.PAGE_LLM_INSTRUCTIONS,
-      "target": getAbsoluteUrl('/llms.txt'),
+      "target": getBaseUrl('/llms.txt'),
       "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
     }
   ],
   "mainEntityOfPage": [
     {
       "@type": "WebPage",
-      "@id": getAbsoluteUrl('/sitemap.xml'),
+      "@id": getBaseUrl('/sitemap.xml'),
       "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
       "description": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS_DESCRIPTION
     },
     {
       "@type": "WebPage",
-      "@id": getAbsoluteUrl('/sitemap-sl-SI.xml'),
+      "@id": getBaseUrl(`/sitemap-${languageIso}-${countryCode}.xml`),
       "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
       "description": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS_DESCRIPTION
     },
     {
       "@type": "WebPage",
-      "@id": getAbsoluteUrl('/llms.txt'),
+      "@id": getBaseUrl('/llms.txt'),
       "name": www.PAGE_LLM_INSTRUCTIONS,
       "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
     }

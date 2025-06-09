@@ -1,9 +1,9 @@
 ---
 // src/pages/[listSlug]/[authorSlug].astro
-import BaseLayout from '../../layouts/BaseLayout.astro'; // Adjusted path
-import authorDataJson from '../../data/author.json';   // Adjusted path
-import wwwData from '../../data/www.json';             // Adjusted path
-import commonData from '../../data/common.json';       // Adjusted path
+import BaseLayout from '../../../layouts/BaseLayout.astro'; // Adjusted path
+import authorDataJson from '../../../data/author.json';   // Adjusted path
+import wwwData from '../../../data/www.json';             // Adjusted path
+import commonData from '../../../data/common.json';       // Adjusted path
 
 // Type Definitions (from original author.astro)
 export interface SocialLinksInfo {
@@ -71,7 +71,7 @@ interface AuthorDataEntry {
   M_SLUG: string;
   EEAT_NAME_20: string; // e.g., "Avtorji in uredniki" (plural name for the list page)
   EEAT_NAME_20_SINGULAR: string; // e.g., "Avtor in urednik"
-  EEAT_URL_20: string; // e.g., "avtorji-in-uredniki" (slug for the list page URL)
+  EEAT_SLUG_20: string;
   WWW_AUTHOR_NATIONALITY: string;
   WWW_AUTHOR_OCCUPATION: string;
   WWW_AUTHOR_BIO: string;
@@ -114,19 +114,18 @@ interface AuthorDataEntry {
   AUTHOR_DATE_UPDATED: string;
   AUTHOR_META_SEO: string;
   EEAT_SLUG_13: string; // Slug for editorial policy
-  EEAT_SLUG_20: string; // Should be the same as EEAT_URL_20 if it refers to the same concept
   AUTHOR_FULL_BIO: string;
 }
 
 export const prerender = false; // Enable SSR
 
-const { listSlug, authorSlug } = Astro.params;
+const { AuthorlistSlug, authorSlug } = Astro.params;
 
 const author = authorDataJson.find(
   (entry: AuthorDataEntry) => entry.WWW_AUTHOR_SLUG === authorSlug
 );
 
-if (!author || author.PUBLISH_Y_N !== "1" || author.EEAT_URL_20 !== listSlug) {
+if (!author || author.PUBLISH_Y_N !== "1" || author.EEAT_SLUG_20 !== AuthorlistSlug) {
   return Astro.redirect('/404');
 }
 
@@ -143,17 +142,15 @@ const common =
   ) ||
   commonData[0];
 
+// Helper function for absolute URLs with locale
 const getAbsoluteUrl = (path: string): string => {
-  if (path.startsWith('http://') || path.startsWith('https://')) {
-    return path;
-  }
-  const resolvedPath = path.startsWith('/') ? path : `/${path}`;
-  try {
-    return new URL(resolvedPath, Astro.site || Astro.url.origin).toString();
-  } catch (e) {
-    console.error(`Error creating URL for path: ${resolvedPath} and base: ${Astro.site || Astro.url.origin}`, e);
-    return `${Astro.site || Astro.url.origin}${resolvedPath}`;
-  }
+  const locale = Astro.url.pathname.split('/')[1];
+  return new URL(`/${locale}${path}`, Astro.url.origin).toString();
+};
+
+// Helper function for base-level URLs (without locale)
+const getBaseUrl = (path: string): string => {
+  return new URL(path, Astro.url.origin).toString();
 };
 
 const languageIso = author.M_LANGUAGE_ISO;
@@ -164,8 +161,8 @@ const authorProfileData = {
   name: author.WWW_AUTHOR,
   seoTitle: `${author.WWW_AUTHOR} — ${author.EEAT_NAME_20_SINGULAR}`,
   description: author.AUTHOR_FULL_BIO,
-  image: getAbsoluteUrl(author.AUTHOR_PROFILE_IMAGE_PATH),
-  ogImage: getAbsoluteUrl(author.AUTHOR_OG_IMAGE_PATH),
+  image: getBaseUrl(author.AUTHOR_PROFILE_IMAGE_PATH),
+  ogImage: getBaseUrl(author.AUTHOR_OG_IMAGE_PATH),
   imageAltText: `${author.WWW_AUTHOR} — ${author.EEAT_NAME_20_SINGULAR} | ${www.PAGE_ORGANISATION_FULL_NAME}`,
   socialLinks: {
     linkedin: author.WWW_AUTHOR_LINKEDIN,
@@ -241,13 +238,13 @@ const layoutStringsData: LayoutStrings = {
   languagesSectionTitle: common.AUTHOR_LANGUAGE_LABEL || "Languages",
   languagesSectionIcon: "🌍",
   footerLinkAllAuthorsText: common.AUTHOR_OTHER_AUTHORS || "All Authors",
-  footerLinkAllAuthorsUrl: getAbsoluteUrl(author.EEAT_URL_20),
+  footerLinkAllAuthorsUrl: getAbsoluteUrl(author.EEAT_SLUG_20),
   footerLinkEditorialPolicyText: common.AUTHOR_READ_MORE || "Read More (Editorial Policy)",
   footerLinkEditorialPolicyUrl: getAbsoluteUrl(author.EEAT_SLUG_13),
 };
 
 const pageLocale = `${author.M_LANGUAGE_ISO}-${author.M_COUNTRY_CODE}`;
-const authorListUrl = getAbsoluteUrl(listSlug);
+const authorListUrl = getAbsoluteUrl(AuthorlistSlug);
 
 const webpageSchema = {
   "@context": "https://schema.org",
@@ -263,7 +260,7 @@ const webpageSchema = {
         "@type": "ListItem",
         "position": 1,
         "name": common.M_HOME_NAME || "Home",
-        "item": getAbsoluteUrl("/")
+        "item": getBaseUrl('/')
       },
       {
         "@type": "ListItem",
@@ -283,7 +280,7 @@ const webpageSchema = {
     "@type": "Article",
     "headline": author.WWW_AUTHOR,
     "description": author.AUTHOR_META_SEO,
-    "image": getAbsoluteUrl(author.AUTHOR_OG_IMAGE_PATH),
+    "image": getBaseUrl(author.AUTHOR_OG_IMAGE_PATH),
     "author": {
       "@type": "Organization",
       "name": www.PAGE_ORGANISATION_FULL_NAME
@@ -293,7 +290,7 @@ const webpageSchema = {
         "name": www.PAGE_ORGANISATION_FULL_NAME,
         "logo": {
             "@type": "ImageObject",
-            "url": getAbsoluteUrl(www.PAGE_LOGO_IMAGE_PATH_1)
+            "url": getBaseUrl(www.PAGE_LOGO_IMAGE_PATH_1)
         }
     },
     "datePublished": `${author.AUTHOR_DATE_PUBLISHED}T${author.AUTHOR_HOUR_PUBLISHED || '00:00'}:00+02:00`,
@@ -330,9 +327,9 @@ const personSchema = {
   "worksFor": {
     "@type": "Organization",
     "name": www.PAGE_ORGANISATION_FULL_NAME,
-    "url": getAbsoluteUrl(www.PAGE_FULL_PERMALINK || "/")
+    "url": getBaseUrl(www.PAGE_FULL_PERMALINK || "/")
   },
-  "image": getAbsoluteUrl(author.AUTHOR_PROFILE_IMAGE_PATH),
+  "image": getBaseUrl(author.AUTHOR_PROFILE_IMAGE_PATH),
   "nationality": {
     "@type": "Country",
     "name": author.WWW_AUTHOR_NATIONALITY
@@ -352,9 +349,9 @@ const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": www.PAGE_ORGANISATION_FULL_NAME,
-  "url": getAbsoluteUrl('/'),
+  "url": getBaseUrl('/'),
   "foundingDate": www.PAGE_FOUNDING_DATE,
-  "logo": getAbsoluteUrl(www.PAGE_LOGO_IMAGE_PATH_1),
+  "logo": getBaseUrl(www.PAGE_LOGO_IMAGE_PATH_1),
   "keywords": [
     www.PAGE_ORGANISATION_FULL_NAME,
     common.M_COUNTRY_NATIVE,
@@ -395,36 +392,36 @@ const organizationSchema = {
     {
       "@type": "ViewAction",
       "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
-      "target": getAbsoluteUrl('/sitemap.xml')
+      "target": getBaseUrl('/sitemap.xml')
     },
     {
       "@type": "ViewAction",
       "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
-      "target": getAbsoluteUrl( author.M_LANGUAGE_ISO && author.M_COUNTRY_CODE ? `/sitemap-${author.M_LANGUAGE_ISO}-${author.M_COUNTRY_CODE}.xml` : '/sitemap-local.xml')
+      "target": getBaseUrl(author.M_LANGUAGE_ISO && author.M_COUNTRY_CODE ? `/sitemap-${author.M_LANGUAGE_ISO}-${author.M_COUNTRY_CODE}.xml` : '/sitemap-local.xml')
     },
     {
       "@type": "ViewAction",
       "name": www.PAGE_LLM_INSTRUCTIONS,
-      "target": getAbsoluteUrl('/llms.txt'),
+      "target": getBaseUrl('/llms.txt'),
       "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
     }
   ],
   "mainEntityOfPage": [
     {
       "@type": "WebPage",
-      "@id": getAbsoluteUrl('/sitemap.xml'),
+      "@id": getBaseUrl('/sitemap.xml'),
       "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
       "description": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS_DESCRIPTION
     },
     {
       "@type": "WebPage",
-      "@id": getAbsoluteUrl( author.M_LANGUAGE_ISO && author.M_COUNTRY_CODE ? `/sitemap-${author.M_LANGUAGE_ISO}-${author.M_COUNTRY_CODE}.xml` : '/sitemap-local.xml'),
+      "@id": getBaseUrl(author.M_LANGUAGE_ISO && author.M_COUNTRY_CODE ? `/sitemap-${author.M_LANGUAGE_ISO}-${author.M_COUNTRY_CODE}.xml` : '/sitemap-local.xml'),
       "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
       "description": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS_DESCRIPTION
     },
     {
       "@type": "WebPage",
-      "@id": getAbsoluteUrl('/llms.txt'),
+      "@id": getBaseUrl('/llms.txt'),
       "name": www.PAGE_LLM_INSTRUCTIONS,
       "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
     }

@@ -1,18 +1,18 @@
 ---
 // import { getEntry } from 'astro:content'; // Removed as it's not used; data comes from JSON
 import { actions, type ActionError } from 'astro:actions'; // Import actions
-import BaseLayout from '../layouts/BaseLayout.astro'; // Adjusted path assuming layouts is one level up
-import wwwData from '../data/www.json'; // Adjusted path
-import commonData from '../data/common.json'; // Adjusted path
-import eeatData from '../data/eeat.json'; // Adjusted path
+import BaseLayout from '../../layouts/BaseLayout.astro'; // Adjusted path assuming layouts is one level up
+import wwwData from '../../data/www.json'; // Adjusted path
+import commonData from '../../data/common.json'; // Adjusted path
+import eeatData from '../../data/eeat.json'; // Adjusted path
 
 export const prerender = false;
 
 // Get the slug from the URL
-const { slug } = Astro.params;
+const { EEATslug } = Astro.params;  
 
 // Find the matching EEAT entry
-const eeatEntry = eeatData.find(entry => entry.EEAT_SLUG === slug);
+const eeatEntry = eeatData.find(entry => entry.EEAT_SLUG === EEATslug);
 
 // Check if entry exists
 if (!eeatEntry) {
@@ -38,12 +38,16 @@ const eeat = eeatEntry;
 const www = wwwData[0];
 const common = commonData.find(c => c.M_LANGUAGE_ISO === eeat.M_LANGUAGE_ISO && c.M_COUNTRY_CODE === eeat.M_COUNTRY_CODE) || commonData[0]; // Ensure common matches language, fallback to first
 
-// Helper function for absolute URLs
+// Helper function for absolute URLs with locale
 const getAbsoluteUrl = (path: string) => {
-  if (path.startsWith('http://') || path.startsWith('https://')) {
-    return path;
-  }
-  return new URL(path, Astro.url.origin).toString();
+    // Get the locale from the URL path (e.g., 'si' from '/si/')
+    const locale = Astro.url.pathname.split('/')[1];
+    return new URL(`/${locale}${path}`, Astro.url.origin).toString();
+};
+
+// Helper function for base-level URLs (without locale)
+const getBaseUrl = (path: string) => {
+    return new URL(path, Astro.url.origin).toString();
 };
 
 // Get language data
@@ -143,7 +147,7 @@ const webpageSchema = {
     "@type": "Article",
     "headline": headline,
     "description": pageDescription,
-    "image": getAbsoluteUrl(pageogImage),
+    "image": getBaseUrl(pageogImage),
     "author": {
       "@type": "Organization",
       "name": www.PAGE_ORGANISATION_FULL_NAME
@@ -160,9 +164,9 @@ const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": www.PAGE_ORGANISATION_FULL_NAME,
-  "url": getAbsoluteUrl('/'),
+  "url": getBaseUrl('/'),
   "foundingDate": www.PAGE_FOUNDING_DATE,
-  "logo": getAbsoluteUrl(www.PAGE_LOGO_IMAGE_PATH_1),
+  "logo": getBaseUrl(www.PAGE_LOGO_IMAGE_PATH_1),
   "keywords": [
     www.PAGE_ORGANISATION_FULL_NAME,
     www.M_COUNTRY_NATIVE, // This is from www, common also has M_COUNTRY_NATIVE
@@ -203,38 +207,36 @@ const organizationSchema = {
     {
       "@type": "ViewAction",
       "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
-      "target": getAbsoluteUrl('/sitemap.xml')
+      "target": getBaseUrl('/sitemap.xml')
     },
     {
       "@type": "ViewAction",
       "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
-      // Corrected regex literal to string literal
-      "target": getAbsoluteUrl( languageIso && countryCode ? `sitemap-${languageIso}-${countryCode}.xml` : '/sitemap-local.xml')
+      "target": getBaseUrl(`/sitemap-${languageIso}-${countryCode}.xml`)
     },
     {
       "@type": "ViewAction",
       "name": www.PAGE_LLM_INSTRUCTIONS,
-      "target": getAbsoluteUrl('/llms.txt'),
+      "target": getBaseUrl('/llms.txt'),
       "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
     }
   ],
   "mainEntityOfPage": [
     {
       "@type": "WebPage",
-      "@id": getAbsoluteUrl('/sitemap.xml'),
+      "@id": getBaseUrl('/sitemap.xml'),
       "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
       "description": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS_DESCRIPTION
     },
     {
       "@type": "WebPage",
-      // Corrected regex literal to string literal
-      "@id": getAbsoluteUrl( languageIso && countryCode ? `sitemap-${languageIso}-${countryCode}.xml` : '/sitemap-local.xml'),
+      "@id": getBaseUrl(`/sitemap-${languageIso}-${countryCode}.xml`),
       "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
       "description": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS_DESCRIPTION
     },
     {
       "@type": "WebPage",
-      "@id": getAbsoluteUrl('/llms.txt'),
+      "@id": getBaseUrl('/llms.txt'),
       "name": www.PAGE_LLM_INSTRUCTIONS,
       "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
     }

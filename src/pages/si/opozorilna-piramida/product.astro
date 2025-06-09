@@ -1,11 +1,11 @@
 ---
 import type { RelatedProductInfo as OriginalRelatedProductInfo, FaqItemData as OriginalFaqItemData, ProductLayoutStrings as OriginalProductLayoutStrings } from '../../layouts/ProductLayout.astro'; // Path might need adjustment if ProductLayout is deleted
-import productData from '../../data/product.json';
-import wwwData from '../../data/www.json';
-import commonData from '../../data/common.json';
+import productData from '../../../data/product.json';
+import wwwData from '../../../data/www.json';
+import commonData from '../../../data/common.json';
 
 // Imports from ProductLayout.astro
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { actions, isInputError } from 'astro:actions';
 
 // Interfaces 
@@ -33,8 +33,15 @@ const product = productData[0];
 const www = wwwData[0];
 const common = commonData[0];
 
+// Helper function for absolute URLs with locale
 const getAbsoluteUrl = (path: string) => {
-  return new URL(path, Astro.url.origin).toString();
+    const locale = Astro.url.pathname.split('/')[1];
+    return new URL(`/${locale}${path}`, Astro.url.origin).toString();
+};
+
+// Helper function for base-level URLs (without locale)
+const getBaseUrl = (path: string) => {
+    return new URL(path, Astro.url.origin).toString();
 };
 
 const languageIso = product.M_LANGUAGE_ISO;
@@ -178,7 +185,7 @@ const productSchema = {
   "@context": "https://schema.org/",
   "@type": "Product",
   "name": product.PRODUCT_H1,
-  "image": getAbsoluteUrl(product.PRODUCT_IMAGE_PATH_L),
+  "image": getBaseUrl(product.PRODUCT_IMAGE_PATH_L),
   "mpn": product.PRODUCT_MPN,
   "category": product.PRODUCT_CATEGORY_1,
   "weight": {
@@ -247,9 +254,9 @@ const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": www.PAGE_ORGANISATION_FULL_NAME,
-  "url": getAbsoluteUrl('/'),
+  "url": getBaseUrl('/'),
   "foundingDate": www.PAGE_FOUNDING_DATE,
-  "logo": getAbsoluteUrl(www.PAGE_LOGO_IMAGE_PATH_1),
+  "logo": getBaseUrl(www.PAGE_LOGO_IMAGE_PATH_1),
   "keywords": [
     www.PAGE_ORGANISATION_FULL_NAME,
     common.M_COUNTRY_NATIVE,
@@ -290,12 +297,12 @@ const organizationSchema = {
     {
       "@type": "ViewAction",
       "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
-      "target": getAbsoluteUrl('/sitemap.xml')
+      "target": getBaseUrl('/sitemap.xml')
     },
     {
       "@type": "ViewAction",
       "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
-      "target": getAbsoluteUrl('/sitemap-sl-SI.xml')
+      "target": getBaseUrl(`/sitemap-${languageIso}-${countryCode}.xml`)
     },
     {
       "@type": "ViewAction",
