@@ -3,6 +3,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import articleDataJson from '../../../data/article.json';
 import wwwData from '../../../data/www.json';
 import commonData from '../../../data/common.json';
+import authorDataJson from '../../../data/author.json';
 
 // --- Type Definitions for Props (originally from ArticleLayout.astro) ---
 export interface AuthorInfo {
@@ -88,6 +89,15 @@ if (!article || article.PUBLISH_Y_N !== "1" || article.ARTICLE_LIST_SLUG !== Art
 const www = wwwData[0];
 const common = commonData[0];
 
+// Find the author data from author.json based on matching AUTHOR_ID with PAGE_ID
+const authorData = authorDataJson.find(
+  (author) => author.PAGE_ID === article.AUTHOR_ID
+);
+
+if (!authorData) {
+  return Astro.redirect('/404');
+}
+
 // Helper function for absolute URLs with locale
 const getAbsoluteUrl = (path: string): string => {
     const locale = Astro.url.pathname.split('/')[1];
@@ -118,9 +128,9 @@ const articleMetadata = {
   publishDate: article.ARTICLE_PUBLISH_DATE,
   updateDate: article.ARTICLE_UPDATE_DATE,
   author: {
-    name: article.ARTICLE_AUTHOR_NAME,
-    profileUrl: article.ARTICLE_AUTHOR_PROFILE_URL,
-    image: article.ARTICLE_AUTHOR_IMAGE
+    name: authorData.WWW_AUTHOR,
+    profileUrl: `/${authorData.M_SLUG}/${authorData.EEAT_URL_20}/${authorData.WWW_AUTHOR_SLUG}`,
+    image: authorData.AUTHOR_PROFILE_IMAGE_PATH
   } as AuthorInfo,
   headings: [
     { depth: 2, slug: common.ARTICLE_H2_1_ID, text: article.ARTICLE_H2_1 },
@@ -276,7 +286,7 @@ const articleSchema = {
         "@type": "ListItem",
         "position": 1,
         "name": article.M_HOME_NAME,
-        "item": getBaseUrl('/')
+        "item": getAbsoluteUrl('/')
       },
       {
         "@type": "ListItem",
@@ -299,9 +309,9 @@ const articleSchema = {
     "image": getBaseUrl(articleMetadata.ogImage),
     "author": {
       "@type": "Person",
-      "name": articleMetadata.author.name,
-      "image": getBaseUrl(articleMetadata.author.image),
-      "url": getAbsoluteUrl(articleMetadata.author.profileUrl)
+      "name": authorData.WWW_AUTHOR,
+      "image": getBaseUrl(authorData.AUTHOR_PROFILE_IMAGE_PATH),
+      "url": getAbsoluteUrl(`/${authorData.EEAT_URL_20}/${authorData.WWW_AUTHOR_SLUG}`)
     },
     "datePublished": articleMetadata.publishDate,
     "dateModified": articleMetadata.updateDate,
