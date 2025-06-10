@@ -1,72 +1,90 @@
 ---
 // Import JSON data
 import headerFooterData from '../data/headerfooter.json';
-import { SI, DE, PT, BA, LT, HR, ES, FR, IT, NL, SE, DK, NO, RU, TR, CZ, PL, SK, AL, AZ, BE, BG, CY, EE, GE, HU, LV, MD, ME, MK, RO, RS, UA, FI } from 'country-flag-icons/string/3x2';
+import { SI, DE, PT, BA, LT, HR, ES, FR, IT, NL, SE, DK, CH, AT, LU, BY, GR, LI, MC, SM, NO, RU, TR, CZ, PL, SK, AL, AZ, BE, BG, CY, EE, GE, HU, LV, MD, ME, MK, RO, RS, UA, FI } from 'country-flag-icons/string/3x2';
 import commonData from '../data/common.json';
 
-// Get the first (and only) object from headerFooterData array
-const headerFooter = headerFooterData[0];
-const common = commonData[0];
+// Get the locale from the URL path (e.g., 'si' from /si/...)
+const locale = Astro.url.pathname.split('/')[1];
+
+// Find the matching headerFooter and common data objects based on M_SLUG
+const headerFooter = headerFooterData.find(item => item.M_SLUG === locale) || headerFooterData[0];
+const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
 
 // Header component for the EU Signal website
 const navigation = [
-  { name: common.M_HOME_NAME, href: headerFooter.HEADER_LOGO_PATH },
-  { name: headerFooter.HEADER_LINK_NAME_1, href: headerFooter.HEADER_LINK_PATH_1 },
-  { name: headerFooter.HEADER_LINK_NAME_2, href: headerFooter.HEADER_LINK_PATH_2 },
-  { name: headerFooter.HEADER_LINK_NAME_3, href: headerFooter.HEADER_LINK_PATH_3 },
+  { name: common.M_HOME_NAME, href: `/${locale}` },
+  { name: headerFooter.HEADER_LINK_NAME_1, href: `/${locale}${headerFooter.HEADER_LINK_PATH_1}` },
+  { name: headerFooter.HEADER_LINK_NAME_2, href: `/${locale}${headerFooter.HEADER_LINK_PATH_2}` },
+  { name: headerFooter.HEADER_LINK_NAME_3, href: `/${locale}${headerFooter.HEADER_LINK_PATH_3}` },
 ];
 
 // --- Language Switcher Logic ---
-const supportedLanguages = [
-  { code: 'sl', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_1, flag: SI },
-  { code: 'hr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_2, flag: HR },
-  { code: 'es', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_3, flag: ES },
-  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_4, flag: FR },
-  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_5, flag: DE },
-  { code: 'pt', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_6, flag: PT },
-  { code: 'it', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_7, flag: IT },
-  { code: 'nl', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_8, flag: NL },
-  { code: 'sv', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_9, flag: SE },
-  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_10, flag: DE },
-  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_11, flag: FR },
-  { code: 'it', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_12, flag: IT },
-  { code: 'da', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_13, flag: DK },
-  { code: 'no', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_14, flag: NO },
-  { code: 'nl', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_15, flag: NL },
-  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_16, flag: FR },
-  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_17, flag: DE },
-  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_18, flag: DE },
-  { code: 'fi', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_19, flag: FI },
-  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_20, flag: FR },
-  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_21, flag: DE },
-  { code: 'ru', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_22, flag: RU },
-  { code: 'tr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_23, flag: TR },
-  { code: 'cz', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_24, flag: CZ },
-  { code: 'pl', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_25, flag: PL },
-  { code: 'sk', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_26, flag: SK },
-  { code: 'sq', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_27, flag: AL },
-  { code: 'az', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_28, flag: AZ },
-  { code: 'be', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_29, flag: BE },
-  { code: 'bs', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_30, flag: BA },
-  { code: 'bg', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_31, flag: BG },
-  { code: 'el', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_32, flag: CY },
-  { code: 'et', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_33, flag: EE },
-  { code: 'ka', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_34, flag: GE },
-  { code: 'el', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_35, flag: CY },
-  { code: 'hu', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_36, flag: HU },
-  { code: 'lv', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_37, flag: LV },
-  { code: 'de', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_38, flag: DE },
-  { code: 'lt', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_39, flag: LT },
-  { code: 'ro', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_40, flag: RO },
-  { code: 'fr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_41, flag: FR },
-  { code: 'sr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_42, flag: RS },
-  { code: 'mk', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_43, flag: MK },
-  { code: 'ro', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_44, flag: MD },
-  { code: 'it', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_45, flag: IT },
-  { code: 'sr', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_46, flag: RS },
-  { code: 'ua', name: headerFooter.HEADER_LANGUAGE_DROPDOWN_47, flag: UA }
+// Define supported locales with their corresponding data
+const supportedLocales = [
+  { code: 'si', country: 'SI', name: headerFooter.HEADER_LANGUAGE_SLOVENIA_SLOVENIAN },
+  { code: 'hr', country: 'HR', name: headerFooter.HEADER_LANGUAGE_CROATIA_CROATIAN },
+  { code: 'es', country: 'ES', name: headerFooter.HEADER_LANGUAGE_SPAIN_SPANISH },
+  { code: 'fr', country: 'FR', name: headerFooter.HEADER_LANGUAGE_FRANCE_FRENCH },
+  { code: 'de', country: 'DE', name: headerFooter.HEADER_LANGUAGE_GERMANY_GERMAN },
+  { code: 'pt', country: 'PT', name: headerFooter.HEADER_LANGUAGE_PORTUGAL_PORTUGUESE },
+  { code: 'it', country: 'IT', name: headerFooter.HEADER_LANGUAGE_ITALY_ITALIAN },
+  { code: 'nl', country: 'NL', name: headerFooter.HEADER_LANGUAGE_NETHERLANDS_DUTCH },
+  { code: 'se', country: 'SE', name: headerFooter.HEADER_LANGUAGE_SWEDEN_SWEDISH },
+  { code: 'ch', country: 'CH', name: headerFooter.HEADER_LANGUAGE_SWITZERLAND_GERMAN },
+  { code: 'ch', country: 'CH', name: headerFooter.HEADER_LANGUAGE_SWITZERLAND_FRENCH },
+  { code: 'ch', country: 'CH', name: headerFooter.HEADER_LANGUAGE_SWITZERLAND_ITALIAN },
+  { code: 'dk', country: 'DK', name: headerFooter.HEADER_LANGUAGE_DENMARK_DANISH },
+  { code: 'no', country: 'NO', name: headerFooter.HEADER_LANGUAGE_NORWAY_NORWEGIAN },
+  { code: 'be', country: 'BE', name: headerFooter.HEADER_LANGUAGE_BELGIUM_DUTCH },
+  { code: 'be', country: 'BE', name: headerFooter.HEADER_LANGUAGE_BELGIUM_FRENCH },
+  { code: 'be', country: 'BE', name: headerFooter.HEADER_LANGUAGE_BELGIUM_GERMAN },
+  { code: 'at', country: 'AT', name: headerFooter.HEADER_LANGUAGE_AUSTRIA_GERMAN },
+  { code: 'fi', country: 'FI', name: headerFooter.HEADER_LANGUAGE_FINLAND_FINNISH },
+  { code: 'lu', country: 'LU', name: headerFooter.HEADER_LANGUAGE_LUXEMBOURG_FRENCH },
+  { code: 'lu', country: 'LU', name: headerFooter.HEADER_LANGUAGE_LUXEMBOURG_GERMAN },
+  { code: 'ru', country: 'RU', name: headerFooter.HEADER_LANGUAGE_RUSSIA_RUSSIAN },
+  { code: 'tr', country: 'TR', name: headerFooter.HEADER_LANGUAGE_TURKEY_TURKISH },
+  { code: 'cz', country: 'CZ', name: headerFooter.HEADER_LANGUAGE_CZECHIA_CZECH },
+  { code: 'pl', country: 'PL', name: headerFooter.HEADER_LANGUAGE_POLAND_POLISH },
+  { code: 'sk', country: 'SK', name: headerFooter.HEADER_LANGUAGE_SLOVAKIA_SLOVAK },
+  { code: 'al', country: 'AL', name: headerFooter.HEADER_LANGUAGE_ALBANIA_ALBANIAN },
+  { code: 'az', country: 'AZ', name: headerFooter.HEADER_LANGUAGE_AZERBAIJAN_AZERBAIJANI },
+  { code: 'by', country: 'BY', name: headerFooter.HEADER_LANGUAGE_BELARUS_BELARUSIAN },
+  { code: 'ba', country: 'BA', name: headerFooter.HEADER_LANGUAGE_BOSNIA_AND_HERZEGOVINA_BOSNIAN },
+  { code: 'bg', country: 'BG', name: headerFooter.HEADER_LANGUAGE_BULGARIA_BULGARIAN },
+  { code: 'cy', country: 'CY', name: headerFooter.HEADER_LANGUAGE_CYPRUS_GREEK },
+  { code: 'ee', country: 'EE', name: headerFooter.HEADER_LANGUAGE_ESTONIA_ESTONIAN },
+  { code: 'ge', country: 'GE', name: headerFooter.HEADER_LANGUAGE_GEORGIA_GEORGIAN },
+  { code: 'gr', country: 'GR', name: headerFooter.HEADER_LANGUAGE_GREECE_GREEK },
+  { code: 'hu', country: 'HU', name: headerFooter.HEADER_LANGUAGE_HUNGARY_HUNGARIAN },
+  { code: 'lv', country: 'LV', name: headerFooter.HEADER_LANGUAGE_LATVIA_LATVIAN },
+  { code: 'li', country: 'LI', name: headerFooter.HEADER_LANGUAGE_LIECHTENSTEIN_GERMAN },
+  { code: 'lt', country: 'LT', name: headerFooter.HEADER_LANGUAGE_LITHUANIA_LITHUANIAN },
+  { code: 'md', country: 'MD', name: headerFooter.HEADER_LANGUAGE_MOLDOVA_ROMANIAN },
+  { code: 'mc', country: 'MC', name: headerFooter.HEADER_LANGUAGE_MONACO_FRENCH },
+  { code: 'me', country: 'ME', name: headerFooter.HEADER_LANGUAGE_MONTENEGRO_SERBIAN },
+  { code: 'mk', country: 'MK', name: headerFooter.HEADER_LANGUAGE_NORTH_MACEDONIA_MACEDONIAN },
+  { code: 'ro', country: 'RO', name: headerFooter.HEADER_LANGUAGE_ROMANIA_ROMANIAN },
+  { code: 'sm', country: 'SM', name: headerFooter.HEADER_LANGUAGE_SAN_MARINO_ITALIAN },
+  { code: 'rs', country: 'RS', name: headerFooter.HEADER_LANGUAGE_SERBIA_SERBIAN },
+  { code: 'ua', country: 'UA', name: headerFooter.HEADER_LANGUAGE_UKRAINE_UKRAINIAN }
 ];
-const defaultLangCode = 'sl'; // Your site's default language code
+
+// Map country codes to their corresponding flag components
+const flagMap = {
+  SI, HR, ES, FR, DE, PT, IT, NL, SE, CH, DK, NO, BE, AT, FI, LU, RU, TR, CZ, PL, SK,
+  AL, AZ, BY, BA, BG, CY, EE, GE, GR, HU, LV, LI, LT, MD, MC, ME, MK, RO, SM, RS, UA
+};
+
+// Create the final supported languages array with flags
+const supportedLanguages = supportedLocales.map(locale => ({
+  code: locale.code,
+  name: locale.name,
+  flag: flagMap[locale.country]
+}));
+
+const defaultLangCode = 'si'; // Your site's default language code
 
 const currentPathname = Astro.url.pathname;
 const pathParts = currentPathname.split('/').filter(p => p !== '');
@@ -101,8 +119,8 @@ const languageLinks = supportedLanguages.map(lang => {
 });
 
 const currentLanguageObject = supportedLanguages.find(lang => lang.code === currentDetectedLang) ||
-                              supportedLanguages.find(lang => lang.code === defaultLangCode) ||
-                              supportedLanguages[0]; // Fallback
+                            supportedLanguages.find(lang => lang.code === defaultLangCode) ||
+                            supportedLanguages[0]; // Fallback
 // --- End Language Switcher Logic ---
 ---
 
@@ -110,7 +128,7 @@ const currentLanguageObject = supportedLanguages.find(lang => lang.code === curr
   <nav class="container mx-auto px-4 py-4 flex items-center justify-between">
     {/* Logo */}
     <a
-      href={headerFooter.HEADER_LOGO_PATH}
+      href={`/${locale}`}
       class="flex items-center"
       id="header-logo-link"
     >
