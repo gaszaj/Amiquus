@@ -2,59 +2,100 @@
 // Import JSON data
 import headerFooterData from '../data/headerfooter.json';
 import commonData from '../data/common.json';
-import { SI, DE } from 'country-flag-icons/string/3x2'; // Add this import for Slovenian flag
+import eeatData from '../data/eeat.json';
+import products from '../data/product.json';
+import * as flags from 'country-flag-icons/string/3x2';
 
 const currentYear = new Date().getFullYear();
 
-// Get the first (and only) object from headerFooterData array
-const headerFooter = headerFooterData[0];
-const common = commonData[0];
+// Get current locale from URL path
+const currentPath = Astro.url.pathname;
+const localeMatch = currentPath.match(/^\/([a-z]{2}(?:-[a-z]{2})?)/);
+const currentLocale = localeMatch ? localeMatch[1] : 'si';
 
-// Footer navigation groups
+// Get country code from locale (handle cases like 'de-ch' -> 'ch')
+const getCountryCode = (locale: string) => {
+  const parts = locale.split('-');
+  return parts.length > 1 ? parts[1].toUpperCase() : locale.toUpperCase();
+};
+
+// Find matching data for current locale
+const headerFooter = headerFooterData.find(data => data.M_SLUG === currentLocale) || headerFooterData[0];
+const common = commonData.find(data => data.M_SLUG === currentLocale) || commonData[0];
+
+// Get current country flag
+const currentCountryCode = getCountryCode(currentLocale);
+const currentCountryFlag = flags[currentCountryCode as keyof typeof flags];
+
+// Helper function to get EEAT pages by filtering number
+const getEeatPages = (filteringNumbers: string[]) => {
+  return eeatData
+    .filter(page => filteringNumbers.includes(page.EEAT_FILTERING))
+    .map(page => ({
+      text: page.EEAT_NAME,
+      href: `/${currentLocale}/${page.EEAT_SLUG}`
+    }));
+};
+
+// Helper function to get product by ID
+const getProductById = (productId: string) => {
+  return products.find(product => 
+    product.PRODUCT_ID === productId && 
+    product.M_SLUG === currentLocale
+  );
+};
+
+// Debug logging
+console.log('Current Locale:', currentLocale);
+console.log('Product IDs:', {
+  id1: headerFooter.FOOTER_BESTSELLER_ID_1,
+  id2: headerFooter.FOOTER_BESTSELLER_ID_2,
+  id3: headerFooter.FOOTER_BESTSELLER_ID_3,
+  id4: headerFooter.FOOTER_BESTSELLER_ID_4,
+  id5: headerFooter.FOOTER_BESTSELLER_ID_5,
+  id6: headerFooter.FOOTER_BESTSELLER_ID_6
+});
+
+// Filter and sort bestsellers based on criteria for specific locale
+const bestSellers = products
+  .filter(product => 
+    product.PUBLISH_Y_N === "1" && 
+    product.PRODUCT_IS_BESTSELLER === "1" &&
+    product.M_SLUG === currentLocale
+  )
+  .sort((a, b) => {
+    // First sort by importance rank (descending)
+    const rankDiff = parseInt(b.PRODUCT_IMPORTANCE_RANK) - parseInt(a.PRODUCT_IMPORTANCE_RANK);
+    if (rankDiff !== 0) return rankDiff;
+    // If ranks are equal, randomize
+    return Math.random() - 0.5;
+  })
+  .slice(0, 6) // Get top 6 bestsellers for footer
+  .map(product => ({
+    text: product.PRODUCT_NAME,
+    href: `/${product.M_SLUG}/${product.PRODUCT_CATEGORY_1_SLUG}/${product.PRODUCT_ASCII_SLUG}`
+  }));
+
+// Debug logging
+console.log('Final bestSellers array:', bestSellers);
+
+// Define footer navigation groups with exact EEAT page mapping
 const footerNavGroups = [
   {
-    title: headerFooter.FOOTER_EEAT_GROUP_1,
-    links: [
-      { text: headerFooter.FOOTER_EEAT_GROUP_1_NAME_1, href: headerFooter.FOOTER_EEAT_GROUP_1_PATH_1 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_1_NAME_2, href: headerFooter.FOOTER_EEAT_GROUP_1_PATH_2 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_1_NAME_3, href: headerFooter.FOOTER_EEAT_GROUP_1_PATH_3 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_1_NAME_4, href: headerFooter.FOOTER_EEAT_GROUP_1_PATH_4 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_1_NAME_5, href: headerFooter.FOOTER_EEAT_GROUP_1_PATH_5 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_1_NAME_6, href: headerFooter.FOOTER_EEAT_GROUP_1_PATH_6 }
-    ]
+    title: headerFooter.FOOTER_EEAT_GROUP_1, // Podjetje
+    links: getEeatPages(['18', '21', '14', '22', '20', '19'])
   },
   {
-    title: headerFooter.FOOTER_EEAT_GROUP_2,
-    links: [
-      { text: headerFooter.FOOTER_EEAT_GROUP_2_NAME_1, href: headerFooter.FOOTER_EEAT_GROUP_2_PATH_1 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_2_NAME_2, href: headerFooter.FOOTER_EEAT_GROUP_2_PATH_2 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_2_NAME_3, href: headerFooter.FOOTER_EEAT_GROUP_2_PATH_3 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_2_NAME_4, href: headerFooter.FOOTER_EEAT_GROUP_2_PATH_4 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_2_NAME_5, href: headerFooter.FOOTER_EEAT_GROUP_2_PATH_5 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_2_NAME_6, href: headerFooter.FOOTER_EEAT_GROUP_2_PATH_6 }
-    ]
+    title: headerFooter.FOOTER_EEAT_GROUP_2, // Podpora
+    links: getEeatPages(['16', '15', '17', '26', '11', '08'])
   },
   {
-    title: headerFooter.FOOTER_EEAT_GROUP_3,
-    links: [
-      { text: headerFooter.FOOTER_EEAT_GROUP_3_NAME_1, href: headerFooter.FOOTER_EEAT_GROUP_3_PATH_1 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_3_NAME_2, href: headerFooter.FOOTER_EEAT_GROUP_3_PATH_2 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_3_NAME_3, href: headerFooter.FOOTER_EEAT_GROUP_3_PATH_3 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_3_NAME_4, href: headerFooter.FOOTER_EEAT_GROUP_3_PATH_4 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_3_NAME_5, href: headerFooter.FOOTER_EEAT_GROUP_3_PATH_5 }
-    ]
+    title: headerFooter.FOOTER_EEAT_GROUP_3, // Sodelovanja
+    links: getEeatPages(['24', '25', '23', '09', '10'])
   },
   {
-    title: headerFooter.FOOTER_EEAT_GROUP_4,
-    links: [
-      { text: headerFooter.FOOTER_EEAT_GROUP_4_NAME_1, href: headerFooter.FOOTER_EEAT_GROUP_4_PATH_1 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_4_NAME_2, href: headerFooter.FOOTER_EEAT_GROUP_4_PATH_2 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_4_NAME_3, href: headerFooter.FOOTER_EEAT_GROUP_4_PATH_3 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_4_NAME_4, href: headerFooter.FOOTER_EEAT_GROUP_4_PATH_4 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_4_NAME_5, href: headerFooter.FOOTER_EEAT_GROUP_4_PATH_5 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_4_NAME_6, href: headerFooter.FOOTER_EEAT_GROUP_4_PATH_6 },
-      { text: headerFooter.FOOTER_EEAT_GROUP_4_NAME_7, href: headerFooter.FOOTER_EEAT_GROUP_4_PATH_7 }
-    ]
+    title: headerFooter.FOOTER_EEAT_GROUP_4, // Pravilniki
+    links: getEeatPages(['03', '04', '05', '06', '07', '12', '13'])
   }
 ];
 
@@ -68,16 +109,6 @@ const socialLinks = [
   { name: 'YouTube', url: common.PAGE_YOUTUBE_URL, icon: 'youtube' },
   { name: 'Pinterest', url: common.PAGE_PINTEREST_URL, icon: 'pinterest' },
   { name: 'Bluesky', url: common.PAGE_BLUESKY_URL, icon: 'bluesky' }
-];
-
-// Best sellers
-const bestSellers = [
-  { text: headerFooter.FOOTER_BESTSELLERS_NAME_1, href: headerFooter.FOOTER_BESTSELLERS_PATH_1 },
-  { text: headerFooter.FOOTER_BESTSELLERS_NAME_2, href: headerFooter.FOOTER_BESTSELLERS_PATH_2 },
-  { text: headerFooter.FOOTER_BESTSELLERS_NAME_3, href: headerFooter.FOOTER_BESTSELLERS_PATH_3 },
-  { text: headerFooter.FOOTER_BESTSELLERS_NAME_4, href: headerFooter.FOOTER_BESTSELLERS_PATH_4 },
-  { text: headerFooter.FOOTER_BESTSELLERS_NAME_5, href: headerFooter.FOOTER_BESTSELLERS_PATH_5 },
-  { text: headerFooter.FOOTER_BESTSELLERS_NAME_6, href: headerFooter.FOOTER_BESTSELLERS_PATH_6 }
 ];
 
 // Bundles
@@ -321,16 +352,20 @@ const bundles = [
         <p class="text-gray-400 text-sm">
           <span class="block md:inline">&copy; {currentYear} <span class="text-signal-green">{common.PAGE_ORGANISATION_FULL_NAME} BRAND</span></span>
           <span class="hidden md:inline mx-2">|</span>
-          <span class="block md:inline mt-2 md:mt-0">
-            {common.M_PROUD_1}
-            <span class="inline-block ml-2 w-6 h-4" set:html={SI}></span>
-          </span>
-          <span class="hidden md:inline mx-2"></span>
-          <span class="block md:inline mt-2 md:mt-0">{common.M_PROUD_2}</span>
-          <span class="inline-block ml-2 w-6 h-4" set:html={DE}></span>
-          <span class="hidden md:inline mx-2">|</span>
           <span class="block md:inline mt-2 md:mt-0">{common.M_COPYRIGHT}</span>
         </p>
+        
+        <!-- New row for country flags with proper mobile breakpoint -->
+        <div class="text-gray-400 text-sm mt-4">
+          <p class="block md:inline">
+            {common.M_PROUD_1}
+            <span class="inline-block ml-2 w-6 h-4" set:html={flags.SI}></span>
+          </p>
+          <p class="block md:inline mt-2 md:mt-0">
+            {common.M_PROUD_2}
+            <span class="inline-block ml-2 w-6 h-4" set:html={currentCountryFlag}></span>
+          </p>
+        </div>
       </div>
     </div>
   </div>
