@@ -76,8 +76,8 @@
         "ARTICLE_P_ID_8": "p7001" 
     },
     {
-        "PAGE_ID": "ar00101",
-        "ARTICLE_NUMBER": "001",
+        "PAGE_ID": "ar00201",
+        "ARTICLE_NUMBER": "002",
         "AUTHOR_ID": "author101",
         "PUBLISH_Y_N": "1",
         "ARTICLE_NAME": "Varnost, označevanje in opozarjanje pri organizaciji maratona",
@@ -155,8 +155,8 @@
         "ARTICLE_P_ID_8": "p03901"
     },
     {
-        "PAGE_ID": "ar00201",
-        "ARTICLE_NUMBER": "002",
+        "PAGE_ID": "ar00301",
+        "ARTICLE_NUMBER": "003",
         "AUTHOR_ID": "author101",
         "PUBLISH_Y_N": "1",
         "ARTICLE_NAME": "Varnost, označevanje in opozarjanje pri športnih dogodkih",
@@ -234,8 +234,8 @@
         "ARTICLE_P_ID_8": "p03901"
     },
     {
-        "PAGE_ID": "ar00301",
-        "ARTICLE_NUMBER": "003",
+        "PAGE_ID": "ar00401",
+        "ARTICLE_NUMBER": "004",
         "AUTHOR_ID": "author101",
         "PUBLISH_Y_N": "1",
         "ARTICLE_NAME": "Varnost, označevanje in opozarjanje pri festivalih",

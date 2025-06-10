@@ -94,7 +94,7 @@ const organizationSchema = {
   "logo": getAbsoluteUrl(www.PAGE_LOGO_IMAGE_PATH_1),
   "keywords": [
     www.PAGE_ORGANISATION_FULL_NAME,
-    www.M_COUNTRY_NATIVE,
+    common.M_COUNTRY_NATIVE,
     common.PAGE_KEYWORD_1,
     common.PAGE_KEYWORD_2,
     common.PAGE_KEYWORD_3,
@@ -125,8 +125,8 @@ const organizationSchema = {
   ].filter(Boolean),
   "areaServed": {
     "@type": "Country",
-    "name": www.M_COUNTRY,
-    "identifier": www.M_COUNTRY_CODE
+    "name": common.M_COUNTRY,
+    "identifier": common.M_COUNTRY_CODE
   },
   "potentialAction": [
     {

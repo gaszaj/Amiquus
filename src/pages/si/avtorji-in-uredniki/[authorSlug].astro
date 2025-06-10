@@ -73,8 +73,8 @@ interface AuthorDataEntry {
   M_COUNTRY_CODE: string;
   M_LANGUAGE_ISO: string;
   M_SLUG: string;
-  EEAT_NAME_20: string; // e.g., "Avtorji in uredniki" (plural name for the list page)
-  EEAT_NAME_20_SINGULAR: string; // e.g., "Avtor in urednik"
+  EEAT_NAME_20: string;
+  EEAT_NAME_20_SINGULAR: string;
   EEAT_SLUG_20: string;
   WWW_AUTHOR_NATIONALITY: string;
   WWW_AUTHOR_OCCUPATION: string;
@@ -117,7 +117,7 @@ interface AuthorDataEntry {
   AUTHOR_DATE_PUBLISHED: string;
   AUTHOR_DATE_UPDATED: string;
   AUTHOR_META_SEO: string;
-  EEAT_SLUG_13: string; // Slug for editorial policy
+  EEAT_SLUG_13: string;
   AUTHOR_FULL_BIO: string;
 }
 
@@ -164,7 +164,7 @@ const authorProfileData = {
   seoTitle: `${author.WWW_AUTHOR} — ${author.EEAT_NAME_20_SINGULAR}`,
   description: author.AUTHOR_FULL_BIO,
   image: getBaseUrl(author.AUTHOR_PROFILE_IMAGE_PATH),
-  ogImage: getBaseUrl(author.AUTHOR_OG_IMAGE_PATH),
+  ogImage: (author.AUTHOR_OG_IMAGE_PATH),
   imageAltText: `${author.WWW_AUTHOR} — ${author.EEAT_NAME_20_SINGULAR} | ${www.PAGE_ORGANISATION_FULL_NAME}`,
   socialLinks: {
     linkedin: author.WWW_AUTHOR_LINKEDIN,

@@ -232,7 +232,7 @@ const schema = [collectionPageSchema, organizationSchema];
         <div class="container mx-auto px-4">
             <div class="grid grid-cols-2 lg:grid-cols-3 gap-2">
                 {filteredProducts.map((product) => {
-                    const productUrl = `${Astro.url.origin}/${parentSlug}/opozorilna-piramida/${product.PRODUCT_ASCII_SLUG}`;
+                    const productUrl = `${Astro.url.origin}/${parentSlug}/${currentFolder}/${product.PRODUCT_ASCII_SLUG}`;
                     const fullProductName = `${product.PRODUCT_CATEGORY_1} ${product.PRODUCT_NAME}`;
                     
                     return (
@@ -255,7 +255,7 @@ const schema = [collectionPageSchema, organizationSchema];
                                         {product.M_PRODUCT_PRICE}
                                     </div>
                                     <span class="block w-full bg-black text-signal-green border border-signal-green py-2 px-4 hover:bg-signal-green hover:text-black transition-all text-center">
-                                        {product.PRODUCT_PAGE_RELATED_PRODUCT_VIEW_BUTTON_TEXT || "Poglej izdelek"}
+                                        {common.PRODUCT_PAGE_RELATED_PRODUCT_VIEW_BUTTON_TEXT || "Poglej izdelek"}
                                     </span>
                                 </div>
                             </a>

@@ -8,6 +8,50 @@ import commonData from '../../../data/common.json';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { actions, isInputError } from 'astro:actions';
 
+// Get the product slug from the URL
+const { productSlug } = Astro.params;
+
+// Get the locale from the URL path (e.g., 'si' from /si/opozorilna-piramida/...)
+const locale = Astro.url.pathname.split('/')[1];
+
+// Find the matching product based on slug and locale
+const product = productData.find(
+  (entry) => 
+    entry.PRODUCT_ASCII_SLUG === productSlug && 
+    entry.M_SLUG === locale &&
+    entry.PUBLISH_Y_N === "1"
+);
+
+// If product not found or not published, redirect to 404
+if (!product) {
+  return Astro.redirect('/404');
+}
+
+// Find the matching common data object based on M_SLUG
+const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
+const www = wwwData[0];
+
+// Get language data from the product
+const languageIso = product.M_LANGUAGE_ISO;
+const countryCode = product.M_COUNTRY_CODE;
+
+// Find matching content orientation from common.json
+const contentOrientation = commonData.find(item =>
+  item.M_LANGUAGE_ISO === languageIso &&
+  item.M_COUNTRY_CODE === countryCode
+)?.M_CONTENT_ORIENTATION || 'ltr';
+
+// Helper function for absolute URLs with locale
+const getAbsoluteUrl = (path: string): string => {
+    const locale = Astro.url.pathname.split('/')[1];
+    return new URL(`/${locale}${path}`, Astro.url.origin).toString();
+};
+
+// Helper function for base-level URLs (without locale)
+const getBaseUrl = (path: string): string => {
+    return new URL(path, Astro.url.origin).toString();
+};
+
 // Interfaces 
 export interface ProductSpecification {
   dimensions: string; material: string; weight: string; visibility: string; windResistance: string; setupTime: string;
@@ -28,38 +72,6 @@ export interface ProductLayoutStrings {
   validationNameRequired: string; validationSurnameRequired: string; validationStreetRequired: string; validationCityRequired: string; validationZipRequired: string; validationEmailRequired: string; validationEmailInvalid: string; validationPhoneRequired: string; validationQuantityRequired: string; validationPaymentRequired: string; validationTermsRequired: string;
   formSuccessMessage: string;
 }
-
-// Get the locale from the URL path (e.g., 'si' from '/si/opozorilna-piramida/product')
-const locale = Astro.url.pathname.split('/')[1];
-
-// Find the matching common data object based on M_SLUG
-const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
-
-// Get the first object from wwwData
-const www = wwwData[0];
-
-// Get the first product from productData
-const product = productData[0];
-
-// Helper function for absolute URLs with locale
-const getAbsoluteUrl = (path: string) => {
-    return new URL(`/${locale}${path}`, Astro.url.origin).toString();
-};
-
-// Helper function for base-level URLs (without locale)
-const getBaseUrl = (path: string) => {
-    return new URL(path, Astro.url.origin).toString();
-};
-
-// Get language data
-const languageIso = product.M_LANGUAGE_ISO;
-const countryCode = product.M_COUNTRY_CODE;
-
-// Find matching content orientation from common.json
-const contentOrientation = commonData.find(item =>
-  item.M_LANGUAGE_ISO === languageIso &&
-  item.M_COUNTRY_CODE === countryCode
-)?.M_CONTENT_ORIENTATION || 'ltr';
 
 const productCoreData = {
   h1: product.PRODUCT_H1,
@@ -98,12 +110,12 @@ const productFaqItems: FaqItemData[] = [
 ];
 
 const allAvailableProducts: RelatedProductInfo[] = [
-  { id: product.PRODUCT_RELATEDP1, title: "Opozorilna piramida ČIŠČENJE BAZENOV", image: "/productimg/l/triopan-čiščenje-bazenov.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/ciscenje-bazenov" },
-  { id: product.PRODUCT_RELATEDP2, title: "Opozorilna piramida OBVEZNA SMER LEVO", image: "/productimg/l/triopan-obvezna-smer-levo.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/obvezna-smer-levo" },
-  { id: product.PRODUCT_RELATEDP3, title: "Opozorilna piramida ZOŽENJE Z LEVE", image: "/productimg/l/triopan-zoženje-z-leve.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/zoženje-z-leve" },
-  { id: product.PRODUCT_RELATEDP4, title: "Opozorilna piramida PREPOVED USTAVLJANJA", image: "/productimg/l/triopan-prepoved-ustavljanja.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/prepoved-ustavljanja" },
-  { id: product.PRODUCT_RELATEDP5, title: "Opozorilna piramida KOŠNJA TRAVE", image: "/productimg/l/triopan-košnja-trave.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/kosnja-trave" },
-  { id: product.PRODUCT_RELATEDP6, title: "Opozorilna piramida KOLESARSKI IZPIT", image: "/productimg/l/triopan-kolesarski-izpit.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/kolesarski-izpit" }
+  { id: product.PRODUCT_RELATED_P1, title: "Opozorilna piramida ČIŠČENJE BAZENOV", image: "/productimg/l/triopan-čiščenje-bazenov.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/ciscenje-bazenov" },
+  { id: product.PRODUCT_RELATED_P2, title: "Opozorilna piramida OBVEZNA SMER LEVO", image: "/productimg/l/triopan-obvezna-smer-levo.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/obvezna-smer-levo" },
+  { id: product.PRODUCT_RELATED_P3, title: "Opozorilna piramida ZOŽENJE Z LEVE", image: "/productimg/l/triopan-zoženje-z-leve.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/zoženje-z-leve" },
+  { id: product.PRODUCT_RELATED_P4, title: "Opozorilna piramida PREPOVED USTAVLJANJA", image: "/productimg/l/triopan-prepoved-ustavljanja.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/prepoved-ustavljanja" },
+  { id: product.PRODUCT_RELATED_P5, title: "Opozorilna piramida KOŠNJA TRAVE", image: "/productimg/l/triopan-košnja-trave.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/kosnja-trave" },
+  { id: product.PRODUCT_RELATED_P6, title: "Opozorilna piramida KOLESARSKI IZPIT", image: "/productimg/l/triopan-kolesarski-izpit.webp", category: product.PRODUCT_CATEGORY_1_SLUG, url: "/si/opozorilna-piramida/kolesarski-izpit" }
 ];
 
 const filteredRelatedProducts = allAvailableProducts
@@ -227,7 +239,7 @@ const productSchema = {
     },
     "author": {
       "@type": "Person",
-      "name": product.PRODUCT_AUTHOR
+      "name": product.PRODUCT_TESTIMONIAL_PERSON_1
     }
   },
   "aggregateRating": {
@@ -311,7 +323,7 @@ const organizationSchema = {
     {
       "@type": "ViewAction",
       "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
-      "target": getBaseUrl(`/sitemap-${languageIso}-${countryCode}.xml`)
+      "target": getBaseUrl(`/sitemap-${locale}.xml`)
     },
     {
       "@type": "ViewAction",

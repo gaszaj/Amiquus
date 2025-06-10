@@ -4,6 +4,7 @@ import articleDataJson from '../../../data/article.json';
 import wwwData from '../../../data/www.json';
 import commonData from '../../../data/common.json';
 import authorDataJson from '../../../data/author.json';
+import products from '../../../data/product.json';
 
 // --- Type Definitions for Props (originally from ArticleLayout.astro) ---
 export interface AuthorInfo {
@@ -18,7 +19,7 @@ export interface HeadingInfo {
   text: string;
 }
 
-export interface RelatedArticleInfo { // This replaces the imported ArticleLayout_RelatedArticleInfo
+export interface RelatedArticleInfo { 
   title: string;
   url: string;
   date: string;
@@ -40,7 +41,7 @@ export interface DisclaimerContent {
   text: string;
 }
 
-export interface RelatedArticlesContent { // Used for relatedArticlesForPage structure
+export interface RelatedArticlesContent { 
   title: string;
   articles: RelatedArticleInfo[];
 }
@@ -180,83 +181,95 @@ const layoutContent = { // This data was previously passed as props to ArticleLa
 // Define keywords for the page
 const pageKeywords = [
   article.ARTICLE_H1,
-  www.M_COUNTRY_NATIVE,
+  article.ARTICLE_H2_1,
+  common.M_COUNTRY_NATIVE,
   www.PAGE_ORGANISATION_FULL_NAME
 ].join(', ');
 
 
 // --- Related Articles Data and Logic ---
-const allDomainArticles: RelatedArticleInfo[] = [
-  { title: "Varnost, označevanje in opozarjanje pri tekaških dogodkih", url: "/articles/safety-signs-visibility-night", date: "2025-03-15" },
-  { title: "Varnost, označevanje in opozarjanje pri športnih dogodkih", url: "/articles/eu-regulations-road-warning-systems", date: "2025-03-10" },
-  { title: "Varnost, označevanje in opozarjanje pri kolesarskih dirkah", url: "/articles/maintain-triopan-warning-signs", date: "2025-03-05" },
-  { title: "Varnost, označevanje in opozarjanje pri športnih turnirjih", url: "/articles/warning-signs-construction-sites", date: "2025-02-28" },
-  { title: "Varnost, označevanje in opozarjanje pri športnih dnevih", url: "/articles/event-safety-warning-systems", date: "2025-02-20" },
-  { title: "Varnost, označevanje in opozarjanje pri šolskih tekmovanjih", url: "/articles/highway-work-zone-safety", date: "2025-02-15" },
-  { title: "Varnost, označevanje in opozarjanje pri javnih prireditvah", url: "/articles/emergency-response-warning-systems", date: "2025-02-10" },
-  { title: "Varnost, označevanje in opozarjanje pri športnih objektih", url: "/articles/safety-sign-technology-innovation", date: "2025-02-05" }
-];
+// Helper function to find article by ID
+const findArticleById = (articleId: string) => {
+  return articleDataJson.find(entry => entry.PAGE_ID === articleId && entry.PUBLISH_Y_N === "1");
+};
 
-const relatedArticlesForPage: RelatedArticlesContent = { // Structure matches RelatedArticlesContent
+// Get related articles from the current article's data
+const relatedArticleIds = [
+  article.ARTICLE_RELATED_A1,
+  article.ARTICLE_RELATED_A2,
+  article.ARTICLE_RELATED_A3,
+  article.ARTICLE_RELATED_A4,
+  article.ARTICLE_RELATED_A5,
+  article.ARTICLE_RELATED_A6,
+  article.ARTICLE_RELATED_A7,
+  article.ARTICLE_RELATED_A8,
+  article.ARTICLE_RELATED_A9
+].filter(Boolean); // Remove any undefined/null values
+
+// Map related articles to the required format
+const allDomainArticles: RelatedArticleInfo[] = relatedArticleIds
+  .map(id => {
+    const relatedArticle = findArticleById(id);
+    if (!relatedArticle) return null;
+    
+    return {
+      title: relatedArticle.ARTICLE_H1,
+      url: `/${relatedArticle.M_SLUG}/${relatedArticle.ARTICLE_LIST_SLUG}/${relatedArticle.ARTICLE_SLUG}`,
+      date: relatedArticle.ARTICLE_PUBLISH_DATE
+    };
+  })
+  .filter(Boolean) as RelatedArticleInfo[]; // Remove any null values and type assert
+
+const relatedArticlesForPage: RelatedArticlesContent = {
   title: common.ARTICLE_RELATED_ARTICLES,
   articles: allDomainArticles
-    .filter(articleItem => articleItem.title !== articleMetadata.h1)
-    .slice(0, 9)
+    .filter(articleItem => articleItem.title !== articleMetadata.h1) // Exclude current article
+    .slice(0, 9) // Limit to 9 articles
 };
 
 // --- Product Data (specific to this article's content) ---
-const basicSigns: BasicSign[] = [
-  { name: article.ARTICLE_SIGN_1_NAME, image: article.ARTICLE_SIGN_1_IMAGE, url: article.ARTICLE_SIGN_1_URL },
-  { name: article.ARTICLE_SIGN_2_NAME, image: article.ARTICLE_SIGN_2_IMAGE, url: article.ARTICLE_SIGN_2_URL },
-  { name: article.ARTICLE_SIGN_3_NAME, image: article.ARTICLE_SIGN_3_IMAGE, url: article.ARTICLE_SIGN_3_URL }
-];
+// Helper function to find product by ID
+const findProductById = (productId: string) => {
+  // Remove 'p' prefix if it exists
+  const cleanId = productId.replace('p', '');
+  return products.find(p => p.PRODUCT_ID === cleanId && p.PUBLISH_Y_N === "1");
+};
 
+// Get basic signs (first 3 products)
+const basicSigns: BasicSign[] = [
+  article.ARTICLE_P_ID_1,
+  article.ARTICLE_P_ID_2,
+  article.ARTICLE_P_ID_3
+].map(id => {
+  const product = findProductById(id);
+  if (!product) return null;
+  return {
+    name: `${product.PRODUCT_CATEGORY_1} — ${product.PRODUCT_NAME}`,
+    image: getBaseUrl(product.PRODUCT_IMAGE_PATH_S),
+    url: getBaseUrl(`/${product.M_SLUG}/${product.PRODUCT_CATEGORY_1_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
+  };
+}).filter(Boolean) as BasicSign[];
+
+// Get additional signs (products 4-8)
 const additionalSigns: AdditionalSign[] = [
-  {
-    image: article.ARTICLE_ADD_SIGN_1_IMAGE,
-    name: article.ARTICLE_ADD_SIGN_1_NAME,
-    url: article.ARTICLE_ADD_SIGN_1_URL
-  },
-  {
-    image: "/productimg/s/triopan-pozor-viličar.webp",
-    name: "Opozorilna piramida DELO NA CESTI 250m",
-    url: "/si/opozorilna-piramida/delo-na-cesti-250m"
-  },
-  {
-    image: "/productimg/s/triopan-delo-na-cesti.webp",
-    name: "Opozorilna piramida DELO NA CESTI 500m",
-    url: "/si/opozorilna-piramida/delo-na-cesti-500m"
-  },
-  {
-    image: "/productimg/s/triopan-parkirni-prostor.webp",
-    name: "Opozorilna piramida OBVOZ",
-    url: "/si/opozorilna-piramida/obvoz"
-  },
-  {
-    image: "/productimg/s/triopan-šolska-pot.webp",
-    name: "Opozorilna piramida ŠOLSKA POT",
-    url: "/si/opozorilna-piramida/šolska-pot"
-  },
-  {
-    image: "/productimg/s/triopan-zoženje-z-desne.webp",
-    name: "Opozorilna piramida ZOŽENJE Z DESNE",
-    url: "/si/opozorilna-piramida/zozenje-z-desne"
-  },
-  {
-    image: "/productimg/s/triopan-zoženje-z-leve.webp",
-    name: "Opozorilna piramida ZOŽENJE Z LEVE",
-    url: "/si/opozorilna-piramida/zozenje-z-leve"
-  },
-  {
-    image: "/productimg/s/triopan-omejitev-hitrosti-10.webp",
-    name: "Opozorilna piramida OMEJITEV HITROSTI",
-    url: "/si/opozorilna-piramida/omejitev-hitrosti"
-  }
-];
+  article.ARTICLE_P_ID_4,
+  article.ARTICLE_P_ID_5,
+  article.ARTICLE_P_ID_6,
+  article.ARTICLE_P_ID_7,
+  article.ARTICLE_P_ID_8
+].map(id => {
+  const product = findProductById(id);
+  if (!product) return null;
+  return {
+    name: `${product.PRODUCT_CATEGORY_1} — ${product.PRODUCT_NAME}`,
+    image: getBaseUrl(product.PRODUCT_IMAGE_PATH_S),
+    url: getBaseUrl(`/${product.M_SLUG}/${product.PRODUCT_CATEGORY_1_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
+  };
+}).filter(Boolean) as AdditionalSign[];
 
 // --- FAQ Data Structure ---
 const faqSection: FaqSection = {
-  title: article.ARTICLE_H2_6, // This text is used for the H2 of the FAQ section
+  title: article.ARTICLE_H2_6,
   items: [
     {
       question: article.ARTICLE_FAQ_Q1,
@@ -290,7 +303,7 @@ const articleSchema = {
       {
         "@type": "ListItem",
         "position": 1,
-        "name": article.M_HOME_NAME,
+        "name": common.M_HOME_NAME,
         "item": getAbsoluteUrl('/')
       },
       {
@@ -348,7 +361,7 @@ const organizationSchema = {
   "logo": getBaseUrl(www.PAGE_LOGO_IMAGE_PATH_1),
   "keywords": [
     www.PAGE_ORGANISATION_FULL_NAME,
-    www.M_COUNTRY_NATIVE,
+    common.M_COUNTRY_NATIVE,
     common.PAGE_KEYWORD_1,
     common.PAGE_KEYWORD_2,
     common.PAGE_KEYWORD_3,
@@ -379,8 +392,8 @@ const organizationSchema = {
   ],
   "areaServed": {
     "@type": "Country",
-    "name": www.M_COUNTRY,
-    "identifier": www.M_COUNTRY_CODE
+    "name": common.M_COUNTRY,
+    "identifier": common.M_COUNTRY_CODE
   },
   "potentialAction": [
     {
