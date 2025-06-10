@@ -215,7 +215,7 @@ const pageKeywords = [
   author.EEAT_NAME_20,
   author.WWW_AUTHOR_OCCUPATION,
   author.WWW_AUTHOR_NATIONALITY,
-  www.M_COUNTRY_NATIVE,
+  common.M_COUNTRY_NATIVE,
   www.PAGE_ORGANISATION_FULL_NAME,
 ].join(', ');
 
@@ -240,13 +240,13 @@ const layoutStringsData: LayoutStrings = {
   languagesSectionTitle: common.AUTHOR_LANGUAGE_LABEL || "Languages",
   languagesSectionIcon: "🌍",
   footerLinkAllAuthorsText: common.AUTHOR_OTHER_AUTHORS || "All Authors",
-  footerLinkAllAuthorsUrl: getAbsoluteUrl(`/${common.EEAT_SLUG_20}`),
+  footerLinkAllAuthorsUrl: getAbsoluteUrl(`/${common.AUTHOR_LIST_SLUG}`),
   footerLinkEditorialPolicyText: common.AUTHOR_READ_MORE || "Read More (Editorial Policy)",
-  footerLinkEditorialPolicyUrl: getAbsoluteUrl(author.EEAT_SLUG_13),
+  footerLinkEditorialPolicyUrl: getAbsoluteUrl(`/${common.AUTHOR_EDITORIAL_SLUG}`),
 };
 
 const pageLocale = `${author.M_LANGUAGE_ISO}-${author.M_COUNTRY_CODE}`;
-const authorListUrl = getAbsoluteUrl('/avtorji-in-uredniki');
+const authorListUrl = getAbsoluteUrl(`/${common.AUTHOR_LIST_SLUG}`);
 
 const webpageSchema = {
   "@context": "https://schema.org",
@@ -387,8 +387,8 @@ const organizationSchema = {
   ].filter(Boolean),
   "areaServed": {
     "@type": "Country",
-    "name": www.M_COUNTRY,
-    "identifier": www.M_COUNTRY_CODE
+    "name": common.M_COUNTRY_NATIVE,
+    "identifier": common.M_COUNTRY_CODE
   },
   "potentialAction": [
     {

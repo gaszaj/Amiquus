@@ -1,30 +1,35 @@
 ---
-// Path: /src/pages/si/opozorilna-piramida/index.astro
-// Purpose: Display products from product.json that match parent folder slug and are published
-// Data: product.json, www.json, common.json
+// Path: /src/pages/si/clanki/index.astro
+// Purpose: Display articles from article.json that match parent folder slug and are published
+// Data: article.json, www.json, common.json
 // Dependencies: BaseLayout.astro
 
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import productData from '../../../data/product.json';
+import articleData from '../../../data/article.json';
 import wwwData from '../../../data/www.json';
 import commonData from '../../../data/common.json';
-
-// Get the first object from each JSON array
-const www = wwwData[0];
-const common = commonData[0];
 
 // Get the parent folder slug (si in this case)
 const parentSlug = Astro.url.pathname.split('/')[1];
 
-// Filter products based on requirements
-const filteredProducts = productData.filter(product => 
-    product.M_SLUG === parentSlug && 
-    product.PUBLISH_Y_N === "1"
+// Get the current page folder name (clanki in this case)
+const currentFolder = Astro.url.pathname.split('/')[2];
+
+// Find the matching common data object based on M_SLUG
+const common = commonData.find(item => item.M_SLUG === parentSlug) || commonData[0];
+
+// Get the first object from www array
+const www = wwwData[0];
+
+// Filter articles based on requirements
+const filteredArticles = articleData.filter(article => 
+    article.M_SLUG === parentSlug && 
+    article.PUBLISH_Y_N === "1"
 );
 
 // Helper function for absolute URLs with locale
 const getAbsoluteUrl = (path: string) => {
-    // Get the locale from the URL path (e.g., 'si' from '/si/opozorilna-piramida/')
+    // Get the locale from the URL path (e.g., 'si' from '/si/clanki/')
     const locale = Astro.url.pathname.split('/')[1];
     return new URL(`/${locale}${path}`, Astro.url.origin).toString();
 };
@@ -34,9 +39,9 @@ const getBaseUrl = (path: string) => {
     return new URL(path, Astro.url.origin).toString();
 };
 
-// Get language data from the first product (they should all be the same for a given slug)
-const languageIso = filteredProducts[0]?.M_LANGUAGE_ISO || 'sl';
-const countryCode = filteredProducts[0]?.M_COUNTRY_CODE || 'SI';
+// Get language data from the first article (they should all be the same for a given slug)
+const languageIso = filteredArticles[0]?.M_LANGUAGE_ISO || 'sl';
+const countryCode = filteredArticles[0]?.M_COUNTRY_CODE || 'SI';
 
 // Find matching content orientation from common.json
 const contentOrientation = commonData.find(item =>
@@ -44,43 +49,44 @@ const contentOrientation = commonData.find(item =>
     item.M_COUNTRY_CODE === countryCode
 )?.M_CONTENT_ORIENTATION || 'ltr';
 
-// Get category name from first product (they should all be the same)
-const categoryName = filteredProducts[0]?.PRODUCT_CATEGORY_1 || '';
-
 // Define page metadata
-const pageTitle = categoryName;
-const pageDescription = common.M_PRODUCTS_DESCRIPTION;
-const pageOgImage = www.PAGE_OG_IMAGE_PATH;
+const pageTitle = common.ARTICLE_CATEGORY_LISTING_TITLE;
+const pageDescription = common.ARTICLE_CATEGORY_LISTING_DESCRIPTION;
+const pageOgImage = common.ARTICLE_CATEGORY_LISTING_OG_IMAGE_PATH;
 const pageKeywords = [
-    categoryName,
-    www.M_COUNTRY_NATIVE,
+    common.ARTICLE_CATEGORY_LISTING_TITLE,
+    common.M_COUNTRY_NATIVE,
     www.PAGE_ORGANISATION_FULL_NAME
 ].join(', ');
 
-// Schema definition
-const webpageSchema = {
+// CollectionPage Schema
+const collectionPageSchema = {
     "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": pageTitle,
+    "@type": "CollectionPage",
+    "@id": Astro.url.href,
+    "name": common.ARTICLE_CATEGORY_LISTING_TITLE,
+    "description": common.ARTICLE_CATEGORY_LISTING_DESCRIPTION,
     "url": Astro.url.href,
-    "description": pageDescription,
-    "inLanguage": `${languageIso}-${countryCode}`,
-    "breadcrumb": {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": common.M_HOME_NAME,
-                "item": getAbsoluteUrl("/")
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": categoryName,
-                "item": Astro.url.href
+    "mainEntity": {
+        "@type": "ItemList",
+        "itemListElement": filteredArticles.map((article, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+                "@type": "Article",
+                "@id": `${Astro.url.origin}/${parentSlug}/${currentFolder}/${article.ARTICLE_SLUG}`,
+                "name": article.ARTICLE_NAME,
+                "url": `${Astro.url.origin}/${parentSlug}/${currentFolder}/${article.ARTICLE_SLUG}`,
+                "image": `${Astro.url.origin}${article.ARTICLE_OG_IMAGE_PATH}`,
+                "description": article.ARTICLE_SUBTITLE,
+                "datePublished": article.ARTICLE_PUBLISH_DATE,
+                "dateModified": article.ARTICLE_UPDATE_DATE,
+                "author": {
+                    "@type": "Organization",
+                    "name": www.PAGE_ORGANISATION_FULL_NAME
+                }
             }
-        ]
+        }))
     }
 };
 
@@ -90,11 +96,43 @@ const organizationSchema = {
     "@type": "Organization",
     "name": www.PAGE_ORGANISATION_FULL_NAME,
     "url": getBaseUrl('/'),
+    "foundingDate": www.PAGE_FOUNDING_DATE,
     "logo": getBaseUrl(www.PAGE_LOGO_IMAGE_PATH_1),
+    "keywords": [
+        www.PAGE_ORGANISATION_FULL_NAME,
+        common.M_COUNTRY_NATIVE,
+        common.PAGE_KEYWORD_1,
+        common.PAGE_KEYWORD_2,
+        common.PAGE_KEYWORD_3,
+        common.PAGE_KEYWORD_4,
+        common.PAGE_KEYWORD_5,
+        common.PAGE_KEYWORD_6
+    ].filter(Boolean),
+    "description": www.PAGE_DESCRIPTION,
+    "numberOfEmployees": {
+        "@type": "QuantitativeValue",
+        "minValue": "1",
+        "maxValue": "9"
+    },
+    "slogan": www.PAGE_SLOGAN,
     "contactPoint": {
         "@type": "ContactPoint",
         "email": www.PAGE_INFO_EMAIL,
         "contactType": common.M_CUSTOMER_SUPPORT
+    },
+    "sameAs": [
+        www.PAGE_INSTAGRAM_URL,
+        www.PAGE_FACEBOOK_URL,
+        www.PAGE_TWITTER_URL,
+        www.PAGE_LINKEDIN_URL,
+        www.PAGE_YOUTUBE_URL,
+        www.PAGE_PINTEREST_URL,
+        www.PAGE_BLUESKY_URL
+    ].filter(Boolean),
+    "areaServed": {
+        "@type": "Country",
+        "name": common.M_COUNTRY_NATIVE,
+        "identifier": common.M_COUNTRY_CODE
     },
     "potentialAction": [
         {
@@ -106,6 +144,12 @@ const organizationSchema = {
             "@type": "ViewAction",
             "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
             "target": getBaseUrl(`/sitemap-${languageIso}-${countryCode}.xml`)
+        },
+        {
+            "@type": "ViewAction",
+            "name": www.PAGE_LLM_INSTRUCTIONS,
+            "target": getBaseUrl('/llms.txt'),
+            "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
         }
     ],
     "mainEntityOfPage": [
@@ -120,12 +164,18 @@ const organizationSchema = {
             "@id": getBaseUrl(`/sitemap-${languageIso}-${countryCode}.xml`),
             "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
             "description": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS_DESCRIPTION
+        },
+        {
+            "@type": "WebPage",
+            "@id": getBaseUrl('/llms.txt'),
+            "name": www.PAGE_LLM_INSTRUCTIONS,
+            "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
         }
     ]
 };
 
 // Combine schemas
-const schema = [webpageSchema, organizationSchema];
+const schema = [collectionPageSchema, organizationSchema];
 ---
 
 <BaseLayout
@@ -143,41 +193,43 @@ const schema = [webpageSchema, organizationSchema];
         <div class="container mx-auto px-4">
             <div class="max-w-4xl mx-auto">
                 <h1 class="text-4xl md:text-5xl font-bold mb-6 animate-fade-in">
-                    {categoryName}
+                    {common.ARTICLE_CATEGORY_LISTING_TITLE}
                 </h1>
             </div>
         </div>
     </div>
 
-    <!-- Products Grid Section - Updated to match homepage bestsellers -->
+    <!-- Articles Grid Section -->
     <section class="py-16 bg-white">
         <div class="container mx-auto px-4">
-            <div class="grid grid-cols-2 lg:grid-cols-3 gap-2">
-                {filteredProducts.map((product) => {
-                    const productUrl = `${Astro.url.origin}/${parentSlug}/opozorilna-piramida/${product.PRODUCT_ASCII_SLUG}`;
-                    const fullProductName = `${product.PRODUCT_CATEGORY_1} ${product.PRODUCT_NAME}`;
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredArticles.map((article) => {
+                    const articleUrl = `${Astro.url.origin}/${parentSlug}/${currentFolder}/${article.ARTICLE_SLUG}`;
                     
                     return (
                         <div class="bg-white border border-gray-100 overflow-hidden group">
-                            <a href={productUrl} class="block">
+                            <a href={articleUrl} class="block">
                                 <img 
-                                    src={product.PRODUCT_IMAGE_PATH_L} 
-                                    alt={product.PRODUCT_IMAGE_ALT}
-                                    class="w-full h-56 object-contain p-4"
-                                    width="225"
-                                    height="225"
+                                    src={article.ARTICLE_OG_IMAGE_PATH} 
+                                    alt={article.ARTICLE_OG_IMAGE_ALT}
+                                    class="w-full h-48 object-cover"
+                                    width="1200"
+                                    height="630"
                                     loading="lazy"
                                     decoding="async"
                                 />
                                 <div class="p-4 border-t border-gray-100">
-                                    <h3 class="font-medium text-black group-hover:text-signal-green transition-colors mb-4">
-                                        {fullProductName}
+                                    <h3 class="font-medium text-black group-hover:text-signal-green transition-colors mb-2">
+                                        {article.ARTICLE_H2_1}
                                     </h3>
-                                    <div class="text-xl font-bold text-black mb-4">
-                                        {product.M_PRODUCT_PRICE}
-                                    </div>
+                                    <p class="text-gray-600 text-sm mb-2">
+                                        {article.ARTICLE_SUBTITLE}
+                                    </p>
+                                    <p class="text-gray-500 text-xs mb-4">
+                                        {common.ARTICLE_UPDATED_LABEL}: {article.ARTICLE_UPDATE_DATE}
+                                    </p>
                                     <span class="block w-full bg-black text-signal-green border border-signal-green py-2 px-4 hover:bg-signal-green hover:text-black transition-all text-center">
-                                        {product.PRODUCT_PAGE_RELATED_PRODUCT_VIEW_BUTTON_TEXT || "Poglej izdelek"}
+                                        {common.ARTICLE_READ_MORE}
                                     </span>
                                 </div>
                             </a>
@@ -200,10 +252,18 @@ const schema = [webpageSchema, organizationSchema];
         to { opacity: 1; }
     }
 
-    /* Product card hover effects - matching homepage */
+    /* Article card hover effects */
     .group:hover {
         transform: translateY(-4px);
         box-shadow: 0 8px 16px rgba(0,0,0,0.1);
         transition: all 0.3s ease;
+    }
+
+    /* Line clamp for article descriptions */
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 </style>

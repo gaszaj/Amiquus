@@ -5,6 +5,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'; // Adjusted path assumi
 import wwwData from '../../data/www.json'; // Adjusted path
 import commonData from '../../data/common.json'; // Adjusted path
 import eeatData from '../../data/eeat.json'; // Adjusted path
+import authorData from '../../data/author.json'; // Add this import
 
 export const prerender = false;
 
@@ -23,6 +24,11 @@ if (!eeatEntry) {
 }
 
 const filteringNumber = parseInt(eeatEntry.EEAT_FILTERING);
+
+// Get authors for the current locale when EEAT_FILTERING is 20 or 13
+const authors = (filteringNumber === 20 || filteringNumber === 13)
+  ? authorData.filter(author => author.M_SLUG === locale && author.PUBLISH_Y_N === "1")
+  : [];
 
 // Check if entry is published and has a valid filtering number (1-26)
 const isValidPage = eeatEntry.PUBLISH_Y_N === "1" &&
@@ -294,6 +300,41 @@ const formatDate = (dateString: string, locale: string) => {
   <div class={`container mx-auto px-4 ${isContactPage ? 'pt-12' : 'py-12'}`}>
     <div class="prose prose-lg max-w-4xl mx-auto">
       <Fragment set:html={pageContent} />
+      
+      <!-- Add Author Grid when EEAT_FILTERING is 20 or 13 -->
+      {(filteringNumber === 20 || filteringNumber === 13) && authors.length > 0 && (
+        <section class="py-16 bg-gray-50">
+          <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-8 text-center">
+              {common.ARTICLE_AUTHORS_TITLE}
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {authors.map((author) => (
+                <a 
+                  href={getAbsoluteUrl(`/${author.EEAT_URL_20}/${author.WWW_AUTHOR_SLUG}`)}
+                  class="group block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                >
+                  <div class="aspect-w-1 aspect-h-1">
+                    <img 
+                      src={author.AUTHOR_PROFILE_IMAGE_PATH} 
+                      alt={author.AUTHOR_IMAGE_ALT}
+                      class="w-full h-64 object-cover object-center"
+                    />
+                  </div>
+                  <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-2 group-hover:text-signal-green transition-colors duration-300">
+                      {author.WWW_AUTHOR}
+                    </h3>
+                    <p class="text-gray-600 text-sm mb-2">{author.WWW_AUTHOR_OCCUPATION}</p>
+                    <p class="text-gray-500 text-sm line-clamp-3">{author.AUTHOR_FULL_BIO}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       <!-- If NOT a contact page, and pageContent2 exists, render it here -->
       {!isContactPage && pageContent2 && (
         <Fragment set:html={pageContent2} />
@@ -561,6 +602,30 @@ const formatDate = (dateString: string, locale: string) => {
       transform: translateY(0);
       opacity: 1;
     }
+  }
+
+  /* Add these new styles for author cards */
+  .prose :global(.author-card) {
+    text-decoration: none;
+  }
+
+  .prose :global(.author-card:hover) {
+    text-decoration: none;
+  }
+
+  .prose :global(.author-card h3) {
+    text-decoration: none;
+  }
+
+  .prose :global(.author-card:hover h3) {
+    text-decoration: none;
+  }
+
+  /* Ensure images maintain aspect ratio during hover */
+  .prose :global(.author-card img) {
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-font-smoothing: subpixel-antialiased;
   }
 </style>
 
