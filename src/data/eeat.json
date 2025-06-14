@@ -1,6 +1,6 @@
 [
     {
-        "PAGE_ID": "eeat0101",
+        "PAGE_ID": "eeat01001",
         "EEAT_FILTERING": "01",
         "EEAT_NAME": "404 Napaka",
         "PUBLISH_Y_N": "1",
@@ -13,7 +13,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "404 Napaka EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "404-napaka-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat0101-404-napaka-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat01001-404-napaka-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "18:03:14",
         "EEAT_HOUR_UPDATED": "08:56:54",
         "EEAT_DATE_PUBLISHED": "2025-06-06",
@@ -27,7 +27,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat0201",
+        "PAGE_ID": "eeat02001",
         "EEAT_FILTERING": "02",
         "EEAT_NAME": "301 Preusmeritev",
         "PUBLISH_Y_N": "1",
@@ -40,7 +40,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "301 Preusmeritev EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "301-preusmeritev-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat0201-301-preusmeritev-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat02001-301-preusmeritev-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "20:22:59",
         "EEAT_HOUR_UPDATED": "15:15:33",
         "EEAT_DATE_PUBLISHED": "2025-06-04",
@@ -54,7 +54,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat0301",
+        "PAGE_ID": "eeat03001",
         "EEAT_FILTERING": "03",
         "EEAT_NAME": "Pogoji uporabe",
         "PUBLISH_Y_N": "1",
@@ -67,7 +67,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Pogoji uporabe EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "pogoji-uporabe-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat0301-pogoji-uporabe-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat03001-pogoji-uporabe-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "08:00:57",
         "EEAT_HOUR_UPDATED": "21:20:16",
         "EEAT_DATE_PUBLISHED": "2025-06-07",
@@ -81,7 +81,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat0401",
+        "PAGE_ID": "eeat04001",
         "EEAT_FILTERING": "04",
         "EEAT_NAME": "Politika zasebnosti",
         "PUBLISH_Y_N": "1",
@@ -94,7 +94,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Politika zasebnosti EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "politika-zasebnosti-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat0401-politika-zasebnosti-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat04001-politika-zasebnosti-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "18:16:34",
         "EEAT_HOUR_UPDATED": "12:41:29",
         "EEAT_DATE_PUBLISHED": "2025-06-02",
@@ -108,10 +108,10 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat0501",
+        "PAGE_ID": "eeat05001",
         "EEAT_FILTERING": "05",
         "EEAT_NAME": "Politika piškotkov",
-        "PUBLISH_Y_N": "0",
+        "PUBLISH_Y_N": "1",
         "PAGE_IDENTIFIER": "SI-sl",
         "PAGE_LOCALE": "sl-SI",
         "M_SLUG": "si",
@@ -121,7 +121,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Politika piškotkov EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "politika-piskotkov-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat0501-politika-piskotkov-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat05001-politika-piskotkov-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "10:18:47",
         "EEAT_HOUR_UPDATED": "16:23:09",
         "EEAT_DATE_PUBLISHED": "2025-06-03",
@@ -135,7 +135,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat0601",
+        "PAGE_ID": "eeat06001",
         "EEAT_FILTERING": "06",
         "EEAT_NAME": "Politika GDPR",
         "PUBLISH_Y_N": "1",
@@ -148,7 +148,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Politika GDPR EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "politika-gdpr-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat0601-politika-gdpr-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat06001-politika-gdpr-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "07:53:37",
         "EEAT_HOUR_UPDATED": "11:05:02",
         "EEAT_DATE_PUBLISHED": "2025-06-06",
@@ -162,7 +162,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat0701",
+        "PAGE_ID": "eeat07001",
         "EEAT_FILTERING": "07",
         "EEAT_NAME": "Izjava o omejitvi odgovornosti",
         "PUBLISH_Y_N": "1",
@@ -175,7 +175,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Izjava o omejitvi odgovornosti EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "izjava-o-omejitvi-odgovornosti-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat0701-izjava-o-omejitvi-odgovornosti-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat07001-izjava-o-omejitvi-odgovornosti-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "20:47:03",
         "EEAT_HOUR_UPDATED": "12:40:51",
         "EEAT_DATE_PUBLISHED": "2025-06-07",
@@ -189,7 +189,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat0801",
+        "PAGE_ID": "eeat08001",
         "EEAT_FILTERING": "08",
         "EEAT_NAME": "Dostopnost",
         "PUBLISH_Y_N": "1",
@@ -202,7 +202,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Dostopnost EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "dostopnost-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat0801-dostopnost-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat08001-dostopnost-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "12:53:06",
         "EEAT_HOUR_UPDATED": "08:58:25",
         "EEAT_DATE_PUBLISHED": "2025-06-06",
@@ -216,7 +216,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat0901",
+        "PAGE_ID": "eeat09001",
         "EEAT_FILTERING": "09",
         "EEAT_NAME": "Etični kodeks",
         "PUBLISH_Y_N": "1",
@@ -229,7 +229,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Etični kodeks EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "eticni-kodeks-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat0901-eticni-kodeks-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat09001-eticni-kodeks-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "18:22:23",
         "EEAT_HOUR_UPDATED": "13:34:12",
         "EEAT_DATE_PUBLISHED": "2025-06-02",
@@ -243,7 +243,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat1001",
+        "PAGE_ID": "eeat10001",
         "EEAT_FILTERING": "10",
         "EEAT_NAME": "Politika EDI",
         "PUBLISH_Y_N": "1",
@@ -256,7 +256,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Politika EDI EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "politika-edi-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat1001-politika-edi-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat10001-politika-edi-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "07:55:33",
         "EEAT_HOUR_UPDATED": "15:06:11",
         "EEAT_DATE_PUBLISHED": "2025-06-05",
@@ -270,7 +270,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat1101",
+        "PAGE_ID": "eeat11001",
         "EEAT_FILTERING": "11",
         "EEAT_NAME": "Pravilnik o pritožbah",
         "PUBLISH_Y_N": "1",
@@ -283,7 +283,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Pravilnik o pritožbah EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "pravilnik-o-pritozbah-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat1101-pravilnik-o-pritozbah-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat11001-pravilnik-o-pritozbah-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "08:17:29",
         "EEAT_HOUR_UPDATED": "15:57:11",
         "EEAT_DATE_PUBLISHED": "2025-06-03",
@@ -297,7 +297,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat1201",
+        "PAGE_ID": "eeat12001",
         "EEAT_FILTERING": "12",
         "EEAT_NAME": "Politika poštene uporabe",
         "PUBLISH_Y_N": "1",
@@ -310,7 +310,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Politika poštene uporabe EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "politika-postene-uporabe-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat1201-politika-postene-uporabe-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat12001-politika-postene-uporabe-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "21:59:46",
         "EEAT_HOUR_UPDATED": "16:27:15",
         "EEAT_DATE_PUBLISHED": "2025-06-07",
@@ -324,7 +324,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat1301",
+        "PAGE_ID": "eeat13001",
         "EEAT_FILTERING": "13",
         "EEAT_NAME": "Uredniška politika",
         "PUBLISH_Y_N": "1",
@@ -337,7 +337,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Uredniška politika EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "uredniska-politika-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat1301-uredniska-politika-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat13001-uredniska-politika-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "15:01:14",
         "EEAT_HOUR_UPDATED": "13:53:59",
         "EEAT_DATE_PUBLISHED": "2025-06-06",
@@ -351,7 +351,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat1401",
+        "PAGE_ID": "eeat14001",
         "EEAT_FILTERING": "14",
         "EEAT_NAME": "Kako delujemo",
         "PUBLISH_Y_N": "1",
@@ -364,7 +364,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Kako delujemo EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "kako-delujemo-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat1401-kako-delujemo-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat14001-kako-delujemo-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "07:31:43",
         "EEAT_HOUR_UPDATED": "17:32:46",
         "EEAT_DATE_PUBLISHED": "2025-06-05",
@@ -378,7 +378,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat1501",
+        "PAGE_ID": "eeat15001",
         "EEAT_FILTERING": "15",
         "EEAT_NAME": "Garancija",
         "PUBLISH_Y_N": "1",
@@ -391,7 +391,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Garancija EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "garancija-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat1501-garancija-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat15001-garancija-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "13:58:50",
         "EEAT_HOUR_UPDATED": "08:51:04",
         "EEAT_DATE_PUBLISHED": "2025-06-06",
@@ -405,7 +405,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat1601",
+        "PAGE_ID": "eeat16001",
         "EEAT_FILTERING": "16",
         "EEAT_NAME": "Pogosta vprašanja FAQ",
         "PUBLISH_Y_N": "1",
@@ -418,7 +418,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Pogosta vprašanja FAQ EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "pogosta-vprasanja-faq-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat1601-pogosta-vprasanja-faq-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat16001-pogosta-vprasanja-faq-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "10:55:32",
         "EEAT_HOUR_UPDATED": "14:56:07",
         "EEAT_DATE_PUBLISHED": "2025-06-04",
@@ -432,7 +432,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat1701",
+        "PAGE_ID": "eeat17001",
         "EEAT_FILTERING": "17",
         "EEAT_NAME": "Politika vračil",
         "PUBLISH_Y_N": "1",
@@ -445,7 +445,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Politika vračil EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "politika-vracil-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat1701-politika-vracil-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat17001-politika-vracil-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "11:52:25",
         "EEAT_HOUR_UPDATED": "21:17:40",
         "EEAT_DATE_PUBLISHED": "2025-06-04",
@@ -459,7 +459,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat1801",
+        "PAGE_ID": "eeat18001",
         "EEAT_FILTERING": "18",
         "EEAT_NAME": "O nas",
         "PUBLISH_Y_N": "1",
@@ -472,7 +472,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "O nas EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "o-nas-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat1801-o-nas-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat18001-o-nas-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "19:15:36",
         "EEAT_HOUR_UPDATED": "18:18:43",
         "EEAT_DATE_PUBLISHED": "2025-06-03",
@@ -486,7 +486,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat1901",
+        "PAGE_ID": "eeat19001",
         "EEAT_FILTERING": "19",
         "EEAT_NAME": "Kontakt",
         "PUBLISH_Y_N": "1",
@@ -499,7 +499,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Kontakt EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "kontakt-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat1901-kontakt-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat19001-kontakt-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "20:22:03",
         "EEAT_HOUR_UPDATED": "19:40:35",
         "EEAT_DATE_PUBLISHED": "2025-06-05",
@@ -513,7 +513,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat2001",
+        "PAGE_ID": "eeat20001",
         "EEAT_FILTERING": "20",
         "EEAT_NAME": "Avtorji in uredniki",
         "PUBLISH_Y_N": "1",
@@ -526,7 +526,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Avtorji in uredniki EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "avtorji-in-uredniki-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat2001-avtorji-in-uredniki-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat20001-avtorji-in-uredniki-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "14:22:35",
         "EEAT_HOUR_UPDATED": "11:01:47",
         "EEAT_DATE_PUBLISHED": "2025-06-02",
@@ -540,7 +540,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat2101",
+        "PAGE_ID": "eeat21001",
         "EEAT_FILTERING": "21",
         "EEAT_NAME": "Vizija in misija",
         "PUBLISH_Y_N": "1",
@@ -553,7 +553,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Vizija in misija EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "vizija-in-misija-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat2101-vizija-in-misija-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat21001-vizija-in-misija-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "17:50:33",
         "EEAT_HOUR_UPDATED": "20:57:08",
         "EEAT_DATE_PUBLISHED": "2025-06-04",
@@ -567,7 +567,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat2201",
+        "PAGE_ID": "eeat22001",
         "EEAT_FILTERING": "22",
         "EEAT_NAME": "Mediji in znamka",
         "PUBLISH_Y_N": "1",
@@ -580,7 +580,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Mediji in znamka EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "mediji-in-znamka-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat2201-mediji-in-znamka-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat22001-mediji-in-znamka-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "15:41:43",
         "EEAT_HOUR_UPDATED": "10:17:27",
         "EEAT_DATE_PUBLISHED": "2025-06-05",
@@ -594,7 +594,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat2301",
+        "PAGE_ID": "eeat23001",
         "EEAT_FILTERING": "23",
         "EEAT_NAME": "Affiliate Politika",
         "PUBLISH_Y_N": "1",
@@ -607,7 +607,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Affiliate Politika EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "affiliate-politika-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat2301-affiliate-politika-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat23001-affiliate-politika-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "20:14:35",
         "EEAT_HOUR_UPDATED": "20:23:58",
         "EEAT_DATE_PUBLISHED": "2025-06-04",
@@ -621,7 +621,7 @@
         "EEAT_CONTENT_2": ""
     },
     {
-        "PAGE_ID": "eeat2401",
+        "PAGE_ID": "eeat24001",
         "EEAT_FILTERING": "24",
         "EEAT_NAME": "Delovna mesta",
         "PUBLISH_Y_N": "1",
@@ -634,7 +634,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Delovna mesta EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "delovna-mesta-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat2401-delovna-mesta-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat24001-delovna-mesta-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "20:15:34",
         "EEAT_HOUR_UPDATED": "12:55:34",
         "EEAT_DATE_PUBLISHED": "2025-06-02",
@@ -648,7 +648,7 @@
         "EEAT_CONTENT_2": "<p>S posredovanjem vaših podatkov boste obveščeni, ko bodo na voljo nova delovna mesta. Za več informacij o našem delu si oglejte našo stran <a href=\"https://www.eusignal.com/si/pogosta-vprasanja-faq\">Pogosta vprašanja FAQ</a> ali <a href=\"https://www.eusignal.com/si/kako-delujemo\">Kako delujemo</a>.</p>"
     },
     {
-        "PAGE_ID": "eeat2501",
+        "PAGE_ID": "eeat25001",
         "EEAT_FILTERING": "25",
         "EEAT_NAME": "Partnerstva",
         "PUBLISH_Y_N": "1",
@@ -661,7 +661,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Partnerstva EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "partnerstva-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat2501-partnerstva-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat25001-partnerstva-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "20:20:42",
         "EEAT_HOUR_UPDATED": "13:25:57",
         "EEAT_DATE_PUBLISHED": "2025-06-02",
@@ -675,7 +675,7 @@
         "EEAT_CONTENT_2": "<p>Pri <a href=\"https://www.eusignal.com/si\">EUSIGNAL</a> vedno iščemo partnerstva, ki so usklajena z našim poslanstvom zagotavljanja dostojanstvenih in sočutnih storitev oskrbe živali. Za več informacij o našem delu obiščite našo stran <a href=\"https://www.eusignal.com/si/kako-delujemo\">Kako delujemo</a>.</p>"
     },
     {
-        "PAGE_ID": "eeat2601",
+        "PAGE_ID": "eeat26001",
         "EEAT_FILTERING": "26",
         "EEAT_NAME": "Politika poštnin",
         "PUBLISH_Y_N": "1",
@@ -688,7 +688,7 @@
         "M_LANGUAGE_ISO": "sl",
         "EEAT_IMAGE_NAME": "Politika poštnin EUSIGNAL Slovenija",
         "EEAT_IMAGE_NAME_ASCII": "politika-postnin-eusignal-slovenija-open-graph",
-        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat2601-politika-postnin-eusignal-slovenija-open-graph.webp",
+        "EEAT_OG_IMAGE_PATH": "/ogimages/ogeeat/eeat26001-politika-postnin-eusignal-slovenija-open-graph.webp",
         "EEAT_HOUR_PUBLISHED": "19:59:01",
         "EEAT_HOUR_UPDATED": "10:52:22",
         "EEAT_DATE_PUBLISHED": "2025-06-06",
