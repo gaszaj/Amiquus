@@ -1,0 +1,287 @@
+---
+// Path: /src/pages/si/opozorilna-piramida/index.astro
+// Purpose: Display products from product.json that match parent folder slug and are published
+// Data: product.json, www.json, common.json
+// Dependencies: BaseLayout.astro
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import productData from '../../../data/product.json';
+import wwwData from '../../../data/www.json';
+import commonData from '../../../data/common.json';
+
+// Get the first object from each JSON array
+const www = wwwData[0];
+
+// Get the parent folder slug (si in this case)
+const parentSlug = Astro.url.pathname.split('/')[1];
+
+// Get the current page folder name (opozorilna-piramida in this case)
+const currentFolder = Astro.url.pathname.split('/')[2];
+
+// Find the matching common data object based on M_SLUG
+const common = commonData.find(item => item.M_SLUG === parentSlug) || commonData[0];
+
+// Filter products based on requirements
+const filteredProducts = productData.filter(product => 
+    product.M_SLUG === parentSlug && 
+    product.PUBLISH_Y_N === "1"
+);
+
+// Helper function for absolute URLs with locale
+const getAbsoluteUrl = (path: string) => {
+    // Get the locale from the URL path (e.g., 'si' from '/si/opozorilna-piramida/')
+    const locale = Astro.url.pathname.split('/')[1];
+    return new URL(`/${locale}${path}`, Astro.url.origin).toString();
+};
+
+// Helper function for base-level URLs (without locale)
+const getBaseUrl = (path: string) => {
+    return new URL(path, Astro.url.origin).toString();
+};
+
+// Get language data from the first product (they should all be the same for a given slug)
+const languageIso = filteredProducts[0]?.M_LANGUAGE_ISO || 'sl';
+const countryCode = filteredProducts[0]?.M_COUNTRY_CODE || 'SI';
+
+// Find matching content orientation from common.json
+const contentOrientation = commonData.find(item =>
+    item.M_LANGUAGE_ISO === languageIso &&
+    item.M_COUNTRY_CODE === countryCode
+)?.M_CONTENT_ORIENTATION || 'ltr';
+
+// Get category name from first product (they should all be the same)
+const categoryName = filteredProducts[0]?.PRODUCT_CATEGORY_1 || '';
+
+// Define page metadata
+const pageTitle = common.PRODUCT_CATEGORY_LISTING_TITLE;
+const pageDescription = common.PRODUCT_CATEGORY_LISTING_DESCRIPTION;
+const pageOgImage = common.PRODUCT_CATEGORY_LISTING_OG_IMAGE_PATH;
+const pageKeywords = [
+    common.PRODUCT_CATEGORY_LISTING_TITLE,
+    common.M_COUNTRY_NATIVE,
+    www.PAGE_ORGANISATION_FULL_NAME
+].join(', ');
+
+// CollectionPage Schema
+const collectionPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": Astro.url.href,
+    "name": common.PRODUCT_CATEGORY_LISTING_TITLE,
+    "description": common.PRODUCT_CATEGORY_LISTING_DESCRIPTION,
+    "url": Astro.url.href,
+    "mainEntity": {
+        "@type": "ItemList",
+        "itemListElement": filteredProducts.map((product, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+                "@type": "Product",
+                "@id": `${Astro.url.origin}/${parentSlug}/${currentFolder}/${product.PRODUCT_ASCII_SLUG}`,
+                "name": product.PRODUCT_NAME,
+                "url": `${Astro.url.origin}/${parentSlug}/${currentFolder}/${product.PRODUCT_ASCII_SLUG}`,
+                "image": product.PRODUCT_IMAGE_PATH_L,
+                "description": product.PRODUCT_META_SEO,
+                "sku": product.PRODUCT_MPN,
+                "mpn": product.PRODUCT_MPN,
+                "offers": {
+                    "@type": "Offer",
+                    "price": product.M_PRODUCT_PRICE_NATIVE.split(' ')[0],
+                    "priceCurrency": product.M_CURRENCY_CODE,
+                    "availability": "https://schema.org/InStock",
+                    "validFrom": product.PRODUCT_DATE_PUBLISHED,
+                    "priceValidUntil": product.PRODUCT_EXPIRATION_DATE
+                },
+                "brand": {
+                    "@type": "Brand",
+                    "name": www.PAGE_ORGANISATION_FULL_NAME
+                },
+                "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": product.PRODUCT_RATING_VALUE,
+                    "reviewCount": product.PRODUCT_REVIEW_COUNT
+                },
+                "keywords": [
+                    product.PRODUCT_KEYWORD_1,
+                    product.PRODUCT_KEYWORD_2,
+                    product.PRODUCT_KEYWORD_3,
+                    product.PRODUCT_KEYWORD_4,
+                    product.PRODUCT_KEYWORD_5,
+                    product.PRODUCT_KEYWORD_6,
+                    product.PRODUCT_KEYWORD_7
+                ].filter(Boolean),
+                "datePublished": product.PRODUCT_DATE_PUBLISHED,
+                "dateModified": product.PRODUCT_DATE_UPDATED,
+                "category": product.PRODUCT_CATEGORY_1
+            }
+        }))
+    }
+};
+
+// Organization Schema
+const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": www.PAGE_ORGANISATION_FULL_NAME,
+    "url": getBaseUrl('/'),
+    "foundingDate": www.PAGE_FOUNDING_DATE,
+    "logo": getBaseUrl(www.PAGE_LOGO_IMAGE_PATH_1),
+    "keywords": [
+        www.PAGE_ORGANISATION_FULL_NAME,
+        common.M_COUNTRY_NATIVE,
+        common.PAGE_KEYWORD_1,
+        common.PAGE_KEYWORD_2,
+        common.PAGE_KEYWORD_3,
+        common.PAGE_KEYWORD_4,
+        common.PAGE_KEYWORD_5,
+        common.PAGE_KEYWORD_6
+    ].filter(Boolean),
+    "description": www.PAGE_DESCRIPTION,
+    "numberOfEmployees": {
+        "@type": "QuantitativeValue",
+        "minValue": "1",
+        "maxValue": "9"
+    },
+    "slogan": www.PAGE_SLOGAN,
+    "contactPoint": {
+        "@type": "ContactPoint",
+        "email": www.PAGE_INFO_EMAIL,
+        "contactType": common.M_CUSTOMER_SUPPORT
+    },
+    "sameAs": [
+        www.PAGE_INSTAGRAM_URL,
+        www.PAGE_FACEBOOK_URL,
+        www.PAGE_TWITTER_URL,
+        www.PAGE_LINKEDIN_URL,
+        www.PAGE_YOUTUBE_URL,
+        www.PAGE_PINTEREST_URL,
+        www.PAGE_BLUESKY_URL
+    ].filter(Boolean),
+    "areaServed": {
+        "@type": "Country",
+        "name": common.M_COUNTRY_NATIVE,
+        "identifier": common.M_COUNTRY_CODE
+    },
+    "potentialAction": [
+        {
+            "@type": "ViewAction",
+            "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
+            "target": getBaseUrl('/sitemap.xml')
+        },
+        {
+            "@type": "ViewAction",
+            "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
+            "target": getBaseUrl(`/sitemap-${languageIso}-${countryCode}.xml`)
+        },
+        {
+            "@type": "ViewAction",
+            "name": www.PAGE_LLM_INSTRUCTIONS,
+            "target": getBaseUrl('/llms.txt'),
+            "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
+        }
+    ],
+    "mainEntityOfPage": [
+        {
+            "@type": "WebPage",
+            "@id": getBaseUrl('/sitemap.xml'),
+            "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
+            "description": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS_DESCRIPTION
+        },
+        {
+            "@type": "WebPage",
+            "@id": getBaseUrl(`/sitemap-${languageIso}-${countryCode}.xml`),
+            "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
+            "description": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS_DESCRIPTION
+        },
+        {
+            "@type": "WebPage",
+            "@id": getBaseUrl('/llms.txt'),
+            "name": www.PAGE_LLM_INSTRUCTIONS,
+            "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
+        }
+    ]
+};
+
+// Combine schemas
+const schema = [collectionPageSchema, organizationSchema];
+---
+
+<BaseLayout
+    languageIso={languageIso}
+    countryCode={countryCode}
+    contentOrientation={contentOrientation}
+    title={pageTitle}
+    description={pageDescription}
+    ogImage={pageOgImage}
+    keywords={pageKeywords}
+    schema={schema}
+>
+    <!-- Dark Header Section -->
+    <div class="bg-black text-white py-16">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-4xl md:text-5xl font-bold mb-6 animate-fade-in">
+                    {categoryName}
+                </h1>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Grid Section - Updated to match homepage bestsellers -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-2 lg:grid-cols-3 gap-2">
+                {filteredProducts.map((product) => {
+                    const productUrl = `${Astro.url.origin}/${parentSlug}/${currentFolder}/${product.PRODUCT_ASCII_SLUG}`;
+                    const fullProductName = `${product.PRODUCT_CATEGORY_1} ${product.PRODUCT_NAME}`;
+                    
+                    return (
+                        <div class="bg-white border border-gray-100 overflow-hidden group">
+                            <a href={productUrl} class="block">
+                                <img 
+                                    src={product.PRODUCT_IMAGE_PATH_L} 
+                                    alt={product.PRODUCT_IMAGE_ALT}
+                                    class="w-full h-56 object-contain p-4"
+                                    width="225"
+                                    height="225"
+                                    loading="lazy"
+                                    decoding="async"
+                                />
+                                <div class="p-4 border-t border-gray-100">
+                                    <h3 class="font-medium text-black group-hover:text-signal-green transition-colors mb-4">
+                                        {fullProductName}
+                                    </h3>
+                                    <div class="text-xl font-bold text-black mb-4">
+                                        {product.M_PRODUCT_PRICE}
+                                    </div>
+                                    <span class="block w-full bg-black text-signal-green border border-signal-green py-2 px-4 hover:bg-signal-green hover:text-black transition-all text-center">
+                                        {common.PRODUCT_PAGE_RELATED_PRODUCT_VIEW_BUTTON_TEXT || "Poglej izdelek"}
+                                    </span>
+                                </div>
+                            </a>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    </section>
+</BaseLayout>
+
+<style>
+    /* Animations */
+    :global(.animate-fade-in) {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Product card hover effects - matching homepage */
+    .group:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+</style>
