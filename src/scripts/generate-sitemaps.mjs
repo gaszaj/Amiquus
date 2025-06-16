@@ -1,10 +1,12 @@
 import { readFileSync, readdirSync, statSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import path from 'path';
+import wwwData from '../data/www.json';
 
 // --- Configuration ---
-// IMPORTANT: Replace this with your actual production domain
-const SITE_URL = 'https://www.yourdomain.com'; // Change this to your real domain
+// Get the first object from wwwData
+const www = wwwData[0];
+const SITE_URL = www.PAGE_FULL_PERMALINK; // This will use "https://www.eusignal.com"
 const PUBLIC_DIR = path.join(process.cwd(), 'public');
 const PAGES_DIR = path.join(process.cwd(), 'src/pages');
 
