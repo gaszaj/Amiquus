@@ -100,6 +100,41 @@ const getAbsoluteOgImageUrl = (imagePath: string) => {
     <!-- Canonical URL -->
     <link rel="canonical" href={Astro.url.href} />
 
+    <!-- Alternate Language Links -->
+    {languageLinksMap && Object.entries(languageLinksMap).map(([localeCode, url]) => {
+      if (!url) return null;
+      const normalizedUrl = url.replace(/\/$/, '');
+      if (normalizedUrl === `/${localeCode}`) return null;
+      if (normalizedUrl === Astro.url.pathname.replace(/\/$/, '')) return null;
+
+      // Find the locale data for this locale
+      const localeData = allLocaleData.find(l => l.M_SLUG === localeCode);
+
+      // Always use 4-letter code: try M_HREFLANG_CODE, else build from M_LANGUAGE_ISO and M_COUNTRY_CODE
+      let hreflang = localeData?.M_HREFLANG_CODE;
+      if (!hreflang || !/^[a-z]{2}-[A-Z]{2}$/.test(hreflang)) {
+        // fallback: build from language and country code
+        const lang = localeData?.M_LANGUAGE_ISO || localeCode;
+        const country = localeData?.M_COUNTRY_CODE || localeCode.toUpperCase();
+        hreflang = `${lang}-${country}`;
+      }
+
+      // Generate absolute URL
+      const absoluteUrl = new URL(url, Astro.url.origin).toString();
+
+      return (
+        <link rel="alternate" hrefLang={hreflang} href={absoluteUrl} />
+      );
+    })}
+    {(() => {
+      // You can set your default locale here
+      const defaultLocale = "si";
+      const defaultUrl = languageLinksMap?.[defaultLocale] 
+        ? new URL(languageLinksMap[defaultLocale], Astro.url.origin).toString()
+        : new URL(`/${defaultLocale}`, Astro.url.origin).toString();
+      return <link rel="alternate" hrefLang="x-default" href={defaultUrl} />;
+    })()}
+
     <!-- Robots Meta Tag -->
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
 
