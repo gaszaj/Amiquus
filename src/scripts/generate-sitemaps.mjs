@@ -1,21 +1,28 @@
+import { readFileSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import path from 'path';
 
-// --- Import your JSON data ---
-// The `assert { type: 'json' }` is the standard way to import JSON in modern Node.js
-import localesData from '../data/locale.json' assert { type: 'json' };
-import homeData from '../data/home.json' assert { type: 'json' };
-import eeatData from '../data/eeat.json' assert { type: 'json' };
-import authorData from '../data/author.json' assert { type: 'json' };
-import articleData from '../data/article.json' assert { type: 'json' };
-import productData from '../data/product.json' assert { type: 'json' };
-
 // --- Configuration ---
 // IMPORTANT: Replace this with your actual production domain
-const SITE_URL = 'https://www.yourdomain.com';
+const SITE_URL = 'https://eusignal.netlify.app'; // Change this to your real domain
 const PUBLIC_DIR = path.join(process.cwd(), 'public');
 
-// --- Helper Functions (same as before, but adapted for this script) ---
+// --- Helper function to read JSON files robustly ---
+const readJsonFile = (filePath) => {
+  const absolutePath = path.join(process.cwd(), filePath);
+  const fileContent = readFileSync(absolutePath, 'utf-8');
+  return JSON.parse(fileContent);
+};
+
+// --- Import your JSON data using the robust method ---
+const localesData = readJsonFile('src/data/locale.json');
+const homeData = readJsonFile('src/data/home.json');
+const eeatData = readJsonFile('src/data/eeat.json');
+const authorData = readJsonFile('src/data/author.json');
+const articleData = readJsonFile('src/data/article.json');
+const productData = readJsonFile('src/data/product.json');
+
+// --- Helper Functions (No changes here) ---
 
 const formatLastMod = (dateStr, timeStr) => {
   if (!dateStr || !timeStr) {
@@ -142,7 +149,7 @@ const generateLocaleSitemap = (localeCode) => {
 </urlset>`;
 };
 
-// --- Main Execution Logic ---
+// --- Main Execution Logic (No changes here) ---
 
 async function main() {
   console.log('🚀 Generating sitemaps...');
