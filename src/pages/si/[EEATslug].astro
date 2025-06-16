@@ -6,6 +6,7 @@ import wwwData from '../../data/www.json'; // Adjusted path
 import commonData from '../../data/common.json'; // Adjusted path
 import eeatData from '../../data/eeat.json'; // Adjusted path
 import authorData from '../../data/author.json'; // Add this import
+import localeData from '../../data/locale.json';
 
 export const prerender = false;
 
@@ -131,6 +132,21 @@ if (formResult) {
   }
 }
 
+// Build the language link map for the language picker
+const languageLinksMap = {};
+for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
+  // Find alternate EEAT entry for this locale by EEAT_FILTERING
+  const altEeat = eeatData.find(e =>
+    e.EEAT_FILTERING === eeatEntry.EEAT_FILTERING && // Use filtering, not number!
+    e.M_SLUG === locale.M_SLUG &&
+    e.PUBLISH_Y_N === "1"
+  );
+  if (altEeat) {
+    languageLinksMap[locale.M_SLUG] = `/${altEeat.M_SLUG}/${altEeat.EEAT_SLUG}`;
+  } else {
+    languageLinksMap[locale.M_SLUG] = `/${locale.M_SLUG}`;
+  }
+}
 
 // WebPage and Article Schema
 const webpageSchema = {
@@ -280,6 +296,7 @@ const formatDate = (dateString: string, locale: string) => {
   ogImage={pageogImage}
   keywords={pageKeywords}
   schema={combinedSchema}
+  languageLinksMap={languageLinksMap}
 >
   <!-- Dark Header Section -->
   <div class="bg-black text-white py-16">

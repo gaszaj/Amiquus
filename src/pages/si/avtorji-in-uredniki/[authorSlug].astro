@@ -1,13 +1,14 @@
 ---
 // Path: src/pages/si/avtorji-in-uredniki/[authorSlug].astro
 // Purpose: Author profile page with dynamic language support
-// Data: author.json, www.json, common.json
+// Data: author.json, www.json, common.json, locale.json
 // Dependencies: BaseLayout.astro
 
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import authorDataJson from '../../../data/author.json';
 import wwwData from '../../../data/www.json';
 import commonData from '../../../data/common.json';
+import localeData from '../../../data/locale.json';
 
 // Type Definitions (from original author.astro)
 export interface SocialLinksInfo {
@@ -119,6 +120,7 @@ interface AuthorDataEntry {
   AUTHOR_META_SEO: string;
   EEAT_SLUG_13: string;
   AUTHOR_FULL_BIO: string;
+  EEAT_URL_20: string;
 }
 
 export const prerender = false; // Enable SSR
@@ -433,6 +435,22 @@ const organizationSchema = {
 };
 
 const combinedSchema = [webpageSchema, personSchema, organizationSchema];
+
+// Build the language link map for the language picker
+const languageLinksMap = {};
+for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
+  // Find alternate author entry for this locale by WWW_AUTHOR_NUMBER
+  const altAuthor = authorDataJson.find(a =>
+    a.WWW_AUTHOR_NUMBER === author.WWW_AUTHOR_NUMBER &&
+    a.M_SLUG === localeObj.M_SLUG &&
+    a.PUBLISH_Y_N === "1"
+  );
+  if (altAuthor) {
+    languageLinksMap[localeObj.M_SLUG] = `/${altAuthor.M_SLUG}/${altAuthor.EEAT_URL_20}/${altAuthor.WWW_AUTHOR_SLUG}`;
+  } else {
+    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}`;
+  }
+}
 ---
 
 <BaseLayout
@@ -444,6 +462,7 @@ const combinedSchema = [webpageSchema, personSchema, organizationSchema];
   ogImage={authorProfileData.ogImage}
   keywords={pageKeywords}
   schema={combinedSchema}
+  languageLinksMap={languageLinksMap}
 >
   <!-- Dark Hero Section -->
   <div class="bg-black text-white py-16">
