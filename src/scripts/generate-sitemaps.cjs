@@ -1,12 +1,10 @@
-import { readFileSync, readdirSync, statSync } from 'fs';
-import { writeFile } from 'fs/promises';
-import path from 'path';
-import wwwData from '../data/www.json';
+const { readFileSync, readdirSync, statSync } = require('fs');
+const { writeFile } = require('fs/promises');
+const path = require('path');
 
 // --- Configuration ---
-// Get the first object from wwwData
-const www = wwwData[0];
-const SITE_URL = www.PAGE_FULL_PERMALINK; // This will use "https://www.eusignal.com"
+// IMPORTANT: Replace this with your actual production domain
+const SITE_URL = 'https://eusignal.netlify.app'; // Change this to your real domain
 const PUBLIC_DIR = path.join(process.cwd(), 'public');
 const PAGES_DIR = path.join(process.cwd(), 'src/pages');
 
@@ -51,7 +49,6 @@ const generateSitemapIndex = (finalLocales) => {
 </sitemapindex>`;
 };
 
-// ... [The generateLocaleSitemap function remains exactly the same as before] ...
 const generateLocaleSitemap = (localeCode) => {
   const urlEntries = [];
 
@@ -157,32 +154,21 @@ const generateLocaleSitemap = (localeCode) => {
 async function main() {
   console.log('🚀 Generating sitemaps...');
 
-  // --- NEW: Scan `src/pages` for existing locale directories ---
   const existingLocaleDirs = readdirSync(PAGES_DIR).filter(file => {
     try {
-      // Check if the item in src/pages is a directory
       return statSync(path.join(PAGES_DIR, file)).isDirectory();
     } catch (e) {
-      // Ignore errors for files that might not be accessible
       return false;
     }
   });
   console.log(`🔎 Found existing page directories: [${existingLocaleDirs.join(', ')}]`);
 
-  // --- MODIFIED: Filter locales based on BOTH conditions ---
   const finalLocalesToBuild = localesData.filter(locale => {
-    // Condition 1: Must be marked as "publish" in locale.json
     const isPublished = locale.M_LOCALE_PUBLISH_Y_N === "1";
-    
-    // Condition 2: A directory with the name of the M_SLUG must exist in src/pages
     const directoryExists = existingLocaleDirs.includes(locale.M_SLUG);
-
-    // Provide a warning for locales that are "published" but have no matching folder
     if (isPublished && !directoryExists) {
         console.warn(`⚠️  Skipping locale '${locale.M_HREFLANG_CODE}': It's marked for publishing, but the directory 'src/pages/${locale.M_SLUG}/' does not exist.`);
     }
-
-    // A locale will only be included if BOTH conditions are true
     return isPublished && directoryExists;
   });
 
@@ -194,12 +180,10 @@ async function main() {
   console.log(`✅ Identified locales to build sitemaps for: [${finalLocalesToBuild.map(l => l.M_HREFLANG_CODE).join(', ')}]`);
 
   try {
-    // Generate and write the main sitemap index using the filtered list
     const sitemapIndexXml = generateSitemapIndex(finalLocalesToBuild);
     await writeFile(path.join(PUBLIC_DIR, 'sitemap.xml'), sitemapIndexXml);
     console.log('✅ Generated sitemap.xml');
 
-    // Generate a sitemap for each of the FINAL, validated locales
     for (const locale of finalLocalesToBuild) {
       const localeCode = locale.M_HREFLANG_CODE;
       const localeSitemapXml = generateLocaleSitemap(localeCode);
@@ -211,9 +195,8 @@ async function main() {
     console.log('✨ Sitemap generation complete!');
   } catch (error) {
     console.error('❌ Error generating sitemaps:', error);
-    process.exit(1); // Exit with an error code
+    process.exit(1);
   }
 }
 
-// Run the script
 main();
