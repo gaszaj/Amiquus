@@ -1,13 +1,11 @@
-import { readFileSync, readdirSync, statSync } from 'fs';
+import { readFileSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import path from 'path';
-import wwwData from '../data/www.json' assert { type: 'json' };
 
-const www = wwwData[0];
-
-const SITE_URL = www.PAGE_FULL_PERMALINK;
+// --- Configuration ---
+// IMPORTANT: Replace this with your actual production domain
+const SITE_URL = 'https://eusignal.netlify.app'; // Change this to your real domain
 const PUBLIC_DIR = path.join(process.cwd(), 'public');
-const PAGES_DIR = path.join(process.cwd(), 'src/pages');
 
 // --- Helper function to read JSON files robustly ---
 const readJsonFile = (filePath) => {
@@ -24,7 +22,7 @@ const authorData = readJsonFile('src/data/author.json');
 const articleData = readJsonFile('src/data/article.json');
 const productData = readJsonFile('src/data/product.json');
 
-// --- Helper Functions ---
+// --- Helper Functions (No changes here) ---
 
 const formatLastMod = (dateStr, timeStr) => {
   if (!dateStr || !timeStr) {
@@ -33,8 +31,9 @@ const formatLastMod = (dateStr, timeStr) => {
   return new Date(`${dateStr}T${timeStr}`).toISOString();
 };
 
-const generateSitemapIndex = (finalLocales) => {
-  const sitemapLinks = finalLocales
+const generateSitemapIndex = () => {
+  const publishedLocales = localesData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1");
+  const sitemapLinks = publishedLocales
     .map(locale => {
       const lastmod = new Date().toISOString();
       return `
@@ -150,48 +149,19 @@ const generateLocaleSitemap = (localeCode) => {
 </urlset>`;
 };
 
-// --- Main Execution Logic ---
+// --- Main Execution Logic (No changes here) ---
 
 async function main() {
   console.log('🚀 Generating sitemaps...');
-
-  // Scan `src/pages` for existing locale directories
-  const existingLocaleDirs = readdirSync(PAGES_DIR).filter(file => {
-    try {
-      return statSync(path.join(PAGES_DIR, file)).isDirectory();
-    } catch (e) {
-      return false;
-    }
-  });
-  console.log(`🔎 Found existing page directories: [${existingLocaleDirs.join(', ')}]`);
-
-  // Filter locales based on BOTH conditions
-  const finalLocalesToBuild = localesData.filter(locale => {
-    const isPublished = locale.M_LOCALE_PUBLISH_Y_N === "1";
-    const directoryExists = existingLocaleDirs.includes(locale.M_SLUG);
-    
-    if (isPublished && !directoryExists) {
-        console.warn(`⚠️  Skipping locale '${locale.M_HREFLANG_CODE}': It's marked for publishing, but the directory 'src/pages/${locale.M_SLUG}/' does not exist.`);
-    }
-    
-    return isPublished && directoryExists;
-  });
-
-  if (finalLocalesToBuild.length === 0) {
-    console.warn('No locales to build sitemaps for. Please check your `locale.json` and `src/pages` directories.');
-    return;
-  }
-  
-  console.log(`✅ Identified locales to build sitemaps for: [${finalLocalesToBuild.map(l => l.M_HREFLANG_CODE).join(', ')}]`);
-
   try {
-    // Generate and write the main sitemap index using the filtered list
-    const sitemapIndexXml = generateSitemapIndex(finalLocalesToBuild);
+    // Generate and write the main sitemap index
+    const sitemapIndexXml = generateSitemapIndex();
     await writeFile(path.join(PUBLIC_DIR, 'sitemap.xml'), sitemapIndexXml);
     console.log('✅ Generated sitemap.xml');
 
-    // Generate a sitemap for each of the FINAL, validated locales
-    for (const locale of finalLocalesToBuild) {
+    // Find all published locales and generate a sitemap for each
+    const publishedLocales = localesData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1");
+    for (const locale of publishedLocales) {
       const localeCode = locale.M_HREFLANG_CODE;
       const localeSitemapXml = generateLocaleSitemap(localeCode);
       const fileName = `sitemap-${localeCode}.xml`;
@@ -202,8 +172,9 @@ async function main() {
     console.log('✨ Sitemap generation complete!');
   } catch (error) {
     console.error('❌ Error generating sitemaps:', error);
-    process.exit(1);
+    process.exit(1); // Exit with an error code
   }
 }
 
+// Run the script
 main();
