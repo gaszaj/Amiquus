@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync, statSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import path from 'path';
-import wwwData from '../data/www.json';
+import wwwData from '../data/www.json' assert { type: 'json' };
 
 const www = wwwData[0];
 
