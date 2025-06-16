@@ -21,6 +21,15 @@ export interface Props {
   keywords?: string;
   locale?: string;
   schema?: object | null;
+  alternativeLinks?: Array<{
+    code: string;
+    country: string;
+    name: string;
+    languageIso: string;
+    hreflang: string;
+    href: string;
+  }>;
+  languageLinksMap: Record<string, string>;
 }
 
 const {
@@ -32,7 +41,9 @@ const {
   ogImage = "/images/og-image.jpg",
   keywords = "safety signs, warning signs, triopan, road safety, construction safety, event safety",
   locale = "sl-SI", // Default locale // This prop seems to be 'locale' not 'fullLocale'
-  schema = null
+  schema = null,
+  alternativeLinks = null,
+  languageLinksMap
 } = Astro.props;
 
 // Define default English texts (these will be used if common.json doesn't provide specific translations)
@@ -190,7 +201,7 @@ const getAbsoluteOgImageUrl = (imagePath: string) => {
     {schema && <Schema schema={schema} />}
   </head>
   <body class="min-h-screen bg-signal-light flex flex-col">
-    <Header />
+    <Header alternativeLinks={alternativeLinks} languageLinksMap={languageLinksMap} />
     <main class="flex-grow">
       <slot />
     </main>

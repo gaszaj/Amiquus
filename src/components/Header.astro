@@ -13,6 +13,20 @@ import {
 import commonData from '../data/common.json';
 import localeData from '../data/locale.json';
 
+export interface Props {
+  alternativeLinks?: Array<{
+    code: string;
+    country: string;
+    name: string;
+    languageIso: string;
+    hreflang: string;
+    href: string;
+  }>;
+  languageLinksMap?: Record<string, string>;
+}
+
+const { alternativeLinks, languageLinksMap = {} } = Astro.props;
+
 // Get the locale from the URL path (e.g., 'si' from /si/...)
 const locale = Astro.url.pathname.split('/')[1];
 
@@ -29,17 +43,9 @@ const navigation = [
 ];
 
 // --- Language Switcher Logic ---
-// Define supported locales with their corresponding data from locale.json
-// Only include locales that are marked for publishing (M_LOCALE_PUBLISH_Y_N === "1")
-const supportedLocales = localeData
-  .filter(locale => locale.M_LOCALE_PUBLISH_Y_N === "1")
-  .map(locale => ({
-    code: locale.M_SLUG,
-    country: locale.M_COUNTRY_CODE,
-    name: locale.M_LANGUAGE_NATIVE,
-    languageIso: locale.M_LANGUAGE_ISO,
-    hreflang: locale.M_HREFLANG_CODE
-  }));
+// If we have alternative links from the page, use those
+// Otherwise, use the default language switcher logic
+const supportedLocales = localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1");
 
 // Map country codes to their corresponding flag components
 const flagMap = {
@@ -53,56 +59,16 @@ const flagMap = {
 };
 
 // Create the final supported languages array with flags
-const supportedLanguages = supportedLocales.map(locale => ({
-  code: locale.code,
-  name: locale.name,
-  flag: flagMap[locale.country],
-  languageIso: locale.languageIso,
-  hreflang: locale.hreflang
+const languageLinks = supportedLocales.map(locale => ({
+  code: locale.M_SLUG,
+  name: locale.M_LANGUAGE_NATIVE,
+  flag: flagMap[locale.M_COUNTRY_CODE],
+  href: languageLinksMap[locale.M_SLUG] || `/${locale.M_SLUG}`,
+  isActive: locale.M_SLUG === locale
 }));
 
-// Get the first published locale as default, or fallback to 'si' if none are published
-const defaultLangCode = supportedLanguages.length > 0 ? supportedLanguages[0].code : 'si';
-
-const currentPathname = Astro.url.pathname;
-const pathParts = currentPathname.split('/').filter(p => p !== '');
-
-let currentDetectedLang = defaultLangCode;
-let slugParts = [...pathParts];
-
-// Check if the current path starts with a valid published locale
-if (pathParts.length > 0 && supportedLanguages.some(lang => lang.code === pathParts[0])) {
-  currentDetectedLang = pathParts[0];
-  slugParts.shift();
-} else {
-  // If the current locale is not published, redirect to the default locale
-  if (currentDetectedLang !== defaultLangCode) {
-    return Astro.redirect(`/${defaultLangCode}${currentPathname}`);
-  }
-}
-
-const baseSlug = slugParts.join('/') || '';
-
-const languageLinks = supportedLanguages.map(lang => {
-  let newPath;
-  if (lang.code === defaultLangCode) {
-    newPath = baseSlug ? `/${baseSlug}` : '/';
-  } else {
-    newPath = `/${lang.code}${baseSlug ? `/${baseSlug}` : ''}`;
-  }
-  if (!baseSlug && lang.code !== defaultLangCode && !newPath.endsWith('/')) {
-    newPath += '/';
-  }
-  if (newPath === `/${defaultLangCode}/` && defaultLangCode) {
-    newPath = '/';
-  }
-
-  return { ...lang, href: newPath, isActive: lang.code === currentDetectedLang };
-});
-
-const currentLanguageObject = supportedLanguages.find(lang => lang.code === currentDetectedLang) ||
-                            supportedLanguages.find(lang => lang.code === defaultLangCode) ||
-                            supportedLanguages[0]; // Fallback
+const currentLanguageObject = languageLinks.find(lang => lang.code === locale) ||
+                            languageLinks[0]; // Fallback
 // --- End Language Switcher Logic ---
 ---
 

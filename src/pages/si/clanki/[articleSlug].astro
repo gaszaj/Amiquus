@@ -5,6 +5,7 @@ import wwwData from '../../../data/www.json';
 import commonData from '../../../data/common.json';
 import authorDataJson from '../../../data/author.json';
 import products from '../../../data/product.json';
+import localeData from '../../../data/locale.json';
 
 // --- Type Definitions for Props (originally from ArticleLayout.astro) ---
 export interface AuthorInfo {
@@ -490,6 +491,44 @@ const formatDate = (dateString: string, locale: string, options: Intl.DateTimeFo
 
 // Filter headings for TOC
 const tocHeadings = articleMetadata.headings.filter(heading => heading.depth >= 2 && heading.depth <= 3);
+
+// Build the language link map
+const languageLinksMap = {};
+for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
+  // Find alternate article for this locale
+  const altArticle = articleDataJson.find(a =>
+    a.ARTICLE_NUMBER === article.ARTICLE_NUMBER &&
+    a.M_SLUG === locale.M_SLUG &&
+    a.PUBLISH_Y_N === "1"
+  );
+  if (altArticle) {
+    languageLinksMap[locale.M_SLUG] = `/${altArticle.M_SLUG}/${altArticle.ARTICLE_LIST_SLUG}/${altArticle.ARTICLE_SLUG}`;
+  } else {
+    languageLinksMap[locale.M_SLUG] = `/${locale.M_SLUG}`;
+  }
+}
+
+// Get alternative language links for the current article
+const getAlternativeLanguageLinks = (currentArticle, localeData, articleDataJson) => {
+  const languageLinksMap = {};
+  for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
+    // Find alternate article for this locale
+    const altArticle = articleDataJson.find(a =>
+      a.ARTICLE_NUMBER === currentArticle.ARTICLE_NUMBER &&
+      a.M_SLUG === locale.M_SLUG &&
+      a.PUBLISH_Y_N === "1"
+    );
+    if (altArticle) {
+      languageLinksMap[locale.M_SLUG] = `/${altArticle.M_SLUG}/${altArticle.ARTICLE_LIST_SLUG}/${altArticle.ARTICLE_SLUG}`;
+    } else {
+      languageLinksMap[locale.M_SLUG] = `/${locale.M_SLUG}`;
+    }
+  }
+  return languageLinksMap;
+};
+
+// Usage:
+const alternativeLinks = getAlternativeLanguageLinks(article, localeData, articleDataJson);
 ---
 
 <BaseLayout
@@ -501,6 +540,8 @@ const tocHeadings = articleMetadata.headings.filter(heading => heading.depth >= 
   ogImage={articleMetadata.ogImage}
   keywords={pageKeywords}
   schema={combinedSchema}
+  alternativeLinks={alternativeLinks}
+  languageLinksMap={languageLinksMap}
 >
   <!-- Hero Section with Dark Background -->
   <header class="bg-black text-white py-12">
