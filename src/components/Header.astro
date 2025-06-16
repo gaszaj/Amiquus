@@ -1,8 +1,17 @@
 ---
 // Import JSON data
 import headerFooterData from '../data/headerfooter.json';
-import { SI, DE, PT, BA, LT, HR, ES, FR, IT, NL, SE, DK, CH, AT, LU, BY, GR, LI, MC, SM, NO, RU, TR, CZ, PL, SK, AL, AZ, BE, BG, CY, EE, GE, HU, LV, MD, ME, MK, RO, RS, UA, FI } from 'country-flag-icons/string/3x2';
+import { 
+  AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, 
+  CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, 
+  ES, FI, FJ, FR, GA, GB, GE, GH, GI, GM, GN, GP, GR, GT, GU, GY, HK, HN, HR, HT, 
+  HU, ID, IE, IL, IN, IS, IT, JM, JO, JP, KE, KR, KW, KY, LB, LI, LS, LT, LU, LV, 
+  LY, MA, MC, MD, ME, MK, MM, MN, MR, MU, MW, MX, MY, MZ, NG, NI, NL, NO, NP, NZ, 
+  OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL, 
+  SM, SN, SR, SV, SZ, TD, TH, TN, TR, TT, UA, UG, US, UY, VE, VN, YT, ZA 
+} from 'country-flag-icons/string/3x2';
 import commonData from '../data/common.json';
+import localeData from '../data/locale.json';
 
 // Get the locale from the URL path (e.g., 'si' from /si/...)
 const locale = Astro.url.pathname.split('/')[1];
@@ -20,71 +29,40 @@ const navigation = [
 ];
 
 // --- Language Switcher Logic ---
-// Define supported locales with their corresponding data
-const supportedLocales = [
-  { code: 'si', country: 'SI', name: headerFooter.HEADER_LANGUAGE_SLOVENIA_SLOVENIAN },
-  { code: 'hr', country: 'HR', name: headerFooter.HEADER_LANGUAGE_CROATIA_CROATIAN },
-  { code: 'es', country: 'ES', name: headerFooter.HEADER_LANGUAGE_SPAIN_SPANISH },
-  { code: 'fr', country: 'FR', name: headerFooter.HEADER_LANGUAGE_FRANCE_FRENCH },
-  { code: 'de', country: 'DE', name: headerFooter.HEADER_LANGUAGE_GERMANY_GERMAN },
-  { code: 'pt', country: 'PT', name: headerFooter.HEADER_LANGUAGE_PORTUGAL_PORTUGUESE },
-  { code: 'it', country: 'IT', name: headerFooter.HEADER_LANGUAGE_ITALY_ITALIAN },
-  { code: 'nl', country: 'NL', name: headerFooter.HEADER_LANGUAGE_NETHERLANDS_DUTCH },
-  { code: 'se', country: 'SE', name: headerFooter.HEADER_LANGUAGE_SWEDEN_SWEDISH },
-  { code: 'ch', country: 'CH', name: headerFooter.HEADER_LANGUAGE_SWITZERLAND_GERMAN },
-  { code: 'ch', country: 'CH', name: headerFooter.HEADER_LANGUAGE_SWITZERLAND_FRENCH },
-  { code: 'ch', country: 'CH', name: headerFooter.HEADER_LANGUAGE_SWITZERLAND_ITALIAN },
-  { code: 'dk', country: 'DK', name: headerFooter.HEADER_LANGUAGE_DENMARK_DANISH },
-  { code: 'no', country: 'NO', name: headerFooter.HEADER_LANGUAGE_NORWAY_NORWEGIAN },
-  { code: 'be', country: 'BE', name: headerFooter.HEADER_LANGUAGE_BELGIUM_DUTCH },
-  { code: 'be', country: 'BE', name: headerFooter.HEADER_LANGUAGE_BELGIUM_FRENCH },
-  { code: 'be', country: 'BE', name: headerFooter.HEADER_LANGUAGE_BELGIUM_GERMAN },
-  { code: 'at', country: 'AT', name: headerFooter.HEADER_LANGUAGE_AUSTRIA_GERMAN },
-  { code: 'fi', country: 'FI', name: headerFooter.HEADER_LANGUAGE_FINLAND_FINNISH },
-  { code: 'lu', country: 'LU', name: headerFooter.HEADER_LANGUAGE_LUXEMBOURG_FRENCH },
-  { code: 'lu', country: 'LU', name: headerFooter.HEADER_LANGUAGE_LUXEMBOURG_GERMAN },
-  { code: 'ru', country: 'RU', name: headerFooter.HEADER_LANGUAGE_RUSSIA_RUSSIAN },
-  { code: 'tr', country: 'TR', name: headerFooter.HEADER_LANGUAGE_TURKEY_TURKISH },
-  { code: 'cz', country: 'CZ', name: headerFooter.HEADER_LANGUAGE_CZECHIA_CZECH },
-  { code: 'pl', country: 'PL', name: headerFooter.HEADER_LANGUAGE_POLAND_POLISH },
-  { code: 'sk', country: 'SK', name: headerFooter.HEADER_LANGUAGE_SLOVAKIA_SLOVAK },
-  { code: 'al', country: 'AL', name: headerFooter.HEADER_LANGUAGE_ALBANIA_ALBANIAN },
-  { code: 'az', country: 'AZ', name: headerFooter.HEADER_LANGUAGE_AZERBAIJAN_AZERBAIJANI },
-  { code: 'by', country: 'BY', name: headerFooter.HEADER_LANGUAGE_BELARUS_BELARUSIAN },
-  { code: 'ba', country: 'BA', name: headerFooter.HEADER_LANGUAGE_BOSNIA_AND_HERZEGOVINA_BOSNIAN },
-  { code: 'bg', country: 'BG', name: headerFooter.HEADER_LANGUAGE_BULGARIA_BULGARIAN },
-  { code: 'cy', country: 'CY', name: headerFooter.HEADER_LANGUAGE_CYPRUS_GREEK },
-  { code: 'ee', country: 'EE', name: headerFooter.HEADER_LANGUAGE_ESTONIA_ESTONIAN },
-  { code: 'ge', country: 'GE', name: headerFooter.HEADER_LANGUAGE_GEORGIA_GEORGIAN },
-  { code: 'gr', country: 'GR', name: headerFooter.HEADER_LANGUAGE_GREECE_GREEK },
-  { code: 'hu', country: 'HU', name: headerFooter.HEADER_LANGUAGE_HUNGARY_HUNGARIAN },
-  { code: 'lv', country: 'LV', name: headerFooter.HEADER_LANGUAGE_LATVIA_LATVIAN },
-  { code: 'li', country: 'LI', name: headerFooter.HEADER_LANGUAGE_LIECHTENSTEIN_GERMAN },
-  { code: 'lt', country: 'LT', name: headerFooter.HEADER_LANGUAGE_LITHUANIA_LITHUANIAN },
-  { code: 'md', country: 'MD', name: headerFooter.HEADER_LANGUAGE_MOLDOVA_ROMANIAN },
-  { code: 'mc', country: 'MC', name: headerFooter.HEADER_LANGUAGE_MONACO_FRENCH },
-  { code: 'me', country: 'ME', name: headerFooter.HEADER_LANGUAGE_MONTENEGRO_SERBIAN },
-  { code: 'mk', country: 'MK', name: headerFooter.HEADER_LANGUAGE_NORTH_MACEDONIA_MACEDONIAN },
-  { code: 'ro', country: 'RO', name: headerFooter.HEADER_LANGUAGE_ROMANIA_ROMANIAN },
-  { code: 'sm', country: 'SM', name: headerFooter.HEADER_LANGUAGE_SAN_MARINO_ITALIAN },
-  { code: 'rs', country: 'RS', name: headerFooter.HEADER_LANGUAGE_SERBIA_SERBIAN },
-  { code: 'ua', country: 'UA', name: headerFooter.HEADER_LANGUAGE_UKRAINE_UKRAINIAN }
-];
+// Define supported locales with their corresponding data from locale.json
+// Only include locales that are marked for publishing (M_LOCALE_PUBLISH_Y_N === "1")
+const supportedLocales = localeData
+  .filter(locale => locale.M_LOCALE_PUBLISH_Y_N === "1")
+  .map(locale => ({
+    code: locale.M_SLUG,
+    country: locale.M_COUNTRY_CODE,
+    name: locale.M_LANGUAGE_NATIVE,
+    languageIso: locale.M_LANGUAGE_ISO,
+    hreflang: locale.M_HREFLANG_CODE
+  }));
 
 // Map country codes to their corresponding flag components
 const flagMap = {
-  SI, HR, ES, FR, DE, PT, IT, NL, SE, CH, DK, NO, BE, AT, FI, LU, RU, TR, CZ, PL, SK,
-  AL, AZ, BY, BA, BG, CY, EE, GE, GR, HU, LV, LI, LT, MD, MC, ME, MK, RO, SM, RS, UA
+  AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, 
+  CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, 
+  ES, FI, FJ, FR, GA, GB, GE, GH, GI, GM, GN, GP, GR, GT, GU, GY, HK, HN, HR, HT, 
+  HU, ID, IE, IL, IN, IS, IT, JM, JO, JP, KE, KR, KW, KY, LB, LI, LS, LT, LU, LV, 
+  LY, MA, MC, MD, ME, MK, MM, MN, MR, MU, MW, MX, MY, MZ, NG, NI, NL, NO, NP, NZ, 
+  OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL, 
+  SM, SN, SR, SV, SZ, TD, TH, TN, TR, TT, UA, UG, US, UY, VE, VN, YT, ZA
 };
 
 // Create the final supported languages array with flags
 const supportedLanguages = supportedLocales.map(locale => ({
   code: locale.code,
   name: locale.name,
-  flag: flagMap[locale.country]
+  flag: flagMap[locale.country],
+  languageIso: locale.languageIso,
+  hreflang: locale.hreflang
 }));
 
-const defaultLangCode = 'si'; // Your site's default language code
+// Get the first published locale as default, or fallback to 'si' if none are published
+const defaultLangCode = supportedLanguages.length > 0 ? supportedLanguages[0].code : 'si';
 
 const currentPathname = Astro.url.pathname;
 const pathParts = currentPathname.split('/').filter(p => p !== '');
@@ -92,11 +70,15 @@ const pathParts = currentPathname.split('/').filter(p => p !== '');
 let currentDetectedLang = defaultLangCode;
 let slugParts = [...pathParts];
 
+// Check if the current path starts with a valid published locale
 if (pathParts.length > 0 && supportedLanguages.some(lang => lang.code === pathParts[0])) {
   currentDetectedLang = pathParts[0];
   slugParts.shift();
 } else {
-  currentDetectedLang = defaultLangCode;
+  // If the current locale is not published, redirect to the default locale
+  if (currentDetectedLang !== defaultLangCode) {
+    return Astro.redirect(`/${defaultLangCode}${currentPathname}`);
+  }
 }
 
 const baseSlug = slugParts.join('/') || '';

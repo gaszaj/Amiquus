@@ -33,9 +33,9 @@ const authors = (filteringNumber === 20 || filteringNumber === 13)
   ? authorData.filter(author => author.M_SLUG === locale && author.PUBLISH_Y_N === "1")
   : [];
 
-// Check if entry is published and has a valid filtering number (1-26)
+// Check if entry is published and has a valid filtering number (1-28)
 const isValidPage = eeatEntry.PUBLISH_Y_N === "1" &&
-  filteringNumber >= 1 && filteringNumber <= 26;
+  filteringNumber >= 1 && filteringNumber <= 28;
 
 if (!isValidPage) {
   return Astro.redirect('/404');

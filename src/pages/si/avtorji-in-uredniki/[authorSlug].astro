@@ -131,12 +131,14 @@ const locale = Astro.url.pathname.split('/')[1];
 // Find the matching common data object based on M_SLUG
 const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
 
-// Find author data
-const author = authorDataJson.find(
-  (entry: AuthorDataEntry) => entry.WWW_AUTHOR_SLUG === authorSlug
-);
+// Filter authorData to only include entries matching the current locale
+const localeAuthorData = authorDataJson.filter(entry => entry.M_SLUG === locale);
 
-if (!author || author.PUBLISH_Y_N !== "1")  {
+// Find the matching author entry from the filtered data
+const author = localeAuthorData.find(entry => entry.WWW_AUTHOR_SLUG === authorSlug);
+
+// Check if author exists and is published
+if (!author || author.PUBLISH_Y_N !== "1") {
   return Astro.redirect('/404');
 }
 

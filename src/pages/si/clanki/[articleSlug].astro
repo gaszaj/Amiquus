@@ -85,9 +85,11 @@ const locale = Astro.url.pathname.split('/')[1];
 // Find the matching common data object based on M_SLUG
 const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
 
-const article = articleDataJson.find(
-  (entry: ArticleJsonEntry) => entry.ARTICLE_SLUG === articleSlug
-);
+// Filter articleData to only include entries matching the current locale
+const localeArticleData = articleDataJson.filter(entry => entry.M_SLUG === locale);
+
+// Find the matching article entry from the filtered data
+const article = localeArticleData.find(entry => entry.ARTICLE_SLUG === articleSlug);
 
 if (!article || article.PUBLISH_Y_N !== "1") {
   return Astro.redirect('/404');
@@ -113,6 +115,12 @@ const getAbsoluteUrl = (path: string): string => {
 // Helper function for base-level URLs (without locale)
 const getBaseUrl = (path: string): string => {
     return new URL(path, Astro.url.origin).toString();
+};
+
+// Add this new helper function after the existing getAbsoluteUrl function
+const getEditorialPolicyUrl = (slug: string): string => {
+    const locale = Astro.url.pathname.split('/')[1];
+    return new URL(`/${locale}/${slug}`, Astro.url.origin).toString();
 };
 
 // Get language data
@@ -165,7 +173,7 @@ const layoutContent = { // This data was previously passed as props to ArticleLa
     title: common.ARTICLE_EDITORIAL_POLICY_TITLE,
     description: common.ARTICLE_EDITORIAL_POLICY_DESC,
     ctaText: common.ARTICLE_EDITORIAL_POLICY_CTA,
-    ctaLink: common.AUTHOR_EDITORIAL_SLUG
+    ctaLink: getEditorialPolicyUrl(common.AUTHOR_EDITORIAL_SLUG)
   } as EditorialPolicyContent,
   disclaimerContent: {
     text: common.ARTICLE_DISCLAIMER
