@@ -42,7 +42,7 @@ const navigation = [
   { name: headerFooter.HEADER_LINK_NAME_3, href: `/${locale}${headerFooter.HEADER_LINK_PATH_3}` },
 ];
 
-// --- Find the hreflang code for the current locale to fetch the correct search index ---
+// Find the hreflang code for the current locale to fetch the correct search index
 const currentLocaleData = localeData.find(l => l.M_SLUG === locale);
 // Use the HREFLANG_CODE which matches your JSON file names (e.g., 'sl-si')
 const hreflangCode = currentLocaleData ? currentLocaleData.M_HREFLANG_CODE : 'sl-si'; // Provide a sensible fallback
@@ -73,7 +73,6 @@ const languageLinks = supportedLocales.map(langLocale => ({
 const currentLanguageObject = languageLinks.find(lang => lang.code === locale) ||
                             languageLinks.find(lang => lang.code === 'si') || // Fallback to 'si'
                             languageLinks[0]; // Final fallback
-// --- End Language Switcher Logic ---
 ---
 
 <header class="header-transparent">
@@ -412,7 +411,14 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
     updateHeaderBackground(); // Initial check
   });
 
-  // --- NEW & IMPROVED SEARCH COMPONENT LOGIC ---
+  // --- SEARCH COMPONENT LOGIC ---
+
+  // Helper function to truncate text to a specific length and add ellipsis
+  const truncateText = (text, maxLength) => {
+    if (!text || typeof text !== 'string') return '';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
   
   // Cache for our search index. It starts empty.
   let searchIndex = []; 
@@ -436,18 +442,17 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
         }
         const data = await response.json();
         
-        // **IMPORTANT**: Transform the data to match the expected format (lowercase keys).
-        // Your JSON has TITLE, EXCERPT, etc. The search code expects title, excerpt.
+        // Map the fetched data to a consistent, lowercase-key format for the script.
         searchIndex = data.map(item => ({
           title: item.TITLE,
           excerpt: item.EXCERPT,
           href: item.HREF,
-          image: item.IMAGE // This will be undefined if not present, which is fine
+          image: item.IMAGE 
         }));
         
       } catch (error) {
         console.error("Failed to load or parse search index:", error);
-        // Handle the error, maybe show a message to the user.
+        // Handle the error by showing a message to the user.
         searchStatus.innerHTML = "Iskalnega indeksa ni bilo mogoče naložiti. Poskusite znova.";
         searchIndex = []; // Ensure it's empty on failure.
       }
@@ -479,13 +484,12 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
         mobileMenu.classList.add('hidden');
       }
 
-      // **NEW**: Trigger the loading of the search index.
-      // It will only fetch the first time.
+      // Trigger the lazy-loading of the search index on demand.
       await loadSearchIndex();
 
       if (prefillQuery) {
         searchInput.value = prefillQuery;
-        // Only perform search if index is loaded
+        // Only perform search if the index is loaded
         if (searchIndex.length > 0) performSearch(prefillQuery);
         clearSearchButton.classList.remove('hidden');
         clearSearchButton.classList.add('flex');
@@ -515,10 +519,9 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
     };
 
     const performSearch = (query) => {
-      // If index isn't loaded for some reason, exit.
+      // If index isn't loaded for some reason, inform the user and retry.
       if (searchIndex.length === 0 && query) {
          searchStatus.innerHTML = `Nalaganje iskalnega indeksa...`;
-         // Retry loading if it failed previously and user is searching
          loadSearchIndex().then(() => performSearch(query));
          return;
       }
@@ -562,8 +565,8 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
                 ${item.image ? `<img src="${item.image}" alt="" class="search-result-image w-9 h-9" width="36" height="36" loading="lazy">` : '<div class="search-result-image-placeholder w-9 h-9"></div>'}
               </div>
               <div class="search-result-content flex flex-col justify-center pl-3 min-w-0">
-                <div class="search-result-title text-white font-semibold leading-tight">${highlight(item.title)}</div>
-                <div class="search-result-excerpt text-signal-green leading-snug">${highlight(item.excerpt)}</div>
+                <div class="search-result-title text-white font-semibold leading-tight">${highlight(truncateText(item.title, 65))}</div>
+                <div class="search-result-excerpt text-signal-green leading-snug">${highlight(truncateText(item.excerpt, 160))}</div>
               </div>
             </a>
           `).join('');
@@ -670,7 +673,7 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
     background: rgba(255, 255, 255, 0.5);
   }
 
-  /* --- New Search Component Styles --- */
+  /* --- Search Component Styles --- */
   .search-icon-btn {
     color: #e5e7eb;
     transition: color 0.2s ease-in-out;
