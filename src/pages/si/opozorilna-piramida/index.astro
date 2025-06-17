@@ -8,6 +8,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import productData from '../../../data/product.json';
 import wwwData from '../../../data/www.json';
 import commonData from '../../../data/common.json';
+import localeData from '../../../data/locale.json';
 
 // Get the first object from each JSON array
 const www = wwwData[0];
@@ -204,6 +205,24 @@ const organizationSchema = {
 
 // Combine schemas
 const schema = [collectionPageSchema, organizationSchema];
+
+// Build the language link map for the language picker
+const languageLinksMap = {};
+for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
+  // Find any published product for this locale to get the correct PRODUCT_CATEGORY_1_SLUG
+  const productForLocale = productData.find(p =>
+    p.M_SLUG === localeObj.M_SLUG &&
+    p.PUBLISH_Y_N === "1" &&
+    p.PRODUCT_CATEGORY_1_SLUG && p.PRODUCT_CATEGORY_1_SLUG.trim()
+  );
+  if (productForLocale) {
+    // Always use the slug from the product for that locale
+    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}/${productForLocale.PRODUCT_CATEGORY_1_SLUG}`;
+  } else {
+    // Fallback to homepage if no product listing exists
+    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}`;
+  }
+}
 ---
 
 <BaseLayout
@@ -215,6 +234,7 @@ const schema = [collectionPageSchema, organizationSchema];
     ogImage={pageOgImage}
     keywords={pageKeywords}
     schema={schema}
+    languageLinksMap={languageLinksMap}
 >
     <!-- Dark Header Section -->
     <div class="bg-black text-white py-16">

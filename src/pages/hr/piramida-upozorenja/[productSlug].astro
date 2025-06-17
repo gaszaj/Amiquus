@@ -4,6 +4,7 @@ import productData from '../../../data/product.json';
 import wwwData from '../../../data/www.json';
 import commonData from '../../../data/common.json';
 import articleDataJson from '../../../data/article.json';
+import localeData from '../../../data/locale.json';
 
 // Imports from ProductLayout.astro
 import BaseLayout from '../../../layouts/BaseLayout.astro';
@@ -439,6 +440,24 @@ function getFieldError(fieldName: string): string | undefined {
   return formErrors[fieldName]?.[0];
 }
 
+// Build the language link map for the language picker
+const languageLinksMap = {};
+for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
+  // Find any published product for this locale to get the correct PRODUCT_CATEGORY_1_SLUG
+  const productForLocale = productData.find(p =>
+    p.M_SLUG === localeObj.M_SLUG &&
+    p.PUBLISH_Y_N === "1" &&
+    p.PRODUCT_CATEGORY_1_SLUG && p.PRODUCT_CATEGORY_1_SLUG.trim()
+  );
+  if (productForLocale) {
+    // Always use the slug from the product for that locale
+    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}/${productForLocale.PRODUCT_CATEGORY_1_SLUG}`;
+  } else {
+    // Fallback to homepage if no product listing exists
+    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}`;
+  }
+}
+
 ---
 
 <BaseLayout
@@ -450,6 +469,7 @@ function getFieldError(fieldName: string): string | undefined {
   ogImage={productCoreData.ogImage}
   keywords={pageKeywords}
   schema={combinedSchema}
+  languageLinksMap={languageLinksMap}
 >
   <div class="container mx-auto px-4 py-8">
     <div class="flex flex-col lg:flex-row gap-8">

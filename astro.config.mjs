@@ -2,7 +2,6 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import { defineConfig, passthroughImageService } from 'astro/config';
-import sitemap from '@astrojs/sitemap';
 import netlify from '@astrojs/netlify';
 
 // https://astro.build/config
@@ -26,7 +25,6 @@ export default defineConfig({
       // Compress the default output directory
       Path: ["./dist"]
     }),
-    sitemap()
   ],
   site: 'https://eusignal.netlify.app',
   image: {

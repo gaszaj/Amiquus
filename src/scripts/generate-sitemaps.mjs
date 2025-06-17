@@ -59,7 +59,7 @@ const generateLocaleSitemap = (localeCode) => {
       urlEntries.push({
         loc: `${SITE_URL}/${page.M_SLUG}`,
         lastmod: formatLastMod(page.DATE_UPDATED, page.HOME_HOUR_UPDATED),
-        changefreq: 'daily',
+        changefreq: 'weekly',
         priority: 1.0,
       });
     });
@@ -120,7 +120,7 @@ const generateLocaleSitemap = (localeCode) => {
       urlEntries.push({
         loc: `${SITE_URL}/${page.M_SLUG}/${page.PRODUCT_CATEGORY_1_SLUG}/${page.PRODUCT_ASCII_SLUG}`,
         lastmod: formatLastMod(page.PRODUCT_DATE_UPDATED, page.PRODUCT_HOUR_UPDATED),
-        changefreq: 'weekly',
+        changefreq: 'monthly',
         priority: 0.9,
       });
     });
@@ -129,7 +129,7 @@ const generateLocaleSitemap = (localeCode) => {
     urlEntries.push({
       loc: `${SITE_URL}/${firstProduct.M_SLUG}/${firstProduct.PRODUCT_CATEGORY_1_SLUG}`,
       lastmod: formatLastMod(mostRecentProduct.PRODUCT_DATE_UPDATED, mostRecentProduct.PRODUCT_HOUR_UPDATED),
-      changefreq: 'weekly',
+      changefreq: 'monthly',
       priority: 0.9,
     });
   }
