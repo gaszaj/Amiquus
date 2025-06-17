@@ -356,69 +356,7 @@ const mockSearchResults = [
   </div>
 </div>
 
-<script define:vars={{ mockSearchResults }} is:inline>
-  // --- Mobile Menu Toggle ---
-  const mobileMenuButton = document.getElementById('mobile-menu-button');
-  const mobileMenu = document.getElementById('mobile-menu');
-
-  if (mobileMenuButton && mobileMenu) {
-    mobileMenuButton.addEventListener('click', () => {
-      const isExpanded = mobileMenu.classList.toggle('hidden');
-      mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
-    });
-  }
-
-  // --- Desktop Language Dropdown ---
-  const desktopLangButton = document.getElementById('desktop-lang-button');
-  const desktopLangDropdown = document.getElementById('desktop-lang-dropdown');
-  const desktopLangSwitcherContainer = document.getElementById('desktop-lang-switcher-container');
-
-  if (desktopLangButton && desktopLangDropdown && desktopLangSwitcherContainer) {
-    desktopLangButton.addEventListener('click', (event) => {
-      event.stopPropagation();
-      const isExpanded = desktopLangButton.getAttribute('aria-expanded') === 'true';
-      desktopLangButton.setAttribute('aria-expanded', String(!isExpanded));
-      desktopLangDropdown.classList.toggle('hidden');
-    });
-
-    document.addEventListener('click', (event) => {
-      if (!desktopLangSwitcherContainer.contains(event.target) && desktopLangButton.getAttribute('aria-expanded') === 'true') {
-        desktopLangButton.setAttribute('aria-expanded', 'false');
-        desktopLangDropdown.classList.add('hidden');
-      }
-    });
-  }
-
-  // --- Mobile Language Dropdown ---
-  const mobileLangButton = document.getElementById('mobile-lang-button');
-  const mobileLangDropdownList = document.getElementById('mobile-lang-dropdown-list');
-  const mobileLangChevron = document.getElementById('mobile-lang-chevron');
-
-  if (mobileLangButton && mobileLangDropdownList && mobileLangChevron) {
-    mobileLangButton.addEventListener('click', () => {
-      const isExpanded = mobileLangButton.getAttribute('aria-expanded') === 'true';
-      mobileLangButton.setAttribute('aria-expanded', String(!isExpanded));
-      mobileLangDropdownList.classList.toggle('hidden');
-      mobileLangChevron.classList.toggle('rotate-180');
-    });
-  }
-
-  // --- Scroll Handler for Header Background ---
-  document.addEventListener('DOMContentLoaded', () => {
-    const header = document.querySelector('.header-transparent');
-
-    const updateHeaderBackground = () => {
-      if (window.scrollY > 0) {
-        header.classList.add('header-scrolled');
-      } else {
-        header.classList.remove('header-scrolled');
-      }
-    };
-
-    window.addEventListener('scroll', updateHeaderBackground);
-    updateHeaderBackground(); // Initial check
-  });
-
+<script define:vars={{ locale }} is:inline>
   // --- Search Component Logic ---
   const desktopSearchButton = document.getElementById('desktop-search-button');
   const mobileSearchButton = document.getElementById('mobile-search-button');
@@ -432,9 +370,30 @@ const mockSearchResults = [
   const searchResults = document.getElementById('search-results');
   const searchFooter = document.getElementById('search-footer');
   let searchTimeout;
+  let searchData = null; // Will store the loaded search data
+
+  // Function to load search data for the current locale
+  const loadSearchData = async () => {
+    try {
+      const response = await fetch(`/index-${locale}.json`);
+      if (!response.ok) throw new Error('Failed to load search data');
+      searchData = await response.json();
+    } catch (error) {
+      console.error('Error loading search data:', error);
+      searchData = []; // Set empty array on error
+    }
+  };
+
+  // Load search data when the component initializes
+  loadSearchData();
 
   if (searchOverlay) {
-    const openSearch = (prefillQuery = '') => {
+    const openSearch = async (prefillQuery = '') => {
+      // Ensure search data is loaded
+      if (!searchData) {
+        await loadSearchData();
+      }
+
       searchOverlay.classList.remove('hidden');
       searchOverlay.classList.add('flex');
       searchOverlay.setAttribute('aria-hidden', 'false');
@@ -456,7 +415,6 @@ const mockSearchResults = [
       searchOverlay.classList.remove('flex');
       searchOverlay.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
-      // Clear the mobile menu search input when closing
       if (mobileMenuSearchInput) {
         mobileMenuSearchInput.value = '';
       }
@@ -483,9 +441,14 @@ const mockSearchResults = [
       searchFooter.classList.add('hidden');
 
       searchTimeout = setTimeout(() => {
-        const results = mockSearchResults.filter(item =>
-          item.title.toLowerCase().includes(query.toLowerCase()) ||
-          item.excerpt.toLowerCase().includes(query.toLowerCase())
+        if (!searchData) {
+          searchStatus.innerHTML = 'Error loading search data';
+          return;
+        }
+
+        const results = searchData.filter(item =>
+          item.TITLE.toLowerCase().includes(query.toLowerCase()) ||
+          item.EXCERPT.toLowerCase().includes(query.toLowerCase())
         );
 
         let statusText = '';
@@ -508,13 +471,13 @@ const mockSearchResults = [
         const showResults = (count) => {
           const resultsToShow = results.slice(0, count);
           searchResults.innerHTML = resultsToShow.map((item, idx, arr) => `
-            <a href="${item.href}" class="search-result-item group border-b border-white/20${idx === arr.length - 1 ? ' border-b-0' : ''} flex items-center py-2">
+            <a href="${item.HREF}" class="search-result-item group border-b border-white/20${idx === arr.length - 1 ? ' border-b-0' : ''} flex items-center py-2">
               <div class="search-result-image-container flex-shrink-0 w-9 h-9">
-                ${item.image ? `<img src="${item.image}" alt="" class="search-result-image w-9 h-9" width="36" height="36" loading="lazy">` : '<div class="search-result-image-placeholder w-9 h-9"></div>'}
+                ${item.IMAGE ? `<img src="${item.IMAGE}" alt="" class="search-result-image w-9 h-9" width="36" height="36" loading="lazy">` : '<div class="search-result-image-placeholder w-9 h-9"></div>'}
               </div>
               <div class="search-result-content flex flex-col justify-center pl-3 min-w-0">
-                <div class="search-result-title text-white font-semibold leading-tight">${highlight(item.title)}</div>
-                <div class="search-result-excerpt text-signal-green leading-snug">${highlight(item.excerpt)}</div>
+                <div class="search-result-title text-white font-semibold leading-tight">${highlight(item.TITLE)}</div>
+                <div class="search-result-excerpt text-signal-green leading-snug">${highlight(item.EXCERPT)}</div>
               </div>
             </a>
           `).join('');
