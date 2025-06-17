@@ -504,19 +504,18 @@ const mockSearchResults = [
           (match) => `<mark class="bg-signal-green text-black font-semibold px-1 py-0.5 rounded">${match}</mark>`
         );
 
-        let resultsShown = 6;
+        let resultsShown = 7;
         const showResults = (count) => {
           const resultsToShow = results.slice(0, count);
           searchResults.innerHTML = resultsToShow.map((item, idx, arr) => `
-            <a href="${item.href}" class="search-result-item group border-b border-white/20${idx === arr.length - 1 ? ' border-b-0' : ''}">
-              <div class="search-result-image-container">
-                ${item.image ? `<img src="${item.image}" alt="" class="search-result-image" width="40" height="40" loading="lazy">` : '<div class="search-result-image-placeholder"></div>'}
+            <a href="${item.href}" class="search-result-item group border-b border-white/20${idx === arr.length - 1 ? ' border-b-0' : ''} flex items-center py-2">
+              <div class="search-result-image-container flex-shrink-0 w-9 h-9">
+                ${item.image ? `<img src="${item.image}" alt="" class="search-result-image w-9 h-9" width="36" height="36" loading="lazy">` : '<div class="search-result-image-placeholder w-9 h-9"></div>'}
               </div>
-              <div class="search-result-content">
-                <div class="search-result-title text-white font-semibold">${highlight(item.title)}</div>
-                <div class="search-result-excerpt text-signal-green">${highlight(item.excerpt)}</div>
+              <div class="search-result-content flex flex-col justify-center pl-3 min-w-0">
+                <div class="search-result-title text-white font-semibold leading-tight">${highlight(item.title)}</div>
+                <div class="search-result-excerpt text-signal-green leading-snug">${highlight(item.excerpt)}</div>
               </div>
-              <div class="search-result-arrow">→</div>
             </a>
           `).join('');
         };
