@@ -293,12 +293,13 @@ const mockSearchResults = [
 <div 
   id="search-overlay" 
   class="fixed top-0 left-0 w-full h-full bg-black/80 backdrop-blur-sm z-40 hidden items-start justify-center pt-20 md:pt-32" 
-  aria-hidden="true"
+  aria-hidden="true" 
   data-zero-results={common.PAGEFIND_ZERO_RESULTS}
   data-one-result={common.PAGEFIND_ONE_RESULT}
   data-many-results={common.PAGEFIND_MANY_RESULTS}
   data-searching={common.PAGEFIND_SEARCHING}
   data-load-more={common.PAGEFIND_LOAD_MORE}
+  data-load-all={common.PAGEFIND_LOAD_ALL}
 >
   <div class="relative w-full max-w-2xl px-4">
     <form class="relative" role="search" onsubmit="event.preventDefault();">
@@ -498,26 +499,48 @@ const mockSearchResults = [
         searchStatus.innerHTML = statusText;
 
         const regex = new RegExp(query.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
-        const highlight = (text) => text.replace(regex, (match) => `<mark class="search-highlight">${match}</mark>`);
+        const highlight = (text) => text.replace(
+          regex,
+          (match) => `<mark class="bg-signal-green text-black font-semibold px-1 py-0.5 rounded">${match}</mark>`
+        );
 
-        const resultsToShow = results.slice(0, 6);
-        searchResults.innerHTML = resultsToShow.map(item => `
-          <a href="${item.href}" class="search-result-item group">
-            <div class="search-result-image-container">
-              ${item.image ? `<img src="${item.image}" alt="" class="search-result-image" width="40" height="40" loading="lazy">` : '<div class="search-result-image-placeholder"></div>'}
-            </div>
-            <div class="search-result-content">
-              <div class="search-result-title">${highlight(item.title)}</div>
-              <div class="search-result-excerpt">${highlight(item.excerpt)}</div>
-            </div>
-            <div class="search-result-arrow">→</div>
-          </a>
-        `).join('');
+        let resultsShown = 6;
+        const showResults = (count) => {
+          const resultsToShow = results.slice(0, count);
+          searchResults.innerHTML = resultsToShow.map((item, idx, arr) => `
+            <a href="${item.href}" class="search-result-item group border-b border-white/20${idx === arr.length - 1 ? ' border-b-0' : ''}">
+              <div class="search-result-image-container">
+                ${item.image ? `<img src="${item.image}" alt="" class="search-result-image" width="40" height="40" loading="lazy">` : '<div class="search-result-image-placeholder"></div>'}
+              </div>
+              <div class="search-result-content">
+                <div class="search-result-title text-white font-semibold">${highlight(item.title)}</div>
+                <div class="search-result-excerpt text-signal-green">${highlight(item.excerpt)}</div>
+              </div>
+              <div class="search-result-arrow">→</div>
+            </a>
+          `).join('');
+        };
+        showResults(resultsShown);
 
-        if (results.length > 6) {
-          const loadMoreUrl = `/search?q=${encodeURIComponent(query)}`;
-          searchFooter.innerHTML = `<a href="${loadMoreUrl}" class="block w-full py-3 text-sm text-gray-300 hover:bg-gray-700/50 hover:text-white transition-colors">${searchOverlay.dataset.loadMore}</a>`;
+        if (results.length > resultsShown) {
+          searchFooter.innerHTML = `<button id="load-more-results" class="block w-full py-3 text-sm text-gray-300 hover:bg-gray-700/50 hover:text-white transition-colors">${searchOverlay.dataset.loadMore}</button>`;
           searchFooter.classList.remove('hidden');
+          document.getElementById('load-more-results').onclick = () => {
+            resultsShown += 6;
+            showResults(resultsShown);
+            if (results.length > resultsShown) {
+              searchFooter.innerHTML = `<button id=\"load-more-results\" class=\"block w-full py-3 text-sm text-gray-300 hover:bg-gray-700/50 hover:text-white transition-colors\">${searchOverlay.dataset.loadMore}</button>`;
+              document.getElementById('load-more-results').onclick = arguments.callee;
+            } else {
+              searchFooter.innerHTML = `<div class=\"block w-full py-3 text-sm text-gray-400\">${searchOverlay.dataset.loadAll}</div>`;
+            }
+          };
+        } else if (results.length > 0) {
+          searchFooter.innerHTML = `<div class=\"block w-full py-3 text-sm text-gray-400\">${searchOverlay.dataset.loadAll}</div>`;
+          searchFooter.classList.remove('hidden');
+        } else {
+          searchFooter.innerHTML = '';
+          searchFooter.classList.add('hidden');
         }
       }, 300);
     };
@@ -621,12 +644,8 @@ const mockSearchResults = [
     align-items: center;
     padding: 0.75rem 1rem;
     text-decoration: none;
-    border-bottom: 1px solid rgba(107, 114, 128, 0.3);
     transition: background-color 0.2s ease-in-out;
-    color: inherit; /* Ensure it doesn't override child colors */
-  }
-  .search-result-item:last-child {
-    border-bottom: none;
+    color: inherit;
   }
   .search-result-item:hover {
     background-color: rgba(255, 255, 255, 0.05);
