@@ -28,7 +28,7 @@ export interface Props {
 const { alternativeLinks, languageLinksMap = {} } = Astro.props;
 
 // Get the locale from the URL path (e.g., 'si' from /si/...)
-const locale = Astro.url.pathname.split('/')[1];
+const locale = Astro.url.pathname.split('/')[1] || 'si'; // Fallback for root path
 
 // Find the matching headerFooter and common data objects based on M_SLUG
 const headerFooter = headerFooterData.find(item => item.M_SLUG === locale) || headerFooterData[0];
@@ -42,9 +42,12 @@ const navigation = [
   { name: headerFooter.HEADER_LINK_NAME_3, href: `/${locale}${headerFooter.HEADER_LINK_PATH_3}` },
 ];
 
+// --- Find the hreflang code for the current locale to fetch the correct search index ---
+const currentLocaleData = localeData.find(l => l.M_SLUG === locale);
+// Use the HREFLANG_CODE which matches your JSON file names (e.g., 'sl-si')
+const hreflangCode = currentLocaleData ? currentLocaleData.M_HREFLANG_CODE : 'sl-si'; // Provide a sensible fallback
+
 // --- Language Switcher Logic ---
-// If we have alternative links from the page, use those
-// Otherwise, use the default language switcher logic
 const supportedLocales = localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1");
 
 // Map country codes to their corresponding flag components
@@ -59,33 +62,23 @@ const flagMap = {
 };
 
 // Create the final supported languages array with flags
-const languageLinks = supportedLocales.map(locale => ({
-  code: locale.M_SLUG,
-  name: locale.M_LANGUAGE_NATIVE,
-  flag: flagMap[locale.M_COUNTRY_CODE],
-  href: languageLinksMap[locale.M_SLUG] || `/${locale.M_SLUG}`,
-  isActive: locale.M_SLUG === locale
+const languageLinks = supportedLocales.map(langLocale => ({
+  code: langLocale.M_SLUG,
+  name: langLocale.M_LANGUAGE_NATIVE,
+  flag: flagMap[langLocale.M_COUNTRY_CODE],
+  href: languageLinksMap[langLocale.M_SLUG] || `/${langLocale.M_SLUG}`,
+  isActive: langLocale.M_SLUG === locale
 }));
 
 const currentLanguageObject = languageLinks.find(lang => lang.code === locale) ||
-                            languageLinks[0]; // Fallback
+                            languageLinks.find(lang => lang.code === 'si') || // Fallback to 'si'
+                            languageLinks[0]; // Final fallback
 // --- End Language Switcher Logic ---
-
-// --- MOCK DATA FOR SEARCH DEMO ---
-const mockSearchResults = [
-  { title: 'Janez Novak', excerpt: 'Strokovnjak za spletni razvoj in Astro.', href: '#', image: 'https://i.pravatar.cc/150?u=janez' },
-  { title: 'Uvod v Astro', excerpt: 'Obsežen vodnik za izdelavo vaše prve Astro strani...', href: '#', image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=100&h=100&fit=crop' },
-  { title: 'Oblikovanje v Astru s Tailwind CSS', excerpt: 'Naučite se integrirati priljubljeno ogrodje CSS...', href: '#' },
-  { title: 'Marija Kovač', excerpt: 'Specialistka za zmogljivost in uporabniško izkušnjo.', href: '#', image: 'https://i.pravatar.cc/150?u=marija' },
-  { title: 'Signal Pro Naročnina', excerpt: 'Odklenite premium funkcije in podprite platformo.', href: '#' },
-  { title: 'Napredni Astro: Arhitektura otokov', excerpt: 'Poglobite se v delovanje Astro Islands za optimalno delovanje.', href: '#', image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&h=100&fit=crop' },
-  { title: 'Objava vaše Astro strani', excerpt: 'Vodnik po korakih za objavo na različnih platformah.', href: '#' }
-];
 ---
 
 <header class="header-transparent">
   <nav class="container mx-auto px-4 py-4 flex items-center justify-between">
-    {/* Logo */}
+    <!-- Logo -->
     <a
       href={`/${locale}`}
       class="flex items-center"
@@ -103,7 +96,7 @@ const mockSearchResults = [
       <span class="sr-only">{common.M_HOME_NAME}</span>
     </a>
 
-    {/* Desktop Navigation & Language Switcher */}
+    <!-- Desktop Navigation & Language Switcher -->
     <div class="hidden md:flex items-center space-x-8">
       {navigation.map(item => (
         <a
@@ -114,7 +107,7 @@ const mockSearchResults = [
         </a>
       ))}
       
-      {/* Desktop Search Button */}
+      <!-- Desktop Search Button -->
       <button 
         type="button" 
         id="desktop-search-button" 
@@ -140,7 +133,7 @@ const mockSearchResults = [
         {headerFooter.HEADER_NAME_CTA}
       </a>
 
-      {/* Desktop Language Dropdown Switcher */}
+      <!-- Desktop Language Dropdown Switcher -->
       <div class="relative ml-6 pl-6 border-l border-gray-600" id="desktop-lang-switcher-container">
         <button
           type="button"
@@ -191,7 +184,7 @@ const mockSearchResults = [
       </div>
     </div>
 
-    {/* Mobile Controls */}
+    <!-- Mobile Controls -->
     <div class="flex items-center md:hidden">
         <button 
             type="button" 
@@ -214,10 +207,10 @@ const mockSearchResults = [
     </div>
   </nav>
 
-  {/* Mobile Navigation */}
+  <!-- Mobile Navigation -->
   <div class="md:hidden hidden" id="mobile-menu">
     <div class="px-2 pt-2 pb-3 space-y-1">
-      {/* Mobile Search Form */}
+      <!-- Mobile Search Form -->
       <div class="px-1 py-2">
         <div class="relative">
           <input 
@@ -244,7 +237,7 @@ const mockSearchResults = [
         </a>
       ))}
 
-      {/* Mobile Language Dropdown Switcher */}
+      <!-- Mobile Language Dropdown Switcher -->
       <div class="pt-4 pb-2 border-t border-gray-700 mt-2">
         <button
           type="button"
@@ -289,7 +282,7 @@ const mockSearchResults = [
   </div>
 </header>
 
-{/* Search Overlay */}
+<!-- Search Overlay -->
 <div 
   id="search-overlay" 
   class="fixed top-0 left-0 w-full h-full bg-black/80 backdrop-blur-sm z-40 hidden items-start justify-center pt-20 md:pt-32" 
@@ -333,7 +326,7 @@ const mockSearchResults = [
       </button>
     </form>
 
-    {/* Search Results & Status Area */}
+    <!-- Search Results & Status Area -->
     <div id="search-results-area" class="relative mt-2 bg-gray-800/80 backdrop-blur-md rounded-lg shadow-lg overflow-hidden hidden">
       <div id="search-status" class="px-4 py-2 text-sm text-gray-400 border-b border-gray-700"></div>
       <div id="search-results" class="max-h-[50vh] overflow-y-auto">
@@ -356,8 +349,113 @@ const mockSearchResults = [
   </div>
 </div>
 
-<script define:vars={{ locale }} is:inline>
-  // --- Search Component Logic ---
+<script define:vars={{ hreflangCode }} is:inline>
+  // --- Mobile Menu Toggle ---
+  const mobileMenuButton = document.getElementById('mobile-menu-button');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  if (mobileMenuButton && mobileMenu) {
+    mobileMenuButton.addEventListener('click', () => {
+      const isExpanded = mobileMenu.classList.toggle('hidden');
+      mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
+    });
+  }
+
+  // --- Desktop Language Dropdown ---
+  const desktopLangButton = document.getElementById('desktop-lang-button');
+  const desktopLangDropdown = document.getElementById('desktop-lang-dropdown');
+  const desktopLangSwitcherContainer = document.getElementById('desktop-lang-switcher-container');
+
+  if (desktopLangButton && desktopLangDropdown && desktopLangSwitcherContainer) {
+    desktopLangButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const isExpanded = desktopLangButton.getAttribute('aria-expanded') === 'true';
+      desktopLangButton.setAttribute('aria-expanded', String(!isExpanded));
+      desktopLangDropdown.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!desktopLangSwitcherContainer.contains(event.target) && desktopLangButton.getAttribute('aria-expanded') === 'true') {
+        desktopLangButton.setAttribute('aria-expanded', 'false');
+        desktopLangDropdown.classList.add('hidden');
+      }
+    });
+  }
+
+  // --- Mobile Language Dropdown ---
+  const mobileLangButton = document.getElementById('mobile-lang-button');
+  const mobileLangDropdownList = document.getElementById('mobile-lang-dropdown-list');
+  const mobileLangChevron = document.getElementById('mobile-lang-chevron');
+
+  if (mobileLangButton && mobileLangDropdownList && mobileLangChevron) {
+    mobileLangButton.addEventListener('click', () => {
+      const isExpanded = mobileLangButton.getAttribute('aria-expanded') === 'true';
+      mobileLangButton.setAttribute('aria-expanded', String(!isExpanded));
+      mobileLangDropdownList.classList.toggle('hidden');
+      mobileLangChevron.classList.toggle('rotate-180');
+    });
+  }
+
+  // --- Scroll Handler for Header Background ---
+  document.addEventListener('DOMContentLoaded', () => {
+    const header = document.querySelector('.header-transparent');
+
+    const updateHeaderBackground = () => {
+      if (window.scrollY > 0) {
+        header.classList.add('header-scrolled');
+      } else {
+        header.classList.remove('header-scrolled');
+      }
+    };
+
+    window.addEventListener('scroll', updateHeaderBackground);
+    updateHeaderBackground(); // Initial check
+  });
+
+  // --- NEW & IMPROVED SEARCH COMPONENT LOGIC ---
+  
+  // Cache for our search index. It starts empty.
+  let searchIndex = []; 
+  // A promise to prevent multiple fetches if the user clicks fast.
+  let searchIndexPromise = null; 
+
+  async function loadSearchIndex() {
+    // If the index is already loaded, do nothing.
+    if (searchIndex.length > 0) return;
+    
+    // If we are already fetching, wait for the existing fetch to complete.
+    if (searchIndexPromise) return searchIndexPromise;
+
+    // Start fetching the data.
+    searchIndexPromise = (async () => {
+      try {
+        // Construct the path to the correct localized JSON file.
+        const response = await fetch(`/index-${hreflangCode}.json`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        
+        // **IMPORTANT**: Transform the data to match the expected format (lowercase keys).
+        // Your JSON has TITLE, EXCERPT, etc. The search code expects title, excerpt.
+        searchIndex = data.map(item => ({
+          title: item.TITLE,
+          excerpt: item.EXCERPT,
+          href: item.HREF,
+          image: item.IMAGE // This will be undefined if not present, which is fine
+        }));
+        
+      } catch (error) {
+        console.error("Failed to load or parse search index:", error);
+        // Handle the error, maybe show a message to the user.
+        searchStatus.innerHTML = "Iskalnega indeksa ni bilo mogoče naložiti. Poskusite znova.";
+        searchIndex = []; // Ensure it's empty on failure.
+      }
+    })();
+    
+    return searchIndexPromise;
+  }
+
   const desktopSearchButton = document.getElementById('desktop-search-button');
   const mobileSearchButton = document.getElementById('mobile-search-button');
   const mobileMenuSearchInput = document.getElementById('mobile-menu-search-input');
@@ -370,30 +468,9 @@ const mockSearchResults = [
   const searchResults = document.getElementById('search-results');
   const searchFooter = document.getElementById('search-footer');
   let searchTimeout;
-  let searchData = null; // Will store the loaded search data
-
-  // Function to load search data for the current locale
-  const loadSearchData = async () => {
-    try {
-      const response = await fetch(`/index-${locale}.json`);
-      if (!response.ok) throw new Error('Failed to load search data');
-      searchData = await response.json();
-    } catch (error) {
-      console.error('Error loading search data:', error);
-      searchData = []; // Set empty array on error
-    }
-  };
-
-  // Load search data when the component initializes
-  loadSearchData();
 
   if (searchOverlay) {
     const openSearch = async (prefillQuery = '') => {
-      // Ensure search data is loaded
-      if (!searchData) {
-        await loadSearchData();
-      }
-
       searchOverlay.classList.remove('hidden');
       searchOverlay.classList.add('flex');
       searchOverlay.setAttribute('aria-hidden', 'false');
@@ -401,9 +478,15 @@ const mockSearchResults = [
       if(mobileMenu && !mobileMenu.classList.contains('hidden')) {
         mobileMenu.classList.add('hidden');
       }
+
+      // **NEW**: Trigger the loading of the search index.
+      // It will only fetch the first time.
+      await loadSearchIndex();
+
       if (prefillQuery) {
         searchInput.value = prefillQuery;
-        performSearch(prefillQuery);
+        // Only perform search if index is loaded
+        if (searchIndex.length > 0) performSearch(prefillQuery);
         clearSearchButton.classList.remove('hidden');
         clearSearchButton.classList.add('flex');
       }
@@ -432,6 +515,14 @@ const mockSearchResults = [
     };
 
     const performSearch = (query) => {
+      // If index isn't loaded for some reason, exit.
+      if (searchIndex.length === 0 && query) {
+         searchStatus.innerHTML = `Nalaganje iskalnega indeksa...`;
+         // Retry loading if it failed previously and user is searching
+         loadSearchIndex().then(() => performSearch(query));
+         return;
+      }
+
       clearTimeout(searchTimeout);
 
       searchResultsArea.classList.remove('hidden');
@@ -441,14 +532,9 @@ const mockSearchResults = [
       searchFooter.classList.add('hidden');
 
       searchTimeout = setTimeout(() => {
-        if (!searchData) {
-          searchStatus.innerHTML = 'Error loading search data';
-          return;
-        }
-
-        const results = searchData.filter(item =>
-          item.TITLE.toLowerCase().includes(query.toLowerCase()) ||
-          item.EXCERPT.toLowerCase().includes(query.toLowerCase())
+        const results = searchIndex.filter(item =>
+          item.title.toLowerCase().includes(query.toLowerCase()) ||
+          item.excerpt.toLowerCase().includes(query.toLowerCase())
         );
 
         let statusText = '';
@@ -470,14 +556,14 @@ const mockSearchResults = [
         let resultsShown = 7;
         const showResults = (count) => {
           const resultsToShow = results.slice(0, count);
-          searchResults.innerHTML = resultsToShow.map((item, idx, arr) => `
-            <a href="${item.HREF}" class="search-result-item group border-b border-white/20${idx === arr.length - 1 ? ' border-b-0' : ''} flex items-center py-2">
+          searchResults.innerHTML = resultsToShow.map((item, idx) => `
+            <a href="${item.href}" class="search-result-item group border-b border-white/20${idx === resultsToShow.length - 1 ? ' border-b-0' : ''} flex items-center py-2">
               <div class="search-result-image-container flex-shrink-0 w-9 h-9">
-                ${item.IMAGE ? `<img src="${item.IMAGE}" alt="" class="search-result-image w-9 h-9" width="36" height="36" loading="lazy">` : '<div class="search-result-image-placeholder w-9 h-9"></div>'}
+                ${item.image ? `<img src="${item.image}" alt="" class="search-result-image w-9 h-9" width="36" height="36" loading="lazy">` : '<div class="search-result-image-placeholder w-9 h-9"></div>'}
               </div>
               <div class="search-result-content flex flex-col justify-center pl-3 min-w-0">
-                <div class="search-result-title text-white font-semibold leading-tight">${highlight(item.TITLE)}</div>
-                <div class="search-result-excerpt text-signal-green leading-snug">${highlight(item.EXCERPT)}</div>
+                <div class="search-result-title text-white font-semibold leading-tight">${highlight(item.title)}</div>
+                <div class="search-result-excerpt text-signal-green leading-snug">${highlight(item.excerpt)}</div>
               </div>
             </a>
           `).join('');
@@ -487,24 +573,22 @@ const mockSearchResults = [
         if (results.length > resultsShown) {
           searchFooter.innerHTML = `<button id="load-more-results" class="block w-full py-3 text-sm text-gray-300 hover:bg-gray-700/50 hover:text-white transition-colors">${searchOverlay.dataset.loadMore}</button>`;
           searchFooter.classList.remove('hidden');
-          document.getElementById('load-more-results').onclick = () => {
-            resultsShown += 6;
-            showResults(resultsShown);
-            if (results.length > resultsShown) {
-              searchFooter.innerHTML = `<button id=\"load-more-results\" class=\"block w-full py-3 text-sm text-gray-300 hover:bg-gray-700/50 hover:text-white transition-colors\">${searchOverlay.dataset.loadMore}</button>`;
-              document.getElementById('load-more-results').onclick = arguments.callee;
-            } else {
-              searchFooter.innerHTML = `<div class=\"block w-full py-3 text-sm text-gray-400\">${searchOverlay.dataset.loadAll}</div>`;
-            }
+          const loadMoreButton = document.getElementById('load-more-results');
+          loadMoreButton.onclick = () => {
+             resultsShown += 7;
+             showResults(resultsShown);
+             if (results.length <= resultsShown) {
+                loadMoreButton.outerHTML = `<div class="block w-full py-3 text-sm text-gray-400">${searchOverlay.dataset.loadAll}</div>`;
+             }
           };
         } else if (results.length > 0) {
-          searchFooter.innerHTML = `<div class=\"block w-full py-3 text-sm text-gray-400\">${searchOverlay.dataset.loadAll}</div>`;
+          searchFooter.innerHTML = `<div class="block w-full py-3 text-sm text-gray-400">${searchOverlay.dataset.loadAll}</div>`;
           searchFooter.classList.remove('hidden');
         } else {
           searchFooter.innerHTML = '';
           searchFooter.classList.add('hidden');
         }
-      }, 300);
+      }, 250);
     };
 
     desktopSearchButton?.addEventListener('click', () => openSearch());
@@ -512,11 +596,9 @@ const mockSearchResults = [
     searchOverlayCloseButton?.addEventListener('click', closeSearch);
     clearSearchButton?.addEventListener('click', clearSearch);
 
-    // Handle mobile menu search input
     mobileMenuSearchInput?.addEventListener('input', () => {
       const query = mobileMenuSearchInput.value.trim();
       if (query) {
-        // Open full screen search with the typed query
         openSearch(query);
       }
     });
