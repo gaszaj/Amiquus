@@ -104,7 +104,6 @@ const getAbsoluteOgImageUrl = (imagePath: string) => {
     {languageLinksMap && Object.entries(languageLinksMap).map(([localeCode, url]) => {
       if (!url) return null;
       const normalizedUrl = url.replace(/\/$/, '');
-      if (normalizedUrl === `/${localeCode}`) return null;
       if (normalizedUrl === Astro.url.pathname.replace(/\/$/, '')) return null;
 
       // Find the locale data for this locale

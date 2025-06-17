@@ -4,6 +4,7 @@ import homeData from '../../data/home.json';
 import wwwData from '../../data/www.json';
 import commonData from '../../data/common.json';
 import products from '../../data/product.json';
+import localeData from '../../data/locale.json';
 
 // --- Interface Definitions  ---
 interface HeroData {
@@ -377,6 +378,14 @@ const schema: object[] | null = [webpageSchema, faqSchema, organizationSchema];
 const pageTitle: string = home.HOME_H1;
 const pageDescription: string | undefined = home.HOME_META_SEO;
 const pageOgImage: string | undefined = home.HOME_OG_IMAGE_PATH;
+
+// Build the language link map for the language picker
+const languageLinksMap = {};
+for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
+  // For homepage, we just use the locale slug as the URL
+  languageLinksMap[locale.M_SLUG] = `/${locale.M_SLUG}`;
+}
+
 ---
 
 <BaseLayout 
@@ -388,6 +397,7 @@ const pageOgImage: string | undefined = home.HOME_OG_IMAGE_PATH;
   ogImage={pageOgImage} 
   keywords={pageKeywords} 
   schema={schema}
+  languageLinksMap={languageLinksMap}
 >
   <!-- Hero Section -->
   <section class="bg-black text-white py-12">
