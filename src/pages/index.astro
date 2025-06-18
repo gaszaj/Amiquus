@@ -1,0 +1,186 @@
+---
+// pages/index.astro
+import localeData from '../data/locale.json';
+import { 
+  AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, 
+  CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, 
+  ES, FI, FJ, FR, GA, GB, GE, GH, GI, GM, GN, GP, GR, GT, GU, GY, HK, HN, HR, HT, 
+  HU, ID, IE, IL, IN, IS, IT, JM, JO, JP, KE, KR, KW, KY, LB, LI, LS, LT, LU, LV, 
+  LY, MA, MC, MD, ME, MK, MM, MN, MR, MU, MW, MX, MY, MZ, NG, NI, NL, NO, NP, NZ, 
+  OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL, 
+  SM, SN, SR, SV, SZ, TD, TH, TN, TR, TT, UA, UG, US, UY, VE, VN, YT, ZA 
+} from 'country-flag-icons/string/3x2';
+
+// --- Replicate Flag Logic from Header.astro ---
+const flagMap = {
+  AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, 
+  CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, 
+  ES, FI, FJ, FR, GA, GB, GE, GH, GI, GM, GN, GP, GR, GT, GU, GY, HK, HN, HR, HT, 
+  HU, ID, IE, IL, IN, IS, IT, JM, JO, JP, KE, KR, KW, KY, LB, LI, LS, LT, LU, LV, 
+  LY, MA, MC, MD, ME, MK, MM, MN, MR, MU, MW, MX, MY, MZ, NG, NI, NL, NO, NP, NZ, 
+  OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL, 
+  SM, SN, SR, SV, SZ, TD, TH, TN, TR, TT, UA, UG, US, UY, VE, VN, YT, ZA
+};
+
+// --- Language Detection & Redirect Logic (Unchanged) ---
+
+const publishedLocales = localeData.filter(
+  (locale) => locale.M_LOCALE_PUBLISH_Y_N === "1"
+);
+
+const acceptLanguage = Astro.request.headers.get('accept-language');
+let redirectSlug = null;
+
+if (acceptLanguage) {
+  const userPreferredLangs = acceptLanguage
+    .toLowerCase()
+    .split(',')
+    .map(part => part.split(';')[0]);
+
+  for (const userLang of userPreferredLangs) {
+    let match = null;
+    match = publishedLocales.find((loc) => loc.M_HREFLANG_CODE.toLowerCase() === userLang);
+    if (!match) {
+      const langPart = userLang.split('-')[0];
+      match = publishedLocales.find((loc) => loc.M_LANGUAGE_ISO === langPart);
+    }
+    if (match) {
+      redirectSlug = match.M_SLUG;
+      break; 
+    }
+  }
+}
+
+if (redirectSlug) {
+  return Astro.redirect(`/${redirectSlug}/`, 302);
+}
+
+// If we reach this point, no redirect happened.
+// The HTML below will be rendered.
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language & Region Selection</title>
+    <meta name="robots" content="noindex, nofollow">
+    <style>
+        :root {
+            --background: #f8f9fa;
+            --card-background: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --accent-color: #BCEF2F;
+            --border-color: #e9ecef;
+            --shadow-color: rgba(0, 0, 0, 0.05);
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh; 
+            margin: 0;
+            background-color: var(--background); 
+            color: var(--text-primary);
+            padding: 1rem;
+        }
+        .container { 
+            max-width: 650px; 
+            width: 100%;
+            padding: 2rem; 
+            background: var(--card-background); 
+            border-radius: 0.75rem; 
+            box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color);
+            text-align: center;
+        }
+        .logo {
+            max-width: 150px;
+            margin: 0 auto 1.5rem auto;
+        }
+        h1 { 
+            font-size: 1.75rem; 
+            font-weight: 700;
+            margin-bottom: 0.5rem; 
+        }
+        p { 
+            margin-bottom: 2rem; 
+            line-height: 1.6;
+            color: var(--text-secondary);
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .language-grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: 1fr; /* Mobile: 1 column */
+        }
+        .language-button { 
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            text-decoration: none; 
+            color: var(--text-primary); 
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .language-button:hover {
+            background-color: #f1f3f5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
+        }
+        .flag {
+            width: 2rem;
+            height: 1.5rem;
+            margin-right: 1rem;
+            border-radius: 0.25rem;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+        }
+        .language-name {
+            font-size: 1rem;
+        }
+        .country-name {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-left: 0.5rem;
+        }
+        /* Desktop styles */
+        @media (min-width: 640px) {
+            .language-grid {
+                grid-template-columns: 1fr 1fr; /* Desktop: 2 columns */
+            }
+            .container {
+                padding: 2.5rem 3rem;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="/logos/EUSIGNAL-SVG_File_Horizontal-Dark.svg" alt="EUSIGNAL Logo" class="logo" />
+        <h1>Welcome!</h1>
+        <p>Your browser language is not currently supported, but you can choose from any of our available sites below to continue.</p>
+        
+        <div class="language-grid">
+            {publishedLocales.map(locale => (
+                <a href={`/${locale.M_SLUG}/`} class="language-button">
+                    {flagMap[locale.M_COUNTRY_CODE] && (
+                        <div class="flag" set:html={flagMap[locale.M_COUNTRY_CODE]} />
+                    )}
+                    <span class="language-name">{locale.M_LANGUAGE_NATIVE}</span>
+                    <span class="country-name">({locale.M_COUNTRY_NATIVE})</span>
+                </a>
+            ))}
+        </div>
+    </div>
+</body>
+</html>
