@@ -2,7 +2,6 @@ import { readFileSync } from 'fs';
 import { mkdir } from 'fs/promises';
 import path from 'path';
 import { chromium } from 'playwright';
-import sharp from 'sharp'; // Import the sharp library
 
 // Import all country flag SVGs
 import { 
@@ -132,20 +131,18 @@ async function main() {
       await page.setViewportSize({ width: 1200, height: 630 });
       await page.setContent(htmlContent, { waitUntil: 'networkidle' });
 
-      // --- NEW EFFICIENT WORKFLOW ---
-      // Step A: Take a screenshot as a PNG buffer in memory (not a file).
-      const pngBuffer = await page.screenshot({ type: 'png' });
-      
-      // We're done with this page, close it to free up resources.
-      await page.close();
-      
-      // Step B: Use Sharp to convert the PNG buffer to WEBP and save to disk.
+      // Take screenshot in JPEG format with very low quality
       const imageName = home.HOME_OG_IMAGE_NAME_ASCII;
       const outputPath = path.join(OUTPUT_DIR, imageName);
-
-      await sharp(pngBuffer)
-        .webp({ quality: 3 }) // Convert to webp with desired quality
-        .toFile(outputPath);   // Write to the final destination
+      
+      await page.screenshot({ 
+        path: outputPath,
+        type: 'jpeg',
+        quality: 10
+      });
+      
+      // We're done with this page, close it to free up resources
+      await page.close();
 
       console.log(`✅ Generated ${imageName}`);
     }
