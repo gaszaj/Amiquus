@@ -23,12 +23,13 @@ export interface Props {
     href: string;
   }>;
   languageLinksMap?: Record<string, string>;
+    locale?: string;
 }
 
-const { alternativeLinks, languageLinksMap = {} } = Astro.props;
+const { alternativeLinks, languageLinksMap = {}, locale: propLocale } = Astro.props;
 
 // Get the locale from the URL path (e.g., 'si' from /si/...)
-const locale = Astro.url.pathname.split('/')[1] || 'si'; // Fallback for root path
+const locale = propLocale || Astro.url.pathname.split('/')[1] || 'si'; 
 
 // Find the matching headerFooter and common data objects based on M_SLUG
 const headerFooter = headerFooterData.find(item => item.M_SLUG === locale) || headerFooterData[0];

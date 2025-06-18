@@ -2,6 +2,19 @@ import { readFileSync } from 'fs';
 import { mkdir } from 'fs/promises';
 import path from 'path';
 import { chromium } from 'playwright';
+import sharp from 'sharp';
+import tailwindConfig from '../../tailwind.config.mjs';
+
+// Extract the color palette
+const tailwindColors = tailwindConfig.theme.extend.colors;
+const signalColors = [
+  tailwindColors['signal-yellow'],
+  tailwindColors['signal-red'],
+  tailwindColors['signal-green'],
+  tailwindColors['signal-dark'],
+  tailwindColors['signal-light'],
+  tailwindColors['signal-gray'],
+];
 
 // Import all country flag SVGs
 import { 
@@ -22,7 +35,7 @@ const OUTPUT_DIR = path.join(PUBLIC_DIR, 'ogimages', 'oghome');
 // Create a map for easy lookup of flag SVGs by country code
 const flagMap = { AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, ES, FI, FJ, FR, GA, GB, GE, GH, GI, GM, GN, GP, GR, GT, GU, GY, HK, HN, HR, HT, HU, ID, IE, IL, IN, IS, IT, JM, JO, JP, KE, KR, KW, KY, LB, LI, LS, LT, LU, LV, LY, MA, MC, MD, ME, MK, MM, MN, MR, MU, MW, MX, MY, MZ, NG, NI, NL, NO, NP, NZ, OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL, SM, SN, SR, SV, SZ, TD, TH, TN, TR, TT, UA, UG, US, UY, VE, VN, YT, ZA };
 
-// --- Helper Functions (No changes here) ---
+// --- Helper Functions ---
 const readJsonFile = (filePath) => {
   const absolutePath = path.join(CWD, filePath);
   const fileContent = readFileSync(absolutePath, 'utf-8');
@@ -34,7 +47,7 @@ const readImageAsBase64 = (filePath) => {
   return readFileSync(absolutePath, 'base64');
 };
 
-// --- HTML Template Generator (No changes here) ---
+// --- HTML Template Generator ---
 const generateHtmlTemplate = (data) => `
 <!DOCTYPE html>
 <html lang="${data.lang}">
@@ -55,10 +68,10 @@ const generateHtmlTemplate = (data) => `
         .feature-text { font-size: clamp(1.2rem, 5cqi, 2.5rem); color: ${data.featureTextColor}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
         .feature-icon { width: clamp(1.3rem, 5cqi, 2.75rem); height: clamp(1.3rem, 5cqi, 2.75rem); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='35px' height='35px' viewBox='0 0 56 56'%3E%3Cpath fill='%2300ce9c' d='M28 51.906c13.055 0 23.906-10.828 23.906-23.906c0-13.055-10.875-23.906-23.93-23.906C14.899 4.094 4.095 14.945 4.095 28c0 13.078 10.828 23.906 23.906 23.906m0-3.984C16.937 47.922 8.1 39.062 8.1 28c0-11.04 8.813-19.922 19.876-19.922c11.039 0 19.921 8.883 19.945 19.922c.023 11.063-8.883 19.922-19.922 19.922m-2.953-8.203c.773 0 1.406-.375 1.898-1.102l11.578-18.21c.282-.47.563-1.009.563-1.524c0-1.078-.938-1.735-1.922-1.735c-.633 0-1.219.352-1.64 1.055L24.93 35.148l-5.438-7.03c-.515-.704-1.078-.962-1.71-.962c-1.032 0-1.852.844-1.852 1.899c0 .515.21 1.008.539 1.453l6.562 8.11c.633.773 1.242 1.1 2.016 1.1'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-size: contain; flex-shrink: 0; }
         .footer { position: absolute; bottom: 0; left: 0; right: 0; background-color: ${data.footerBgColor}; padding: 0.2rem 2.25rem; display: flex; justify-content: center; align-items: center; color: white; gap: 2rem; }
-        .footer-item { display: flex; align-items: center; gap: 0.75rem; font-weight: 700; white-space: nowrap; }
+        .footer-item { display: flex; align-items: center; gap: 0.75rem; font-weight: 700; white-space: nowrap; color: ${data.footerTextColor}; }
         .footer-icon { width: 4.25rem; height: 4.25rem; fill: currentColor; flex-shrink: 0; }
         .footer-text { font-size: clamp(1.45rem, 4cqi, 2.8rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 1rem); }
-        .flag-container { position: absolute; top: 1rem; right: 1rem; background: white; padding: 0.5rem; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 6rem; height: 4rem; display: flex; align-items: center; justify-content: center; }
+        .flag-container { position: absolute; top: 1rem; right: 1rem; background: white; padding: 0.75rem; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 8rem; height: 5.5rem; display: flex; align-items: center; justify-content: center; }
         .flag-container img { width: 100%; height: 100%; object-fit: contain; }
     </style>
 </head>
@@ -108,7 +121,11 @@ async function main() {
     });
 
     // 5. Loop through each homepage and generate an image
-    for (const home of homeData) {
+    for (const [i, home] of homeData.entries()) {
+      // Dynamically assign colors
+      const footerBgColor = tailwindColors['signal-dark'];
+      const footerTextColor = tailwindColors['signal-green'];
+
       const dataForTemplate = {
         lang: home.M_LANGUAGE_ISO,
         subtitle: home.HOME_H1,
@@ -120,7 +137,8 @@ async function main() {
         flagSvg: flagMap[home.M_COUNTRY_CODE] || '',
         logoBase64: logoBase64,
         bodyBgColor: brandingData.PAGE_BODY_BACKGROUND_COLOR,
-        footerBgColor: brandingData.PAGE_FOOTER_BACKGROUND_COLOR,
+        footerBgColor,
+        footerTextColor,
         bodyTextColor: brandingData.PAGE_BODY_TEXT_COLOR,
         subtitleTextColor: brandingData.PAGE_SUBTITLE_TEXT_COLOR,
         featureTextColor: brandingData.PAGE_FEATURE_TEXT_COLOR,
@@ -131,18 +149,20 @@ async function main() {
       await page.setViewportSize({ width: 1200, height: 630 });
       await page.setContent(htmlContent, { waitUntil: 'networkidle' });
 
-      // Take screenshot in JPEG format with very low quality
+      // --- NEW EFFICIENT WORKFLOW ---
+      // Step A: Take a screenshot as a PNG buffer in memory (not a file).
+      const pngBuffer = await page.screenshot({ type: 'png' });
+      
+      // We're done with this page, close it to free up resources.
+      await page.close();
+      
+      // Step B: Use Sharp to convert the PNG buffer to WEBP and save to disk.
       const imageName = home.HOME_OG_IMAGE_NAME_ASCII;
       const outputPath = path.join(OUTPUT_DIR, imageName);
-      
-      await page.screenshot({ 
-        path: outputPath,
-        type: 'jpeg',
-        quality: 10
-      });
-      
-      // We're done with this page, close it to free up resources
-      await page.close();
+
+      await sharp(pngBuffer)
+        .webp({ quality: 3 })
+        .toFile(outputPath);   // Write to the final destination
 
       console.log(`✅ Generated ${imageName}`);
     }
@@ -152,7 +172,6 @@ async function main() {
     console.error('❌ Error generating OG images:', error);
     process.exit(1);
   } finally {
-    // Ensure the browser is always closed, even if an error occurs.
     if (browser) {
       await browser.close();
     }

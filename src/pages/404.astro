@@ -1,223 +1,86 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro'; // Assuming BaseLayout.astro is in src/layouts/
-import eeatData from '../data/eeat.json';
-import wwwData from '../data/www.json';
+// pages/404.astro
+
+import BaseLayout from '../layouts/BaseLayout.astro';
 import commonData from '../data/common.json';
+import eeatData from '../data/eeat.json';
+import localeData from '../data/locale.json';
 
+const supportedSlugs = localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1").map(l => l.M_SLUG);
+const defaultSlug = 'si'; // Your primary fallback language
 
-// Get the third object from eeatData and first from others
-const eeat = eeatData[0];
-const www = wwwData[0];
-const common = commonData[0];
+let determinedSlug = defaultSlug;
 
-// Helper function for absolute URLs
-const getAbsoluteUrl = (path: string) => {
-  return new URL(path, Astro.url.origin).toString();
-};
+// --- NEW, ROBUST LANGUAGE DETECTION ---
 
-// Get language data
-const languageIso = eeat.M_LANGUAGE_ISO;
-const countryCode = eeat.M_COUNTRY_CODE;
-
-// Find matching content orientation from common.json
-const contentOrientation = commonData.find(item =>
-  item.M_LANGUAGE_ISO === languageIso &&
-  item.M_COUNTRY_CODE === countryCode
-)?.M_CONTENT_ORIENTATION || 'ltr'; 
-
-// Define content for the page 
-const seoTitle = eeat.EEAT_NAME;
-const headline = eeat.EEAT_H1;
-const pageDescription = eeat.EEAT_META_SEO;
-const pageContent = eeat.EEAT_CONTENT;
-const pageogImage = eeat.EEAT_OG_IMAGE_PATH;
-const articlePublishDate = eeat.EEAT_DATE_PUBLISHED;
-const articleUpdateDate = eeat.EEAT_DATE_UPDATED;
-const publishedTextLabel = common.M_PUBLISHED;
-const updatedTextLabel = common.M_UPDATED;
-const articleDateLocale = `${eeat.M_LANGUAGE_ISO}-${eeat.M_COUNTRY_CODE}`;
-
-// Define keywords for the page
-const pageKeywords = [
-  eeat.EEAT_NAME,           
-  eeat.M_COUNTRY_NATIVE,    
-  www.PAGE_ORGANISATION_FULL_NAME 
-].join(', ');
-
-// WebPage and Article Schema
-const webpageSchema = {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": eeat.EEAT_H1,
-  "url": Astro.url.href,
-  "description": eeat.EEAT_META_SEO,
-  "inLanguage": `${eeat.M_LANGUAGE_ISO}-${eeat.M_COUNTRY_CODE}`,
-  "breadcrumb": {
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": common.M_HOME_NAME,
-        "item": getAbsoluteUrl("/") 
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": eeat.EEAT_NAME,
-        "item": Astro.url.href
-      }
-    ]
-  },
-  "mainEntity": {
-    "@type": "Article",
-    "headline": eeat.EEAT_H1,
-    "description": eeat.EEAT_META_SEO,
-    "image": getAbsoluteUrl(eeat.EEAT_OG_IMAGE_PATH),
-    "author": {
-      "@type": "Organization",
-      "name": www.PAGE_ORGANISATION_FULL_NAME
-    },
-    "datePublished": `${eeat.EEAT_DATE_PUBLISHED}T${eeat.EEAT_HOUR_PUBLISHED}+02:00`,
-    "dateModified": `${eeat.EEAT_DATE_UPDATED}T${eeat.EEAT_HOUR_UPDATED}+02:00`,
-    "inLanguage": `${eeat.M_LANGUAGE_ISO}-${eeat.M_COUNTRY_CODE}`
+// Priority 1: Check for our 'last_lang' cookie. This is the most reliable source.
+const langCookie = Astro.cookies.get('last_lang');
+if (langCookie && supportedSlugs.includes(langCookie.value)) {
+  determinedSlug = langCookie.value;
+} else {
+  // Priority 2 (Fallback): If no cookie, check the browser's language preference.
+  // This handles first-time visitors who land directly on a broken link.
+  const acceptLanguage = Astro.request.headers.get('accept-language');
+  if (acceptLanguage) {
+    const preferredLangs = acceptLanguage.split(',').map(lang => lang.split(';')[0].toLowerCase().split('-')[0]);
+    const matchedSlug = preferredLangs.find(lang => supportedSlugs.includes(lang));
+    if (matchedSlug) {
+      determinedSlug = matchedSlug;
+    }
   }
+}
+
+// --- DATA FETCHING AND RENDERING LOGIC (Remains the same as before) ---
+
+const eeat = eeatData.find(entry => 
+  entry.M_SLUG === determinedSlug && 
+  entry.EEAT_FILTERING === "01"
+);
+
+const pageData = eeat || {
+  EEAT_NAME: "404 Page Not Found",
+  EEAT_H1: "404 - Page Not Found",
+  EEAT_META_SEO: "The page you are looking for does not exist.",
+  EEAT_CONTENT: `<p>We're sorry, we couldn't find the page you were looking for. Please use the main navigation to find your way or return to the homepage.</p><p>Please ensure your data/eeat.json file contains an entry for EEAT_FILTERING: "01" for the language: ${determinedSlug}.</p>`,
+  M_LANGUAGE_ISO: "en",
+  M_COUNTRY_CODE: "US",
 };
 
-// Organization Schema
-const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": www.PAGE_ORGANISATION_FULL_NAME,
-  "url": getAbsoluteUrl('/'),
-  "foundingDate": www.PAGE_FOUNDING_DATE,
-  "logo": getAbsoluteUrl(www.PAGE_LOGO_IMAGE_PATH_1),
-  "keywords": [
-    www.PAGE_ORGANISATION_FULL_NAME,
-    common.M_COUNTRY_NATIVE,
-    common.PAGE_KEYWORD_1,
-    common.PAGE_KEYWORD_2,
-    common.PAGE_KEYWORD_3,
-    common.PAGE_KEYWORD_4,
-    common.PAGE_KEYWORD_5,
-    common.PAGE_KEYWORD_6
-  ].filter(Boolean),
-  "description": www.PAGE_DESCRIPTION,
-  "numberOfEmployees": {
-    "@type": "QuantitativeValue",
-    "minValue": "1",
-    "maxValue": "9"
-  },
-  "slogan": www.PAGE_SLOGAN,
-  "contactPoint": {
-    "@type": "ContactPoint",
-    "email": www.PAGE_INFO_EMAIL,
-    "contactType": common.M_CUSTOMER_SUPPORT
-  },
-  "sameAs": [
-    www.PAGE_INSTAGRAM_URL,
-    www.PAGE_FACEBOOK_URL,
-    www.PAGE_TWITTER_URL,
-    www.PAGE_LINKEDIN_URL,
-    www.PAGE_YOUTUBE_URL,
-    www.PAGE_PINTEREST_URL,
-    www.PAGE_BLUESKY_URL
-  ].filter(Boolean),
-  "areaServed": {
-    "@type": "Country",
-    "name": common.M_COUNTRY,
-    "identifier": common.M_COUNTRY_CODE
-  },
-  "potentialAction": [
-    {
-      "@type": "ViewAction",
-      "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
-      "target": getAbsoluteUrl('/sitemap.xml')
-    },
-    {
-      "@type": "ViewAction",
-      "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
-      "target": getAbsoluteUrl( eeat.M_LANGUAGE_ISO && eeat.M_COUNTRY_CODE ? `/sitemap-${eeat.M_LANGUAGE_ISO}-${eeat.M_COUNTRY_CODE}.xml` : '/sitemap-local.xml')
-    },
-    {
-      "@type": "ViewAction",
-      "name": www.PAGE_LLM_INSTRUCTIONS,
-      "target": getAbsoluteUrl('/llms.txt'),
-      "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
-    }
-  ],
-  "mainEntityOfPage": [
-    {
-      "@type": "WebPage",
-      "@id": getAbsoluteUrl('/sitemap.xml'),
-      "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
-      "description": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS_DESCRIPTION
-    },
-    {
-      "@type": "WebPage",
-      "@id": getAbsoluteUrl( eeat.M_LANGUAGE_ISO && eeat.M_COUNTRY_CODE ? `/sitemap-${eeat.M_LANGUAGE_ISO}-${eeat.M_COUNTRY_CODE}.xml` : '/sitemap-local.xml'),
-      "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
-      "description": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS_DESCRIPTION
-    },
-    {
-      "@type": "WebPage",
-      "@id": getAbsoluteUrl('/llms.txt'),
-      "name": www.PAGE_LLM_INSTRUCTIONS,
-      "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
-    }
-  ]
-};
+const common = commonData.find(item => item.M_SLUG === determinedSlug);
 
-// Combine schemas into an array
-const combinedSchema = [webpageSchema, organizationSchema];
+const languageLinksMap = {};
+for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
+    languageLinksMap[locale.M_SLUG] = `/${locale.M_SLUG}/`;
+}
 
-// Format dates - uses the passed locale (from EEATLayout.astro)
-const formatDate = (dateString: string, locale: string) => {
-  return new Date(dateString).toLocaleDateString(locale, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-};
+const headline = pageData.EEAT_H1;
+const pageContent = pageData.EEAT_CONTENT;
 ---
 
 <BaseLayout
-  languageIso={languageIso}
-  countryCode={countryCode}
-  contentOrientation={contentOrientation}
-  title={seoTitle}
-  description={pageDescription}
-  ogImage={pageogImage}
-  keywords={pageKeywords}
-  schema={combinedSchema}
+  title={pageData.EEAT_NAME}
+  description={pageData.EEAT_META_SEO}
+  languageIso={pageData.M_LANGUAGE_ISO}
+  countryCode={pageData.M_COUNTRY_CODE}
+  contentOrientation={common?.M_CONTENT_ORIENTATION || 'ltr'}
+  languageLinksMap={languageLinksMap}
+  currentSlug={determinedSlug}
 >
-  <!-- Dark Header Section -->
   <div class="bg-black text-white py-16">
     <div class="container mx-auto px-4">
-      <div class="max-w-4xl mx-auto">
+      <div class="max-w-4xl mx-auto text-center">
         <h1 class="text-4xl md:text-5xl font-bold mb-6 animate-fade-in">{headline}</h1>
-
-        <!-- Publication Info -->
-        <div class="flex flex-wrap items-center gap-2 text-lg animate-slide-up">
-          <span class="text-signal-green">{publishedTextLabel} {formatDate(articlePublishDate, articleDateLocale)}</span>
-          {articleUpdateDate && updatedTextLabel && (
-            <>
-              <span class="text-gray-400">•</span>
-              <span class="text-signal-green">{updatedTextLabel} {formatDate(articleUpdateDate, articleDateLocale)}</span>
-            </>
-          )}
-        </div>
       </div>
     </div>
   </div>
 
-  <!-- Main Content -->
   <div class="container mx-auto px-4 py-12">
     <div class="prose prose-lg max-w-4xl mx-auto">
-      <Fragment set:html={pageContent} /> {/* The main article content */}
+      <Fragment set:html={pageContent} />
     </div>
   </div>
 </BaseLayout>
+
 
 <style>
   /* Base prose container */
@@ -230,7 +93,7 @@ const formatDate = (dateString: string, locale: string) => {
   /* Headings */
   .prose :global(h2) {
     color: black;
-    font-size: 1.875rem;
+    font-size: 1.875rem; /* 30px */
     font-weight: 700;
     margin-top: 2.5rem;
     margin-bottom: 1.5rem;
@@ -240,13 +103,13 @@ const formatDate = (dateString: string, locale: string) => {
     color: black;
     margin-top: 2rem;
     margin-bottom: 1rem;
-    font-size: 1.5rem;
+    font-size: 1.5rem; /* 24px */
     font-weight: 600;
   }
 
   /* Paragraphs */
   .prose :global(p) {
-    color: #374151;
+    color: #374151; /* Tailwind gray-700 */
     margin-bottom: 1.25rem;
     line-height: 1.75;
   }
@@ -255,19 +118,24 @@ const formatDate = (dateString: string, locale: string) => {
   .prose :global(a) {
     color: black;
     text-decoration: underline;
-    text-decoration-color: #BCEF2F;
+    text-decoration-color: #BCEF2F; /* signal-green */
     text-underline-offset: 2px;
     transition: color 0.2s ease, text-decoration-color 0.2s ease;
   }
 
   .prose :global(a:hover) {
-    color: #BCEF2F;
+    color: #BCEF2F; /* signal-green */
     text-decoration-color: black;
   }
 
   /* Lists */
   .prose :global(ul) {
     list-style-type: none;
+    margin-left: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .prose :global(ol) { 
     margin-left: 1.25rem;
     margin-bottom: 1.25rem;
   }
@@ -279,18 +147,18 @@ const formatDate = (dateString: string, locale: string) => {
     line-height: 1.75;
   }
 
-  .prose :global(li::before) {
+  .prose :global(ul li::before) {
     content: "";
     position: absolute;
     left: 0;
-    top: 0.75rem;
+    top: 0.75rem; /* Adjusted for line-height */
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 50%;
-    background: #BCEF2F;
+    background: #BCEF2F; /* signal-green */
     border: 2px solid black;
   }
-
+  
   /* Underline */
   .prose :global(u) {
     text-decoration: none;
@@ -313,6 +181,11 @@ const formatDate = (dateString: string, locale: string) => {
     );
   }
 
+  /* Bold text */
+  .prose :global(b) {
+    font-weight: 700;
+  }
+
   /* List items with links */
   .prose :global(li a) {
     display: inline-block;
@@ -325,6 +198,15 @@ const formatDate = (dateString: string, locale: string) => {
 
   .prose :global(p + ul) {
     margin-top: 0.5rem;
+  }
+  
+  /* FAQ Section styling */
+  .prose :global(.faq-section) {
+    margin-top: 2rem;
+  }
+
+  .prose :global(.faq-section p) {
+    margin-bottom: 1.5rem;
   }
 
   /* Animations */
@@ -351,4 +233,30 @@ const formatDate = (dateString: string, locale: string) => {
       opacity: 1;
     }
   }
+
+  /* Add these new styles for author cards */
+  .prose :global(.author-card) {
+    text-decoration: none;
+  }
+
+  .prose :global(.author-card:hover) {
+    text-decoration: none;
+  }
+
+  .prose :global(.author-card h3) {
+    text-decoration: none;
+  }
+
+  .prose :global(.author-card:hover h3) {
+    text-decoration: none;
+  }
+
+  /* Ensure images maintain aspect ratio during hover */
+  .prose :global(.author-card img) {
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-font-smoothing: subpixel-antialiased;
+  }
 </style>
+
+<!-- Removed the old client-side script tag as Astro Actions handles submission and validation -->

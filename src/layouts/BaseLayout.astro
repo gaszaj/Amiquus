@@ -30,6 +30,7 @@ export interface Props {
     href: string;
   }>;
   languageLinksMap: Record<string, string>;
+  currentSlug?: string;
 }
 
 const {
@@ -43,7 +44,8 @@ const {
   locale = "sl-SI", // Default locale // This prop seems to be 'locale' not 'fullLocale'
   schema = null,
   alternativeLinks = null,
-  languageLinksMap
+  languageLinksMap,
+  currentSlug
 } = Astro.props;
 
 // Define default English texts (these will be used if common.json doesn't provide specific translations)
@@ -59,6 +61,17 @@ const currentLocaleData = allLocaleData.find(locData =>
   locData.M_LANGUAGE_ISO === languageIso && 
   locData.M_COUNTRY_CODE === countryCode
 );
+
+if (currentLocaleData) {
+  const currentSlug = currentLocaleData.M_SLUG;
+  
+  // Set a cookie with the user's last-known language slug.
+  // This will be available on subsequent requests, including to the 404 page.
+  Astro.cookies.set('last_lang', currentSlug, {
+    path: '/', // Make the cookie available on the entire site
+    maxAge: 60 * 60 * 24 * 365, // Store it for one year
+  });
+}
 
 // If a matching locale object is found, use its translations, otherwise stick to English defaults
 if (currentLocaleData) {
@@ -235,7 +248,7 @@ const getAbsoluteOgImageUrl = (imagePath: string) => {
     {schema && <Schema schema={schema} />}
   </head>
   <body class="min-h-screen bg-signal-light flex flex-col">
-    <Header alternativeLinks={alternativeLinks} languageLinksMap={languageLinksMap} />
+    <Header alternativeLinks={alternativeLinks} languageLinksMap={languageLinksMap} locale={currentSlug} />
     <main class="flex-grow">
       <slot />
     </main>
