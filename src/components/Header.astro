@@ -126,7 +126,7 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
       </button>
 
       <a
-        href={headerFooter.HEADER_NAME_CTA_PATH}
+        href={`/${locale}${headerFooter.HEADER_NAME_CTA_PATH}`}
         class="bg-black text-signal-green border border-signal-green px-6 py-2 hover:bg-signal-green hover:text-black transition-all duration-200"
       >
         {headerFooter.HEADER_NAME_CTA}

@@ -305,13 +305,13 @@ const organizationSchema = {
     common.PAGE_KEYWORD_5,
     common.PAGE_KEYWORD_6
   ].filter(Boolean),
-  "description": www.PAGE_DESCRIPTION,
+  "description": common.PAGE_DESCRIPTION,
   "numberOfEmployees": {
     "@type": "QuantitativeValue",
     "minValue": "1",
     "maxValue": "9"
   },
-  "slogan": www.PAGE_SLOGAN,
+  "slogan": common.PAGE_SLOGAN,
   "contactPoint": {
     "@type": "ContactPoint",
     "email": www.PAGE_INFO_EMAIL,
@@ -334,39 +334,39 @@ const organizationSchema = {
   "potentialAction": [
     {
       "@type": "ViewAction",
-      "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
+      "name": `XML Sitemap for ${www.PAGE_ORGANISATION_FULL_NAME}`,
       "target": getBaseUrl('/sitemap.xml')
     },
     {
       "@type": "ViewAction",
-      "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
+      "name": `Localized XML Sitemap (${languageIso}-${countryCode}) for ${www.PAGE_ORGANISATION_FULL_NAME}`,
       "target": getBaseUrl(`/sitemap-${languageIso}-${countryCode}.xml`)
     },
     {
       "@type": "ViewAction",
-      "name": www.PAGE_LLM_INSTRUCTIONS,
+      "name": `LLM Guidance for ${www.PAGE_ORGANISATION_FULL_NAME}`,
       "target": getBaseUrl('/llms.txt'),
-      "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
+      "description": `A text resource outlining key information about ${www.PAGE_ORGANISATION_FULL_NAME} offerings, company, products, services, and more for AI agents and AI crawlers.`
     }
   ],
   "mainEntityOfPage": [
     {
       "@type": "WebPage",
       "@id": getBaseUrl('/sitemap.xml'),
-      "name": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS,
-      "description": www.PAGE_MASTER_SITEMAP_INSTRUCTIONS_DESCRIPTION
+      "name": `XML Sitemap for ${www.PAGE_ORGANISATION_FULL_NAME}`,
+      "description": `Provides a structured list of pages available on ${www.PAGE_ORGANISATION_FULL_NAME} for crawlers and AI agents.`
     },
     {
       "@type": "WebPage",
       "@id": getBaseUrl(`/sitemap-${languageIso}-${countryCode}.xml`),
-      "name": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS,
-      "description": www.PAGE_LOCAL_SITEMAP_INSTRUCTIONS_DESCRIPTION
+      "name": `Localized XML Sitemap (${languageIso}-${countryCode}) for ${www.PAGE_ORGANISATION_FULL_NAME}`,
+      "description": `Provides a full and structured list of localized pages for ${languageIso} (${languageIso}-${countryCode}) locale on ${www.PAGE_ORGANISATION_FULL_NAME} for crawlers and AI agents.`
     },
     {
       "@type": "WebPage",
       "@id": getBaseUrl('/llms.txt'),
-      "name": www.PAGE_LLM_INSTRUCTIONS,
-      "description": www.PAGE_LLM_INSTRUCTIONS_DESCRIPTION
+      "name": `LLM Guidance for ${www.PAGE_ORGANISATION_FULL_NAME}`,
+      "description": `A text resource outlining key information about ${www.PAGE_ORGANISATION_FULL_NAME} offerings, company, products, services, and more for AI agents and AI crawlers.`
     }
   ]
 };
