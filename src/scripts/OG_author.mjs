@@ -39,12 +39,13 @@ const generateAuthorHtmlTemplate = (data) => `
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { width: 1200px; height: 630px; margin: 0; font-family: 'Inter', system-ui, sans-serif; background-color: ${data.bodyBgColor}; color: ${data.bodyTextColor}; display: flex; position: relative; overflow: hidden; }
-        .name-container { position: absolute; top: 3.5rem; left: 3.5rem; background-color: ${data.nameBgColor}; color: ${data.nameTextColor}; padding: 1.25rem 1.5rem; font-size: 3.5rem; font-weight: 700; line-height: 1.2; box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.25); max-width: 60%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .tagline { position: absolute; left: 3.7rem; top: 16rem; font-size: 2rem; font-weight: 600; color: ${data.taglineTextColor}; max-width: 55%; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; }
+        .name-container { position: absolute; top: 3.5rem; left: 3.5rem; background-color: ${data.nameBgColor}; color: ${data.nameTextColor}; padding: 1.25rem 1.5rem; font-size: 3.7rem; font-weight: 700; line-height: 1.2; box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.25); max-width: 60%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .tagline { position: absolute; left: 3.7rem; top: 16rem; font-size: 3rem; font-weight: 600; color: ${data.taglineTextColor}; max-width: 55%; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; }
+        .occupation { position: absolute; left: 3.7rem; top: 22rem; font-size: 2.4rem; font-weight: 500; color: ${data.taglineTextColor}; max-width: 55%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; opacity: 0.9; }
         .right-section { position: absolute; top: 0; right: -5%; width: 50%; height: 100%; clip-path: polygon(25% 0, 100% 0, 100% 100%, 0% 100%); background-color: ${data.rightSectionBgColor}; display: flex; justify-content: center; align-items: center; }
         .right-section img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
-        .logo { width: 250px; height: auto; position: absolute; bottom: 2rem; left: 3.5rem; }
-        .flag-container { position: absolute; bottom: 2rem; right: 3rem; background: white; padding: 0.75rem; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 6rem; height: 4rem; display: flex; align-items: center; justify-content: center; }
+        .logo { width: 300px; height: auto; position: absolute; bottom: 2rem; left: 3.5rem; }
+        .flag-container { position: absolute; bottom: 2rem; right: 3rem; background: white; padding: 0.75rem; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 8rem; height: 5.5rem; display: flex; align-items: center; justify-content: center; }
         .flag-container img { width: 100%; height: 100%; object-fit: contain; }
     </style>
 </head>
@@ -54,6 +55,7 @@ const generateAuthorHtmlTemplate = (data) => `
     </div>
     <div class="name-container">${data.authorName}</div>
     <div class="tagline">${data.tagline}</div>
+    <div class="occupation">${data.occupation}</div>
     <img src="data:image/png;base64,${data.logoBase64}" alt="Logo" class="logo">
     <div class="flag-container">
         <img src="data:image/svg+xml;utf8,${encodeURIComponent(data.flagSvg)}" alt="Country flag">
@@ -74,7 +76,8 @@ async function generateImageForAuthor(author, commonAssets, context) {
     const dataForTemplate = {
         lang: author.M_LANGUAGE_ISO,
         authorName: author.WWW_AUTHOR,
-        tagline: `${author.EEAT_NAME_20_SINGULAR} | ${brandingData.PAGE_ORGANISATION_FULL_NAME}`,
+        tagline: author.EEAT_NAME_20_SINGULAR,
+        occupation: author.WWW_AUTHOR_OCCUPATION || '',
         flagSvg: flagMap[author.M_COUNTRY_CODE] || '',
         logoBase64: logoBase64,
         authorImageBase64: authorImageBase64,
