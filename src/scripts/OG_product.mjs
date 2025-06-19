@@ -87,7 +87,7 @@ const generateProductHtmlTemplate = (data) => `
 
 // --- IMAGE GENERATION ---
 async function generateImageForProduct(product, commonAssets, context) {
-    const imageName = `${product.PRODUCT_ID}-${product.PRODUCT_IMAGE_NAME_ASCII}`.replace(/\.webp$/i, '') + '.webp';
+    const imageName = `${product.PRODUCT_IMAGE_NAME_ASCII}`.replace(/\.webp$/i, '') + '.webp';
     const { brandingData, logoBase64 } = commonAssets;
 
     const rawProductPath = product.PRODUCT_IMAGE_PATH_L;
