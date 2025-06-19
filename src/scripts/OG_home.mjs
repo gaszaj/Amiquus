@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { mkdir } from 'fs/promises';
+import { mkdir, rm } from 'fs/promises'; // <-- Added 'rm'
 import path from 'path';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
@@ -10,12 +10,11 @@ import tailwindConfig from '../../tailwind.config.mjs';
 const CWD = process.cwd();
 const PUBLIC_DIR = path.join(CWD, 'public');
 const OUTPUT_DIR = path.join(PUBLIC_DIR, 'ogimages', 'oghome');
-const CONCURRENCY = 10; // Number of images to generate in parallel. Adjust based on your system's specs.
+const CONCURRENCY = 10; 
 
 // --- DATA & ASSETS ---
 const tailwindColors = tailwindConfig.theme.extend.colors;
 
-// Import all country flag SVGs
 import { 
   AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, 
   CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, 
@@ -33,7 +32,6 @@ const readJsonFile = (filePath) => JSON.parse(readFileSync(path.join(CWD, filePa
 const readImageAsBase64 = (filePath) => readFileSync(path.join(CWD, filePath), 'base64');
 
 // --- HTML TEMPLATE GENERATOR ---
-// This function remains unchanged as it's already well-structured.
 const generateHtmlTemplate = (data) => `
 <!DOCTYPE html>
 <html lang="${data.lang}">
@@ -81,14 +79,11 @@ const generateHtmlTemplate = (data) => `
 
 /**
  * Generates a single OG image for a given home data object.
- * This is the core task that will be run in parallel.
  * @param {object} home - The home data object from home.json.
  * @param {object} commonAssets - An object containing shared assets like branding data and logo.
  * @param {import('playwright').BrowserContext} context - The Playwright browser context.
- * @param {number} index - The current index for logging purposes.
- * @param {number} total - The total number of items for logging.
  */
-async function generateImageForHome(home, commonAssets, context, index, total) {
+async function generateImageForHome(home, commonAssets, context) {
     const imageName = home.HOME_OG_IMAGE_NAME_ASCII;
     const { brandingData, logoBase64 } = commonAssets;
 
@@ -115,18 +110,16 @@ async function generateImageForHome(home, commonAssets, context, index, total) {
     
     try {
         await page.setViewportSize({ width: 1200, height: 630 });
-        // Use 'load' which is faster as we don't have external network requests
         await page.setContent(htmlContent, { waitUntil: 'load' });
 
         const pngBuffer = await page.screenshot({ type: 'png' });
         const outputPath = path.join(OUTPUT_DIR, imageName);
 
-        await sharp(pngBuffer).webp({ quality: 3 }).toFile(outputPath);
-
-        // Improved logging with progress counter
-        console.log(`[${index + 1}/${total}] ✅ Generated ${imageName}`);
+        await sharp(pngBuffer).webp({ quality: 85 }).toFile(outputPath);
+        
+        // Per-file logging removed for cleaner output
+        // console.log(`[${index + 1}/${total}] ✅ Generated ${imageName}`);
     } finally {
-        // Ensure page is closed even if an error occurs
         await page.close();
     }
 }
@@ -137,9 +130,12 @@ async function main() {
     console.log('🚀 Starting homepage OG image generation...');
     let browser;
     try {
-        // 1. Prepare directories and load all data once
+        // 1. Clear and prepare the output directory
+        console.log(`🧹 Clearing destination directory: ${OUTPUT_DIR}`);
+        await rm(OUTPUT_DIR, { recursive: true, force: true });
         await mkdir(OUTPUT_DIR, { recursive: true });
 
+        // 2. Load all data once
         const homeData = readJsonFile('src/data/home.json');
         const wwwData = readJsonFile('src/data/www.json');
         const commonData = readJsonFile('src/data/common.json');
@@ -156,26 +152,21 @@ async function main() {
             logoBase64: readImageAsBase64(logoEntry.PAGE_LOGO_IMAGE_PATH_4)
         };
 
-        // 2. Launch the browser and context once for all tasks
+        // 3. Launch the browser
         browser = await chromium.launch();
-        const context = await browser.newContext({
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
-        });
+        const context = await browser.newContext();
 
-        // 3. Set up the concurrency limiter
+        // 4. Set up concurrency limiter
         const limit = pLimit(CONCURRENCY);
         const totalItems = homeData.length;
-        console.log(`Found ${totalItems} items to process with a concurrency of ${CONCURRENCY}.`);
-
-        // 4. Create an array of tasks to be executed in parallel
-        const tasks = homeData.map((home, index) => 
-            limit(() => generateImageForHome(home, commonAssets, context, index, totalItems))
+        
+        // 5. Create and run tasks in parallel
+        const tasks = homeData.map((home) => 
+            limit(() => generateImageForHome(home, commonAssets, context))
         );
-
-        // 5. Run all tasks and wait for them to complete
         const results = await Promise.allSettled(tasks);
 
-        // 6. Report a summary of the results
+        // 6. Report summary
         const successful = results.filter(r => r.status === 'fulfilled').length;
         const failed = results.filter(r => r.status === 'rejected');
 
@@ -186,7 +177,7 @@ async function main() {
             failed.forEach((fail, index) => {
                 console.error(`  - Failure ${index + 1}:`, fail.reason.message);
             });
-            process.exitCode = 1; // Indicate failure
+            process.exitCode = 1;
         }
 
     } catch (error) {
