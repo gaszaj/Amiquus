@@ -1,4 +1,5 @@
 // src/scripts/generate-json-search.mjs
+
 import { readFileSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import path from 'path';
@@ -15,6 +16,7 @@ const readJsonFile = (filePath) => {
 };
 
 // --- Main Exported Function ---
+// This is the core logic, which is imported by the integration.
 export async function generateSearchIndexes(logger) {
   logger.info('🚀 Generating JSON search indexes...');
   try {
