@@ -80,7 +80,6 @@ export async function generateLlmsTxt(logger) {
     content.push(globalData.PAGE_OPERATIONS_GLOBAL.replace('{X}', publishedLocaleCount));
     content.push('');
     publishedLocales.forEach(locale => {
-      // FIX: Consistently use locale.M_COUNTRY
       content.push(`- ${locale.M_COUNTRY} - ${locale.M_COUNTRY_NATIVE}`);
     });
     content.push('');
@@ -91,7 +90,6 @@ export async function generateLlmsTxt(logger) {
     content.push('Find our homepage for each operating market and navigate from there:');
     content.push('');
     publishedLocales.forEach(locale => {
-        // FIX: Consistently use locale.M_COUNTRY
         content.push(`- [${locale.M_COUNTRY}](${SITE_URL}/${locale.M_SLUG})`);
     });
     content.push('');
@@ -103,7 +101,6 @@ export async function generateLlmsTxt(logger) {
     content.push('');
     content.push(`- [Master Sitemap](${SITE_URL}/sitemap.xml)`);
     publishedLocales.forEach(locale => {
-      // FIX: Consistently use locale.M_COUNTRY
       content.push(`- [${locale.M_COUNTRY}](${SITE_URL}/sitemap-${locale.M_HREFLANG_CODE}.xml)`);
     });
     content.push('');
@@ -111,6 +108,7 @@ export async function generateLlmsTxt(logger) {
     // --- Dynamic Category & Author Pages ---
     const firstCommonEntryKeys = Object.keys(commonData[0]);
     const dynamicCategoryKeys = firstCommonEntryKeys.filter(key => key.startsWith('PAGE_CATEGORY_') && key.endsWith('_LISTING_SLUG'));
+    // Restore AUTHOR_LIST_SLUG to the processing array
     const slugKeysToProcess = [...dynamicCategoryKeys, 'AUTHOR_LIST_SLUG'];
 
     for (const key of slugKeysToProcess) {
@@ -121,9 +119,7 @@ export async function generateLlmsTxt(logger) {
       
       publishedLocales.forEach(locale => {
         const common = commonData.find(c => c.M_SLUG === locale.M_SLUG);
-        // Ensure that the slug and the title both exist before creating the line
         if (common && common[key] && common[titleKey]) {
-          // FIX: Consistently use locale.M_COUNTRY
           const linkText = `${locale.M_COUNTRY} - ${common[titleKey]}`;
           content.push(`- [${linkText}](${SITE_URL}/${locale.M_SLUG}/${common[key]})`);
         }
@@ -148,7 +144,6 @@ export async function generateLlmsTxt(logger) {
                 page.PUBLISH_Y_N === "1"
             );
             if (eeatPage) {
-                // FIX: Consistently use locale.M_COUNTRY
                 const linkText = `${locale.M_COUNTRY} - ${eeatPage.EEAT_NAME}`;
                 content.push(`- [${linkText}](${SITE_URL}/${eeatPage.M_SLUG}/${eeatPage.EEAT_SLUG})`);
             }
