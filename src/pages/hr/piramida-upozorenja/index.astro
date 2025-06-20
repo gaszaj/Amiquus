@@ -260,7 +260,7 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
                             <a href={productUrl} class="block">
                                 <img 
                                     src={product.PRODUCT_IMAGE_PATH_L} 
-                                    alt={product.PRODUCT_IMAGE_ALT}
+                                    alt={product.PRODUCT_IMAGE_NAME}
                                     class="w-full h-56 object-contain p-4"
                                     width="225"
                                     height="225"
@@ -275,7 +275,7 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
                                         {product.M_PRODUCT_PRICE}
                                     </div>
                                     <span class="block w-full bg-black text-signal-green border border-signal-green py-2 px-4 hover:bg-signal-green hover:text-black transition-all text-center">
-                                        {common.PRODUCT_PAGE_RELATED_PRODUCT_VIEW_BUTTON_TEXT || "Poglej izdelek"}
+                                        {common.PRODUCT_PAGE_RELATED_PRODUCT_VIEW_BUTTON_TEXT}
                                     </span>
                                 </div>
                             </a>

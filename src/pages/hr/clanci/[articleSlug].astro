@@ -132,7 +132,7 @@ const countryCode = article.M_COUNTRY_CODE;
 const contentOrientation = commonData.find(item =>
   item.M_LANGUAGE_ISO === languageIso &&
   item.M_COUNTRY_CODE === countryCode
-)?.M_CONTENT_ORIENTATION || 'ltr'; // Default to 'ltr' if no match found
+)?.M_CONTENT_ORIENTATION; // Default to 'ltr' if no match found
 
 // --- Article Specific Metadata ---
 const articleMetadata = {

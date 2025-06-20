@@ -452,7 +452,7 @@ for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
             {heroData.socialProof.userPhotos.map(photo => (
               <img 
                 src={photo} 
-                alt="User" 
+                alt="User Testimonial" 
                 class="w-10 h-10 rounded-full border-2 border-black"
                 width="50"
                 height="50"
@@ -466,7 +466,7 @@ for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
         
         <a 
           href={heroData.ctaLink} 
-          class="inline-block bg-signal-green text-black font-semibold px-8 py-3 hover:bg-[#a5d429] transition-colors"
+          class="inline-block bg-signal-green text-black font-semibold px-8 py-3 hover:bg-signal-green hover:text-black transition-colors"
         >
           {heroData.ctaText}
         </a>

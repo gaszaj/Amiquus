@@ -1,6 +1,6 @@
 ---
 // import { getEntry } from 'astro:content'; // Removed as it's not used; data comes from JSON
-import { actions, type ActionError } from 'astro:actions'; // Import actions
+import { actions, isInputError } from 'astro:actions'; // Import actions
 import BaseLayout from '../../layouts/BaseLayout.astro'; // Adjusted path assuming layouts is one level up
 import wwwData from '../../data/www.json'; // Adjusted path
 import commonData from '../../data/common.json'; // Adjusted path
@@ -92,45 +92,26 @@ const pageKeywords = [
   www.PAGE_ORGANISATION_FULL_NAME
 ].join(', ');
 
-// Contact form configuration (only used if isContactPage is true)
-let contactSection;
-if (isContactPage) {
-  contactSection = {
-    title: seoTitle,
-    subtitle: pageDescription,
-    formLabels: {
-      fullName: common.M_FULL_NAME,
-      fullNamePlaceholder: common.M_FULLNAME_PLACEHOLDER,
-      email: common.M_EMAIL, // Using M_EMAIL for label "Elektronski naslov"
-      emailPlaceholder: common.M_EMAIL_PLACEHOLDER,
-      message: common.M_MESSAGE_LABEL,
-      messagePlaceholder: common.M_MESSAGE_PLACEHOLDER,
-      terms: common.PRODUCT_PAGE_ORDER_FORM_TERMS_LABEL, // Or a more generic common.M_TERMS_LABEL if available
-      submitButton: common.M_SEND_BUTTON
-    }
-  };
-}
+// --- FORM HANDLING ---
+const submissionResult = await Astro.getActionResult(actions.submitContactForm);
+const formErrors: Record<string, string[] | undefined> = {};
+let genericError: string | undefined = undefined;
+let successMessage: string | undefined = undefined;
 
-// Astro Action form result handling
-const formResult = Astro.locals.actions?.submitContactForm; // Check if actions exist
-let formSuccessMessage: string | null = null;
-let formErrorMessage: string | null = null;
-let fieldErrors: Record<string, string | undefined> = {};
-
-if (formResult) {
-  if (formResult.data?.success) {
-    formSuccessMessage = common.M_CONFIRMATION_TEXT;
-  } else if (formResult.error) {
-    formErrorMessage = formResult.error.message || common.M_FORM_ERROR;
-    if (formResult.errors) { // Zod field-specific errors
-      formResult.errors.forEach(err => {
-        if (err.path && err.path.length > 0) {
-          fieldErrors[err.path.join('.')] = err.message;
-        }
-      });
+if (submissionResult) {
+  if (submissionResult.error) {
+    if (isInputError(submissionResult.error)) {
+      Object.assign(formErrors, submissionResult.error.fields);
+  } else {
+      genericError = submissionResult.error.message;
     }
+  } else if (submissionResult.data?.success) {
+    // The success message now comes directly from the server action, already translated.
+    successMessage = submissionResult.data.message;
   }
 }
+
+const getFieldError = (fieldName: string): string | undefined => formErrors[fieldName]?.[0];
 
 // Build the language link map for the language picker
 const languageLinksMap = {};
@@ -363,95 +344,87 @@ const formatDate = (dateString: string, locale: string) => {
   </div>
 
   <!-- If Contact Page: Form + Main Content Part 2 (eeat.EEAT_CONTENT_2) -->
-  {isContactPage && contactSection && (
+  {isContactPage && (
     <>
       <!-- Contact Form Section -->
       <section class="pt-3 pb-8 bg-gray-50">
         <div class="container mx-auto px-4">
           <div class="max-w-2xl mx-auto">
             {/* Display Success/Error Messages */}
-            {formSuccessMessage && (
+            {successMessage && !submissionResult?.error && (
               <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
-                {formSuccessMessage}
+                {successMessage}
               </div>
             )}
-            {formErrorMessage && (
+            {genericError && (
               <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
-                {formErrorMessage}
-                 {Object.keys(fieldErrors).length > 0 && (
-                  <ul class="mt-2 list-disc list-inside">
-                    {Object.entries(fieldErrors).map(([field, error]) => (
-                      <li>{field}: {error}</li>
-                    ))}
-                  </ul>
-                )}
+                {genericError}
               </div>
             )}
 
-            {/* Conditionally render form if no success message or always show and reset */}
-            {/* For now, always showing the form; Astro Actions cause a page reload, effectively resetting. */}
-            <form method="POST" action={actions.submitContactForm}>
+            <form method="POST" action={actions.submitContactForm.safe} class="space-y-4">
               <input type="hidden" name="pageUrl" value={Astro.url.href} />
               <input type="hidden" name="pageTitle" value={seoTitle} />
+              <input type="hidden" name="locale" value={locale} />
 
               <div>
-                <label for="fullName" class="block text-sm font-medium text-gray-600 mb-1">{contactSection.formLabels.fullName}</label>
+                <label for="fullName" class="block text-sm font-medium text-gray-600 mb-1">{common.FORM_LABEL_FULLNAME}</label>
                 <input
                   type="text"
                   id="fullName"
                   name="fullName"
-                  placeholder={contactSection.formLabels.fullNamePlaceholder}
+                  placeholder={common.FORM_PLACEHOLDER_FULLNAME}
                   class:list={[
                     "w-full px-4 py-2 rounded-lg border focus:ring-1 focus:ring-signal-green",
-                    fieldErrors.fullName ? "border-red-500" : "border-gray-300 focus:border-signal-green"
+                    getFieldError('fullName') ? "border-red-500" : "border-gray-300 focus:border-signal-green"
                   ]}
                   required
                 />
-                {fieldErrors.fullName && <p class="text-red-500 text-xs mt-1">{fieldErrors.fullName}</p>}
+                {getFieldError('fullName') && <p class="text-red-500 text-xs mt-1">{common.FORM_VALIDATION_FULLNAME_REQUIRED}</p>}
               </div>
               <div>
-                <label for="email" class="block text-sm font-medium text-gray-600 mb-1">{contactSection.formLabels.email}</label>
+                <label for="email" class="block text-sm font-medium text-gray-600 mb-1">{common.FORM_LABEL_EMAIL}</label>
                 <input
                   type="email"
                   id="email"
                   name="email"
-                  placeholder={contactSection.formLabels.emailPlaceholder}
+                  placeholder={common.FORM_PLACEHOLDER_EMAIL}
                   class:list={[
                     "w-full px-4 py-2 rounded-lg border focus:ring-1 focus:ring-signal-green",
-                    fieldErrors.email ? "border-red-500" : "border-gray-300 focus:border-signal-green"
+                    getFieldError('email') ? "border-red-500" : "border-gray-300 focus:border-signal-green"
                   ]}
                   required
                 />
-                {fieldErrors.email && <p class="text-red-500 text-xs mt-1">{fieldErrors.email}</p>}
+                {getFieldError('email') && <p class="text-red-500 text-xs mt-1">{common.FORM_VALIDATION_EMAIL_INVALID}</p>}
               </div>
               <div>
-                <label for="message" class="block text-sm font-medium text-gray-600 mb-1">{contactSection.formLabels.message}</label>
+                <label for="message" class="block text-sm font-medium text-gray-600 mb-1">{common.FORM_LABEL_MESSAGE}</label>
                 <textarea
                   id="message"
                   name="message"
                   rows="4"
-                  placeholder={contactSection.formLabels.messagePlaceholder}
+                  placeholder={common.FORM_PLACEHOLDER_MESSAGE_ORDER}
                   class:list={[
                     "w-full px-4 py-2 rounded-lg border focus:ring-1 focus:ring-signal-green",
-                    fieldErrors.message ? "border-red-500" : "border-gray-300 focus:border-signal-green"
+                    getFieldError('message') ? "border-red-500" : "border-gray-300 focus:border-signal-green"
                   ]}
                   required
                 ></textarea>
-                {fieldErrors.message && <p class="text-red-500 text-xs mt-1">{fieldErrors.message}</p>}
+                {getFieldError('message') && <p class="text-red-500 text-xs mt-1">{common.FORM_VALIDATION_MESSAGE_REQUIRED}</p>}
               </div>
               <div class="flex items-center gap-2">
                 <input type="checkbox" id="terms" name="terms" required 
-                  class:list={[ fieldErrors.terms ? "border-red-500" : ""]}/>
+                  class:list={[getFieldError('terms') ? "border-red-500" : ""]}/>
                 <label for="terms" class="text-sm text-gray-600">
-                  {contactSection.formLabels.terms}
+                  {common.FORM_LABEL_TERMS}
                 </label>
               </div>
-               {fieldErrors.terms && <p class="text-red-500 text-xs mt-1">{fieldErrors.terms}</p>}
+              {getFieldError('terms') && <p class="text-red-500 text-xs mt-1">{common.FORM_VALIDATION_TERMS_REQUIRED}</p>}
               <button
                 type="submit"
                 class="w-full bg-black text-signal-green border border-signal-green py-3 rounded-lg hover:bg-signal-green hover:text-black transition-all"
               >
-                {contactSection.formLabels.submitButton}
+                {common.FORM_BUTTON_SUBMIT_CONTACT}
               </button>
             </form>
           </div>
@@ -646,6 +619,11 @@ const formatDate = (dateString: string, locale: string) => {
     backface-visibility: hidden;
     transform: translateZ(0);
     -webkit-font-smoothing: subpixel-antialiased;
+  }
+
+  /* Client side validation styles for modern browsers */
+  :where(input, select, textarea):user-invalid {
+      border-color: #ef4444; /* red-500 */
   }
 </style>
 

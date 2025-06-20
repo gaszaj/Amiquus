@@ -1,22 +1,22 @@
 ---
-import type { RelatedProductInfo as OriginalRelatedProductInfo, FaqItemData as OriginalFaqItemData, ProductLayoutStrings as OriginalProductLayoutStrings } from '../../layouts/ProductLayout.astro'; // Path might need adjustment if ProductLayout is deleted
+// Path: src/pages/si/opozorilna-piramida/[productSlug].astro
+// Purpose: Product detail page with order form, FAQ, and related content
+// Data: JSON dependencies from product, common, www, article, and locale data
+// Dependencies: BaseLayout.astro, actions from index.ts
+
 import productData from '../../../data/product.json';
 import wwwData from '../../../data/www.json';
 import commonData from '../../../data/common.json';
 import articleDataJson from '../../../data/article.json';
 import localeData from '../../../data/locale.json';
 
-// Imports from ProductLayout.astro
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { actions, isInputError } from 'astro:actions';
 
-// Get the product slug from the URL
+// --- DATA FETCHING & PROCESSING ---
 const { productSlug } = Astro.params;
-
-// Get the locale from the URL path (e.g., 'si' from /si/opozorilna-piramida/...)
 const locale = Astro.url.pathname.split('/')[1];
 
-// Find the matching product based on slug and locale
 const product = productData.find(
   (entry) => 
     entry.PRODUCT_ASCII_SLUG === productSlug && 
@@ -24,61 +24,31 @@ const product = productData.find(
     entry.PUBLISH_Y_N === "1"
 );
 
-// If product not found or not published, redirect to 404
 if (!product) {
   return Astro.redirect('/404');
 }
 
-// Find the matching common data object based on M_SLUG
+// Find the matching common data object based on M_SLUG. This is our single source of truth for UI strings.
 const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
 const www = wwwData[0];
 
-// Get language data from the product
 const languageIso = product.M_LANGUAGE_ISO;
 const countryCode = product.M_COUNTRY_CODE;
+const contentOrientation = common.M_CONTENT_ORIENTATION || 'ltr';
 
-// Find matching content orientation from common.json
-const contentOrientation = commonData.find(item =>
-  item.M_LANGUAGE_ISO === languageIso &&
-  item.M_COUNTRY_CODE === countryCode
-)?.M_CONTENT_ORIENTATION || 'ltr';
+// Helper functions for URLs
+const getAbsoluteUrl = (path: string): string => new URL(`/${locale}${path}`, Astro.url.origin).toString();
+const getBaseUrl = (path: string): string => new URL(path, Astro.url.origin).toString();
 
-// Helper function for absolute URLs with locale
-const getAbsoluteUrl = (path: string): string => {
-    const locale = Astro.url.pathname.split('/')[1];
-    return new URL(`/${locale}${path}`, Astro.url.origin).toString();
-};
-
-// Helper function for base-level URLs (without locale)
-const getBaseUrl = (path: string): string => {
-    return new URL(path, Astro.url.origin).toString();
-};
-
-// Interfaces 
-export interface ProductSpecification {
-  dimensions: string; material: string; weight: string; visibility: string; windResistance: string; setupTime: string;
+// Interfaces (can be moved to a types.ts file if shared)
+export interface FaqItemData { 
+  question: string; answer: string;
 }
 export interface RelatedProductInfo { 
   id: string; title: string; image: string; category: string; url: string;
 }
-export interface FaqItemData { 
-  question: string; answer: string;
-}
-export interface ProductLayoutStrings { 
-  techSpecTitle: string; techSpecDimensionsLabel: string; techSpecMaterialLabel: string; techSpecWeightLabel: string; techSpecVisibilityLabel: string; techSpecWindResistanceLabel: string; techSpecSetupTimeLabel: string;
-  orderButtonText: string;
-  orderFormTitle: string; orderFormSubtitleBase: string; orderFormNameLabel: string; orderFormNamePlaceholder: string; orderFormSurnameLabel: string; orderFormSurnamePlaceholder: string; orderFormCompanyLabel: string; orderFormCompanyPlaceholder: string; orderFormVatIdLabel: string; orderFormVatIdPlaceholder: string; orderFormStreetLabel: string; orderFormStreetPlaceholder: string; orderFormCityLabel: string; orderFormCityPlaceholder: string; orderFormZipLabel: string; orderFormZipPlaceholder: string; orderFormEmailLabel: string; orderFormEmailPlaceholder: string; orderFormPhoneLabel: string; orderFormPhonePlaceholder: string; orderFormQuantityLabel: string; orderFormQuantityDefaultOption: string; orderFormPaymentLabelBase: string; orderFormPaymentCod: string; orderFormPaymentPreInvoice: string; orderFormMessageLabel: string; orderFormMessagePlaceholder: string; orderFormTermsLabel: string; orderFormSubmitButtonText: string;
-  faqSectionTitle: string; faqBackButtonText: string;
-  relatedProductsTitle: string; relatedProductViewButtonText: string;
-  customerSupportTitle: string; customerSupportEmail: string;
-  validationNameRequired: string; validationSurnameRequired: string; validationStreetRequired: string; validationCityRequired: string; validationZipRequired: string; validationEmailRequired: string; validationEmailInvalid: string; validationPhoneRequired: string; validationQuantityRequired: string; validationPaymentRequired: string; validationTermsRequired: string;
-  formSuccessMessage: string;
-}
-
 export interface RelatedArticleInfo { 
-  title: string;
-  url: string;
-  date: string;
+  title: string; url: string; date: string;
 }
 
 const productCoreData = {
@@ -115,72 +85,39 @@ const productFaqItems: FaqItemData[] = [
   { question: product.PRODUCT_Q11, answer: product.PRODUCT_A11 },
   { question: product.PRODUCT_Q12, answer: product.PRODUCT_A12 },
   { question: product.PRODUCT_Q13, answer: product.PRODUCT_A13 }
-];
+].filter(item => item.question && item.answer);
 
-// Helper function to find product by ID
-const findProductById = (productId: string) => {
-  return productData.find(p => p.PRODUCT_ID === productId && p.PUBLISH_Y_N === "1");
-};
+// Helper functions for finding related content
+const findProductById = (id: string) => productData.find(p => p.PRODUCT_ID === id && p.PUBLISH_Y_N === "1");
+const findArticleById = (id: string) => articleDataJson.find(a => a.PAGE_ID === id && a.PUBLISH_Y_N === "1");
 
-// Helper function to find article by ID
-const findArticleById = (articleId: string) => {
-  return articleDataJson.find(entry => entry.PAGE_ID === articleId && entry.PUBLISH_Y_N === "1");
-};
-
-// Get related products with their IDs
-const allAvailableProducts: RelatedProductInfo[] = [
-  product.PRODUCT_RELATED_P1,
-  product.PRODUCT_RELATED_P2,
-  product.PRODUCT_RELATED_P3,
-  product.PRODUCT_RELATED_P4,
-  product.PRODUCT_RELATED_P5,
-  product.PRODUCT_RELATED_P6
+// Get related products
+const filteredRelatedProducts: RelatedProductInfo[] = [
+  product.PRODUCT_RELATED_P1, product.PRODUCT_RELATED_P2, product.PRODUCT_RELATED_P3, product.PRODUCT_RELATED_P4, product.PRODUCT_RELATED_P5, product.PRODUCT_RELATED_P6
 ].map(id => {
-  const relatedProduct = findProductById(id);
-  if (!relatedProduct) return null;
-  
+  const p = findProductById(id);
+  if (!p) return null;
   return {
-    id: relatedProduct.PRODUCT_ID,
-    title: `${relatedProduct.PAGE_CATEGORY_1} — ${relatedProduct.PRODUCT_NAME}`,
-    image: getBaseUrl(relatedProduct.PRODUCT_IMAGE_PATH_L),
-    category: relatedProduct.PAGE_CATEGORY_1_SLUG,
-    url: getBaseUrl(`/${relatedProduct.M_SLUG}/${relatedProduct.PAGE_CATEGORY_1_SLUG}/${relatedProduct.PRODUCT_ASCII_SLUG}`)
+    id: p.PRODUCT_ID,
+    title: `${p.PAGE_CATEGORY_1} — ${p.PRODUCT_NAME}`,
+    image: getBaseUrl(p.PRODUCT_IMAGE_PATH_L),
+    category: p.PAGE_CATEGORY_1_SLUG,
+    url: getBaseUrl(`/${p.M_SLUG}/${p.PAGE_CATEGORY_1_SLUG}/${p.PRODUCT_ASCII_SLUG}`)
   };
-}).filter(Boolean) as RelatedProductInfo[];
+}).filter(Boolean).filter(p => p!.id !== product.PRODUCT_ID).slice(0, 3) as RelatedProductInfo[];
 
-// Filter and sort related products
-const filteredRelatedProducts = allAvailableProducts
-  .filter(p => p.id !== product.PRODUCT_ID) // Compare with full product ID including 'p' prefix
-  .sort((a, b) => {
-    if (a.category === productCoreData.category && b.category !== productCoreData.category) return -1;
-    if (a.category !== productCoreData.category && b.category === productCoreData.category) return 1;
-    return 0;
-  })
-  .slice(0, 3);
-
-// Add this new section for related articles
-const relatedArticleIds = [
-  product.PRODUCT_RELATED_A1,
-  product.PRODUCT_RELATED_A2,
-  product.PRODUCT_RELATED_A3,
-  product.PRODUCT_RELATED_A4,
-  product.PRODUCT_RELATED_A5,
-  product.PRODUCT_RELATED_A6,
-  product.PRODUCT_RELATED_A7
-].filter(Boolean);
-
-const relatedArticles: RelatedArticleInfo[] = relatedArticleIds
-  .map(id => {
-    const relatedArticle = findArticleById(id);
-    if (!relatedArticle) return null;
-    
+// Get related articles
+const relatedArticles: RelatedArticleInfo[] = [
+  product.PRODUCT_RELATED_A1, product.PRODUCT_RELATED_A2, product.PRODUCT_RELATED_A3, product.PRODUCT_RELATED_A4, product.PRODUCT_RELATED_A5, product.PRODUCT_RELATED_A6, product.PRODUCT_RELATED_A7
+].map(id => {
+    const a = findArticleById(id);
+    if (!a) return null;
     return {
-      title: relatedArticle.ARTICLE_H1,
-      url: `/${relatedArticle.M_SLUG}/${relatedArticle.ARTICLE_LIST_SLUG}/${relatedArticle.ARTICLE_SLUG}`,
-      date: relatedArticle.ARTICLE_PUBLISH_DATE
+      title: a.ARTICLE_H1,
+      url: `/${a.M_SLUG}/${a.ARTICLE_LIST_SLUG}/${a.ARTICLE_SLUG}`,
+      date: a.ARTICLE_PUBLISH_DATE
     };
-  })
-  .filter(Boolean) as RelatedArticleInfo[];
+  }).filter(Boolean) as RelatedArticleInfo[];
 
 const pageKeywords = [
   product.PRODUCT_NAME,
@@ -197,67 +134,8 @@ const pageKeywords = [
 
 const productQuantityOptions: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 30];
 
-const productPageLayoutStrings: ProductLayoutStrings = {
-  techSpecTitle: common.PRODUCT_SPECIFICATIONS_TITLE,
-  techSpecDimensionsLabel: common.PRODUCT_SPECIFICATIONS_LABEL_1,
-  techSpecMaterialLabel: common.PRODUCT_SPECIFICATIONS_LABEL_2,
-  techSpecWeightLabel: common.PRODUCT_SPECIFICATIONS_LABEL_3,
-  techSpecVisibilityLabel: common.PRODUCT_SPECIFICATIONS_LABEL_4,
-  techSpecWindResistanceLabel: common.PRODUCT_SPECIFICATIONS_LABEL_5,
-  techSpecSetupTimeLabel: common.PRODUCT_SPECIFICATIONS_LABEL_6,
-  orderButtonText: common.PRODUCT_PAGE_ORDER_BUTTON_TEXT,
-  orderFormTitle: common.PRODUCT_INQUIRY_LABEL,
-  orderFormSubtitleBase: common.PRODUCT_PAGE_ORDER_FORM_SUBTITLE_BASE,
-  orderFormNameLabel: common.PRODUCT_PAGE_ORDER_FORM_NAME_LABEL,
-  orderFormNamePlaceholder: common.PRODUCT_PAGE_ORDER_FORM_NAME_PLACEHOLDER,
-  orderFormSurnameLabel: common.PRODUCT_PAGE_ORDER_FORM_SURNAME_LABEL,
-  orderFormSurnamePlaceholder: common.PRODUCT_PAGE_ORDER_FORM_SURNAME_PLACEHOLDER,
-  orderFormCompanyLabel: common.PRODUCT_PAGE_ORDER_FORM_COMPANY_LABEL,
-  orderFormCompanyPlaceholder: common.PRODUCT_PAGE_ORDER_FORM_COMPANY_PLACEHOLDER,
-  orderFormVatIdLabel: common.PRODUCT_PAGE_ORDER_FORM_VAT_ID_LABEL,
-  orderFormVatIdPlaceholder: common.PRODUCT_PAGE_ORDER_FORM_VAT_ID_PLACEHOLDER,
-  orderFormStreetLabel: common.PRODUCT_PAGE_ORDER_FORM_STREET_LABEL,
-  orderFormStreetPlaceholder: common.PRODUCT_PAGE_ORDER_FORM_STREET_PLACEHOLDER,
-  orderFormCityLabel: common.PRODUCT_PAGE_ORDER_FORM_CITY_LABEL,
-  orderFormCityPlaceholder: common.PRODUCT_PAGE_ORDER_FORM_CITY_PLACEHOLDER,
-  orderFormZipLabel: common.PRODUCT_PAGE_ORDER_FORM_ZIP_LABEL,
-  orderFormZipPlaceholder: common.PRODUCT_PAGE_ORDER_FORM_ZIP_PLACEHOLDER,
-  orderFormEmailLabel: common.PRODUCT_PAGE_ORDER_FORM_EMAIL_LABEL,
-  orderFormEmailPlaceholder: common.PRODUCT_PAGE_ORDER_FORM_EMAIL_PLACEHOLDER,
-  orderFormPhoneLabel: common.PRODUCT_PAGE_ORDER_FORM_PHONE_LABEL,
-  orderFormPhonePlaceholder: common.PRODUCT_PAGE_ORDER_FORM_PHONE_PLACEHOLDER,
-  orderFormQuantityLabel: common.PRODUCT_PAGE_ORDER_FORM_QUANTITY_LABEL,
-  orderFormQuantityDefaultOption: common.PRODUCT_PAGE_ORDER_FORM_QUANTITY_DEFAULT_OPTION,
-  orderFormPaymentLabelBase: common.PRODUCT_PAGE_ORDER_FORM_PAYMENT_LABEL_BASE,
-  orderFormPaymentCod: common.PRODUCT_PAGE_ORDER_FORM_PAYMENT_COD,
-  orderFormPaymentPreInvoice: common.PRODUCT_PAGE_ORDER_FORM_PAYMENT_PRE_INVOICE,
-  orderFormMessageLabel: common.PRODUCT_PAGE_ORDER_FORM_MESSAGE_LABEL,
-  orderFormMessagePlaceholder: common.PRODUCT_PAGE_ORDER_FORM_MESSAGE_PLACEHOLDER,
-  orderFormTermsLabel: common.PRODUCT_PAGE_ORDER_FORM_TERMS_LABEL,
-  orderFormSubmitButtonText: common.PRODUCT_PAGE_ORDER_FORM_SUBMIT_BUTTON_TEXT,
-  faqSectionTitle: common.PRODUCT_PAGE_FAQ_SECTION_TITLE,
-  faqBackButtonText: common.PRODUCT_PAGE_FAQ_BACK_BUTTON_TEXT,
-  relatedProductsTitle: common.PRODUCT_PAGE_RELATED_PRODUCTS_TITLE,
-  relatedProductViewButtonText: common.PRODUCT_PAGE_RELATED_PRODUCT_VIEW_BUTTON_TEXT,
-  customerSupportTitle: common.PRODUCT_PAGE_CUSTOMER_SUPPORT_SECTION_TITLE,
-  customerSupportEmail: www.PAGE_INFO_EMAIL,
-
-  validationNameRequired: common.PRODUCT_PAGE_VALIDATION_NAME_REQUIRED,
-  validationSurnameRequired: common.PRODUCT_PAGE_VALIDATION_SURNAME_REQUIRED,
-  validationStreetRequired: common.PRODUCT_PAGE_VALIDATION_STREET_REQUIRED,
-  validationCityRequired: common.PRODUCT_PAGE_VALIDATION_CITY_REQUIRED,
-  validationZipRequired: common.PRODUCT_PAGE_VALIDATION_ZIP_REQUIRED,
-  validationEmailRequired: common.PRODUCT_PAGE_VALIDATION_EMAIL_REQUIRED,
-  validationEmailInvalid: common.M_EMAIL_INVALID,
-  validationPhoneRequired: common.PRODUCT_PAGE_VALIDATION_PHONE_REQUIRED,
-  validationQuantityRequired: common.PRODUCT_PAGE_VALIDATION_QUANTITY_REQUIRED,
-  validationPaymentRequired: common.PRODUCT_PAGE_VALIDATION_PAYMENT_REQUIRED,
-  validationTermsRequired: common.PRODUCT_PAGE_VALIDATION_TERMS_REQUIRED,
-
-  formSuccessMessage: common.M_CONFIRMATION_TEXT
-};
-
-const productSchema = {
+// --- SCHEMA.ORG & METADATA ---
+const combinedSchema = [{
   "@context": "https://schema.org/",
   "@type": "Product",
   "name": product.PRODUCT_H1,
@@ -306,14 +184,12 @@ const productSchema = {
     "@type": "Offer",
     "url": Astro.url.href,
     "priceCurrency": product.M_CURRENCY_CODE,
-    "price": product.M_PRODUCT_PRICE,
+    "price": product.M_PRODUCT_PRICE_RECALC,
     "priceValidUntil": product.PRODUCT_EXPIRATION_DATE,
     "availability": "https://schema.org/InStock",
     "itemCondition": "https://schema.org/NewCondition"
   }
-};
-
-const faqSchema = {
+}, {
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": productFaqItems.map(item => ({
@@ -324,10 +200,7 @@ const faqSchema = {
       "text": item.answer
     }
   }))
-};
-
-// Organization Schema 
-const organizationSchema = {
+}, {
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": www.PAGE_ORGANISATION_FULL_NAME,
@@ -408,14 +281,10 @@ const organizationSchema = {
       "description": `A text resource outlining key information about ${www.PAGE_ORGANISATION_FULL_NAME} offerings, company, products, services, and more for AI agents and AI crawlers.`
     }
   ]
-};
+}];
 
-const combinedSchema = [productSchema, faqSchema, organizationSchema];
-
-const currentPageUrl = Astro.url.href;
-
+// --- FORM HANDLING ---
 const submissionResult = await Astro.getActionResult(actions.submitOrder);
-
 const formErrors: Record<string, string[] | undefined> = {};
 let genericError: string | undefined = undefined;
 let successMessage: string | undefined = undefined;
@@ -423,40 +292,23 @@ let successMessage: string | undefined = undefined;
 if (submissionResult) {
   if (submissionResult.error) {
     if (isInputError(submissionResult.error)) {
-      for (const fieldName in submissionResult.error.fields) {
-        formErrors[fieldName] = submissionResult.error.fields[fieldName];
-      }
-      if (formErrors.pageUrl) {
-        console.warn("Page URL validation error:", formErrors.pageUrl);
-      }
+      Object.assign(formErrors, submissionResult.error.fields);
     } else {
-      genericError = submissionResult.error.message || "Prišlo je do napake.";
+      genericError = submissionResult.error.message;
     }
   } else if (submissionResult.data?.success) {
-    successMessage = submissionResult.data.message || productPageLayoutStrings.formSuccessMessage;
+    // The success message now comes directly from the server action, already translated.
+    successMessage = submissionResult.data.message;
   }
 }
 
-function getFieldError(fieldName: string): string | undefined {
-  return formErrors[fieldName]?.[0];
-}
+const getFieldError = (fieldName: string): string | undefined => formErrors[fieldName]?.[0];
 
-// Build the language link map for the language picker
-const languageLinksMap = {};
+// Language switcher data
+const languageLinksMap: Record<string, string> = {};
 for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
-  // Find any published product for this locale to get the correct PAGE_CATEGORY_1_SLUG
-  const productForLocale = productData.find(p =>
-    p.M_SLUG === localeObj.M_SLUG &&
-    p.PUBLISH_Y_N === "1" &&
-    p.PAGE_CATEGORY_1_SLUG && p.PAGE_CATEGORY_1_SLUG.trim()
-  );
-  if (productForLocale) {
-    // Always use the slug from the product for that locale
-    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}/${productForLocale.PAGE_CATEGORY_1_SLUG}`;
-  } else {
-    // Fallback to homepage if no product listing exists
-    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}`;
-  }
+  const productForLocale = productData.find(p => p.M_SLUG === localeObj.M_SLUG && p.PUBLISH_Y_N === "1" && p.PAGE_CATEGORY_1_SLUG);
+  languageLinksMap[localeObj.M_SLUG] = productForLocale ? `/${localeObj.M_SLUG}/${productForLocale.PAGE_CATEGORY_1_SLUG}` : `/${localeObj.M_SLUG}`;
 }
 
 ---
@@ -492,31 +344,31 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
 
         <div class="lg:hidden mb-8">
           <div class="bg-black text-white rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-semibold mb-4 text-white">{productPageLayoutStrings.techSpecTitle}</h3>
+            <h3 class="text-lg font-semibold mb-4 text-white">{common.PRODUCT_SPECIFICATIONS_TITLE}</h3>
             <ul class="space-y-4">
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M3 5h11m-2 2l2-2l-2-2M5 3L3 5l2 2m14 3v11m-2-2l2 2l2-2m0-7l-2-2l-2 2M3 12a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
                 </span>
-                <div><span class="block font-medium text-white">{productPageLayoutStrings.techSpecDimensionsLabel}</span><span class="text-sm text-gray-300">{productCoreData.specifications.dimensions}</span></div>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_1}</span><span class="text-sm text-gray-300">{productCoreData.specifications.dimensions}</span></div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                 </span>
-                <div><span class="block font-medium text-white">{productPageLayoutStrings.techSpecMaterialLabel}</span><span class="text-sm text-gray-300">{productCoreData.specifications.material}</span></div>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_2}</span><span class="text-sm text-gray-300">{productCoreData.specifications.material}</span></div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 7q.425 0 .713-.288T13 6t-.288-.712T12 5t-.712.288T11 6t.288.713T12 7m2.825 0h1.75q.75 0 1.3.5t.675 1.225l1.425 10q.125.9-.462 1.588T18 21H6q-.925 0-1.513-.687t-.462-1.588l1.425-10Q5.575 8 6.125 7.5t1.3-.5h1.75q-.075-.25-.125-.487T9 6q0-1.25.875-2.125T12 3t2.125.875T15 6q0 .275-.05.513T14.825 7"/></svg>
                 </span>
-                <div><span class="block font-medium text-white">{productPageLayoutStrings.techSpecWeightLabel}</span><span class="text-sm text-gray-300">{productCoreData.specifications.weight}</span></div>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_3}</span><span class="text-sm text-gray-300">{productCoreData.specifications.weight}</span></div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                 </span>
-                <div><span class="block font-medium text-white">{productPageLayoutStrings.techSpecVisibilityLabel}</span><span class="text-sm text-gray-300">{productCoreData.specifications.visibility}</span></div>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_4}</span><span class="text-sm text-gray-300">{productCoreData.specifications.visibility}</span></div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
@@ -534,7 +386,7 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
                     <use width="342" height="234" href="#meteoconsWind_mobile" transform="translate(85 139)"/>
                   </svg>
                 </span>
-                <div><span class="block font-medium text-white">{productPageLayoutStrings.techSpecWindResistanceLabel}</span><span class="text-sm text-gray-300">{productCoreData.specifications.windResistance}</span></div>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_5}</span><span class="text-sm text-gray-300">{productCoreData.specifications.windResistance}</span></div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
@@ -548,7 +400,7 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
                     </rect>
                   </svg>
                 </span>
-                <div><span class="block font-medium text-white">{productPageLayoutStrings.techSpecSetupTimeLabel}</span><span class="text-sm text-gray-300">{productCoreData.specifications.setupTime}</span></div>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_6}</span><span class="text-sm text-gray-300">{productCoreData.specifications.setupTime}</span></div>
               </li>
             </ul>
           </div>
@@ -557,7 +409,7 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
         <div class="product-details">
           <p class="text-2xl text-black font-semibold pl-4 pr-4 underline decoration-signal-green mb-4">{productCoreData.price}</p>
           <a href="#narocilnica" class="inline-block bg-black text-signal-green border border-signal-green font-semibold py-3 px-6 rounded-lg hover:bg-signal-green hover:text-black transition-colors mb-8">
-            <span class="flex items-center">{productPageLayoutStrings.orderButtonText}<svg class="w-5 h-5 ml-2" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></span>
+            <span class="flex items-center">{common.FORM_BUTTON_TO_ORDER}<svg class="w-5 h-5 ml-2" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></span>
           </a>
           
           <!-- Content  -->
@@ -622,8 +474,8 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
 
           <section id="narocilnica" class="scroll-mt-24 mb-8">
             <div class="bg-white rounded-lg shadow-sm p-8 border-2 border-signal-green">
-              <h2 class="text-2xl font-bold mb-6 text-black">{productPageLayoutStrings.orderFormTitle}</h2>
-              <p class="text-signal-gray mb-6">{productPageLayoutStrings.orderFormSubtitleBase} {productCoreData.h1}.</p>
+              <h2 class="text-2xl font-bold mb-6 text-black">{common.FORM_INQUIRY_TITLE}</h2>
+              <p class="text-signal-gray mb-6">{common.FORM_ORDER_SUBTITLE_BASE} {productCoreData.h1}.</p>
 
               {successMessage && !submissionResult?.error && (
                 <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
@@ -637,116 +489,94 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
                 </div>
               )}
 
-              <form id="productOrderForm" method="POST" action={actions.submitOrder} class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <form id="productOrderForm" method="POST" action={actions.submitOrder.safe} class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input type="hidden" name="productTitle" value={productCoreData.h1} />
-                <input type="hidden" name="pageUrl" value={currentPageUrl} />
+                <input type="hidden" name="pageUrl" value={Astro.url.href} />
+                <input type="hidden" name="locale" value={locale} />
 
                 <div>
-                  <label for="form-name" class="block text-sm font-medium text-signal-gray mb-1">{productPageLayoutStrings.orderFormNameLabel}</label>
-                  <input id="form-name" type="text" name="Name" placeholder={productPageLayoutStrings.orderFormNamePlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Name') }]} aria-invalid={getFieldError('Name') ? "true" : "false"} aria-describedby={getFieldError('Name') ? "name-error" : undefined} required />
-                  {getFieldError('Name') && <div id="name-error" class="text-red-500 text-sm mt-1">{getFieldError('Name')}</div>}
-                  {!getFieldError('Name') && <div class="empty-feedback text-red-400 text-sm mt-1" style="display:none;">{productPageLayoutStrings.validationNameRequired}</div>}
+                  <label for="form-name" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_NAME}</label>
+                  <input id="form-name" type="text" name="Name" placeholder={common.FORM_PLACEHOLDER_NAME} class:list={["w-full px-3 py-2 border rounded-md", getFieldError('Name') ? 'border-red-500' : 'border-gray-300']} required />
+                  {getFieldError('Name') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_NAME_REQUIRED}</p>}
                 </div>
                 <div>
-                  <label for="form-surname" class="block text-sm font-medium text-signal-gray mb-1">{productPageLayoutStrings.orderFormSurnameLabel}</label>
-                  <input id="form-surname" type="text" name="Last Name" placeholder={productPageLayoutStrings.orderFormSurnamePlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Last Name') }]} aria-invalid={getFieldError('Last Name') ? "true" : "false"} aria-describedby={getFieldError('Last Name') ? "surname-error" : undefined} required />
-                  {getFieldError('Last Name') && <div id="surname-error" class="text-red-500 text-sm mt-1">{getFieldError('Last Name')}</div>}
-                  {!getFieldError('Last Name') && <div class="empty-feedback text-red-400 text-sm mt-1" style="display:none;">{productPageLayoutStrings.validationSurnameRequired}</div>}
+                  <label for="form-surname" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_SURNAME}</label>
+                  <input id="form-surname" type="text" name="Last Name" placeholder={common.FORM_PLACEHOLDER_SURNAME} class:list={["w-full px-3 py-2 border rounded-md", getFieldError('Last Name') ? 'border-red-500' : 'border-gray-300']} required />
+                  {getFieldError('Last Name') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_SURNAME_REQUIRED}</p>}
                 </div>
                 <div>
-                  <label for="form-company" class="block text-sm font-medium text-signal-gray mb-1">{productPageLayoutStrings.orderFormCompanyLabel}</label>
-                  <input id="form-company" type="text" name="Company" placeholder={productPageLayoutStrings.orderFormCompanyPlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Company') }]} aria-invalid={getFieldError('Company') ? "true" : "false"} aria-describedby={getFieldError('Company') ? "company-error" : undefined} />
-                  {getFieldError('Company') && <div id="company-error" class="text-red-500 text-sm mt-1">{getFieldError('Company')}</div>}
+                  <label for="form-company" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_COMPANY}</label>
+                  <input id="form-company" type="text" name="Company" placeholder={common.FORM_PLACEHOLDER_COMPANY} class="w-full px-3 py-2 border border-gray-300 rounded-md" />
                 </div>
                 <div>
-                  <label for="form-vatid" class="block text-sm font-medium text-signal-gray mb-1">{productPageLayoutStrings.orderFormVatIdLabel}</label>
-                  <input id="form-vatid" type="text" name="VAT ID" placeholder={productPageLayoutStrings.orderFormVatIdPlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('VAT ID') }]} aria-invalid={getFieldError('VAT ID') ? "true" : "false"} aria-describedby={getFieldError('VAT ID') ? "vatid-error" : undefined} />
-                  {getFieldError('VAT ID') && <div id="vatid-error" class="text-red-500 text-sm mt-1">{getFieldError('VAT ID')}</div>}
+                  <label for="form-vatid" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_VAT_ID}</label>
+                  <input id="form-vatid" type="text" name="VAT ID" placeholder={common.FORM_PLACEHOLDER_VAT_ID} class="w-full px-3 py-2 border border-gray-300 rounded-md" />
                 </div>
                 <div>
-                  <label for="form-street" class="block text-sm font-medium text-signal-gray mb-1">{productPageLayoutStrings.orderFormStreetLabel}</label>
-                  <input id="form-street" type="text" name="Street" placeholder={productPageLayoutStrings.orderFormStreetPlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Street') }]} aria-invalid={getFieldError('Street') ? "true" : "false"} aria-describedby={getFieldError('Street') ? "street-error" : undefined} required />
-                  {getFieldError('Street') && <div id="street-error" class="text-red-500 text-sm mt-1">{getFieldError('Street')}</div>}
-                  {!getFieldError('Street') && <div class="empty-feedback text-red-400 text-sm mt-1" style="display:none;">{productPageLayoutStrings.validationStreetRequired}</div>}
+                  <label for="form-street" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_STREET}</label>
+                  <input id="form-street" type="text" name="Street" placeholder={common.FORM_PLACEHOLDER_STREET} class:list={["w-full px-3 py-2 border rounded-md", getFieldError('Street') ? 'border-red-500' : 'border-gray-300']} required />
+                  {getFieldError('Street') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_STREET_REQUIRED}</p>}
                 </div>
                 <div>
-                  <label for="form-city" class="block text-sm font-medium text-signal-gray mb-1">{productPageLayoutStrings.orderFormCityLabel}</label>
-                  <input id="form-city" type="text" name="Location" placeholder={productPageLayoutStrings.orderFormCityPlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Location') }]} aria-invalid={getFieldError('Location') ? "true" : "false"} aria-describedby={getFieldError('Location') ? "city-error" : undefined} required />
-                  {getFieldError('Location') && <div id="city-error" class="text-red-500 text-sm mt-1">{getFieldError('Location')}</div>}
-                  {!getFieldError('Location') && <div class="empty-feedback text-red-400 text-sm mt-1" style="display:none;">{productPageLayoutStrings.validationCityRequired}</div>}
+                  <label for="form-city" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_CITY}</label>
+                  <input id="form-city" type="text" name="Location" placeholder={common.FORM_PLACEHOLDER_CITY} class:list={["w-full px-3 py-2 border rounded-md", getFieldError('Location') ? 'border-red-500' : 'border-gray-300']} required />
+                  {getFieldError('Location') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_CITY_REQUIRED}</p>}
                 </div>
                 <div>
-                  <label for="form-zip" class="block text-sm font-medium text-signal-gray mb-1">{productPageLayoutStrings.orderFormZipLabel}</label>
-                  <input id="form-zip" type="text" name="Postal Code" placeholder={productPageLayoutStrings.orderFormZipPlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Postal Code') }]} aria-invalid={getFieldError('Postal Code') ? "true" : "false"} aria-describedby={getFieldError('Postal Code') ? "zip-error" : undefined} required />
-                  {getFieldError('Postal Code') && <div id="zip-error" class="text-red-500 text-sm mt-1">{getFieldError('Postal Code')}</div>}
-                  {!getFieldError('Postal Code') && <div class="empty-feedback text-red-400 text-sm mt-1" style="display:none;">{productPageLayoutStrings.validationZipRequired}</div>}
+                  <label for="form-zip" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_ZIP}</label>
+                  <input id="form-zip" type="text" name="Postal Code" placeholder={common.FORM_PLACEHOLDER_ZIP} class:list={["w-full px-3 py-2 border rounded-md", getFieldError('Postal Code') ? 'border-red-500' : 'border-gray-300']} required />
+                  {getFieldError('Postal Code') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_ZIP_REQUIRED}</p>}
                 </div>
                 <div>
-                  <label for="form-email" class="block text-sm font-medium text-signal-gray mb-1">{productPageLayoutStrings.orderFormEmailLabel}</label>
-                  <input id="form-email" type="email" name="email" placeholder={productPageLayoutStrings.orderFormEmailPlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('email') }]} aria-invalid={getFieldError('email') ? "true" : "false"} aria-describedby={getFieldError('email') ? "email-error" : undefined} required />
-                  {getFieldError('email') && <div id="email-error" class="text-red-500 text-sm mt-1">{getFieldError('email')}</div>}
-                  {!getFieldError('email') && <> <div class="empty-feedback text-red-400 text-sm mt-1" style="display:none;">{productPageLayoutStrings.validationEmailRequired}</div> <div class="invalid-feedback text-red-400 text-sm mt-1" style="display:none;">{productPageLayoutStrings.validationEmailInvalid}</div> </>}
+                  <label for="form-email" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_EMAIL}</label>
+                  <input id="form-email" type="email" name="email" placeholder={common.FORM_PLACEHOLDER_EMAIL} class:list={["w-full px-3 py-2 border rounded-md", getFieldError('email') ? 'border-red-500' : 'border-gray-300']} required />
+                  {getFieldError('email') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_EMAIL_INVALID}</p>}
                 </div>
                 <div>
-                  <label for="form-phone" class="block text-sm font-medium text-signal-gray mb-1">{productPageLayoutStrings.orderFormPhoneLabel}</label>
-                  <input id="form-phone" type="tel" name="Telephone Number" placeholder={productPageLayoutStrings.orderFormPhonePlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Telephone Number') }]} aria-invalid={getFieldError('Telephone Number') ? "true" : "false"} aria-describedby={getFieldError('Telephone Number') ? "phone-error" : undefined} required />
-                  {getFieldError('Telephone Number') && <div id="phone-error" class="text-red-500 text-sm mt-1">{getFieldError('Telephone Number')}</div>}
-                  {!getFieldError('Telephone Number') && <div class="empty-feedback text-red-400 text-sm mt-1" style="display:none;">{productPageLayoutStrings.validationPhoneRequired}</div>}
+                  <label for="form-phone" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_PHONE}</label>
+                  <input id="form-phone" type="tel" name="Telephone Number" placeholder={common.FORM_PLACEHOLDER_PHONE} class:list={["w-full px-3 py-2 border rounded-md", getFieldError('Telephone Number') ? 'border-red-500' : 'border-gray-300']} required />
+                  {getFieldError('Telephone Number') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_PHONE_REQUIRED}</p>}
                 </div>
                 <div>
-                  <label for="form-quantity" class="block text-sm font-medium text-signal-gray mb-1">{productPageLayoutStrings.orderFormQuantityLabel}</label>
-                  <select id="form-quantity" name="Quantity" class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Quantity') }]} aria-invalid={getFieldError('Quantity') ? "true" : "false"} aria-describedby={getFieldError('Quantity') ? "quantity-error" : undefined} required>
-                    <option value="">{productPageLayoutStrings.orderFormQuantityDefaultOption}</option>
+                  <label for="form-quantity" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_QUANTITY}</label>
+                  <select id="form-quantity" name="Quantity" class:list={["w-full px-3 py-2 border rounded-md", getFieldError('Quantity') ? 'border-red-500' : 'border-gray-300']} required>
+                    <option value="">{common.FORM_OPTION_QUANTITY_DEFAULT}</option>
                     {productQuantityOptions.map(qty => <option value={String(qty)}>{qty}</option>)}
                   </select>
-                  {getFieldError('Quantity') && <div id="quantity-error" class="text-red-500 text-sm mt-1">{getFieldError('Quantity')}</div>}
-                  {!getFieldError('Quantity') && <div class="empty-feedback text-red-400 text-sm mt-1" style="display:none;">{productPageLayoutStrings.validationQuantityRequired}</div>}
+                  {getFieldError('Quantity') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_QUANTITY_REQUIRED}</p>}
                 </div>
                 <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-signal-gray mb-1">{productPageLayoutStrings.orderFormPaymentLabelBase}{productCoreData.price} + DDV)*</label>
-                  <div id="payment-group" role="radiogroup" aria-labelledby={getFieldError('Payment') ? "payment-error" : undefined}>
-                    <label class="flex items-center">
-                      <input id="payment-cod" type="radio" name="Payment" value="Cash on Delivery" class:list={["mr-2", { "border-red-500": getFieldError('Payment') }]} required />
-                      <span>{productPageLayoutStrings.orderFormPaymentCod}</span>
-                    </label>
-                    <label class="flex items-center">
-                      <input id="payment-preinvoice" type="radio" name="Payment" value="Proforma Invoice" class:list={["mr-2", { "border-red-500": getFieldError('Payment') }]} required />
-                      <span>{productPageLayoutStrings.orderFormPaymentPreInvoice}</span>
-                    </label>
-                    {getFieldError('Payment') && <div id="payment-error" class="text-red-500 text-sm mt-1">{getFieldError('Payment')}</div>}
-                    {!getFieldError('Payment') && <div class="empty-feedback text-red-400 text-sm mt-1" style="display:none;">{productPageLayoutStrings.validationPaymentRequired}</div>}
+                  <label class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_PAYMENT} ({productCoreData.price} + {common.M_VAT_NAME_LABEL})*</label>
+                  <div role="radiogroup">
+                    <label class="flex items-center"><input type="radio" name="Payment" value="Cash on Delivery" class="mr-2" required /><span>{common.FORM_OPTION_PAYMENT_COD}</span></label>
+                    <label class="flex items-center"><input type="radio" name="Payment" value="Proforma Invoice" class="mr-2" required /><span>{common.FORM_OPTION_PAYMENT_PREINVOICE}</span></label>
+                    {getFieldError('Payment') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_PAYMENT_REQUIRED}</p>}
                   </div>
                 </div>
                 <div class="md:col-span-2">
-                  <label for="form-message" class="block text-sm font-medium text-signal-gray mb-1">{productPageLayoutStrings.orderFormMessageLabel}</label>
-                  <textarea id="form-message" name="Message" rows="4" placeholder={productPageLayoutStrings.orderFormMessagePlaceholder} class:list={["w-full px-3 py-2 border border-gray-300 rounded-md", { "border-red-500": getFieldError('Message') }]} aria-invalid={getFieldError('Message') ? "true" : "false"} aria-describedby={getFieldError('Message') ? "message-error" : undefined}></textarea>
-                  {getFieldError('Message') && <div id="message-error" class="text-red-500 text-sm mt-1">{getFieldError('Message')}</div>}
+                  <label for="form-message" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_MESSAGE}</label>
+                  <textarea id="form-message" name="Message" rows="4" placeholder={common.FORM_PLACEHOLDER_MESSAGE_ORDER} class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
                 </div>
-
-                <div class="md:col-span-2 terms-wrapper">
-                  <label for="form-terms" class="flex items-center">
-                    <input id="form-terms" type="checkbox" name="Conditions" class:list={["mr-2", { "border-red-500": getFieldError('Conditions') }]} aria-invalid={getFieldError('Conditions') ? "true" : "false"} aria-describedby={getFieldError('Conditions') ? "terms-error" : undefined} required />
-                    <span class="text-sm">{productPageLayoutStrings.orderFormTermsLabel}</span>
+                <div class="md:col-span-2">
+                  <label class="flex items-center">
+                    <input id="form-terms" type="checkbox" name="Conditions" class:list={["mr-2", getFieldError('Conditions') ? 'border-red-500' : '']} required />
+                    <span class="text-sm">{common.FORM_LABEL_TERMS}</span>
                   </label>
-                   {getFieldError('Conditions') && <div id="terms-error" class="text-red-500 text-sm mt-1">{getFieldError('Conditions')}</div>}
-                   {!getFieldError('Conditions') && <div class="empty-feedback text-red-400 text-sm mt-1" data-for="form-terms" style="display:none;">{productPageLayoutStrings.validationTermsRequired}</div>}
+                  {getFieldError('Conditions') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_TERMS_REQUIRED}</p>}
                 </div>
 
                 <div class="md:col-span-2">
                   <button type="submit" class="w-full bg-black text-signal-green border border-signal-green font-semibold py-3 px-6 rounded-lg hover:bg-signal-green hover:text-black transition-colors flex items-center justify-center relative overflow-hidden">
-                    <span class="relative z-10">{productPageLayoutStrings.orderFormSubmitButtonText}</span>
+                    <span class="relative z-10">{common.FORM_BUTTON_SUBMIT_ORDER}</span>
                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shine_2s_infinite]" aria-hidden="true"></div>
                   </button>
-                </div>
-                <div id="productOrderFormResult" class="md:col-span-2 mt-3 text-center">
-                  {/* This div is now handled by the messages above the form */}
                 </div>
               </form>
             </div>
           </section>
 
           <section class="bg-signal-green rounded-xl p-8 mt-12">
-             <h2 class="text-2xl font-bold mb-6 text-black">{productPageLayoutStrings.faqSectionTitle}</h2>
+            <h2 class="text-2xl font-bold mb-6 text-black">{common.FORM_FAQ_TITLE}</h2>
             <div class="space-y-4">
               {productFaqItems.map((item) => (
                 <details class="bg-signal-green rounded-lg group">
@@ -761,15 +591,15 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
             <div class="text-center mt-8">
               <a href="#narocilnica" class="inline-flex items-center bg-white text-black border border-black font-medium py-3 px-6 rounded-lg hover:bg-black hover:text-white transition-colors">
                 <svg class="w-5 h-5 mr-2 transition-colors" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
-                {productPageLayoutStrings.faqBackButtonText}
+                {common.FORM_BUTTON_BACK_TO_ORDER}
               </a>
             </div>
           </section>
         </div>
 
-        {filteredRelatedProducts && filteredRelatedProducts.length > 0 && (
+        {filteredRelatedProducts.length > 0 && (
           <section aria-labelledby="related-products-heading" class="mt-16">
-            <h2 id="related-products-heading" class="text-2xl font-bold mb-6">{productPageLayoutStrings.relatedProductsTitle}</h2>
+            <h2 id="related-products-heading" class="text-2xl font-bold mb-6">{common.PRODUCT_PAGE_RELATED_PRODUCTS_TITLE}</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredRelatedProducts.map(relatedP => (
                 <div class="product-card bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
@@ -785,7 +615,7 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
                   </a>
                   <div class="p-4">
                     <h3 class="font-medium text-lg mb-4"><a href={relatedP.url} class="text-signal-dark hover:text-signal-green transition-colors">{relatedP.title}</a></h3>
-                    <a href={relatedP.url} class="inline-block bg-white border border-signal-gray hover:border-signal-green text-signal-dark font-medium py-2 px-4 rounded-md transition-colors w-full text-center">{productPageLayoutStrings.relatedProductViewButtonText}</a>
+                    <a href={relatedP.url} class="inline-block bg-white border border-signal-gray hover:border-signal-green text-signal-dark font-medium py-2 px-4 rounded-md transition-colors w-full text-center">{common.PRODUCT_PAGE_RELATED_PRODUCT_VIEW_BUTTON_TEXT}</a>
                   </div>
                 </div>
               ))}
@@ -794,7 +624,7 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
         )}
 
         {/* Related Articles Section */}
-        {relatedArticles && relatedArticles.length > 0 && (
+        {relatedArticles.length > 0 && (
           <section aria-labelledby="related-articles-heading" class="mt-16">
             <h2 id="related-articles-heading" class="text-2xl font-bold mb-6">{common.ARTICLE_RELATED_ARTICLES}</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -822,37 +652,37 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
       <div class="hidden lg:block lg:w-1/3">
         <aside class="bg-black text-white rounded-lg shadow-sm p-6 sticky top-20">
           <div class="mb-6">
-            <h3 class="text-lg font-semibold mb-4 text-white">{productPageLayoutStrings.techSpecTitle}</h3>
+            <h3 class="text-lg font-semibold mb-4 text-white">{common.PRODUCT_SPECIFICATIONS_TITLE}</h3>
             <ul class="space-y-4">
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M3 5h11m-2 2l2-2l-2-2M5 3L3 5l2 2m14 3v11m-2-2l2 2l2-2m0-7l-2-2l-2 2M3 12a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
                 </span>
-                <div><span class="block font-medium text-white">{productPageLayoutStrings.techSpecDimensionsLabel}</span><span class="text-sm text-gray-300">{productCoreData.specifications.dimensions}</span></div>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_1}</span><span class="text-sm text-gray-300">{productCoreData.specifications.dimensions}</span></div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                 </span>
-                <div><span class="block font-medium text-white">{productPageLayoutStrings.techSpecMaterialLabel}</span><span class="text-sm text-gray-300">{productCoreData.specifications.material}</span></div>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_2}</span><span class="text-sm text-gray-300">{productCoreData.specifications.material}</span></div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 7q.425 0 .713-.288T13 6t-.288-.712T12 5t-.712.288T11 6t.288.713T12 7m2.825 0h1.75q.75 0 1.3.5t.675 1.225l1.425 10q.125.9-.462 1.588T18 21H6q-.925 0-1.513-.687t-.462-1.588l1.425-10Q5.575 8 6.125 7.5t1.3-.5h1.75q-.075-.25-.125-.487T9 6q0-1.25.875-2.125T12 3t2.125.875T15 6q0 .275-.05.513T14.825 7"/></svg>
                 </span>
-                <div><span class="block font-medium text-white">{productPageLayoutStrings.techSpecWeightLabel}</span><span class="text-sm text-gray-300">{productCoreData.specifications.weight}</span></div>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_3}</span><span class="text-sm text-gray-300">{productCoreData.specifications.weight}</span></div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                 </span>
-                <div><span class="block font-medium text-white">{productPageLayoutStrings.techSpecVisibilityLabel}</span><span class="text-sm text-gray-300">{productCoreData.specifications.visibility}</span></div>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_4}</span><span class="text-sm text-gray-300">{productCoreData.specifications.visibility}</span></div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 512 512" aria-hidden="true">
                     <defs>
-                      <symbol id="meteoconsWind_desktop" viewBox="0 0 342 234"> {/* Unique ID for second instance */}
+                      <symbol id="meteoconsWind_desktop" viewBox="0 0 342 234">
                         <path fill="none" stroke="currentColor" stroke-dasharray="148" stroke-linecap="round" stroke-miterlimit="10" stroke-width="18" d="M264.2 21.3A40 40 0 1 1 293 89H9">
                           <animate attributeName="stroke-dashoffset" dur="7.2s" repeatCount="indefinite" values="0; 2960"/>
                         </path>
@@ -864,7 +694,7 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
                     <use width="342" height="234" href="#meteoconsWind_desktop" transform="translate(85 139)"/>
                   </svg>
                 </span>
-                <div><span class="block font-medium text-white">{productPageLayoutStrings.techSpecWindResistanceLabel}</span><span class="text-sm text-gray-300">{productCoreData.specifications.windResistance}</span></div>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_5}</span><span class="text-sm text-gray-300">{productCoreData.specifications.windResistance}</span></div>
               </li>
               <li class="flex items-start">
                 <span class="text-signal-green mr-3">
@@ -878,15 +708,15 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
                     </rect>
                   </svg>
                 </span>
-                <div><span class="block font-medium text-white">{productPageLayoutStrings.techSpecSetupTimeLabel}</span><span class="text-sm text-gray-300">{productCoreData.specifications.setupTime}</span></div>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_6}</span><span class="text-sm text-gray-300">{productCoreData.specifications.setupTime}</span></div>
               </li>
             </ul>
           </div>
           <div class="mb-6 border-t border-gray-700 pt-6">
-            <h3 class="text-lg font-semibold mb-4 text-white">{productPageLayoutStrings.customerSupportTitle}</h3>
+            <h3 class="text-lg font-semibold mb-4 text-white">{common.M_CUSTOMER_SUPPORT}</h3>
             <div class="flex items-center">
               <span class="text-signal-green mr-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><mask id="lineMdEmailArrowRightFilled_customerSupport"><g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="64" stroke-dashoffset="64" d="M4 5h16c0.55 0 1 0.45 1 1v12c0 0.55 -0.45 1 -1 1h-16c-0.55 0 -1 -0.45 -1 -1v-12c0 -0.55 0.45 -1 1 -1Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.72s" values="64;0"/></path><path stroke-dasharray="24" stroke-dashoffset="24" d="M3 6.5l9 5.5l9 -5.5"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.72s" dur="0.24s" values="24;0"/></path><path fill="#fff" fill-opacity="0" stroke="none" d="M12 11l-8 -5h16l-8 5Z"><animate fill="freeze" attributeName="fill-opacity" begin="1.44s" dur="0.6s" values="0;1"/></path><path fill="#000" fill-opacity="0" stroke="none" d="M19 13c3.31 0 6 2.69 6 6c0 3.31 -2.69 6 -6 6c-3.31 0 -6 -2.69 -6 -6c0 -3.31 2.69 -6 6 -6Z"><set fill="freeze" attributeName="fill-opacity" begin="0.96s" to="1"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M16 19h5"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.96s" dur="0.24s" values="6;0"/></path><path stroke-dasharray="4" stroke-dashoffset="4" d="M21 19l-2 2M21 19l-2 -2"><animate fill="freeze" attributeName="stroke-dashoffset" begin="1.2s" dur="0.24s" values="4;0"/></path></g></mask><rect width="24" height="24" fill="currentColor" mask="url(#lineMdEmailArrowRightFilled_customerSupport)"/></svg></span>
-              <a href={`mailto:${productPageLayoutStrings.customerSupportEmail}`} class="text-signal-green hover:underline">{productPageLayoutStrings.customerSupportEmail}</a>
+              <a href={`mailto:${www.PAGE_INFO_EMAIL}`} class="text-signal-green hover:underline">{www.PAGE_INFO_EMAIL}</a>
             </div>
           </div>
         </aside>
@@ -900,30 +730,9 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
   .animate-\[shine\_2s\_infinite\] { animation: shine 2s infinite; }
   details > summary { list-style: none; }
   details > summary::-webkit-details-marker { display: none; }
-
-  .invalid-feedback,
-  .empty-feedback {
-    display: none;
-  }
-
-  input:user-invalid ~ .empty-feedback,
-  input:user-invalid ~ .invalid-feedback,
-  select:user-invalid ~ .empty-feedback,
-  input[type="radio"]:user-invalid ~ .empty-feedback,
-  input[type="checkbox"]:user-invalid ~ .empty-feedback {
-    display: block;
-  }
-
-  input:invalid,
-  select:invalid,
-  textarea:invalid {
-  }
-  input:invalid:focus,
-  select:invalid:focus,
-  textarea:invalid:focus {
-  }
-  .border-red-500 {
-      border-color: #ef4444;
+  /* Client side validation styles for modern browsers */
+  :where(input, select, textarea):user-invalid {
+      border-color: #ef4444; /* red-500 */
   }
 </style>
 

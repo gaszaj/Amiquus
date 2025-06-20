@@ -4,6 +4,7 @@ import headerFooterData from '../data/headerfooter.json';
 import commonData from '../data/common.json';
 import eeatData from '../data/eeat.json';
 import products from '../data/product.json';
+import wwwData from '../data/www.json';
 import * as flags from 'country-flag-icons/string/3x2';
 
 const currentYear = new Date().getFullYear();
@@ -22,6 +23,7 @@ const getCountryCode = (locale: string) => {
 // Find matching data for current locale
 const headerFooter = headerFooterData.find(data => data.M_SLUG === currentLocale) || headerFooterData[0];
 const common = commonData.find(data => data.M_SLUG === currentLocale) || commonData[0];
+const www = wwwData.find(data => data.M_SLUG === currentLocale) || wwwData[0];
 
 // Get current country flag
 const currentCountryCode = getCountryCode(currentLocale);
@@ -50,20 +52,6 @@ const getProductById = (productId: string) => {
   );
 };
 
-// Debug logging
-console.log('Current Locale:', currentLocale);
-console.log('Product IDs:', {
-  id1: headerFooter.FOOTER_BESTSELLERS_ID_1,
-  id2: headerFooter.FOOTER_BESTSELLERS_ID_2,
-  id3: headerFooter.FOOTER_BESTSELLERS_ID_3,
-  id4: headerFooter.FOOTER_BESTSELLERS_ID_4,
-  id5: headerFooter.FOOTER_BESTSELLERS_ID_5,
-  id6: headerFooter.FOOTER_BESTSELLERS_ID_6,
-  id7: headerFooter.FOOTER_BESTSELLERS_ID_7,
-  id8: headerFooter.FOOTER_BESTSELLERS_ID_8,
-  id9: headerFooter.FOOTER_BESTSELLERS_ID_9
-});
-
 // Filter and sort bestsellers based on criteria for specific locale
 const bestSellers = products
   .filter(product => 
@@ -81,11 +69,8 @@ const bestSellers = products
   .slice(0, 6) // Get top 6 bestsellers for footer
   .map(product => ({
     text: product.PRODUCT_NAME,
-    href: `/${product.M_SLUG}/${product.PRODUCT_CATEGORY_1_SLUG}/${product.PRODUCT_ASCII_SLUG}`
+    href: `/${product.M_SLUG}/${product.PAGE_CATEGORY_1_SLUG}/${product.PRODUCT_ASCII_SLUG}`
   }));
-
-// Debug logging
-console.log('Final bestSellers array:', bestSellers);
 
 // Define footer navigation groups with exact EEAT page mapping
 const footerNavGroups = [
@@ -309,9 +294,9 @@ const bundles = [
           <div>
             <h5 class="font-medium mb-1">{common.M_ADDRESS}</h5>
             <address class="text-gray-300 not-italic">
-              Elsav Veržej d.o.o.<br>
-              Narcisna ulica 11<br>
-              9241 Veržej, Slovenia
+              {www.PAGE_COMPANY_NAME_GLOBAL}<br>
+              {www.PAGE_STREET_ADDRESS_GLOBAL}<br>
+              {www.PAGE_POSTAL_CITY_GLOBAL}, {www.PAGE_COUNTRY_GLOBAL}
             </address>
           </div>
         </div>
@@ -358,7 +343,7 @@ const bundles = [
     <div class="border-t border-gray-800 mt-8 pt-6">
       <div class="flex flex-col items-center text-center">
         <p class="text-gray-400 text-sm">
-          <span class="block md:inline">&copy; {currentYear} <span class="text-signal-green">{common.PAGE_ORGANISATION_FULL_NAME} BRAND</span></span>
+          <span class="block md:inline">&copy; {currentYear} <span class="text-signal-green">{common.PAGE_ORGANISATION_FULL_NAME} {common.M_BRAND_LABEL}</span></span>
           <span class="hidden md:inline mx-2">|</span>
           <span class="block md:inline mt-2 md:mt-0">{common.M_COPYRIGHT}</span>
         </p>

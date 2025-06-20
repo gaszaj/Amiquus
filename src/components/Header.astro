@@ -35,6 +35,18 @@ const locale = propLocale || Astro.url.pathname.split('/')[1] || 'si';
 const headerFooter = headerFooterData.find(item => item.M_SLUG === locale) || headerFooterData[0];
 const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
 
+// Define default English texts for aria-labels (these will be used if common.json doesn't provide specific translations)
+let ariaLabelSearch1 = "Open mobile menu";
+let ariaLabelSearch2 = "Search";
+let ariaLabelSearch3 = "Close search";
+
+// If a matching locale object is found, use its translations, otherwise stick to English defaults
+if (common) {
+  ariaLabelSearch1 = common.PAGEFIND_ARIA_LABEL_SEARCH_1 || ariaLabelSearch1;
+  ariaLabelSearch2 = common.PAGEFIND_ARIA_LABEL_SEARCH_2 || ariaLabelSearch2;
+  ariaLabelSearch3 = common.PAGEFIND_ARIA_LABEL_SEARCH_3 || ariaLabelSearch3;
+}
+
 // Header component for the EU Signal website
 const navigation = [
   { name: common.M_HOME_NAME, href: `/${locale}` },
@@ -197,7 +209,7 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
         <button
             type="button"
             class="text-gray-300 hover:text-white"
-            aria-label="Toggle menu"
+            aria-label={ariaLabelSearch1}
             id="mobile-menu-button"
         >
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -318,7 +330,7 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
       <button
         type="submit"
         class="absolute inset-y-0 right-0 flex items-center pr-5 text-gray-400 hover:text-signal-green transition-colors"
-        aria-label="Submit search"
+        aria-label={ariaLabelSearch2}
       >
         <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
@@ -340,7 +352,7 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
     <button 
       id="search-overlay-close-button" 
       class="absolute -top-12 -right-0 md:-right-12 text-gray-400 hover:text-white" 
-      aria-label="Close search"
+      aria-label={ariaLabelSearch3}
     >
       <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
@@ -522,7 +534,7 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
     const performSearch = (query) => {
       // If index isn't loaded for some reason, inform the user and retry.
       if (searchIndex.length === 0 && query) {
-         searchStatus.innerHTML = `Nalaganje iskalnega indeksa...`;
+         searchStatus.innerHTML = common.PAGEFIND_INDEX_PROGRESS;
          loadSearchIndex().then(() => performSearch(query));
          return;
       }
