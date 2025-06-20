@@ -1,9 +1,13 @@
+// astro.config.mjs
+
 // @ts-check
-import { defineConfig } from 'astro/config';
-import tailwind from '@astrojs/tailwind';
 import { defineConfig, passthroughImageService } from 'astro/config';
+import tailwind from '@astrojs/tailwind';
 import netlify from '@astrojs/netlify';
 import manageLocales from './integrations/locale-manager.js';
+
+// Handling the dynamic import for the compressor at the top level
+const compressIntegration = (await import("@playform/compress")).default;
 
 // https://astro.build/config
 export default defineConfig({
@@ -13,7 +17,7 @@ export default defineConfig({
   }),
   integrations: [
     tailwind(),
-    (await import("@playform/compress")).default({
+    compressIntegration({
       // Enable all compression types
       CSS: true,
       HTML: true,
