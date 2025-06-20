@@ -113,14 +113,30 @@ export async function generateLlmsTxt(logger) {
 
     for (const key of slugKeysToProcess) {
       const titleKey = key.replace('_SLUG', '_TITLE');
-      const title = key.replace(/_/g, ' ').replace('PAGE ', '').replace('SLUG', '').trim();
-      content.push(`## ${title} pages by Locale`);
+      let title = key.replace(/_/g, ' ').replace('PAGE ', '').replace('SLUG', '').trim();
+      
+      // Special handling for AUTHOR_LIST_SLUG
+      if (key === 'AUTHOR_LIST_SLUG') {
+        title = 'AUTHOR LIST';
+        content.push(`## Find out reputable in-real life people that create content on eusignal.com:`);
+      } else {
+        content.push(`## ${title} pages by Locale`);
+      }
       content.push('');
       
       publishedLocales.forEach(locale => {
         const common = commonData.find(c => c.M_SLUG === locale.M_SLUG);
-        if (common && common[key] && common[titleKey]) {
-          const linkText = `${locale.M_COUNTRY} - ${common[titleKey]}`;
+        if (common && common[key]) {
+          let linkText;
+          if (key === 'AUTHOR_LIST_SLUG') {
+            // Use ARTICLE_AUTHORS_TITLE for author list or create a fallback
+            const authorTitle = common.ARTICLE_AUTHORS_TITLE || 'Avtorji in uredniki';
+            linkText = `${locale.M_COUNTRY} - ${authorTitle}`;
+          } else if (common[titleKey]) {
+            linkText = `${locale.M_COUNTRY} - ${common[titleKey]}`;
+          } else {
+            linkText = `${locale.M_COUNTRY}`;
+          }
           content.push(`- [${linkText}](${SITE_URL}/${locale.M_SLUG}/${common[key]})`);
         }
       });
