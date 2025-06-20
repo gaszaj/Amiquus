@@ -4,6 +4,7 @@ import homeData from '../../data/home.json';
 import wwwData from '../../data/www.json';
 import commonData from '../../data/common.json';
 import products from '../../data/product.json';
+import localeData from '../../data/locale.json';
 
 // --- Interface Definitions  ---
 interface HeroData {
@@ -84,6 +85,40 @@ const contentOrientation: string = common.M_CONTENT_ORIENTATION || 'ltr';
 
 // --- Data for the Homepage ---
 
+// Helper function to randomly shuffle and pick n items from an array
+const getRandomItems = <T>(array: T[], count: number): T[] => {
+  const shuffled = [...array].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+};
+
+// Define all available social proof images
+const allSocialProofImages = [
+  '/socialproof/sp1.webp',
+  '/socialproof/sp2.webp',
+  '/socialproof/sp3.webp',
+  '/socialproof/sp4.webp',
+  '/socialproof/sp5.webp',
+  '/socialproof/sp6.webp',
+  '/socialproof/sp7.webp',
+  '/socialproof/sp8.webp',
+  '/socialproof/sp9.webp',
+  '/socialproof/sp10.webp',
+  '/socialproof/sp11.webp',
+  '/socialproof/sp12.webp',
+  '/socialproof/sp13.webp',
+  '/socialproof/sp14.webp',
+  '/socialproof/sp15.webp',
+  '/socialproof/sp16.webp',
+  '/socialproof/sp17.webp',
+  '/socialproof/sp18.webp',
+  '/socialproof/sp19.webp',
+  '/socialproof/sp20.webp',
+  '/socialproof/sp21.webp',
+  '/socialproof/sp22.webp',
+  '/socialproof/sp23.webp',
+  '/socialproof/sp24.webp'
+];
+
 // Hero section data
 const heroData: HeroData = {
   title: home.HOME_H1,
@@ -99,13 +134,7 @@ const heroData: HeroData = {
   socialProof: {
     text: home.HOME_HERO_SOCIAL_PROOF,
     rating: 5,
-    userPhotos: [
-      '/socialproof/sp6.webp',
-      '/socialproof/sp10.webp',
-      '/socialproof/sp13.webp',
-      '/socialproof/sp14.webp',
-      '/socialproof/sp20.webp'
-    ]
+    userPhotos: getRandomItems(allSocialProofImages, 5)
   }
 };
 
@@ -136,9 +165,9 @@ const bestsellers = products
 const marqueeItems = bestsellers
   .slice(0, 5)
   .map(product => ({
-    url: getBaseUrl(`/${product.M_SLUG}/${product.PRODUCT_CATEGORY_1_SLUG}/${product.PRODUCT_ASCII_SLUG}`),
+    url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_CATEGORY_1_SLUG}/${product.PRODUCT_ASCII_SLUG}`),
     image: getBaseUrl(product.PRODUCT_IMAGE_PATH_S),
-    alt: `${product.PRODUCT_CATEGORY_1} — ${product.PRODUCT_NAME} | ${www.PAGE_ORGANISATION_FULL_NAME}`
+    alt: `${product.PAGE_CATEGORY_1} — ${product.PRODUCT_NAME} | ${www.PAGE_ORGANISATION_FULL_NAME}`
   }));
 
 // Get top 9 products for bestsellers section
@@ -148,10 +177,10 @@ const bestsellersSection = {
   products: bestsellers
     .slice(0, 9)
     .map(product => ({
-      title: `${product.PRODUCT_CATEGORY_1} — ${product.PRODUCT_NAME}`,
+      title: `${product.PAGE_CATEGORY_1} — ${product.PRODUCT_NAME}`,
       image: getBaseUrl(product.PRODUCT_IMAGE_PATH_S),
-      alt: `${product.PRODUCT_CATEGORY_1} — ${product.PRODUCT_NAME} | ${www.PAGE_ORGANISATION_FULL_NAME}`,
-      url: getBaseUrl(`/${product.M_SLUG}/${product.PRODUCT_CATEGORY_1_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
+      alt: `${product.PAGE_CATEGORY_1} — ${product.PRODUCT_NAME} | ${www.PAGE_ORGANISATION_FULL_NAME}`,
+      url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_CATEGORY_1_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
     }))
 };
 
@@ -377,6 +406,14 @@ const schema: object[] | null = [webpageSchema, faqSchema, organizationSchema];
 const pageTitle: string = home.HOME_H1;
 const pageDescription: string | undefined = home.HOME_META_SEO;
 const pageOgImage: string | undefined = home.HOME_OG_IMAGE_PATH;
+
+// Build the language link map for the language picker
+const languageLinksMap = {};
+for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
+  // For homepage, we just use the locale slug as the URL
+  languageLinksMap[locale.M_SLUG] = `/${locale.M_SLUG}`;
+}
+
 ---
 
 <BaseLayout 
@@ -388,6 +425,7 @@ const pageOgImage: string | undefined = home.HOME_OG_IMAGE_PATH;
   ogImage={pageOgImage} 
   keywords={pageKeywords} 
   schema={schema}
+  languageLinksMap={languageLinksMap}
 >
   <!-- Hero Section -->
   <section class="bg-black text-white py-12">

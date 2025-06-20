@@ -39,4 +39,4 @@ Disallow: /cart$
 Disallow: /checkout$
 Disallow: /my-account/
 
-Sitemap: https://eusignal-demo.netlify.app/sitemap-index.xml
+Sitemap: https://eusignal-demo.netlify.app/sitemap.xml
