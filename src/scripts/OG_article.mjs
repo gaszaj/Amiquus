@@ -145,7 +145,7 @@ async function generateImageForArticle(article, { brandingData, logoBase64 }, co
         await page.setViewportSize({ width: 1200, height: 630 });
         await page.setContent(htmlContent, { waitUntil: 'load' });
         const pngBuffer = await page.screenshot({ type: 'png' });
-        await sharp(pngBuffer).webp({ quality: 85 }).toFile(outputPath);
+        await sharp(pngBuffer).webp({ quality: 1 }).toFile(outputPath);
     } finally {
         await page.close();
     }

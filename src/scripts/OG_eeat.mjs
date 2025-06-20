@@ -103,7 +103,7 @@ async function generateImageForEeat(eeat, commonAssets, context) {
         await page.setContent(htmlContent, { waitUntil: 'load' });
         const pngBuffer = await page.screenshot({ type: 'png' });
         const outputPath = path.join(OUTPUT_DIR, imageName);
-        await sharp(pngBuffer).webp({ quality: 85 }).toFile(outputPath);
+        await sharp(pngBuffer).webp({ quality: 1 }).toFile(outputPath);
     } finally {
         await page.close();
     }

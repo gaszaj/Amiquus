@@ -97,7 +97,7 @@ const productCoreData = {
     windResistance: common.PRODUCT_SPECIFICATIONS_VALUE_5,
     setupTime: common.PRODUCT_SPECIFICATIONS_VALUE_6
   },
-  category: product.PRODUCT_CATEGORY_1_SLUG,
+  category: product.PAGE_CATEGORY_1_SLUG,
   productId: product.PRODUCT_ID
 };
 
@@ -141,10 +141,10 @@ const allAvailableProducts: RelatedProductInfo[] = [
   
   return {
     id: relatedProduct.PRODUCT_ID,
-    title: `${relatedProduct.PRODUCT_CATEGORY_1} — ${relatedProduct.PRODUCT_NAME}`,
+    title: `${relatedProduct.PAGE_CATEGORY_1} — ${relatedProduct.PRODUCT_NAME}`,
     image: getBaseUrl(relatedProduct.PRODUCT_IMAGE_PATH_L),
-    category: relatedProduct.PRODUCT_CATEGORY_1_SLUG,
-    url: getBaseUrl(`/${relatedProduct.M_SLUG}/${relatedProduct.PRODUCT_CATEGORY_1_SLUG}/${relatedProduct.PRODUCT_ASCII_SLUG}`)
+    category: relatedProduct.PAGE_CATEGORY_1_SLUG,
+    url: getBaseUrl(`/${relatedProduct.M_SLUG}/${relatedProduct.PAGE_CATEGORY_1_SLUG}/${relatedProduct.PRODUCT_ASCII_SLUG}`)
   };
 }).filter(Boolean) as RelatedProductInfo[];
 
@@ -263,7 +263,7 @@ const productSchema = {
   "name": product.PRODUCT_H1,
   "image": getBaseUrl(product.PRODUCT_IMAGE_PATH_L),
   "mpn": product.PRODUCT_MPN,
-  "category": product.PRODUCT_CATEGORY_1,
+  "category": product.PAGE_CATEGORY_1,
   "weight": {
     "@type": "QuantitativeValue",
     "value": common.PRODUCT_SPECIFICATIONS_VALUE_3.replace(/[^0-9.]/g, ''),
@@ -444,15 +444,15 @@ function getFieldError(fieldName: string): string | undefined {
 // Build the language link map for the language picker
 const languageLinksMap = {};
 for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
-  // Find any published product for this locale to get the correct PRODUCT_CATEGORY_1_SLUG
+  // Find any published product for this locale to get the correct PAGE_CATEGORY_1_SLUG
   const productForLocale = productData.find(p =>
     p.M_SLUG === localeObj.M_SLUG &&
     p.PUBLISH_Y_N === "1" &&
-    p.PRODUCT_CATEGORY_1_SLUG && p.PRODUCT_CATEGORY_1_SLUG.trim()
+    p.PAGE_CATEGORY_1_SLUG && p.PAGE_CATEGORY_1_SLUG.trim()
   );
   if (productForLocale) {
     // Always use the slug from the product for that locale
-    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}/${productForLocale.PRODUCT_CATEGORY_1_SLUG}`;
+    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}/${productForLocale.PAGE_CATEGORY_1_SLUG}`;
   } else {
     // Fallback to homepage if no product listing exists
     languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}`;

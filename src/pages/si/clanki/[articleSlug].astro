@@ -253,9 +253,9 @@ const basicSigns: BasicSign[] = [
   const product = findProductById(id);
   if (!product) return null;
   return {
-    name: `${product.PRODUCT_CATEGORY_1} — ${product.PRODUCT_NAME}`,
+    name: `${product.PAGE_CATEGORY_1} — ${product.PRODUCT_NAME}`,
     image: getBaseUrl(product.PRODUCT_IMAGE_PATH_S),
-    url: getBaseUrl(`/${product.M_SLUG}/${product.PRODUCT_CATEGORY_1_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
+    url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_CATEGORY_1_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
   };
 }).filter(Boolean) as BasicSign[];
 
@@ -270,9 +270,9 @@ const additionalSigns: AdditionalSign[] = [
   const product = findProductById(id);
   if (!product) return null;
   return {
-    name: `${product.PRODUCT_CATEGORY_1} — ${product.PRODUCT_NAME}`,
+    name: `${product.PAGE_CATEGORY_1} — ${product.PRODUCT_NAME}`,
     image: getBaseUrl(product.PRODUCT_IMAGE_PATH_S),
-    url: getBaseUrl(`/${product.M_SLUG}/${product.PRODUCT_CATEGORY_1_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
+    url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_CATEGORY_1_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
   };
 }).filter(Boolean) as AdditionalSign[];
 
@@ -318,8 +318,8 @@ const articleSchema = {
       {
         "@type": "ListItem",
         "position": 2,
-        "name": "Članki",
-        "item": getAbsoluteUrl('/clanki')
+        "name": common.PAGE_CATEGORY_2_LISTING_TITLE,
+        "item": getAbsoluteUrl(`/${common.PAGE_CATEGORY_2_LISTING_SLUG}`)
       },
       {
         "@type": "ListItem",

@@ -32,7 +32,7 @@ const generateProductHtmlTemplate = (data) => `
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { width: 1200px; height: 630px; margin: 0; font-family: 'Inter', system-ui, sans-serif; background-color: ${data.branding.PAGE_COLOR_BACKGROUND}; color: ${data.branding.PAGE_COLOR_PRIMARY}; display: flex; position: relative; overflow: hidden; }
-    .left-section { width: 70%; padding: 2rem 1.3rem; display: flex; flex-direction: column; height: 100%; container-type: inline-size; z-index: 1; }
+    .left-section { width: 65%; padding: 2rem 1.3rem; display: flex; flex-direction: column; height: 100%; container-type: inline-size; z-index: 1; }
     .logo { width: 300px; height: auto; flex-shrink: 0; margin-bottom: 0.5rem; }
     .product-title { margin-bottom: 1.25rem; flex-shrink: 0; }
     .category { font-size: clamp(2.5rem, 4cqi, 3rem); font-weight: 600; color: ${data.branding.PAGE_COLOR_PRIMARY}; margin-bottom: 0.5rem; opacity: 0.8; }
@@ -43,9 +43,9 @@ const generateProductHtmlTemplate = (data) => `
     .star-icon { width: clamp(2.2rem, 3.5cqi, 2.5rem); height: clamp(2.2rem, 3.5cqi, 2.5rem); fill: currentColor; }
     .features { list-style: none; display: flex; flex-direction: column; gap: 0.8rem; width: 100%; flex-shrink: 0; margin-top: auto; margin-bottom: 80px; }
     .feature { display: flex; align-items: center; gap: 0.75rem; height: 100%; width: 100%; container-type: inline-size; }
-    .feature-text { font-size: clamp(1.8rem, 3.5cqi, 2rem); color: ${data.branding.PAGE_COLOR_PRIMARY}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: calc(100% - 2rem); padding-right: 0.3rem; }
-    .feature-icon { width: clamp(1.8rem, 3.5cqi, 2rem); height: clamp(1.8rem, 3.5cqi, 2rem); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='35px' height='35px' viewBox='0 0 56 56'%3E%3Cpath fill='${encodeURIComponent(data.branding.PAGE_COLOR_ACCENT_BRIGHT)}' d='M28 51.906c13.055 0 23.906-10.828 23.906-23.906c0-13.055-10.875-23.906-23.93-23.906C14.899 4.094 4.095 14.945 4.095 28c0 13.078 10.828 23.906 23.906 23.906m0-3.984C16.937 47.922 8.1 39.062 8.1 28c0-11.04 8.813-19.922 19.876-19.922c11.039 0 19.921 8.883 19.945 19.922c.023 11.063-8.883 19.922-19.922 19.922m-2.953-8.203c.773 0 1.406-.375 1.898-1.102l11.578-18.21c.282-.47.563-1.009.563-1.524c0-1.078-.938-1.735-1.922-1.735c-.633 0-1.219.352-1.64 1.055L24.93 35.148l-5.438-7.03c-.515-.704-1.078-.962-1.71-.962c-1.032 0-1.852.844-1.852 1.899c0 .515.21 1.008.539 1.453l6.562 8.11c.633.773 1.242 1.1 2.016 1.1'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-size: contain; flex-shrink: 0; }
-    .right-section { position: absolute; top: 0; right: -5%; width: 55%; height: 100%; clip-path: polygon(0% 0, 100% 0, 100% 100%, 33% 100%); background-color: ${data.branding.PAGE_COLOR_BACKGROUND_ALT}; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+    .feature-text { font-size: clamp(2.02rem, 3.92cqi, 2.24rem); color: ${data.branding.PAGE_COLOR_PRIMARY}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: calc(100% - 2rem); padding-right: 0.3rem; }
+    .feature-icon { width: clamp(2.02rem, 3.92cqi, 2.24rem); height: clamp(2.02rem, 3.92cqi, 2.24rem); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='35px' height='35px' viewBox='0 0 56 56'%3E%3Cpath fill='${encodeURIComponent(data.branding.PAGE_COLOR_ACCENT_BRIGHT)}' d='M28 51.906c13.055 0 23.906-10.828 23.906-23.906c0-13.055-10.875-23.906-23.93-23.906C14.899 4.094 4.095 14.945 4.095 28c0 13.078 10.828 23.906 23.906 23.906m0-3.984C16.937 47.922 8.1 39.062 8.1 28c0-11.04 8.813-19.922 19.876-19.922c11.039 0 19.921 8.883 19.945 19.922c.023 11.063-8.883 19.922-19.922 19.922m-2.953-8.203c.773 0 1.406-.375 1.898-1.102l11.578-18.21c.282-.47.563-1.009.563-1.524c0-1.078-.938-1.735-1.922-1.735c-.633 0-1.219.352-1.64 1.055L24.93 35.148l-5.438-7.03c-.515-.704-1.078-.962-1.71-.962c-1.032 0-1.852.844-1.852 1.899c0 .515.21 1.008.539 1.453l6.562 8.11c.633.773 1.242 1.1 2.016 1.1'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-size: contain; flex-shrink: 0; }
+    .right-section { position: absolute; top: 0; right: -5%; width: 50%; height: 100%; clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 20% 100%); background-color: ${data.branding.PAGE_COLOR_BACKGROUND_ALT}; display: flex; justify-content: center; align-items: center; overflow: hidden; }
     .product-image { width: 100%; height: 100%; object-fit: cover; object-position: center; }
     .product-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; color: ${data.branding.PAGE_COLOR_PRIMARY}; opacity: 0.6; text-align: center; padding: 2rem; }
     .placeholder-text { font-size: 2.5rem; font-weight: 600; text-align: center; padding: 2rem; word-wrap: break-word; max-width: 80%; line-height: 1.3; }
@@ -119,7 +119,7 @@ async function generateImageForProduct(product, commonAssets, context) {
         await page.setViewportSize({ width: 1200, height: 630 });
         await page.setContent(htmlContent, { waitUntil: 'load' });
         const pngBuffer = await page.screenshot({ type: 'png' });
-        await sharp(pngBuffer).webp({ quality: 85 }).toFile(path.join(OUTPUT_DIR, imageName));
+        await sharp(pngBuffer).webp({ quality: 1 }).toFile(path.join(OUTPUT_DIR, imageName));
     } finally {
         await page.close();
     }

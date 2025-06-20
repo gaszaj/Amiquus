@@ -51,14 +51,14 @@ const contentOrientation = commonData.find(item =>
 )?.M_CONTENT_ORIENTATION || 'ltr';
 
 // Get category name from first product (they should all be the same)
-const categoryName = filteredProducts[0]?.PRODUCT_CATEGORY_1 || '';
+const categoryName = filteredProducts[0]?.PAGE_CATEGORY_1 || '';
 
 // Define page metadata
-const pageTitle = common.PRODUCT_CATEGORY_LISTING_TITLE;
-const pageDescription = common.PRODUCT_CATEGORY_LISTING_DESCRIPTION;
-const pageOgImage = common.PRODUCT_CATEGORY_LISTING_OG_IMAGE_PATH;
+const pageTitle = common.PAGE_CATEGORY_1_LISTING_TITLE;
+const pageDescription = common.PAGE_CATEGORY_1_LISTING_DESCRIPTION;
+const pageOgImage = common.PAGE_CATEGORY_1_LISTING_OG_IMAGE_PATH;
 const pageKeywords = [
-    common.PRODUCT_CATEGORY_LISTING_TITLE,
+    common.PAGE_CATEGORY_1_LISTING_TITLE,
     common.M_COUNTRY_NATIVE,
     www.PAGE_ORGANISATION_FULL_NAME
 ].join(', ');
@@ -68,8 +68,8 @@ const collectionPageSchema = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     "@id": Astro.url.href,
-    "name": common.PRODUCT_CATEGORY_LISTING_TITLE,
-    "description": common.PRODUCT_CATEGORY_LISTING_DESCRIPTION,
+    "name": common.PAGE_CATEGORY_1_LISTING_TITLE,
+    "description": common.PAGE_CATEGORY_1_LISTING_DESCRIPTION,
     "url": Astro.url.href,
     "mainEntity": {
         "@type": "ItemList",
@@ -113,7 +113,7 @@ const collectionPageSchema = {
                 ].filter(Boolean),
                 "datePublished": product.PRODUCT_DATE_PUBLISHED,
                 "dateModified": product.PRODUCT_DATE_UPDATED,
-                "category": product.PRODUCT_CATEGORY_1
+                "category": product.PAGE_CATEGORY_1
             }
         }))
     }
@@ -209,15 +209,15 @@ const schema = [collectionPageSchema, organizationSchema];
 // Build the language link map for the language picker
 const languageLinksMap = {};
 for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
-  // Find any published product for this locale to get the correct PRODUCT_CATEGORY_1_SLUG
+  // Find any published product for this locale to get the correct PAGE_CATEGORY_1_SLUG
   const productForLocale = productData.find(p =>
     p.M_SLUG === localeObj.M_SLUG &&
     p.PUBLISH_Y_N === "1" &&
-    p.PRODUCT_CATEGORY_1_SLUG && p.PRODUCT_CATEGORY_1_SLUG.trim()
+    p.PAGE_CATEGORY_1_SLUG && p.PAGE_CATEGORY_1_SLUG.trim()
   );
   if (productForLocale) {
     // Always use the slug from the product for that locale
-    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}/${productForLocale.PRODUCT_CATEGORY_1_SLUG}`;
+    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}/${productForLocale.PAGE_CATEGORY_1_SLUG}`;
   } else {
     // Fallback to homepage if no product listing exists
     languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}`;
@@ -253,7 +253,7 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
             <div class="grid grid-cols-2 lg:grid-cols-3 gap-2">
                 {filteredProducts.map((product) => {
                     const productUrl = `${Astro.url.origin}/${parentSlug}/${currentFolder}/${product.PRODUCT_ASCII_SLUG}`;
-                    const fullProductName = `${product.PRODUCT_CATEGORY_1} ${product.PRODUCT_NAME}`;
+                    const fullProductName = `${product.PAGE_CATEGORY_1} ${product.PRODUCT_NAME}`;
                     
                     return (
                         <div class="bg-white border border-gray-100 overflow-hidden group">

@@ -51,11 +51,11 @@ const contentOrientation = commonData.find(item =>
 )?.M_CONTENT_ORIENTATION || 'ltr';
 
 // Define page metadata
-const pageTitle = common.ARTICLE_CATEGORY_LISTING_TITLE;
-const pageDescription = common.ARTICLE_CATEGORY_LISTING_DESCRIPTION;
-const pageOgImage = common.ARTICLE_CATEGORY_LISTING_OG_IMAGE_PATH;
+const pageTitle = common.PAGE_CATEGORY_2_LISTING_TITLE;
+const pageDescription = common.PAGE_CATEGORY_2_LISTING_DESCRIPTION;
+const pageOgImage = common.PAGE_CATEGORY_2_LISTING_OG_IMAGE_PATH;
 const pageKeywords = [
-    common.ARTICLE_CATEGORY_LISTING_TITLE,
+    common.PAGE_CATEGORY_2_LISTING_TITLE,
     common.M_COUNTRY_NATIVE,
     www.PAGE_ORGANISATION_FULL_NAME
 ].join(', ');
@@ -65,8 +65,8 @@ const collectionPageSchema = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     "@id": Astro.url.href,
-    "name": common.ARTICLE_CATEGORY_LISTING_TITLE,
-    "description": common.ARTICLE_CATEGORY_LISTING_DESCRIPTION,
+    "name": common.PAGE_CATEGORY_2_LISTING_TITLE,
+    "description": common.PAGE_CATEGORY_2_LISTING_DESCRIPTION,
     "url": Astro.url.href,
     "mainEntity": {
         "@type": "ItemList",
@@ -213,7 +213,7 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
         <div class="container mx-auto px-4">
             <div class="max-w-4xl mx-auto">
                 <h1 class="text-4xl md:text-5xl font-bold mb-6 animate-fade-in">
-                    {common.ARTICLE_CATEGORY_LISTING_TITLE}
+                    {common.PAGE_CATEGORY_2_LISTING_TITLE}
                 </h1>
             </div>
         </div>
