@@ -5,8 +5,9 @@ import { defineConfig, passthroughImageService } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import netlify from '@astrojs/netlify';
 import manageLocales from './integrations/locale-manager.js';
+import sitemapGenerator from './integrations/sitemap-generator.js';
+import searchIndexGenerator from './integrations/search-index-generator.js';
 
-// Handling the dynamic import for the compressor at the top level
 const compressIntegration = (await import("@playform/compress")).default;
 
 // https://astro.build/config
@@ -16,21 +17,25 @@ export default defineConfig({
     imageCDN: false,
   }),
   integrations: [
+    // 1. This runs FIRST, setting up the correct src/pages/ structure.
+    manageLocales(), 
+    
+    // 2. These run AFTER manageLocales, during the build phase.
+    sitemapGenerator(),
+    searchIndexGenerator(),
+
+    // Your other integrations
     tailwind(),
     compressIntegration({
-      // Enable all compression types
       CSS: true,
       HTML: true,
       Image: false,
       JavaScript: true,
       JSON: true,
       SVG: true,
-      // Set logging level (0 = none, 1 = errors, 2 = all)
       Logger: 2,
-      // Compress the default output directory
       Path: ["./dist"]
     }),
-    manageLocales(),
   ],
   site: 'https://eusignal.netlify.app',
   image: {

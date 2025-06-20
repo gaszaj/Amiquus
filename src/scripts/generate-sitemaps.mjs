@@ -1,29 +1,20 @@
+// src/scripts/generate-sitemaps.mjs
 import { readFileSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import path from 'path';
 
 // --- Configuration ---
-// IMPORTANT: Replace this with your actual production domain
-const SITE_URL = 'https://eusignal.netlify.app'; // Change this to your real domain
+const SITE_URL = 'https://eusignal.netlify.app';
 const PUBLIC_DIR = path.join(process.cwd(), 'public');
 
-// --- Helper function to read JSON files robustly ---
+// --- Helper function to read JSON files ---
 const readJsonFile = (filePath) => {
   const absolutePath = path.join(process.cwd(), filePath);
   const fileContent = readFileSync(absolutePath, 'utf-8');
   return JSON.parse(fileContent);
 };
 
-// --- Import your JSON data using the robust method ---
-const localesData = readJsonFile('src/data/locale.json');
-const homeData = readJsonFile('src/data/home.json');
-const eeatData = readJsonFile('src/data/eeat.json');
-const authorData = readJsonFile('src/data/author.json');
-const articleData = readJsonFile('src/data/article.json');
-const productData = readJsonFile('src/data/product.json');
-
-// --- Helper Functions (No changes here) ---
-
+// --- Helper to format date ---
 const formatLastMod = (dateStr, timeStr) => {
   if (!dateStr || !timeStr) {
     return new Date().toISOString();
@@ -31,150 +22,74 @@ const formatLastMod = (dateStr, timeStr) => {
   return new Date(`${dateStr}T${timeStr}`).toISOString();
 };
 
-const generateSitemapIndex = () => {
-  const publishedLocales = localesData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1");
-  const sitemapLinks = publishedLocales
-    .map(locale => {
-      const lastmod = new Date().toISOString();
-      return `
-    <sitemap>
-      <loc>${SITE_URL}/sitemap-${locale.M_HREFLANG_CODE}.xml</loc>
-      <lastmod>${lastmod}</lastmod>
-    </sitemap>`;
-    })
-    .join('');
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${sitemapLinks}
-</sitemapindex>`;
-};
-
-const generateLocaleSitemap = (localeCode) => {
-  const urlEntries = [];
-
-  // 1. Home Pages
-  homeData
-    .filter(page => page.PAGE_LOCALE === localeCode)
-    .forEach(page => {
-      urlEntries.push({
-        loc: `${SITE_URL}/${page.M_SLUG}`,
-        lastmod: formatLastMod(page.DATE_UPDATED, page.HOME_HOUR_UPDATED),
-        changefreq: 'weekly',
-        priority: 1.0,
-      });
-    });
-
-  // 2. EEAT Pages
-  eeatData
-    .filter(page => page.PAGE_LOCALE === localeCode && page.PUBLISH_Y_N === "1")
-    .forEach(page => {
-      urlEntries.push({
-        loc: `${SITE_URL}/${page.M_SLUG}/${page.EEAT_SLUG}`,
-        lastmod: formatLastMod(page.EEAT_DATE_UPDATED, page.EEAT_HOUR_UPDATED),
-        changefreq: 'yearly',
-        priority: 0.4,
-      });
-    });
-
-  // 3. Author Pages
-  authorData
-    .filter(page => page.PAGE_LOCALE === localeCode && page.PUBLISH_Y_N === "1")
-    .forEach(page => {
-      urlEntries.push({
-        loc: `${SITE_URL}/${page.M_SLUG}/${page.EEAT_URL_20}/${page.WWW_AUTHOR_SLUG}`,
-        lastmod: formatLastMod(page.AUTHOR_DATE_UPDATED, page.AUTHOR_HOUR_UPDATED),
-        changefreq: 'monthly',
-        priority: 0.6,
-      });
-    });
-
-  // 4. Article Pages and Category Page
-  const publishedArticles = articleData.filter(
-    page => page.PAGE_LOCALE === localeCode && page.PUBLISH_Y_N === "1"
-  );
-  if (publishedArticles.length > 0) {
-    publishedArticles.forEach(page => {
-      urlEntries.push({
-        loc: `${SITE_URL}/${page.M_SLUG}/${page.ARTICLE_LIST_SLUG}/${page.ARTICLE_SLUG}`,
-        lastmod: formatLastMod(page.ARTICLE_UPDATE_DATE, page.ARTICLE_HOUR_UPDATED),
-        changefreq: 'monthly',
-        priority: 0.8,
-      });
-    });
-    const firstArticle = publishedArticles[0];
-    const mostRecentArticle = publishedArticles.sort((a, b) => new Date(formatLastMod(b.ARTICLE_UPDATE_DATE, b.ARTICLE_HOUR_UPDATED)).getTime() - new Date(formatLastMod(a.ARTICLE_UPDATE_DATE, a.ARTICLE_HOUR_UPDATED)).getTime())[0];
-    urlEntries.push({
-      loc: `${SITE_URL}/${firstArticle.M_SLUG}/${firstArticle.ARTICLE_LIST_SLUG}`,
-      lastmod: formatLastMod(mostRecentArticle.ARTICLE_UPDATE_DATE, mostRecentArticle.ARTICLE_HOUR_UPDATED),
-      changefreq: 'weekly',
-      priority: 0.9,
-    });
-  }
-
-  // 5. Product Pages and Category Page
-  const publishedProducts = productData.filter(
-    page => page.PAGE_LOCALE === localeCode && page.PUBLISH_Y_N === "1"
-  );
-  if (publishedProducts.length > 0) {
-    publishedProducts.forEach(page => {
-      urlEntries.push({
-        loc: `${SITE_URL}/${page.M_SLUG}/${page.PRODUCT_CATEGORY_1_SLUG}/${page.PRODUCT_ASCII_SLUG}`,
-        lastmod: formatLastMod(page.PRODUCT_DATE_UPDATED, page.PRODUCT_HOUR_UPDATED),
-        changefreq: 'monthly',
-        priority: 0.9,
-      });
-    });
-    const firstProduct = publishedProducts[0];
-    const mostRecentProduct = publishedProducts.sort((a, b) => new Date(formatLastMod(b.PRODUCT_DATE_UPDATED, b.PRODUCT_HOUR_UPDATED)).getTime() - new Date(formatLastMod(a.PRODUCT_DATE_UPDATED, a.PRODUCT_HOUR_UPDATED)).getTime())[0];
-    urlEntries.push({
-      loc: `${SITE_URL}/${firstProduct.M_SLUG}/${firstProduct.PRODUCT_CATEGORY_1_SLUG}`,
-      lastmod: formatLastMod(mostRecentProduct.PRODUCT_DATE_UPDATED, mostRecentProduct.PRODUCT_HOUR_UPDATED),
-      changefreq: 'monthly',
-      priority: 0.9,
-    });
-  }
-
-  const urlset = urlEntries
-    .map(entry => `
-    <url>
-        <loc>${entry.loc}</loc>
-        <lastmod>${entry.lastmod}</lastmod>
-        <changefreq>${entry.changefreq}</changefreq>
-        <priority>${entry.priority.toFixed(1)}</priority>
-    </url>`)
-    .join('');
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urlset}
-</urlset>`;
-};
-
-// --- Main Execution Logic (No changes here) ---
-
-async function main() {
-  console.log('🚀 Generating sitemaps...');
+// --- Main Exported Function ---
+// This function will be called by our Astro integration.
+export async function generateSitemaps(logger) {
+  logger.info('🚀 Generating sitemaps...');
   try {
-    // Generate and write the main sitemap index
+    // Read data at the time of execution
+    const localesData = readJsonFile('src/data/locale.json');
+    const homeData = readJsonFile('src/data/home.json');
+    const eeatData = readJsonFile('src/data/eeat.json');
+    const authorData = readJsonFile('src/data/author.json');
+    const articleData = readJsonFile('src/data/article.json');
+    const productData = readJsonFile('src/data/product.json');
+
+    // ... (All of your generation logic remains the same below) ...
+    const generateSitemapIndex = () => { /* ... no changes ... */ };
+    const generateLocaleSitemap = (localeCode) => { /* ... no changes ... */ };
+    
+    // --- Sitemap Generation Logic (copied from your original script) ---
+    
+    const generateSitemapIndex = () => {
+      const publishedLocales = localesData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1");
+      const sitemapLinks = publishedLocales
+        .map(locale => `<sitemap><loc>${SITE_URL}/sitemap-${locale.M_HREFLANG_CODE}.xml</loc><lastmod>${new Date().toISOString()}</lastmod></sitemap>`)
+        .join('');
+      return `<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${sitemapLinks}</sitemapindex>`;
+    };
+    
+    const generateLocaleSitemap = (localeCode) => {
+      const urlEntries = [];
+      homeData.filter(p => p.PAGE_LOCALE === localeCode).forEach(p => urlEntries.push({ loc: `${SITE_URL}/${p.M_SLUG}`, lastmod: formatLastMod(p.DATE_UPDATED, p.HOME_HOUR_UPDATED), changefreq: 'weekly', priority: 1.0 }));
+      eeatData.filter(p => p.PAGE_LOCALE === localeCode && p.PUBLISH_Y_N === "1").forEach(p => urlEntries.push({ loc: `${SITE_URL}/${p.M_SLUG}/${p.EEAT_SLUG}`, lastmod: formatLastMod(p.EEAT_DATE_UPDATED, p.EEAT_HOUR_UPDATED), changefreq: 'yearly', priority: 0.4 }));
+      authorData.filter(p => p.PAGE_LOCALE === localeCode && p.PUBLISH_Y_N === "1").forEach(p => urlEntries.push({ loc: `${SITE_URL}/${p.M_SLUG}/${p.EEAT_URL_20}/${p.WWW_AUTHOR_SLUG}`, lastmod: formatLastMod(p.AUTHOR_DATE_UPDATED, p.AUTHOR_HOUR_UPDATED), changefreq: 'monthly', priority: 0.6 }));
+      
+      const publishedArticles = articleData.filter(p => p.PAGE_LOCALE === localeCode && p.PUBLISH_Y_N === "1");
+      if (publishedArticles.length > 0) {
+        publishedArticles.forEach(p => urlEntries.push({ loc: `${SITE_URL}/${p.M_SLUG}/${p.ARTICLE_LIST_SLUG}/${p.ARTICLE_SLUG}`, lastmod: formatLastMod(p.ARTICLE_UPDATE_DATE, p.ARTICLE_HOUR_UPDATED), changefreq: 'monthly', priority: 0.8 }));
+        const mostRecentArticle = publishedArticles.sort((a, b) => new Date(formatLastMod(b.ARTICLE_UPDATE_DATE, b.ARTICLE_HOUR_UPDATED)) - new Date(formatLastMod(a.ARTICLE_UPDATE_DATE, a.ARTICLE_HOUR_UPDATED)))[0];
+        urlEntries.push({ loc: `${SITE_URL}/${publishedArticles[0].M_SLUG}/${publishedArticles[0].ARTICLE_LIST_SLUG}`, lastmod: formatLastMod(mostRecentArticle.ARTICLE_UPDATE_DATE, mostRecentArticle.ARTICLE_HOUR_UPDATED), changefreq: 'weekly', priority: 0.9 });
+      }
+
+      const publishedProducts = productData.filter(p => p.PAGE_LOCALE === localeCode && p.PUBLISH_Y_N === "1");
+      if (publishedProducts.length > 0) {
+        publishedProducts.forEach(p => urlEntries.push({ loc: `${SITE_URL}/${p.M_SLUG}/${p.PRODUCT_CATEGORY_1_SLUG}/${p.PRODUCT_ASCII_SLUG}`, lastmod: formatLastMod(p.PRODUCT_DATE_UPDATED, p.PRODUCT_HOUR_UPDATED), changefreq: 'monthly', priority: 0.9 }));
+        const mostRecentProduct = publishedProducts.sort((a, b) => new Date(formatLastMod(b.PRODUCT_DATE_UPDATED, b.PRODUCT_HOUR_UPDATED)) - new Date(formatLastMod(a.PRODUCT_DATE_UPDATED, a.PRODUCT_HOUR_UPDATED)))[0];
+        urlEntries.push({ loc: `${SITE_URL}/${publishedProducts[0].M_SLUG}/${publishedProducts[0].PRODUCT_CATEGORY_1_SLUG}`, lastmod: formatLastMod(mostRecentProduct.PRODUCT_DATE_UPDATED, mostRecentProduct.PRODUCT_HOUR_UPDATED), changefreq: 'monthly', priority: 0.9 });
+      }
+
+      const urlset = urlEntries.map(entry => `<url><loc>${entry.loc}</loc><lastmod>${entry.lastmod}</lastmod><changefreq>${entry.changefreq}</changefreq><priority>${entry.priority.toFixed(1)}</priority></url>`).join('');
+      return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urlset}</urlset>`;
+    };
+
+    // --- Execution Logic ---
     const sitemapIndexXml = generateSitemapIndex();
     await writeFile(path.join(PUBLIC_DIR, 'sitemap.xml'), sitemapIndexXml);
-    console.log('✅ Generated sitemap.xml');
+    logger.info('✅ Generated sitemap.xml');
 
-    // Find all published locales and generate a sitemap for each
     const publishedLocales = localesData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1");
     for (const locale of publishedLocales) {
       const localeCode = locale.M_HREFLANG_CODE;
       const localeSitemapXml = generateLocaleSitemap(localeCode);
       const fileName = `sitemap-${localeCode}.xml`;
       await writeFile(path.join(PUBLIC_DIR, fileName), localeSitemapXml);
-      console.log(`✅ Generated ${fileName}`);
+      logger.info(`✅ Generated ${fileName}`);
     }
 
-    console.log('✨ Sitemap generation complete!');
+    logger.info('✨ Sitemap generation complete!');
   } catch (error) {
-    console.error('❌ Error generating sitemaps:', error);
-    process.exit(1); // Exit with an error code
+    logger.error('❌ Error generating sitemaps:', error);
+    process.exit(1);
   }
 }
-
-// Run the script
-main();

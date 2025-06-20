@@ -175,5 +175,3 @@ export function startWatcher(logger = console) {
         })
         .on('error', (error) => logger.error(chalk.red(`Watcher error: ${error}`)));
 }
-
-// NOTE: The automatic start is removed. The integration now controls execution.
