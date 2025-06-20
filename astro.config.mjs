@@ -1,5 +1,3 @@
-// astro.config.mjs
-
 // @ts-check
 import { defineConfig, passthroughImageService } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
@@ -17,14 +15,9 @@ export default defineConfig({
     imageCDN: false,
   }),
   integrations: [
-    // 1. This runs FIRST, setting up the correct src/pages/ structure.
     manageLocales(), 
-    
-    // 2. These run AFTER manageLocales, during the build phase.
     sitemapGenerator(),
     searchIndexGenerator(),
-
-    // Your other integrations
     tailwind(),
     compressIntegration({
       CSS: true,

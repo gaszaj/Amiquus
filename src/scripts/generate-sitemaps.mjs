@@ -1,4 +1,5 @@
 // src/scripts/generate-sitemaps.mjs
+
 import { readFileSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import path from 'path';
@@ -34,12 +35,9 @@ export async function generateSitemaps(logger) {
     const authorData = readJsonFile('src/data/author.json');
     const articleData = readJsonFile('src/data/article.json');
     const productData = readJsonFile('src/data/product.json');
-
-    // ... (All of your generation logic remains the same below) ...
-    const generateSitemapIndex = () => { /* ... no changes ... */ };
-    const generateLocaleSitemap = (localeCode) => { /* ... no changes ... */ };
     
-    // --- Sitemap Generation Logic (copied from your original script) ---
+    // --- Sitemap Generation Logic ---
+    // FIX: The duplicate, empty declarations have been removed.
     
     const generateSitemapIndex = () => {
       const publishedLocales = localesData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1");
@@ -58,14 +56,14 @@ export async function generateSitemaps(logger) {
       const publishedArticles = articleData.filter(p => p.PAGE_LOCALE === localeCode && p.PUBLISH_Y_N === "1");
       if (publishedArticles.length > 0) {
         publishedArticles.forEach(p => urlEntries.push({ loc: `${SITE_URL}/${p.M_SLUG}/${p.ARTICLE_LIST_SLUG}/${p.ARTICLE_SLUG}`, lastmod: formatLastMod(p.ARTICLE_UPDATE_DATE, p.ARTICLE_HOUR_UPDATED), changefreq: 'monthly', priority: 0.8 }));
-        const mostRecentArticle = publishedArticles.sort((a, b) => new Date(formatLastMod(b.ARTICLE_UPDATE_DATE, b.ARTICLE_HOUR_UPDATED)) - new Date(formatLastMod(a.ARTICLE_UPDATE_DATE, a.ARTICLE_HOUR_UPDATED)))[0];
+        const mostRecentArticle = publishedArticles.sort((a, b) => new Date(formatLastMod(b.ARTICLE_UPDATE_DATE, b.ARTICLE_HOUR_UPDATED)).getTime() - new Date(formatLastMod(a.ARTICLE_UPDATE_DATE, a.ARTICLE_HOUR_UPDATED)).getTime())[0];
         urlEntries.push({ loc: `${SITE_URL}/${publishedArticles[0].M_SLUG}/${publishedArticles[0].ARTICLE_LIST_SLUG}`, lastmod: formatLastMod(mostRecentArticle.ARTICLE_UPDATE_DATE, mostRecentArticle.ARTICLE_HOUR_UPDATED), changefreq: 'weekly', priority: 0.9 });
       }
 
       const publishedProducts = productData.filter(p => p.PAGE_LOCALE === localeCode && p.PUBLISH_Y_N === "1");
       if (publishedProducts.length > 0) {
         publishedProducts.forEach(p => urlEntries.push({ loc: `${SITE_URL}/${p.M_SLUG}/${p.PRODUCT_CATEGORY_1_SLUG}/${p.PRODUCT_ASCII_SLUG}`, lastmod: formatLastMod(p.PRODUCT_DATE_UPDATED, p.PRODUCT_HOUR_UPDATED), changefreq: 'monthly', priority: 0.9 }));
-        const mostRecentProduct = publishedProducts.sort((a, b) => new Date(formatLastMod(b.PRODUCT_DATE_UPDATED, b.PRODUCT_HOUR_UPDATED)) - new Date(formatLastMod(a.PRODUCT_DATE_UPDATED, a.PRODUCT_HOUR_UPDATED)))[0];
+        const mostRecentProduct = publishedProducts.sort((a, b) => new Date(formatLastMod(b.PRODUCT_DATE_UPDATED, b.PRODUCT_HOUR_UPDATED)).getTime() - new Date(formatLastMod(a.PRODUCT_DATE_UPDATED, a.PRODUCT_HOUR_UPDATED)).getTime())[0];
         urlEntries.push({ loc: `${SITE_URL}/${publishedProducts[0].M_SLUG}/${publishedProducts[0].PRODUCT_CATEGORY_1_SLUG}`, lastmod: formatLastMod(mostRecentProduct.PRODUCT_DATE_UPDATED, mostRecentProduct.PRODUCT_HOUR_UPDATED), changefreq: 'monthly', priority: 0.9 });
       }
 
