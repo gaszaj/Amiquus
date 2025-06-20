@@ -39,12 +39,12 @@ const generateAuthorHtmlTemplate = (data) => `
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { width: 1200px; height: 630px; margin: 0; font-family: 'Inter', system-ui, sans-serif; background-color: ${data.bodyBgColor}; color: ${data.bodyTextColor}; display: flex; position: relative; overflow: hidden; }
-        .name-container { position: absolute; top: 3.5rem; left: 3.5rem; background-color: ${data.nameBgColor}; color: ${data.nameTextColor}; padding: 1.25rem 1.5rem; font-size: 3.7rem; font-weight: 700; line-height: 1.2; box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.25); max-width: 60%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .tagline { position: absolute; left: 3.7rem; top: 16rem; font-size: 3rem; font-weight: 600; color: ${data.taglineTextColor}; max-width: 55%; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; }
-        .occupation { position: absolute; left: 3.7rem; top: 22rem; font-size: 2.4rem; font-weight: 500; color: ${data.taglineTextColor}; max-width: 55%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; opacity: 0.9; }
+        .name-container { position: absolute; top: 3.5rem; left: 1.45rem; background-color: ${data.nameBgColor}; color: ${data.nameTextColor}; padding: 1.25rem 1.5rem; font-size: 4rem; font-weight: 700; line-height: 1.2; box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.25); max-width: 60%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .tagline { position: absolute; left: 3rem; top: 14rem; font-size: 4rem; font-weight: 600; color: ${data.taglineTextColor}; max-width: 55%; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; }
+        .occupation { position: absolute; left: 3rem; top: 20rem; font-size: 3rem; font-weight: 500; color: ${data.taglineTextColor}; max-width: 55%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; opacity: 0.9; }
         .right-section { position: absolute; top: 0; right: -5%; width: 50%; height: 100%; clip-path: polygon(25% 0, 100% 0, 100% 100%, 0% 100%); background-color: ${data.rightSectionBgColor}; display: flex; justify-content: center; align-items: center; }
         .right-section img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
-        .logo { width: 300px; height: auto; position: absolute; bottom: 2rem; left: 3.5rem; }
+        .logo { width: 450px; height: auto; position: absolute; bottom: 2rem; left: 3.5rem; }
         .flag-container { position: absolute; bottom: 2rem; right: 3rem; background: white; padding: 0.75rem; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 8rem; height: 5.5rem; display: flex; align-items: center; justify-content: center; }
         .flag-container img { width: 100%; height: 100%; object-fit: contain; }
     </style>
@@ -81,12 +81,12 @@ async function generateImageForAuthor(author, commonAssets, context) {
         flagSvg: flagMap[author.M_COUNTRY_CODE] || '',
         logoBase64: logoBase64,
         authorImageBase64: authorImageBase64,
-        bodyBgColor: brandingData.PAGE_BODY_BACKGROUND_COLOR,
-        bodyTextColor: brandingData.PAGE_BODY_TEXT_COLOR,
-        nameBgColor: brandingData.PAGE_NAME_BACKGROUND_COLOR,
-        nameTextColor: brandingData.PAGE_NAME_TEXT_COLOR,
-        taglineTextColor: brandingData.PAGE_TAGLINE_TEXT_COLOR,
-        rightSectionBgColor: brandingData.PAGE_RIGHT_SECTION_BACKGROUND_COLOR,
+        bodyBgColor: brandingData.PAGE_COLOR_BACKGROUND,
+        bodyTextColor: brandingData.PAGE_COLOR_PRIMARY,
+        nameBgColor: brandingData.PAGE_COLOR_PRIMARY,
+        nameTextColor: brandingData.PAGE_COLOR_ACCENT,
+        taglineTextColor: brandingData.PAGE_COLOR_PRIMARY,
+        rightSectionBgColor: brandingData.PAGE_COLOR_BACKGROUND_ALT,
     };
 
     const htmlContent = generateAuthorHtmlTemplate(dataForTemplate);

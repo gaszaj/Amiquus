@@ -87,13 +87,13 @@ async function generateImageForHome(home, commonAssets, context) {
         email: brandingData.PAGE_INFO_EMAIL,
         flagSvg: flagMap[home.M_COUNTRY_CODE] || '',
         logoBase64: logoBase64,
-        bodyBgColor: brandingData.PAGE_BODY_BACKGROUND_COLOR,
-        bodyTextColor: brandingData.PAGE_BODY_TEXT_COLOR,
-        subtitleTextColor: brandingData.PAGE_SUBTITLE_TEXT_COLOR,
-        featureTextColor: brandingData.PAGE_FEATURE_TEXT_COLOR,
-        footerBgColor: brandingData.PAGE_FOOTER_BACKGROUND_COLOR,
-        footerTextColor: brandingData.PAGE_FOOTER_TEXT_COLOR,
-        iconColor: brandingData.PAGE_CHECKMARK_ICON_COLOR,
+        bodyBgColor: brandingData.PAGE_COLOR_BACKGROUND,
+        bodyTextColor: brandingData.PAGE_COLOR_PRIMARY,
+        subtitleTextColor: brandingData.PAGE_COLOR_PRIMARY,
+        featureTextColor: brandingData.PAGE_COLOR_PRIMARY,
+        footerBgColor: brandingData.PAGE_COLOR_PRIMARY,
+        footerTextColor: brandingData.PAGE_COLOR_ACCENT,
+        iconColor: brandingData.PAGE_COLOR_ACCENT_BRIGHT,
     };
 
     const htmlContent = generateHtmlTemplate(dataForTemplate);

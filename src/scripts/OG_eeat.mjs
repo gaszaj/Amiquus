@@ -39,10 +39,10 @@ const generateEeatHtmlTemplate = (data) => `
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { width: 1200px; height: 630px; margin: 0; font-family: 'Inter', system-ui, sans-serif; background-color: ${data.bodyBgColor}; color: ${data.bodyTextColor}; display: flex; flex-direction: column; position: relative; overflow: hidden; }
-        .logo { width: 250px; height: auto; margin: 2rem auto; flex-shrink: 0; }
+        .logo { width: 350px; height: auto; margin: 1rem auto; flex-shrink: 0; }
         .text-container { width: 100%; padding: 20px 10px; background-color: ${data.headerBgColor}; text-align: center; font-size: 4rem; font-weight: 700; color: ${data.headerTextColor}; margin-bottom: 3.5rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); border-top: 1px solid #dcdcdc; border-bottom: 1px solid #dcdcdc; display: flex; align-items: center; justify-content: center; min-height: 150px; line-height: 1.1; }
-        .features { list-style: none; display: flex; flex-direction: column; gap: 1.25rem; padding: 0 4rem; width: 100%; margin-top: auto; padding-bottom: 120px; }
-        .feature { display: flex; align-items: center; gap: 0.75rem; font-size: 2.25rem; color: ${data.featureTextColor}; container-type: inline-size; }
+        .features { list-style: none; display: flex; flex-direction: column; gap: 1rem; padding: 0 4rem; width: 100%; margin-top: auto; padding-bottom: 120px; }
+        .feature { display: flex; align-items: center; gap: 0.75rem; font-size: 2.6rem; color: ${data.featureTextColor}; container-type: inline-size; }
         .feature-icon { width: clamp(1.5rem, 5cqi, 2.75rem); height: clamp(1.5rem, 5cqi, 2.75rem); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='35px' height='35px' viewBox='0 0 56 56'%3E%3Cpath fill='${encodeURIComponent(data.iconColor)}' d='M28 51.906c13.055 0 23.906-10.828 23.906-23.906c0-13.055-10.875-23.906-23.93-23.906C14.899 4.094 4.095 14.945 4.095 28c0 13.078 10.828 23.906 23.906 23.906m0-3.984C16.937 47.922 8.1 39.062 8.1 28c0-11.04 8.813-19.922 19.876-19.922c11.039 0 19.921 8.883 19.945 19.922c.023 11.063-8.883 19.922-19.922 19.922m-2.953-8.203c.773 0 1.406-.375 1.898-1.102l11.578-18.21c.282-.47.563-1.009.563-1.524c0-1.078-.938-1.735-1.922-1.735c-.633 0-1.219.352-1.64 1.055L24.93 35.148l-5.438-7.03c-.515-.704-1.078-.962-1.71-.962c-1.032 0-1.852.844-1.852 1.899c0 .515.21 1.008.539 1.453l6.562 8.11c.633.773 1.242 1.1 2.016 1.1'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-size: contain; flex-shrink: 0; }
         .feature-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
         .footer { position: absolute; bottom: 0; left: 0; right: 0; height: 70px; background-color: ${data.footerBgColor}; padding: 0 1rem; display: flex; justify-content: center; align-items: center; color: ${data.footerTextColor}; gap: 2rem; }
@@ -85,14 +85,14 @@ async function generateImageForEeat(eeat, commonAssets, context) {
         email: brandingData.PAGE_INFO_EMAIL,
         flagSvg: flagMap[eeat.M_COUNTRY_CODE] || '',
         logoBase64: logoBase64,
-        bodyBgColor: brandingData.PAGE_BODY_BACKGROUND_COLOR,
-        bodyTextColor: brandingData.PAGE_BODY_TEXT_COLOR,
-        headerBgColor: brandingData.PAGE_HEADER_BACKGROUND_COLOR,
-        headerTextColor: brandingData.PAGE_HEADER_TEXT_COLOR,
-        featureTextColor: brandingData.PAGE_FEATURE_TEXT_COLOR,
-        footerBgColor: brandingData.PAGE_FOOTER_BACKGROUND_COLOR,
-        footerTextColor: brandingData.PAGE_FOOTER_TEXT_COLOR,
-        iconColor: brandingData.PAGE_CHECKMARK_ICON_COLOR,
+        bodyBgColor: brandingData.PAGE_COLOR_BACKGROUND,
+        bodyTextColor: brandingData.PAGE_COLOR_PRIMARY,
+        headerBgColor: brandingData.PAGE_COLOR_PRIMARY,
+        headerTextColor: brandingData.PAGE_COLOR_SECONDARY,
+        featureTextColor: brandingData.PAGE_COLOR_PRIMARY,
+        footerBgColor: brandingData.PAGE_COLOR_PRIMARY,
+        footerTextColor: brandingData.PAGE_COLOR_ACCENT,
+        iconColor: brandingData.PAGE_COLOR_ACCENT_BRIGHT,
     };
 
     const htmlContent = generateEeatHtmlTemplate(dataForTemplate);
