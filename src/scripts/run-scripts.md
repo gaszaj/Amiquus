@@ -1,4 +1,6 @@
-Run node src/scripts/manage-locales.mjs FIRST and keep it in dev mode! The 
+Master folders in /pages directory so narejeni samodejno ob npm run build. Pogoj, da so narejeni je, da obstaja locale.json vrednost:
+"M_LOCALE_PUBLISH_Y_N": "1",
+Prav tako morajo biti v common.json ustrezni prevodi za PAGE_CATEGORY_1, PAGE_CATEGORY_2, etc.
 
 To run scripts, run these commands in the terminal:
 node src/scripts/OG_ALL.mjs (for ALL OG images)
