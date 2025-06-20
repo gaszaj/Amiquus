@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import { defineConfig, passthroughImageService } from 'astro/config';
 import netlify from '@astrojs/netlify';
+import manageLocales from './integrations/locale-manager.js';
 
 // https://astro.build/config
 export default defineConfig({
@@ -25,6 +26,7 @@ export default defineConfig({
       // Compress the default output directory
       Path: ["./dist"]
     }),
+    manageLocales(),
   ],
   site: 'https://eusignal.netlify.app',
   image: {
