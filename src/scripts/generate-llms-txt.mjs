@@ -39,7 +39,6 @@ export async function generateLlmsTxt(logger) {
 
     const globalData = wwwData[0];
     const publishedLocales = localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1");
-    // CHANGE 1: Calculate the number of published locales
     const publishedLocaleCount = publishedLocales.length;
     
     const content = [];
@@ -49,7 +48,6 @@ export async function generateLlmsTxt(logger) {
     content.push('');
     content.push(globalData.PAGE_DESCRIPTION_GLOBAL_SHORT);
     content.push('');
-    // CHANGE 1: Replace {X} with the dynamic count
     content.push(globalData.PAGE_DESCRIPTION_GLOBAL_LONG.replace('{X}', publishedLocaleCount));
     content.push('');
 
@@ -79,12 +77,11 @@ export async function generateLlmsTxt(logger) {
     // --- Operating Markets ---
     content.push('## Operating Markets');
     content.push('');
-    // CHANGE 1: Replace {X} with the dynamic count
     content.push(globalData.PAGE_OPERATIONS_GLOBAL.replace('{X}', publishedLocaleCount));
     content.push('');
-    publishedLocales.forEach(l => {
-      // CHANGE 2: Use M_COUNTRY instead of M_COUNTRY_ENGLISH
-      content.push(`- ${l.M_COUNTRY} - ${l.M_COUNTRY_NATIVE}`);
+    publishedLocales.forEach(locale => {
+      // FIX: Consistently use locale.M_COUNTRY
+      content.push(`- ${locale.M_COUNTRY} - ${locale.M_COUNTRY_NATIVE}`);
     });
     content.push('');
 
@@ -93,9 +90,9 @@ export async function generateLlmsTxt(logger) {
     content.push('');
     content.push('Find our homepage for each operating market and navigate from there:');
     content.push('');
-    publishedLocales.forEach(l => {
-        // CHANGE 2: Use M_COUNTRY for the link text
-        content.push(`- [${l.M_COUNTRY}](${SITE_URL}/${l.M_SLUG})`);
+    publishedLocales.forEach(locale => {
+        // FIX: Consistently use locale.M_COUNTRY
+        content.push(`- [${locale.M_COUNTRY}](${SITE_URL}/${locale.M_SLUG})`);
     });
     content.push('');
 
@@ -105,9 +102,9 @@ export async function generateLlmsTxt(logger) {
     content.push('Find our master sitemap and localized sitemap files for easier navigation:');
     content.push('');
     content.push(`- [Master Sitemap](${SITE_URL}/sitemap.xml)`);
-    publishedLocales.forEach(l => {
-      // CHANGE 2: Use M_COUNTRY for the link text
-      content.push(`- [${l.M_COUNTRY}](${SITE_URL}/sitemap-${l.M_HREFLANG_CODE}.xml)`);
+    publishedLocales.forEach(locale => {
+      // FIX: Consistently use locale.M_COUNTRY
+      content.push(`- [${locale.M_COUNTRY}](${SITE_URL}/sitemap-${locale.M_HREFLANG_CODE}.xml)`);
     });
     content.push('');
 
@@ -117,7 +114,6 @@ export async function generateLlmsTxt(logger) {
     const slugKeysToProcess = [...dynamicCategoryKeys, 'AUTHOR_LIST_SLUG'];
 
     for (const key of slugKeysToProcess) {
-      // Find the corresponding title key, e.g., PAGE_CATEGORY_1_LISTING_TITLE
       const titleKey = key.replace('_SLUG', '_TITLE');
       const title = key.replace(/_/g, ' ').replace('PAGE ', '').replace('SLUG', '').trim();
       content.push(`## ${title} pages by Locale`);
@@ -125,8 +121,9 @@ export async function generateLlmsTxt(logger) {
       
       publishedLocales.forEach(locale => {
         const common = commonData.find(c => c.M_SLUG === locale.M_SLUG);
+        // Ensure that the slug and the title both exist before creating the line
         if (common && common[key] && common[titleKey]) {
-          // CHANGE 3: Concatenate Country + Dynamic Title
+          // FIX: Consistently use locale.M_COUNTRY
           const linkText = `${locale.M_COUNTRY} - ${common[titleKey]}`;
           content.push(`- [${linkText}](${SITE_URL}/${locale.M_SLUG}/${common[key]})`);
         }
@@ -151,7 +148,7 @@ export async function generateLlmsTxt(logger) {
                 page.PUBLISH_Y_N === "1"
             );
             if (eeatPage) {
-                // CHANGE 2: Use M_COUNTRY for the link text
+                // FIX: Consistently use locale.M_COUNTRY
                 const linkText = `${locale.M_COUNTRY} - ${eeatPage.EEAT_NAME}`;
                 content.push(`- [${linkText}](${SITE_URL}/${eeatPage.M_SLUG}/${eeatPage.EEAT_SLUG})`);
             }
