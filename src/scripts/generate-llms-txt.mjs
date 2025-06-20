@@ -37,17 +37,20 @@ export async function generateLlmsTxt(logger) {
       return;
     }
 
-    const globalData = wwwData[0]; // Assuming global data is in the first object
+    const globalData = wwwData[0];
     const publishedLocales = localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1");
+    // CHANGE 1: Calculate the number of published locales
+    const publishedLocaleCount = publishedLocales.length;
     
     const content = [];
 
-    // --- General Info ---
+    // --- General Info (with dynamic location count) ---
     content.push(`# ${globalData.PAGE_ORGANISATION_FULL_NAME} is ${globalData.PAGE_SLOGAN_GLOBAL}`);
     content.push('');
     content.push(globalData.PAGE_DESCRIPTION_GLOBAL_SHORT);
     content.push('');
-    content.push(globalData.PAGE_DESCRIPTION_GLOBAL_LONG);
+    // CHANGE 1: Replace {X} with the dynamic count
+    content.push(globalData.PAGE_DESCRIPTION_GLOBAL_LONG.replace('{X}', publishedLocaleCount));
     content.push('');
 
     // --- Social Links ---
@@ -76,10 +79,12 @@ export async function generateLlmsTxt(logger) {
     // --- Operating Markets ---
     content.push('## Operating Markets');
     content.push('');
-    content.push(globalData.PAGE_OPERATIONS_GLOBAL);
+    // CHANGE 1: Replace {X} with the dynamic count
+    content.push(globalData.PAGE_OPERATIONS_GLOBAL.replace('{X}', publishedLocaleCount));
     content.push('');
     publishedLocales.forEach(l => {
-      content.push(`- ${l.M_COUNTRY_ENGLISH} - ${l.M_COUNTRY_NATIVE}`);
+      // CHANGE 2: Use M_COUNTRY instead of M_COUNTRY_ENGLISH
+      content.push(`- ${l.M_COUNTRY} - ${l.M_COUNTRY_NATIVE}`);
     });
     content.push('');
 
@@ -89,7 +94,8 @@ export async function generateLlmsTxt(logger) {
     content.push('Find our homepage for each operating market and navigate from there:');
     content.push('');
     publishedLocales.forEach(l => {
-        content.push(`- [${l.M_COUNTRY_ENGLISH}](${SITE_URL}/${l.M_SLUG})`);
+        // CHANGE 2: Use M_COUNTRY for the link text
+        content.push(`- [${l.M_COUNTRY}](${SITE_URL}/${l.M_SLUG})`);
     });
     content.push('');
 
@@ -100,7 +106,8 @@ export async function generateLlmsTxt(logger) {
     content.push('');
     content.push(`- [Master Sitemap](${SITE_URL}/sitemap.xml)`);
     publishedLocales.forEach(l => {
-      content.push(`- [${l.M_COUNTRY_ENGLISH}](${SITE_URL}/sitemap-${l.M_HREFLANG_CODE}.xml)`);
+      // CHANGE 2: Use M_COUNTRY for the link text
+      content.push(`- [${l.M_COUNTRY}](${SITE_URL}/sitemap-${l.M_HREFLANG_CODE}.xml)`);
     });
     content.push('');
 
@@ -110,13 +117,18 @@ export async function generateLlmsTxt(logger) {
     const slugKeysToProcess = [...dynamicCategoryKeys, 'AUTHOR_LIST_SLUG'];
 
     for (const key of slugKeysToProcess) {
+      // Find the corresponding title key, e.g., PAGE_CATEGORY_1_LISTING_TITLE
+      const titleKey = key.replace('_SLUG', '_TITLE');
       const title = key.replace(/_/g, ' ').replace('PAGE ', '').replace('SLUG', '').trim();
       content.push(`## ${title} pages by Locale`);
       content.push('');
+      
       publishedLocales.forEach(locale => {
         const common = commonData.find(c => c.M_SLUG === locale.M_SLUG);
-        if (common && common[key]) {
-          content.push(`- [${locale.M_COUNTRY_ENGLISH}](${SITE_URL}/${locale.M_SLUG}/${common[key]})`);
+        if (common && common[key] && common[titleKey]) {
+          // CHANGE 3: Concatenate Country + Dynamic Title
+          const linkText = `${locale.M_COUNTRY} - ${common[titleKey]}`;
+          content.push(`- [${linkText}](${SITE_URL}/${locale.M_SLUG}/${common[key]})`);
         }
       });
       content.push('');
@@ -139,7 +151,9 @@ export async function generateLlmsTxt(logger) {
                 page.PUBLISH_Y_N === "1"
             );
             if (eeatPage) {
-                content.push(`- [${locale.M_COUNTRY_ENGLISH} - ${eeatPage.EEAT_NAME}](${SITE_URL}/${eeatPage.M_SLUG}/${eeatPage.EEAT_SLUG})`);
+                // CHANGE 2: Use M_COUNTRY for the link text
+                const linkText = `${locale.M_COUNTRY} - ${eeatPage.EEAT_NAME}`;
+                content.push(`- [${linkText}](${SITE_URL}/${eeatPage.M_SLUG}/${eeatPage.EEAT_SLUG})`);
             }
         });
         content.push('');
@@ -147,7 +161,7 @@ export async function generateLlmsTxt(logger) {
 
     // Write the final file
     await writeFile(OUTPUT_FILE, content.join('\n'));
-    logger.info(`✅ Generated ${path.basename(OUTPUT_FILE)}`);
+    logger.info(`✅ Generated ${path.basename(OUTPUT_FILE)} with ${publishedLocaleCount} published locales.`);
 
   } catch (error) {
     logger.error('❌ Error generating llms.txt:', error);
