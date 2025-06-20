@@ -1,0 +1,71 @@
+/* src/styles/fonts.css */
+
+/* --- Default Font for Latin Scripts --- */
+:root {
+  font-family: 'Inter Variable', system-ui, sans-serif;
+}
+
+:lang(ar) {
+  font-family: 'Noto Sans Arabic', 'Tahoma', sans-serif;
+}
+
+/* Hebrew */
+:lang(he) {
+  font-family: 'Noto Sans Hebrew', 'Arial Hebrew', sans-serif;
+}
+
+/* Hindi */
+:lang(hi) {
+  font-family: 'Noto Sans Devanagari', 'Arial Unicode MS', sans-serif;
+}
+
+/* Japanese */
+:lang(ja) {
+  font-family: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif;
+}
+
+/* Korean */
+:lang(ko) {
+  font-family: 'Noto Sans KR', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+}
+
+/* Cyrillic Scripts */
+:lang(ru),
+:lang(be),
+:lang(bg),
+:lang(mk),
+:lang(sr),
+:lang(uk),
+:lang(mn) {
+  font-family: 'Roboto', 'Arial', sans-serif;
+}
+
+/* Greek */
+:lang(el) {
+  font-family: 'Roboto', 'Arial', sans-serif;
+}
+
+/* Thai */
+:lang(th) {
+  font-family: 'Noto Sans Thai', 'Thonburi', 'Tahoma', sans-serif;
+}
+
+/* Bengali */
+:lang(bn) {
+  font-family: 'Noto Sans Bengali', 'Arial Unicode MS', sans-serif;
+}
+
+/* Armenian */
+:lang(hy) {
+  font-family: 'Noto Sans Armenian', 'Arial Unicode MS', sans-serif;
+}
+
+/* Georgian */
+:lang(ka) {
+  font-family: 'Noto Sans Georgian', 'Arial Unicode MS', sans-serif;
+}
+
+/* Myanmar */
+:lang(my) {
+  font-family: 'Noto Sans Myanmar', 'Arial Unicode MS', sans-serif;
+}

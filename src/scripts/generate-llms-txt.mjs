@@ -130,7 +130,7 @@ export async function generateLlmsTxt(logger) {
           let linkText;
           if (key === 'AUTHOR_LIST_SLUG') {
             // Use ARTICLE_AUTHORS_TITLE for author list or create a fallback
-            const authorTitle = common.ARTICLE_AUTHORS_TITLE || 'Avtorji in uredniki';
+            const authorTitle = common.ARTICLE_AUTHORS_TITLE;
             linkText = `${locale.M_COUNTRY} - ${authorTitle}`;
           } else if (common[titleKey]) {
             linkText = `${locale.M_COUNTRY} - ${common[titleKey]}`;
