@@ -1,11 +1,5 @@
 [
     {
-        "PAGE_LOCALE": "SI-sl",
-        "M_COUNTRY_NUMBER": "001",
-        "M_COUNTRY_CODE": "SI",
-        "M_LANGUAGE_ISO": "sl",
-        "M_HREFLANG_CODE": "sl-SI",
-        "M_SLUG": "si",
         "PAGE_LOGO_IMAGE_URL_1": "https://www.eusignal.com/logos/EUSIGNAL-SVG-File_Horizontal-Light.svg",
         "PAGE_LOGO_IMAGE_URL_2": "https://www.eusignal.com/logos/EUSIGNAL-SVG_Logo_File_Horizontal_Light.svg",
         "PAGE_LOGO_IMAGE_URL_3": "https://www.eusignal.com/logos/EUSIGNAL-PNGFile_Horizontal-Light-273-40.png",

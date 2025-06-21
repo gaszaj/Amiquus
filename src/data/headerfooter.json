@@ -8,13 +8,12 @@
         "HEADER_LOGO_ALT": "EUSIGNAL Logotip",
         "HEADER_LOGO_PATH": "/si",
         "HEADER_LINK_NAME_1": "Kompleti",
-        "HEADER_LINK_NAME_2": "Opozorilne piramide",
+        "HEADER_LINK_NAME_2": "Izdelki",
         "HEADER_LINK_NAME_3": "Kontakt",
         "HEADER_LINK_PATH_1": "/kompleti",
         "HEADER_LINK_PATH_2": "/opozorilna-piramida",
         "HEADER_LINK_PATH_3": "/kontakt",
         "HEADER_NAME_CTA_PATH": "/opozorilna-piramida",
-        "HEADER_SEARCH_BAR_PLACEHOLDER": "Poiščite izdelke...",
         "FOOTER_BUNDLES_LINK_NAME_GROUP": "Varnostni kompleti",
         "HEADER_NAME_CTA": "Oddajte naročilo",
         "FOOTER_EEAT_GROUP_1": "Podjetje",
@@ -91,8 +90,7 @@
         "FOOTER_BESTSELLERS_ID_6": "p089001",
         "FOOTER_BESTSELLERS_ID_7": "p092001",
         "FOOTER_BESTSELLERS_ID_8": "p093001",
-        "FOOTER_BESTSELLERS_ID_9": "p114001",
-        "PRODUCT_KEYWORD_1": "Opozorilna piramida"
+        "FOOTER_BESTSELLERS_ID_9": "p114001"
     },
     {
         "HEADER_ID": "header002",
@@ -103,13 +101,12 @@
         "HEADER_LOGO_ALT": "EUSIGNAL Logo",
         "HEADER_LOGO_PATH": "/hr",
         "HEADER_LINK_NAME_1": "Kompleti",
-        "HEADER_LINK_NAME_2": "Znakovi piramide upozorenja",
+        "HEADER_LINK_NAME_2": "Proizvodi",
         "HEADER_LINK_NAME_3": "Kontakt",
         "HEADER_LINK_PATH_1": "/kompleti",
         "HEADER_LINK_PATH_2": "/piramida-upozorenja",
         "HEADER_LINK_PATH_3": "/kontakt",
         "HEADER_NAME_CTA_PATH": "/piramida-upozorenja",
-        "HEADER_SEARCH_BAR_PLACEHOLDER": "Pretražite proizvode...",
         "FOOTER_BUNDLES_LINK_NAME_GROUP": "Sigurnosni kompleti",
         "HEADER_NAME_CTA": "Pošaljite narudžbu",
         "FOOTER_EEAT_GROUP_1": "Tvrtka",
@@ -186,8 +183,7 @@
         "FOOTER_BESTSELLERS_ID_6": "p089002",
         "FOOTER_BESTSELLERS_ID_7": "p092002",
         "FOOTER_BESTSELLERS_ID_8": "p093002",
-        "FOOTER_BESTSELLERS_ID_9": "p114002",
-        "PRODUCT_KEYWORD_1": "Piramida upozorenja"
+        "FOOTER_BESTSELLERS_ID_9": "p114002"
     },
     {
         "HEADER_ID": "header003",
@@ -198,13 +194,12 @@
         "HEADER_LOGO_ALT": "EUSIGNAL Logotipo",
         "HEADER_LOGO_PATH": "/es",
         "HEADER_LINK_NAME_1": "Kits",
-        "HEADER_LINK_NAME_2": "Señales triangulares de advertencia",
+        "HEADER_LINK_NAME_2": "Productos",
         "HEADER_LINK_NAME_3": "Contacto",
         "HEADER_LINK_PATH_1": "/kits",
         "HEADER_LINK_PATH_2": "/senales-triangulares-de-advertencia",
         "HEADER_LINK_PATH_3": "/contacto",
         "HEADER_NAME_CTA_PATH": "/senales-triangulares-de-advertencia",
-        "HEADER_SEARCH_BAR_PLACEHOLDER": "Buscar productos...",
         "FOOTER_BUNDLES_LINK_NAME_GROUP": "Kits de seguridad",
         "HEADER_NAME_CTA": "Enviar pedido",
         "HEADER_LANGUAGE_SLOVENIA_SLOVENIAN": "Slovenščina",
@@ -277,7 +272,6 @@
         "FOOTER_BESTSELLERS_ID_6": "p089003",
         "FOOTER_BESTSELLERS_ID_7": "p092003",
         "FOOTER_BESTSELLERS_ID_8": "p093003",
-        "FOOTER_BESTSELLERS_ID_9": "p114003",
-        "PRODUCT_KEYWORD_1": "Pirámide de señalización"
+        "FOOTER_BESTSELLERS_ID_9": "p114003"
     }
 ]

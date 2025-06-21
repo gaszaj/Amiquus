@@ -181,15 +181,15 @@ const schema = [collectionPageSchema, organizationSchema];
 // Build the language link map for the language picker
 const languageLinksMap = {};
 for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
-  // Find any published article for this locale to get the correct ARTICLE_LIST_SLUG
+  // Find any published article for this locale to get the correct PAGE_CATEGORY_2_LISTING_SLUG
   const articleForLocale = articleData.find(a =>
     a.M_SLUG === localeObj.M_SLUG &&
     a.PUBLISH_Y_N === "1" &&
-    a.ARTICLE_LIST_SLUG && a.ARTICLE_LIST_SLUG.trim()
+    a.PAGE_CATEGORY_2_LISTING_SLUG && a.PAGE_CATEGORY_2_LISTING_SLUG.trim()
   );
   if (articleForLocale) {
     // Always use the slug from the article for that locale
-    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}/${articleForLocale.ARTICLE_LIST_SLUG}`;
+    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}/${articleForLocale.PAGE_CATEGORY_2_LISTING_SLUG}`;
   } else {
     // Fallback to homepage if no article listing exists
     languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}`;

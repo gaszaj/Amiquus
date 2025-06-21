@@ -223,7 +223,7 @@ const allDomainArticles: RelatedArticleInfo[] = relatedArticleIds
     
     return {
       title: relatedArticle.ARTICLE_H1,
-      url: `/${relatedArticle.M_SLUG}/${relatedArticle.ARTICLE_LIST_SLUG}/${relatedArticle.ARTICLE_SLUG}`,
+      url: `/${relatedArticle.M_SLUG}/${relatedArticle.PAGE_CATEGORY_2_LISTING_SLUG}/${relatedArticle.ARTICLE_SLUG}`,
       date: relatedArticle.ARTICLE_PUBLISH_DATE
     };
   })
@@ -502,7 +502,7 @@ for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
     a.PUBLISH_Y_N === "1"
   );
   if (altArticle) {
-    languageLinksMap[locale.M_SLUG] = `/${altArticle.M_SLUG}/${altArticle.ARTICLE_LIST_SLUG}/${altArticle.ARTICLE_SLUG}`;
+    languageLinksMap[locale.M_SLUG] = `/${altArticle.M_SLUG}/${altArticle.PAGE_CATEGORY_2_LISTING_SLUG}/${altArticle.ARTICLE_SLUG}`;
   } else {
     languageLinksMap[locale.M_SLUG] = `/${locale.M_SLUG}`;
   }
@@ -519,7 +519,7 @@ const getAlternativeLanguageLinks = (currentArticle, localeData, articleDataJson
       a.PUBLISH_Y_N === "1"
     );
     if (altArticle) {
-      languageLinksMap[locale.M_SLUG] = `/${altArticle.M_SLUG}/${altArticle.ARTICLE_LIST_SLUG}/${altArticle.ARTICLE_SLUG}`;
+      languageLinksMap[locale.M_SLUG] = `/${altArticle.M_SLUG}/${altArticle.PAGE_CATEGORY_2_LISTING_SLUG}/${altArticle.ARTICLE_SLUG}`;
     } else {
       languageLinksMap[locale.M_SLUG] = `/${locale.M_SLUG}`;
     }

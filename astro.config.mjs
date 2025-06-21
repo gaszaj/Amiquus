@@ -15,6 +15,9 @@ export default defineConfig({
   adapter: netlify({
     imageCDN: false,
   }),
+  prefetch: {
+    prefetchAll: true
+  },
   integrations: [
     manageLocales(), 
     sitemapGenerator(),

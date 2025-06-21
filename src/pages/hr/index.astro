@@ -127,9 +127,9 @@ const heroData: HeroData = {
   ctaText: home.HOME_HERO_BUTTON,
   ctaLink: "#best-sellers",
   features: [
-    home.PAGE_SOCIAL_SHARING_FEATURE_1,
-    home.PAGE_SOCIAL_SHARING_FEATURE_2,
-    home.PAGE_SOCIAL_SHARING_FEATURE_3
+    home.HOME_HERO_BENEFIT_1,
+    home.HOME_HERO_BENEFIT_2,
+    home.HOME_HERO_BENEFIT_3
   ],
   socialProof: {
     text: home.HOME_HERO_SOCIAL_PROOF,
@@ -141,7 +141,6 @@ const heroData: HeroData = {
 // Define keywords for the page
 const pageKeywords: string = [
   home.M_HOME_NAME,
-  home.HOME_KEYWORD_1,
   common.M_COUNTRY_NATIVE,
   www.PAGE_ORGANISATION_FULL_NAME
 ].join(', ');
@@ -165,7 +164,7 @@ const bestsellers = products
 const marqueeItems = bestsellers
   .slice(0, 5)
   .map(product => ({
-    url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_CATEGORY_1_SLUG}/${product.PRODUCT_ASCII_SLUG}`),
+    url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_CATEGORY_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`),
     image: getBaseUrl(product.PRODUCT_IMAGE_PATH_S),
     alt: `${product.PAGE_CATEGORY_1} — ${product.PRODUCT_NAME} | ${www.PAGE_ORGANISATION_FULL_NAME}`
   }));
@@ -180,7 +179,7 @@ const bestsellersSection = {
       title: `${product.PAGE_CATEGORY_1} — ${product.PRODUCT_NAME}`,
       image: getBaseUrl(product.PRODUCT_IMAGE_PATH_S),
       alt: `${product.PAGE_CATEGORY_1} — ${product.PRODUCT_NAME} | ${www.PAGE_ORGANISATION_FULL_NAME}`,
-      url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_CATEGORY_1_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
+      url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_CATEGORY_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
     }))
 };
 
@@ -190,18 +189,18 @@ const featuresSection = {
   items: [
     {
       icon: "⚡",
-      title: home.HOME_STRING_14,
-      description: home.HOME_STRING_17
+      title: home.HOME_FEATURE_NAME_1,
+      description: home.HOME_FEATURE_LABEL_1
     },
     {
       icon: "🔄",
-      title: home.HOME_STRING_15,
-      description: home.HOME_STRING_18
+      title: home.HOME_FEATURE_NAME_2,
+      description: home.HOME_FEATURE_LABEL_2
     },
     {
       icon: "📦",
-      title: home.HOME_STRING_16,
-      description: home.HOME_STRING_19
+      title: home.HOME_FEATURE_NAME_3,
+      description: home.HOME_FEATURE_LABEL_3
     }
   ] as FeatureItem[] 
 };
@@ -247,9 +246,9 @@ const contactSection = { // Type assertion can be added
   title: home.HOME_H2_6,
   subtitle: home.HOME_CONTACT_SUBTITLE,
   formLabels: {
-    fullName: common.M_FULL_NAME,
+    fullName: common.M_FULLNAME_PLACEHOLDER,
     fullNamePlaceholder: common.M_FULLNAME_PLACEHOLDER,
-    email: common.M_EMAIL,
+    email: common.M_EMAIL_ADDRESS_LABEL,
     emailPlaceholder: common.M_EMAIL_PLACEHOLDER,
     message: common.M_MESSAGE_LABEL,
     messagePlaceholder: common.M_PARTNERSHIP_MESSAGE_PLACEHOLDER,

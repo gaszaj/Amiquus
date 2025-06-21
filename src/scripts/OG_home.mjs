@@ -80,9 +80,9 @@ async function generateImageForHome(home, commonAssets, context) {
     const dataForTemplate = {
         lang: home.M_LANGUAGE_ISO,
         subtitle: home.HOME_H1,
-        feature1: home.PAGE_SOCIAL_SHARING_FEATURE_1,
-        feature2: home.PAGE_SOCIAL_SHARING_FEATURE_2,
-        feature3: home.PAGE_SOCIAL_SHARING_FEATURE_3,
+        feature1: home.HOME_HERO_BENEFIT_1,
+        feature2: home.HOME_HERO_BENEFIT_2,
+        feature3: home.HOME_HERO_BENEFIT_3,
         domain: brandingData.PAGE_ORGANISATION_URL_NAME,
         email: brandingData.PAGE_INFO_EMAIL,
         flagSvg: flagMap[home.M_COUNTRY_CODE] || '',

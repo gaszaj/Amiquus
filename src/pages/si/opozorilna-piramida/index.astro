@@ -209,15 +209,15 @@ const schema = [collectionPageSchema, organizationSchema];
 // Build the language link map for the language picker
 const languageLinksMap = {};
 for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
-  // Find any published product for this locale to get the correct PAGE_CATEGORY_1_SLUG
+  // Find any published product for this locale to get the correct PAGE_CATEGORY_1_LISTING_SLUG
   const productForLocale = productData.find(p =>
     p.M_SLUG === localeObj.M_SLUG &&
     p.PUBLISH_Y_N === "1" &&
-    p.PAGE_CATEGORY_1_SLUG && p.PAGE_CATEGORY_1_SLUG.trim()
+    p.PAGE_CATEGORY_1_LISTING_SLUG && p.PAGE_CATEGORY_1_LISTING_SLUG.trim()
   );
   if (productForLocale) {
     // Always use the slug from the product for that locale
-    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}/${productForLocale.PAGE_CATEGORY_1_SLUG}`;
+    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}/${productForLocale.PAGE_CATEGORY_1_LISTING_SLUG}`;
   } else {
     // Fallback to homepage if no product listing exists
     languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}`;
