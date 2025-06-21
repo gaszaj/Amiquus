@@ -12,6 +12,7 @@ import {
 } from 'country-flag-icons/string/3x2';
 import commonData from '../data/common.json';
 import localeData from '../data/locale.json';
+import wwwData from '../data/www.json';
 
 export interface Props {
   alternativeLinks?: Array<{
@@ -31,9 +32,10 @@ const { alternativeLinks, languageLinksMap = {}, locale: propLocale } = Astro.pr
 // Get the locale from the URL path (e.g., 'si' from /si/...)
 const locale = propLocale || Astro.url.pathname.split('/')[1] || 'si'; 
 
-// Find the matching headerFooter and common data objects based on M_SLUG
+// Find the matching headerFooter, common, and www data objects based on M_SLUG
 const headerFooter = headerFooterData.find(item => item.M_SLUG === locale) || headerFooterData[0];
 const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
+const www = wwwData.find(item => item.M_SLUG === locale) || wwwData[0];
 
 // Define default English texts for aria-labels (these will be used if common.json doesn't provide specific translations)
 let ariaLabelSearch1 = "Open mobile menu";
@@ -97,7 +99,7 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
       id="header-logo-link"
     >
       <img
-        src="/logos/EUSIGNAL-SVG-File_Horizontal-Light.svg"
+        src={www.PAGE_LOGO_IMAGE_PATH_1.replace('public/', '')}
         alt={headerFooter.HEADER_LOGO_ALT}
         class="h-6 w-auto"
         style="max-height: 25px; height: auto; width: auto;"
