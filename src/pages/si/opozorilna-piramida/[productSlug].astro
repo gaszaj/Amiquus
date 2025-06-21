@@ -114,7 +114,7 @@ const relatedArticles: RelatedArticleInfo[] = [
     if (!a) return null;
     return {
       title: a.ARTICLE_H1,
-      url: `/${a.M_SLUG}/${a.ARTICLE_LIST_SLUG}/${a.ARTICLE_SLUG}`,
+      url: `/${a.M_SLUG}/${a.PAGE_CATEGORY_2_LISTING_SLUG}/${a.ARTICLE_SLUG}`,
       date: a.ARTICLE_PUBLISH_DATE
     };
   }).filter(Boolean) as RelatedArticleInfo[];
