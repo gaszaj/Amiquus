@@ -253,9 +253,9 @@ const basicSigns: BasicSign[] = [
   const product = findProductById(id);
   if (!product) return null;
   return {
-    name: `${product.PAGE_CATEGORY_1} — ${product.PRODUCT_NAME}`,
+    name: `${product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME}`,
     image: getBaseUrl(product.PRODUCT_IMAGE_PATH_S),
-    url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_CATEGORY_1_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
+    url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_CATEGORY_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
   };
 }).filter(Boolean) as BasicSign[];
 
@@ -270,9 +270,9 @@ const additionalSigns: AdditionalSign[] = [
   const product = findProductById(id);
   if (!product) return null;
   return {
-    name: `${product.PAGE_CATEGORY_1} — ${product.PRODUCT_NAME}`,
+    name: `${product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME}`,
     image: getBaseUrl(product.PRODUCT_IMAGE_PATH_S),
-    url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_CATEGORY_1_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
+    url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_CATEGORY_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
   };
 }).filter(Boolean) as AdditionalSign[];
 

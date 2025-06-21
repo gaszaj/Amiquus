@@ -166,7 +166,7 @@ const marqueeItems = bestsellers
   .map(product => ({
     url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_CATEGORY_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`),
     image: getBaseUrl(product.PRODUCT_IMAGE_PATH_S),
-    alt: `${product.PAGE_CATEGORY_1} — ${product.PRODUCT_NAME} | ${www.PAGE_ORGANISATION_FULL_NAME}`
+    alt: `${product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME} | ${www.PAGE_ORGANISATION_FULL_NAME}`
   }));
 
 // Get top 9 products for bestsellers section
@@ -176,9 +176,9 @@ const bestsellersSection = {
   products: bestsellers
     .slice(0, 9)
     .map(product => ({
-      title: `${product.PAGE_CATEGORY_1} — ${product.PRODUCT_NAME}`,
+      title: `${product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME}`,
       image: getBaseUrl(product.PRODUCT_IMAGE_PATH_S),
-      alt: `${product.PAGE_CATEGORY_1} — ${product.PRODUCT_NAME} | ${www.PAGE_ORGANISATION_FULL_NAME}`,
+      alt: `${product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME} | ${www.PAGE_ORGANISATION_FULL_NAME}`,
       url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_CATEGORY_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
     }))
 };

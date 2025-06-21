@@ -51,7 +51,7 @@ const contentOrientation = commonData.find(item =>
 )?.M_CONTENT_ORIENTATION || 'ltr';
 
 // Get category name from first product (they should all be the same)
-const categoryName = filteredProducts[0]?.PAGE_CATEGORY_1 || '';
+const categoryName = filteredProducts[0]?.PAGE_CATEGORY_1_LISTING_SLUG_HELPER || '';
 
 // Define page metadata
 const pageTitle = common.PAGE_CATEGORY_1_LISTING_TITLE;
@@ -113,7 +113,7 @@ const collectionPageSchema = {
                 ].filter(Boolean),
                 "datePublished": product.PRODUCT_DATE_PUBLISHED,
                 "dateModified": product.PRODUCT_DATE_UPDATED,
-                "category": product.PAGE_CATEGORY_1
+                "category": product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER
             }
         }))
     }
@@ -253,7 +253,7 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
             <div class="grid grid-cols-2 lg:grid-cols-3 gap-2">
                 {filteredProducts.map((product) => {
                     const productUrl = `${Astro.url.origin}/${parentSlug}/${currentFolder}/${product.PRODUCT_ASCII_SLUG}`;
-                    const fullProductName = `${product.PAGE_CATEGORY_1} ${product.PRODUCT_NAME}`;
+                    const fullProductName = `${product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER} ${product.PRODUCT_NAME}`;
                     
                     return (
                         <div class="bg-white border border-gray-100 overflow-hidden group">
