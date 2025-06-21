@@ -32,10 +32,10 @@ const { alternativeLinks, languageLinksMap = {}, locale: propLocale } = Astro.pr
 // Get the locale from the URL path (e.g., 'si' from /si/...)
 const locale = propLocale || Astro.url.pathname.split('/')[1] || 'si'; 
 
-// Find the matching headerFooter, common, and www data objects based on M_SLUG
+// Find the matching headerFooter and common data objects based on M_SLUG
 const headerFooter = headerFooterData.find(item => item.M_SLUG === locale) || headerFooterData[0];
 const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
-const www = wwwData.find(item => item.M_SLUG === locale) || wwwData[0];
+const www = wwwData[0];
 
 // Define default English texts for aria-labels (these will be used if common.json doesn't provide specific translations)
 let ariaLabelSearch1 = "Open mobile menu";
@@ -44,9 +44,9 @@ let ariaLabelSearch3 = "Close search";
 
 // If a matching locale object is found, use its translations, otherwise stick to English defaults
 if (common) {
-  ariaLabelSearch1 = common.PAGEFIND_ARIA_LABEL_SEARCH_1 || ariaLabelSearch1;
-  ariaLabelSearch2 = common.PAGEFIND_ARIA_LABEL_SEARCH_2 || ariaLabelSearch2;
-  ariaLabelSearch3 = common.PAGEFIND_ARIA_LABEL_SEARCH_3 || ariaLabelSearch3;
+  ariaLabelSearch1 = common.PAGE_SEARCH_ARIA_LABEL_SEARCH_1 || ariaLabelSearch1;
+  ariaLabelSearch2 = common.PAGE_SEARCH_ARIA_LABEL_SEARCH_2 || ariaLabelSearch2;
+  ariaLabelSearch3 = common.PAGE_SEARCH_ARIA_LABEL_SEARCH_3 || ariaLabelSearch3;
 }
 
 // Header component for the EU Signal website
@@ -99,7 +99,7 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
       id="header-logo-link"
     >
       <img
-        src={www.PAGE_LOGO_IMAGE_PATH_1.replace('public/', '')}
+        src={www.PAGE_LOGO_IMAGE_PATH_1.replace('public', '')}
         alt={headerFooter.HEADER_LOGO_ALT}
         class="h-6 w-auto"
         style="max-height: 25px; height: auto; width: auto;"
@@ -126,7 +126,7 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
         type="button" 
         id="desktop-search-button" 
         class="search-icon-btn" 
-        aria-label={common.PAGEFIND_SEARCH_LABEL}
+        aria-label={common.PAGE_SEARCH_SEARCH_LABEL}
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24">
           <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
@@ -204,7 +204,7 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
             type="button" 
             id="mobile-search-button" 
             class="search-icon-btn mr-4" 
-            aria-label={common.PAGEFIND_SEARCH_LABEL}
+            aria-label={common.PAGE_SEARCH_SEARCH_LABEL}
         >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="40" stroke-dashoffset="40" d="M10.76 13.24c-2.34 -2.34 -2.34 -6.14 0 -8.49c2.34 -2.34 6.14 -2.34 8.49 0c2.34 2.34 2.34 6.14 0 8.49c-2.34 2.34 -6.14 2.34 -8.49 0Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="40;0"/></path><path stroke-dasharray="12" stroke-dashoffset="12" d="M10.5 13.5l-7.5 7.5"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.24s" values="12;0"/></path></g></svg>
         </button>
@@ -231,7 +231,7 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
             type="search" 
             id="mobile-menu-search-input"
             name="q-mobile" 
-            placeholder={common.PAGEFIND_PLACEHOLDER}
+            placeholder={common.PAGE_SEARCH_PLACEHOLDER}
             class="w-full bg-gray-800 border border-gray-600 text-white placeholder-gray-400 text-base rounded-md py-2 pl-4 pr-10 focus:ring-signal-green focus:border-signal-green transition"
           >
           <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -301,21 +301,21 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
   id="search-overlay" 
   class="fixed top-0 left-0 w-full h-full bg-black/80 backdrop-blur-sm z-40 hidden items-start justify-center pt-20 md:pt-32" 
   aria-hidden="true" 
-  data-zero-results={common.PAGEFIND_ZERO_RESULTS}
-  data-one-result={common.PAGEFIND_ONE_RESULT}
-  data-many-results={common.PAGEFIND_MANY_RESULTS}
-  data-searching={common.PAGEFIND_SEARCHING}
-  data-load-more={common.PAGEFIND_LOAD_MORE}
-  data-load-all={common.PAGEFIND_LOAD_ALL}
+  data-zero-results={common.PAGE_SEARCH_ZERO_RESULTS}
+  data-one-result={common.PAGE_SEARCH_ONE_RESULT}
+  data-many-results={common.PAGE_SEARCH_MANY_RESULTS}
+  data-searching={common.PAGE_SEARCH_SEARCHING}
+  data-load-more={common.PAGE_SEARCH_LOAD_MORE}
+  data-load-all={common.PAGE_SEARCH_LOAD_ALL}
 >
   <div class="relative w-full max-w-2xl px-4">
     <form class="relative" role="search" onsubmit="event.preventDefault();">
-      <label for="search-input" class="sr-only">{common.PAGEFIND_SEARCH_LABEL}</label>
+      <label for="search-input" class="sr-only">{common.PAGE_SEARCH_SEARCH_LABEL}</label>
       <input
         type="search"
         id="search-input"
         name="q"
-        placeholder={common.PAGEFIND_PLACEHOLDER}
+        placeholder={common.PAGE_SEARCH_PLACEHOLDER}
         class="w-full bg-gray-700/50 border-2 border-gray-600 text-white placeholder-gray-400 text-xl rounded-lg py-4 pl-6 pr-28 focus:ring-signal-green focus:border-signal-green transition-colors duration-200"
         autocomplete="off"
       />
@@ -323,7 +323,7 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
         type="button" 
         id="clear-search-button" 
         class="absolute inset-y-0 right-[68px] hidden items-center text-gray-500 hover:text-red-500 transition-colors" 
-        aria-label={common.PAGEFIND_CLEAR_SEARCH}
+        aria-label={common.PAGE_SEARCH_CLEAR_SEARCH}
       >
         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
@@ -536,7 +536,7 @@ const currentLanguageObject = languageLinks.find(lang => lang.code === locale) |
     const performSearch = (query) => {
       // If index isn't loaded for some reason, inform the user and retry.
       if (searchIndex.length === 0 && query) {
-         searchStatus.innerHTML = common.PAGEFIND_INDEX_PROGRESS;
+         searchStatus.innerHTML = common.PAGE_SEARCH_INDEX_PROGRESS;
          loadSearchIndex().then(() => performSearch(query));
          return;
       }

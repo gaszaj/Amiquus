@@ -1,11 +1,11 @@
 ---
 // import { getEntry } from 'astro:content'; // Removed as it's not used; data comes from JSON
-import { actions, isInputError } from 'astro:actions'; // Import actions
-import BaseLayout from '../../layouts/BaseLayout.astro'; // Adjusted path assuming layouts is one level up
-import wwwData from '../../data/www.json'; // Adjusted path
-import commonData from '../../data/common.json'; // Adjusted path
-import eeatData from '../../data/eeat.json'; // Adjusted path
-import authorData from '../../data/author.json'; // Add this import
+import { actions, isInputError } from 'astro:actions';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import wwwData from '../../data/www.json';
+import commonData from '../../data/common.json';
+import eeatData from '../../data/eeat.json';
+import authorData from '../../data/author.json';
 import localeData from '../../data/locale.json';
 
 export const prerender = false;
@@ -83,7 +83,7 @@ const articlePublishDate = eeat.EEAT_DATE_PUBLISHED;
 const articleUpdateDate = eeat.EEAT_DATE_UPDATED;
 const publishedTextLabel = common.M_PUBLISHED;
 const updatedTextLabel = common.M_UPDATED;
-const articleDateLocale = `${eeat.M_LANGUAGE_ISO}-${eeat.M_COUNTRY_CODE}`; // Corrected template literal
+const articleDateLocale = `${eeat.M_LANGUAGE_ISO}-${eeat.M_COUNTRY_CODE}`;
 
 // Define keywords for the page
 const pageKeywords = [
@@ -118,7 +118,7 @@ const languageLinksMap = {};
 for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
   // Find alternate EEAT entry for this locale by EEAT_FILTERING
   const altEeat = eeatData.find(e =>
-    e.EEAT_FILTERING === eeatEntry.EEAT_FILTERING && // Use filtering, not number!
+    e.EEAT_FILTERING === eeatEntry.EEAT_FILTERING &&
     e.M_SLUG === locale.M_SLUG &&
     e.PUBLISH_Y_N === "1"
   );
