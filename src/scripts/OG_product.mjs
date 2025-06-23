@@ -14,6 +14,28 @@ const CWD = process.cwd();
 const PUBLIC_DIR = path.join(CWD, 'public');
 const OUTPUT_DIR = path.join(PUBLIC_DIR, 'ogimages', 'ogproducts');
 const CONCURRENCY = 10;
+
+// --- FONT CONFIGURATION ---
+// Maps language ISO codes to their specific Google Font URL and font-family stack.
+const FONT_MAP = {
+    ar: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap', family: "'Noto Sans Arabic', 'Tahoma', sans-serif" },
+    he: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;700&display=swap', family: "'Noto Sans Hebrew', 'Arial Hebrew', sans-serif" },
+    hi: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap', family: "'Noto Sans Devanagari', 'Arial Unicode MS', sans-serif" },
+    ja: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap', family: "'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif" },
+    ko: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap', family: "'Noto Sans KR', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif" },
+    ru: { url: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap', family: "'Roboto', 'Arial', sans-serif" },
+    be: { url: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap', family: "'Roboto', 'Arial', sans-serif" },
+    bg: { url: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap', family: "'Roboto', 'Arial', sans-serif" },
+    el: { url: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap', family: "'Roboto', 'Arial', sans-serif" },
+    th: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap', family: "'Noto Sans Thai', 'Thonburi', 'Tahoma', sans-serif" },
+    bn: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&display=swap', family: "'Noto Sans Bengali', 'Arial Unicode MS', sans-serif" },
+    hy: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Armenian:wght@400;700&display=swap', family: "'Noto Sans Armenian', 'Arial Unicode MS', sans-serif" },
+    ka: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;700&display=swap', family: "'Noto Sans Georgian', 'Arial Unicode MS', sans-serif" },
+    my: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;700&display=swap', family: "'Noto Sans Myanmar', 'Arial Unicode MS', sans-serif" },
+    // Default font for Latin scripts and others not specified
+    default: { url: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap', family: "'Inter', system-ui, sans-serif" }
+};
+
 const flagMap = { AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, ES, FI, FJ, FR, GA, GB, GE, GH, GI, GM, GN, GP, GR, GT, GU, GY, HK, HN, HR, HT, HU, ID, IE, IL, IN, IS, IT, JM, JO, JP, KE, KR, KW, KY, LB, LI, LS, LT, LU, LV, LY, MA, MC, MD, ME, MK, MM, MN, MR, MU, MW, MX, MY, MZ, NG, NI, NL, NO, NP, NZ, OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL, SM, SN, SR, SV, SZ, TD, TH, TN, TR, TT, UA, UG, US, UY, VE, VN, YT, ZA };
 
 // --- HELPERS ---
@@ -23,15 +45,15 @@ const readImageAsBase64 = (fp) => readFileSync(path.join(CWD, fp), 'base64');
 // --- HTML TEMPLATE ---
 const generateProductHtmlTemplate = (data) => `
 <!DOCTYPE html>
-<html lang="${data.lang}">
+<html lang="${data.lang}" dir="${data.orientation}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product OG Image</title>
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    @import url('${data.fontUrl}');
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { width: 1200px; height: 630px; margin: 0; font-family: 'Inter', system-ui, sans-serif; background-color: ${data.branding.PAGE_COLOR_BACKGROUND}; color: ${data.branding.PAGE_COLOR_PRIMARY}; display: flex; position: relative; overflow: hidden; }
+    body { width: 1200px; height: 630px; margin: 0; font-family: ${data.fontFamily}; background-color: ${data.branding.PAGE_COLOR_BACKGROUND}; color: ${data.branding.PAGE_COLOR_PRIMARY}; display: flex; position: relative; overflow: hidden; }
     .left-section { width: 65%; padding: 2rem 1.3rem; display: flex; flex-direction: column; height: 100%; container-type: inline-size; z-index: 1; }
     .logo { width: 300px; height: auto; flex-shrink: 0; margin-bottom: 0.5rem; }
     .product-title { margin-bottom: 1.25rem; flex-shrink: 0; }
@@ -45,7 +67,7 @@ const generateProductHtmlTemplate = (data) => `
     .feature { display: flex; align-items: center; gap: 0.75rem; height: 100%; width: 100%; container-type: inline-size; }
     .feature-text { font-size: clamp(2.02rem, 3.92cqi, 2.24rem); color: ${data.branding.PAGE_COLOR_PRIMARY}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: calc(100% - 2rem); padding-right: 0.3rem; }
     .feature-icon { width: clamp(2.02rem, 3.92cqi, 2.24rem); height: clamp(2.02rem, 3.92cqi, 2.24rem); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='35px' height='35px' viewBox='0 0 56 56'%3E%3Cpath fill='${encodeURIComponent(data.branding.PAGE_COLOR_ACCENT_BRIGHT)}' d='M28 51.906c13.055 0 23.906-10.828 23.906-23.906c0-13.055-10.875-23.906-23.93-23.906C14.899 4.094 4.095 14.945 4.095 28c0 13.078 10.828 23.906 23.906 23.906m0-3.984C16.937 47.922 8.1 39.062 8.1 28c0-11.04 8.813-19.922 19.876-19.922c11.039 0 19.921 8.883 19.945 19.922c.023 11.063-8.883 19.922-19.922 19.922m-2.953-8.203c.773 0 1.406-.375 1.898-1.102l11.578-18.21c.282-.47.563-1.009.563-1.524c0-1.078-.938-1.735-1.922-1.735c-.633 0-1.219.352-1.64 1.055L24.93 35.148l-5.438-7.03c-.515-.704-1.078-.962-1.71-.962c-1.032 0-1.852.844-1.852 1.899c0 .515.21 1.008.539 1.453l6.562 8.11c.633.773 1.242 1.1 2.016 1.1'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-size: contain; flex-shrink: 0; }
-    .right-section { position: absolute; top: 0; right: -5%; width: 50%; height: 100%; clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 20% 100%); background-color: ${data.branding.PAGE_COLOR_BACKGROUND_ALT}; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+    .right-section { position: absolute; top: 0; ${data.orientation === 'rtl' ? 'left: -5%;' : 'right: -5%;'} width: 50%; height: 100%; clip-path: ${data.orientation === 'rtl' ? 'polygon(0% 0%, 100% 0%, 80% 100%, 0% 100%)' : 'polygon(0% 0%, 100% 0%, 100% 100%, 20% 100%)'}; background-color: ${data.branding.PAGE_COLOR_BACKGROUND_ALT}; display: flex; justify-content: center; align-items: center; overflow: hidden; }
     .product-image { width: 100%; height: 100%; object-fit: cover; object-position: center; }
     .product-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; color: ${data.branding.PAGE_COLOR_PRIMARY}; opacity: 0.6; text-align: center; padding: 2rem; }
     .placeholder-text { font-size: 2.5rem; font-weight: 600; text-align: center; padding: 2rem; word-wrap: break-word; max-width: 80%; line-height: 1.3; }
@@ -53,7 +75,20 @@ const generateProductHtmlTemplate = (data) => `
     .footer-item { display: flex; align-items: center; gap: 0.75rem; font-weight: 700; white-space: nowrap; color: ${data.branding.PAGE_COLOR_ACCENT}; }
     .footer-icon { width: 4.25rem; height: 4.25rem; fill: currentColor; flex-shrink: 0; }
     .footer-text { font-size: clamp(1.45rem, 4cqi, 2.8rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 1rem); }
-    .flag-container { position: absolute; top: 1rem; right: 1rem; background: white; padding: 0.75rem; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 8rem; height: 5.5rem; display: flex; align-items: center; justify-content: center; }
+    .flag-container { 
+        position: absolute; 
+        top: 1rem; 
+        ${data.orientation === 'rtl' ? 'left: 1rem;' : 'right: 1rem;'}
+        background: white; 
+        padding: 0.75rem; 
+        border-radius: 4px; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        width: 8rem; 
+        height: 5.5rem; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+    }
     .flag-container img { width: 100%; height: 100%; object-fit: contain; }
 </style>
 </head>
@@ -90,6 +125,11 @@ async function generateImageForProduct(product, commonAssets, context) {
     const imageName = `${product.PRODUCT_IMAGE_NAME_ASCII}`.replace(/\.webp$/i, '') + '.webp';
     const { brandingData, logoBase64 } = commonAssets;
 
+    // Determine font and orientation based on locale
+    const langIso = product.M_LANGUAGE_ISO || 'en'; // Fallback for safety
+    const fontDetails = FONT_MAP[langIso] || FONT_MAP.default;
+    const orientation = product.M_CONTENT_ORIENTATION || 'ltr';
+
     const rawProductPath = product.PRODUCT_IMAGE_PATH_L;
     const cleanProductPath = rawProductPath.startsWith('/') ? rawProductPath.substring(1) : rawProductPath;
     const absoluteProductImagePath = path.join(PUBLIC_DIR, cleanProductPath);
@@ -98,8 +138,11 @@ async function generateImageForProduct(product, commonAssets, context) {
     const dataForTemplate = {
         branding: brandingData,
         logoBase64,
-        lang: product.M_LANGUAGE_ISO,
-        category: product.PRODUCT_CATEGORY_1,
+        lang: langIso,
+        orientation: orientation,
+        fontUrl: fontDetails.url,
+        fontFamily: fontDetails.family,
+        category: product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER,
         productName: product.PRODUCT_NAME,
         price: product.M_PRODUCT_PRICE,
         rating: product.PRODUCT_RATING_VALUE,
@@ -117,7 +160,8 @@ async function generateImageForProduct(product, commonAssets, context) {
     const page = await context.newPage();
     try {
         await page.setViewportSize({ width: 1200, height: 630 });
-        await page.setContent(htmlContent, { waitUntil: 'load' });
+        // Use 'networkidle' to ensure web fonts from Google are loaded before screenshotting
+        await page.setContent(htmlContent, { waitUntil: 'networkidle' });
         const pngBuffer = await page.screenshot({ type: 'png' });
         await sharp(pngBuffer).webp({ quality: 1 }).toFile(path.join(OUTPUT_DIR, imageName));
     } finally {

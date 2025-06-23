@@ -15,6 +15,27 @@ const CWD = process.cwd();
 const OUTPUT_DIR = path.join(CWD, 'public', 'ogimages', 'ogcategory');
 const CONCURRENCY = 10;
 
+// --- FONT CONFIGURATION ---
+// Maps language ISO codes to their specific Google Font URL and font-family stack.
+const FONT_MAP = {
+    ar: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap', family: "'Noto Sans Arabic', 'Tahoma', sans-serif" },
+    he: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;700&display=swap', family: "'Noto Sans Hebrew', 'Arial Hebrew', sans-serif" },
+    hi: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap', family: "'Noto Sans Devanagari', 'Arial Unicode MS', sans-serif" },
+    ja: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap', family: "'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif" },
+    ko: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap', family: "'Noto Sans KR', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif" },
+    ru: { url: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap', family: "'Roboto', 'Arial', sans-serif" },
+    be: { url: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap', family: "'Roboto', 'Arial', sans-serif" },
+    bg: { url: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap', family: "'Roboto', 'Arial', sans-serif" },
+    el: { url: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap', family: "'Roboto', 'Arial', sans-serif" },
+    th: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap', family: "'Noto Sans Thai', 'Thonburi', 'Tahoma', sans-serif" },
+    bn: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&display=swap', family: "'Noto Sans Bengali', 'Arial Unicode MS', sans-serif" },
+    hy: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Armenian:wght@400;700&display=swap', family: "'Noto Sans Armenian', 'Arial Unicode MS', sans-serif" },
+    ka: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;700&display=swap', family: "'Noto Sans Georgian', 'Arial Unicode MS', sans-serif" },
+    my: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;700&display=swap', family: "'Noto Sans Myanmar', 'Arial Unicode MS', sans-serif" },
+    // Default font for Latin scripts and others not specified
+    default: { url: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap', family: "'Inter', system-ui, sans-serif" }
+};
+
 // --- ASSETS ---
 // Import country flag icons for visual localization
 import { 
@@ -34,20 +55,20 @@ const flagMap = { AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR
 const readJsonFile = (filePath) => JSON.parse(readFileSync(path.join(CWD, filePath), 'utf-8'));
 const readImageAsBase64 = (filePath) => readFileSync(path.join(CWD, filePath), 'base64');
 
-// --- HTML TEMPLATE (No changes needed, template is correct) ---
+// --- HTML TEMPLATE ---
 const generateCategoryHtmlTemplate = (data) => `
 <!DOCTYPE html>
-<html lang="${data.lang}">
+<html lang="${data.lang}" dir="${data.orientation}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Category OG Image</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        @import url('${data.fontUrl}');
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             width: 1200px; height: 630px; margin: 0; 
-            font-family: 'Inter', system-ui, sans-serif; 
+            font-family: ${data.fontFamily}; 
             background-color: ${data.bodyBgColor}; 
             color: ${data.bodyTextColor}; 
             display: flex; 
@@ -133,9 +154,14 @@ function detectCategories(commonData) {
     return Array.from(categories).sort((a, b) => a - b);
 }
 
-// --- IMAGE GENERATION (No changes needed, logic is correct) ---
+// --- IMAGE GENERATION ---
 async function generateImageForCategory(locale, categoryNumber, commonAssets, context) {
     const { brandingData, logoBase64 } = commonAssets;
+    
+    // Determine font and orientation based on locale
+    const langIso = locale.M_LANGUAGE_ISO || 'en'; // Fallback for safety
+    const fontDetails = FONT_MAP[langIso] || FONT_MAP.default;
+    const orientation = locale.M_CONTENT_ORIENTATION || 'ltr';
     
     // Get category-specific text from the locale data
     const title = locale[`PAGE_CATEGORY_${categoryNumber}_LISTING_TITLE`] || `Category ${categoryNumber}`;
@@ -149,7 +175,10 @@ async function generateImageForCategory(locale, categoryNumber, commonAssets, co
 
     // Data for the HTML template, now using correct branding info
     const templateData = {
-        lang: locale.M_LANGUAGE_ISO,
+        lang: langIso,
+        orientation: orientation,
+        fontUrl: fontDetails.url,
+        fontFamily: fontDetails.family,
         title: title,
         subtitle: description,
         domain: brandingData.PAGE_ORGANISATION_URL_NAME,
@@ -168,7 +197,8 @@ async function generateImageForCategory(locale, categoryNumber, commonAssets, co
     
     try {
         await page.setViewportSize({ width: 1200, height: 630 });
-        await page.setContent(htmlContent, { waitUntil: 'load' });
+        // Use 'networkidle' to ensure web fonts from Google are loaded before screenshotting
+        await page.setContent(htmlContent, { waitUntil: 'networkidle' });
         const pngBuffer = await page.screenshot({ type: 'png' });
         const outputPath = path.join(OUTPUT_DIR, imageName);
         await sharp(pngBuffer).webp({ quality: 1 }).toFile(outputPath);

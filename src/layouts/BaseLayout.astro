@@ -316,7 +316,8 @@ const getAbsoluteOgImageUrl = (imagePath: string) => {
               <span id="current-url-display" class="flex-1 text-xs text-gray-600 truncate">
                 {socialSharingCopyLoading}
               </span>
-              <svg class="w-4 h-4 text-gray-500 group-hover:text-gray-700 transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {/* CHANGE 1: Added `rtl:scale-x-[-1]` to flip the copy icon in RTL mode. */}
+              <svg class="w-4 h-4 text-gray-500 group-hover:text-gray-700 transition-colors rtl:scale-x-[-1]" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
                 <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
               </svg>
@@ -359,7 +360,8 @@ const getAbsoluteOgImageUrl = (imagePath: string) => {
                 class="p-3 rounded-lg bg-[#24A1DE] hover:bg-[#1e91c7] transition-colors"
                 aria-label={ariaLabelTelegram}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                {/* CHANGE 2.1: Added `rtl:scale-x-[-1]` to the SVG to flip the directional paper plane icon. */}
+                <svg class="rtl:scale-x-[-1]" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
                   <path fill="#fff" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19c-.14.75-.42 1-.68 1.03c-.58.05-1.02-.38-1.58-.75c-.88-.58-1.38-.94-2.23-1.5c-.99-.65-.35-1.01.22-1.59c.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02c-.09.02-1.49.95-4.22 2.79c-.4.27-.76.41-1.08.4c-.36-.01-1.04-.2-1.55-.37c-.63-.2-1.12-.31-1.08-.66c.02-.18.27-.36.74-.55c2.92-1.27 4.86-2.11 5.83-2.51c2.78-1.16 3.35-1.36 3.73-1.36c.08 0 .27.02.39.12c.1.08.13.19.14.27c-.01.06.01.24 0 .38"/>
                 </svg>
               </a>
@@ -369,7 +371,8 @@ const getAbsoluteOgImageUrl = (imagePath: string) => {
                 class="p-3 rounded-lg bg-[#BCEF2F] hover:bg-[#a5d429] transition-colors"
                 aria-label={ariaLabelEmail}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                {/* CHANGE 2.2: Added `rtl:scale-x-[-1]` to the SVG to flip the directional 'send' part of the icon. */}
+                <svg class="rtl:scale-x-[-1]" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
                   <mask id="emailIcon">
                     <g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
                       <path stroke-dasharray="64" stroke-dashoffset="64" d="M4 5h16c0.55 0 1 0.45 1 1v12c0 0.55 -0.45 1 -1 1h-16c-0.55 0 -1 -0.45 -1 -1v-12c0 -0.55 0.45 -1 1 -1Z">
@@ -405,9 +408,11 @@ const getAbsoluteOgImageUrl = (imagePath: string) => {
     <Cookie />
 
     <!-- Move to Top Button -->
+    {/* CHANGE 3: Replaced `right-[25px]` with the logical property `end-[25px]`. 
+        This will be `right` in LTR and `left` in RTL automatically. */}
     <button
       id="moveToTop"
-      class="fixed bottom-[25px] right-[25px] w-10 h-10 bg-[#BCEF2F] rounded-lg shadow-lg flex items-center justify-center opacity-0 invisible transition-all duration-300 hover:bg-[#a5d429] focus:outline-none focus:ring-2 focus:ring-[#BCEF2F] focus:ring-opacity-50"
+      class="fixed bottom-[25px] end-[25px] w-10 h-10 bg-[#BCEF2F] rounded-lg shadow-lg flex items-center justify-center opacity-0 invisible transition-all duration-300 hover:bg-[#a5d429] focus:outline-none focus:ring-2 focus:ring-[#BCEF2F] focus:ring-opacity-50"
       aria-label={ariaLabelMoveToTop}
     >
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

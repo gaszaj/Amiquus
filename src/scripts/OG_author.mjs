@@ -11,6 +11,27 @@ const PUBLIC_DIR = path.join(CWD, 'public');
 const OUTPUT_DIR = path.join(PUBLIC_DIR, 'ogimages', 'ogauthor');
 const CONCURRENCY = 10;
 
+// --- FONT CONFIGURATION ---
+// Maps language ISO codes to their specific Google Font URL and font-family stack.
+const FONT_MAP = {
+    ar: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap', family: "'Noto Sans Arabic', 'Tahoma', sans-serif" },
+    he: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;700&display=swap', family: "'Noto Sans Hebrew', 'Arial Hebrew', sans-serif" },
+    hi: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap', family: "'Noto Sans Devanagari', 'Arial Unicode MS', sans-serif" },
+    ja: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap', family: "'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif" },
+    ko: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap', family: "'Noto Sans KR', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif" },
+    ru: { url: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap', family: "'Roboto', 'Arial', sans-serif" },
+    be: { url: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap', family: "'Roboto', 'Arial', sans-serif" },
+    bg: { url: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap', family: "'Roboto', 'Arial', sans-serif" },
+    el: { url: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap', family: "'Roboto', 'Arial', sans-serif" },
+    th: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap', family: "'Noto Sans Thai', 'Thonburi', 'Tahoma', sans-serif" },
+    bn: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&display=swap', family: "'Noto Sans Bengali', 'Arial Unicode MS', sans-serif" },
+    hy: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Armenian:wght@400;700&display=swap', family: "'Noto Sans Armenian', 'Arial Unicode MS', sans-serif" },
+    ka: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;700&display=swap', family: "'Noto Sans Georgian', 'Arial Unicode MS', sans-serif" },
+    my: { url: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;700&display=swap', family: "'Noto Sans Myanmar', 'Arial Unicode MS', sans-serif" },
+    // Default font for Latin scripts and others not specified
+    default: { url: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap', family: "'Inter', system-ui, sans-serif" }
+};
+
 import { 
   AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, 
   CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, 
@@ -27,25 +48,25 @@ const flagMap = { AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR
 const readJsonFile = (filePath) => JSON.parse(readFileSync(path.join(CWD, filePath), 'utf-8'));
 const readImageAsBase64 = (filePath) => readFileSync(path.join(CWD, filePath), 'base64');
 
-// --- HTML TEMPLATE GENERATOR (No changes needed here) ---
+// --- HTML TEMPLATE GENERATOR ---
 const generateAuthorHtmlTemplate = (data) => `
 <!DOCTYPE html>
-<html lang="${data.lang}">
+<html lang="${data.lang}" dir="${data.orientation}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Author Social Share</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        @import url('${data.fontUrl}');
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { width: 1200px; height: 630px; margin: 0; font-family: 'Inter', system-ui, sans-serif; background-color: ${data.bodyBgColor}; color: ${data.bodyTextColor}; display: flex; position: relative; overflow: hidden; }
-        .name-container { position: absolute; top: 3.5rem; left: 1.45rem; background-color: ${data.nameBgColor}; color: ${data.nameTextColor}; padding: 1.25rem 1.5rem; font-size: 4rem; font-weight: 700; line-height: 1.2; box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.25); max-width: 60%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .tagline { position: absolute; left: 3rem; top: 14rem; font-size: 4rem; font-weight: 600; color: ${data.taglineTextColor}; max-width: 55%; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; }
-        .occupation { position: absolute; left: 3rem; top: 20rem; font-size: 3rem; font-weight: 500; color: ${data.taglineTextColor}; max-width: 55%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; opacity: 0.9; }
-        .right-section { position: absolute; top: 0; right: -5%; width: 50%; height: 100%; clip-path: polygon(25% 0, 100% 0, 100% 100%, 0% 100%); background-color: ${data.rightSectionBgColor}; display: flex; justify-content: center; align-items: center; }
+        body { width: 1200px; height: 630px; margin: 0; font-family: ${data.fontFamily}; background-color: ${data.bodyBgColor}; color: ${data.bodyTextColor}; display: flex; position: relative; overflow: hidden; }
+        .name-container { position: absolute; top: 3.5rem; ${data.orientation === 'rtl' ? 'right: 1.45rem;' : 'left: 1.45rem;'} background-color: ${data.nameBgColor}; color: ${data.nameTextColor}; padding: 1.25rem 1.5rem; font-size: 4rem; font-weight: 700; line-height: 1.2; box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.25); max-width: 60%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .tagline { position: absolute; ${data.orientation === 'rtl' ? 'right: 3rem;' : 'left: 3rem;'} top: 14rem; font-size: 4rem; font-weight: 600; color: ${data.taglineTextColor}; max-width: 55%; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; }
+        .occupation { position: absolute; ${data.orientation === 'rtl' ? 'right: 3rem;' : 'left: 3rem;'} top: 20rem; font-size: 3rem; font-weight: 500; color: ${data.taglineTextColor}; max-width: 55%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; opacity: 0.9; }
+        .right-section { position: absolute; top: 0; ${data.orientation === 'rtl' ? 'left: -5%;' : 'right: -5%;'} width: 50%; height: 100%; clip-path: ${data.orientation === 'rtl' ? 'polygon(0% 0, 75% 0, 100% 100%, 0% 100%)' : 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)'}; background-color: ${data.rightSectionBgColor}; display: flex; justify-content: center; align-items: center; }
         .right-section img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
-        .logo { width: 450px; height: auto; position: absolute; bottom: 2rem; left: 3.5rem; }
-        .flag-container { position: absolute; bottom: 2rem; right: 3rem; background: white; padding: 0.75rem; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 8rem; height: 5.5rem; display: flex; align-items: center; justify-content: center; }
+        .logo { width: 450px; height: auto; position: absolute; bottom: 2rem; ${data.orientation === 'rtl' ? 'right: 3.5rem;' : 'left: 3.5rem;'} }
+        .flag-container { position: absolute; bottom: 2rem; ${data.orientation === 'rtl' ? 'left: 3rem;' : 'right: 3rem;'} background: white; padding: 0.75rem; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 8rem; height: 5.5rem; display: flex; align-items: center; justify-content: center; }
         .flag-container img { width: 100%; height: 100%; object-fit: contain; }
     </style>
 </head>
@@ -68,13 +89,21 @@ async function generateImageForAuthor(author, commonAssets, context) {
     const imageName = baseName.replace(/\.webp$/i, '') + '.webp';
     const { brandingData, logoBase64 } = commonAssets;
 
+    // Determine font and orientation based on locale
+    const langIso = author.M_LANGUAGE_ISO || 'en'; // Fallback for safety
+    const fontDetails = FONT_MAP[langIso] || FONT_MAP.default;
+    const orientation = author.M_CONTENT_ORIENTATION || 'ltr';
+
     const rawAuthorPath = author.AUTHOR_PROFILE_IMAGE_PATH;
     const cleanAuthorPath = rawAuthorPath.startsWith('/') ? rawAuthorPath.substring(1) : rawAuthorPath;
     const absoluteAuthorImagePath = path.join(PUBLIC_DIR, cleanAuthorPath);
     const authorImageBase64 = readFileSync(absoluteAuthorImagePath, 'base64');
     
     const dataForTemplate = {
-        lang: author.M_LANGUAGE_ISO,
+        lang: langIso,
+        orientation: orientation,
+        fontUrl: fontDetails.url,
+        fontFamily: fontDetails.family,
         authorName: author.WWW_AUTHOR,
         tagline: author.EEAT_NAME_20_SINGULAR,
         occupation: author.WWW_AUTHOR_OCCUPATION || '',
@@ -94,7 +123,8 @@ async function generateImageForAuthor(author, commonAssets, context) {
     
     try {
         await page.setViewportSize({ width: 1200, height: 630 });
-        await page.setContent(htmlContent, { waitUntil: 'load' });
+        // Use 'networkidle' to ensure web fonts from Google are loaded before screenshotting
+        await page.setContent(htmlContent, { waitUntil: 'networkidle' });
         const pngBuffer = await page.screenshot({ type: 'png' });
         const outputPath = path.join(OUTPUT_DIR, imageName);
         await sharp(pngBuffer).webp({ quality: 1 }).toFile(outputPath);

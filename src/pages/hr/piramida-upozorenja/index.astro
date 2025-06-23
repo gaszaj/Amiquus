@@ -1,7 +1,7 @@
 ---
-// Path: /src/pages/si/opozorilna-piramida/index.astro
-// Purpose: Display products from product.json that match parent folder slug and are published
-// Data: product.json, www.json, common.json
+// Path: /src/pages/hr/piramida-upozorenja/index.astro
+// Purpose: Display products with advanced sorting, filtering, and infinite scroll.
+// Data: product.json, www.json, common.json, locale.json
 // Dependencies: BaseLayout.astro
 
 import BaseLayout from '../../../layouts/BaseLayout.astro';
@@ -10,50 +10,39 @@ import wwwData from '../../../data/www.json';
 import commonData from '../../../data/common.json';
 import localeData from '../../../data/locale.json';
 
-// Get the first object from each JSON array
+// --- DATA FETCHING & INITIAL FILTERING ---
+
+const parentSlug = Astro.url.pathname.split('/')[1];
+const currentFolder = Astro.url.pathname.split('/')[2];
+const common = commonData.find(item => item.M_SLUG === parentSlug) || commonData[0];
 const www = wwwData[0];
 
-// Get the parent folder slug (si in this case)
-const parentSlug = Astro.url.pathname.split('/')[1];
+// Filter products for the current locale, published status, and apply a default sort.
+// Default Sort: By Importance Rank (desc), then by Product Name (A-Z).
+const filteredProducts = productData
+    .filter(product => product.M_SLUG === parentSlug && product.PUBLISH_Y_N === "1")
+    .sort((a, b) => {
+        const rankA = parseInt(a.PRODUCT_IMPORTANCE_RANK, 10) || 0;
+        const rankB = parseInt(b.PRODUCT_IMPORTANCE_RANK, 10) || 0;
+        if (rankB !== rankA) {
+            return rankB - rankA; // Higher rank first
+        }
+        return a.PRODUCT_NAME.localeCompare(b.PRODUCT_NAME); // Then A-Z
+    });
 
-// Get the current page folder name (opozorilna-piramida in this case)
-const currentFolder = Astro.url.pathname.split('/')[2];
+// --- BATCHING FOR INITIAL LOAD ---
+const BATCH_SIZE = 12;
+const initialProducts = filteredProducts.slice(0, BATCH_SIZE);
 
-// Find the matching common data object based on M_SLUG
-const common = commonData.find(item => item.M_SLUG === parentSlug) || commonData[0];
+// --- METADATA AND SEO ---
 
-// Filter products based on requirements
-const filteredProducts = productData.filter(product => 
-    product.M_SLUG === parentSlug && 
-    product.PUBLISH_Y_N === "1"
-);
-
-// Helper function for absolute URLs with locale
-const getAbsoluteUrl = (path: string) => {
-    // Get the locale from the URL path (e.g., 'si' from '/si/opozorilna-piramida/')
-    const locale = Astro.url.pathname.split('/')[1];
-    return new URL(`/${locale}${path}`, Astro.url.origin).toString();
-};
-
-// Helper function for base-level URLs (without locale)
-const getBaseUrl = (path: string) => {
-    return new URL(path, Astro.url.origin).toString();
-};
-
-// Get language data from the first product (they should all be the same for a given slug)
 const languageIso = filteredProducts[0]?.M_LANGUAGE_ISO || 'sl';
 const countryCode = filteredProducts[0]?.M_COUNTRY_CODE || 'SI';
-
-// Find matching content orientation from common.json
 const contentOrientation = commonData.find(item =>
     item.M_LANGUAGE_ISO === languageIso &&
     item.M_COUNTRY_CODE === countryCode
 )?.M_CONTENT_ORIENTATION || 'ltr';
 
-// Get category name from first product (they should all be the same)
-const categoryName = filteredProducts[0]?.PAGE_CATEGORY_1_LISTING_SLUG_HELPER || '';
-
-// Define page metadata
 const pageTitle = common.PAGE_CATEGORY_1_LISTING_TITLE;
 const pageDescription = common.PAGE_CATEGORY_1_LISTING_DESCRIPTION;
 const pageOgImage = common.PAGE_CATEGORY_1_LISTING_OG_IMAGE_PATH;
@@ -63,7 +52,29 @@ const pageKeywords = [
     www.PAGE_ORGANISATION_FULL_NAME
 ].join(', ');
 
-// CollectionPage Schema
+const getBaseUrl = (path: string) => new URL(path, Astro.url.origin).toString();
+
+// --- SCHEMA.ORG (UNCHANGED LOGIC: USES FULL LIST FOR SEO) ---
+
+// Organization Schema 
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": www.PAGE_ORGANISATION_FULL_NAME,
+  "url": getBaseUrl('/'),
+  "foundingDate": www.PAGE_FOUNDING_DATE,
+  "logo": getBaseUrl(www.PAGE_LOGO_IMAGE_PATH_1),
+  "description": common.PAGE_DESCRIPTION,
+  "slogan": common.PAGE_SLOGAN,
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": www.PAGE_INFO_EMAIL,
+    "contactType": common.M_CUSTOMER_SUPPORT
+  },
+  "sameAs": [ www.PAGE_INSTAGRAM_URL, www.PAGE_FACEBOOK_URL, www.PAGE_TWITTER_URL, www.PAGE_LINKEDIN_URL, www.PAGE_YOUTUBE_URL, www.PAGE_PINTEREST_URL, www.PAGE_BLUESKY_URL ].filter(Boolean),
+  "areaServed": { "@type": "Country", "name": common.M_COUNTRY, "identifier": common.M_COUNTRY_CODE }
+};
+
 const collectionPageSchema = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -81,7 +92,7 @@ const collectionPageSchema = {
                 "@id": `${Astro.url.origin}/${parentSlug}/${currentFolder}/${product.PRODUCT_ASCII_SLUG}`,
                 "name": product.PRODUCT_NAME,
                 "url": `${Astro.url.origin}/${parentSlug}/${currentFolder}/${product.PRODUCT_ASCII_SLUG}`,
-                "image": product.PRODUCT_IMAGE_PATH_L,
+                "image": `${Astro.url.origin}${product.PRODUCT_OG_IMAGE_PATH}`,
                 "description": product.PRODUCT_META_SEO,
                 "sku": product.PRODUCT_MPN,
                 "mpn": product.PRODUCT_MPN,
@@ -89,137 +100,26 @@ const collectionPageSchema = {
                     "@type": "Offer",
                     "price": product.M_PRODUCT_PRICE_NATIVE.split(' ')[0],
                     "priceCurrency": product.M_CURRENCY_CODE,
-                    "availability": "https://schema.org/InStock",
-                    "validFrom": product.PRODUCT_DATE_PUBLISHED,
-                    "priceValidUntil": product.PRODUCT_EXPIRATION_DATE
+                    "availability": "https://schema.org/InStock"
                 },
-                "brand": {
-                    "@type": "Brand",
-                    "name": www.PAGE_ORGANISATION_FULL_NAME
-                },
-                "aggregateRating": {
-                    "@type": "AggregateRating",
-                    "ratingValue": product.PRODUCT_RATING_VALUE,
-                    "reviewCount": product.PRODUCT_REVIEW_COUNT
-                },
-                "keywords": [
-                    product.PRODUCT_KEYWORD_1,
-                    product.PRODUCT_KEYWORD_2,
-                    product.PRODUCT_KEYWORD_3,
-                    product.PRODUCT_KEYWORD_4,
-                    product.PRODUCT_KEYWORD_5,
-                    product.PRODUCT_KEYWORD_6,
-                    product.PRODUCT_KEYWORD_7
-                ].filter(Boolean),
-                "datePublished": product.PRODUCT_DATE_PUBLISHED,
-                "dateModified": product.PRODUCT_DATE_UPDATED,
-                "category": product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER
+                "brand": { "@type": "Brand", "name": www.PAGE_ORGANISATION_FULL_NAME },
+                "aggregateRating": { "@type": "AggregateRating", "ratingValue": product.PRODUCT_RATING_VALUE, "reviewCount": product.PRODUCT_REVIEW_COUNT }
             }
         }))
     }
 };
 
-// Organization Schema 
-const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": www.PAGE_ORGANISATION_FULL_NAME,
-  "url": getBaseUrl('/'),
-  "foundingDate": www.PAGE_FOUNDING_DATE,
-  "logo": getBaseUrl(www.PAGE_LOGO_IMAGE_PATH_1),
-  "keywords": [
-    www.PAGE_ORGANISATION_FULL_NAME,
-    common.M_COUNTRY_NATIVE,
-    common.PAGE_KEYWORD_1,
-    common.PAGE_KEYWORD_2,
-    common.PAGE_KEYWORD_3,
-    common.PAGE_KEYWORD_4,
-    common.PAGE_KEYWORD_5,
-    common.PAGE_KEYWORD_6
-  ].filter(Boolean),
-  "description": common.PAGE_DESCRIPTION,
-  "numberOfEmployees": {
-    "@type": "QuantitativeValue",
-    "minValue": "1",
-    "maxValue": "9"
-  },
-  "slogan": common.PAGE_SLOGAN,
-  "contactPoint": {
-    "@type": "ContactPoint",
-    "email": www.PAGE_INFO_EMAIL,
-    "contactType": common.M_CUSTOMER_SUPPORT
-  },
-  "sameAs": [
-    www.PAGE_INSTAGRAM_URL,
-    www.PAGE_FACEBOOK_URL,
-    www.PAGE_TWITTER_URL,
-    www.PAGE_LINKEDIN_URL,
-    www.PAGE_YOUTUBE_URL,
-    www.PAGE_PINTEREST_URL,
-    www.PAGE_BLUESKY_URL
-  ].filter(Boolean),
-  "areaServed": {
-    "@type": "Country",
-    "name": common.M_COUNTRY,
-    "identifier": common.M_COUNTRY_CODE
-  },
-  "potentialAction": [
-    {
-      "@type": "ViewAction",
-      "name": `XML Sitemap for ${www.PAGE_ORGANISATION_FULL_NAME}`,
-      "target": getBaseUrl('/sitemap.xml')
-    },
-    {
-      "@type": "ViewAction",
-      "name": `Localized XML Sitemap (${languageIso}-${countryCode}) for ${www.PAGE_ORGANISATION_FULL_NAME}`,
-      "target": getBaseUrl(`/sitemap-${languageIso}-${countryCode}.xml`)
-    },
-    {
-      "@type": "ViewAction",
-      "name": `LLM Guidance for ${www.PAGE_ORGANISATION_FULL_NAME}`,
-      "target": getBaseUrl('/llms.txt'),
-      "description": `A text resource outlining key information about ${www.PAGE_ORGANISATION_FULL_NAME} offerings, company, products, services, and more for AI agents and AI crawlers.`
-    }
-  ],
-  "mainEntityOfPage": [
-    {
-      "@type": "WebPage",
-      "@id": getBaseUrl('/sitemap.xml'),
-      "name": `XML Sitemap for ${www.PAGE_ORGANISATION_FULL_NAME}`,
-      "description": `Provides a structured list of pages available on ${www.PAGE_ORGANISATION_FULL_NAME} for crawlers and AI agents.`
-    },
-    {
-      "@type": "WebPage",
-      "@id": getBaseUrl(`/sitemap-${languageIso}-${countryCode}.xml`),
-      "name": `Localized XML Sitemap (${languageIso}-${countryCode}) for ${www.PAGE_ORGANISATION_FULL_NAME}`,
-      "description": `Provides a full and structured list of localized pages for ${languageIso} (${languageIso}-${countryCode}) locale on ${www.PAGE_ORGANISATION_FULL_NAME} for crawlers and AI agents.`
-    },
-    {
-      "@type": "WebPage",
-      "@id": getBaseUrl('/llms.txt'),
-      "name": `LLM Guidance for ${www.PAGE_ORGANISATION_FULL_NAME}`,
-      "description": `A text resource outlining key information about ${www.PAGE_ORGANISATION_FULL_NAME} offerings, company, products, services, and more for AI agents and AI crawlers.`
-    }
-  ]
-};
-
-// Combine schemas
 const schema = [collectionPageSchema, organizationSchema];
 
-// Build the language link map for the language picker
+// --- LANGUAGE LINKS ---
 const languageLinksMap = {};
 for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
-  // Find any published product for this locale to get the correct PAGE_CATEGORY_1_LISTING_SLUG
   const productForLocale = productData.find(p =>
-    p.M_SLUG === localeObj.M_SLUG &&
-    p.PUBLISH_Y_N === "1" &&
-    p.PAGE_CATEGORY_1_LISTING_SLUG && p.PAGE_CATEGORY_1_LISTING_SLUG.trim()
+    p.M_SLUG === localeObj.M_SLUG && p.PUBLISH_Y_N === "1" && p.PAGE_CATEGORY_1_LISTING_SLUG?.trim()
   );
   if (productForLocale) {
-    // Always use the slug from the product for that locale
     languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}/${productForLocale.PAGE_CATEGORY_1_LISTING_SLUG}`;
   } else {
-    // Fallback to homepage if no product listing exists
     languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}`;
   }
 }
@@ -241,67 +141,217 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
         <div class="container mx-auto px-4">
             <div class="max-w-4xl mx-auto">
                 <h1 class="text-4xl md:text-5xl font-bold mb-6 animate-fade-in">
-                    {categoryName}
+                    {filteredProducts[0]?.PAGE_CATEGORY_1_LISTING_SLUG_HELPER || 'Products'}
                 </h1>
             </div>
         </div>
     </div>
 
-    <!-- Products Grid Section - Updated to match homepage bestsellers -->
-    <section class="py-16 bg-white">
+    <!-- Products Section -->
+    <section class="py-16 bg-gray-50">
         <div class="container mx-auto px-4">
-            <div class="grid grid-cols-2 lg:grid-cols-3 gap-2">
-                {filteredProducts.map((product) => {
-                    const productUrl = `${Astro.url.origin}/${parentSlug}/${currentFolder}/${product.PRODUCT_ASCII_SLUG}`;
+            <!-- Controls Bar -->
+            <div class="bg-white p-4 rounded-lg shadow-sm mb-8 border border-gray-200">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <!-- Filters & Sorters -->
+                    <div class="flex flex-wrap items-center gap-x-6 gap-y-4">
+                        <!-- Sort Dropdown -->
+                        <div>
+                            <label for="sort-select" class="block text-sm font-medium text-gray-700 mb-1">{common.UI_SORT_BY}</label>
+                            <select id="sort-select" class="rounded-md border-gray-300 shadow-sm focus:border-signal-green focus:ring focus:ring-signal-green focus:ring-opacity-50">
+                                <option value="importance">{common.UI_SORT_IMPORTANCE}</option>
+                                <option value="newest">{common.UI_SORT_NEWEST}</option>
+                                <option value="price-asc">{common.UI_SORT_PRICE_ASC}</option>
+                                <option value="price-desc">{common.UI_SORT_PRICE_DESC}</option>
+                                <option value="rating">{common.UI_SORT_RATING}</option>
+                                <option value="az">{common.UI_SORT_AZ}</option>
+                                <option value="za">{common.UI_SORT_ZA}</option>
+                            </select>
+                        </div>
+                        <!-- Feature Filter Dropdown -->
+                        <div>
+                             <label for="feature-filter" class="block text-sm font-medium text-gray-700 mb-1">{common.UI_FILTER_BY}</label>
+                            <select id="feature-filter" class="rounded-md border-gray-300 shadow-sm focus:border-signal-green focus:ring focus:ring-signal-green focus:ring-opacity-50">
+                                <option value="all">{common.UI_FILTER_ALL_PRODUCTS}</option>
+                                <option value="bestsellers">{common.UI_FILTER_BESTSELLERS}</option>
+                            </select>
+                        </div>
+                    </div>
+                     <!-- Info & Clear Button -->
+                    <div class="flex items-center gap-4">
+                        <span id="product-count" class="text-sm text-gray-600"></span>
+                        <button id="clear-filters-btn" class="text-sm font-medium text-signal-green hover:underline">{common.UI_BUTTON_CLEAR_FILTERS}</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Initial products are server-rendered -->
+                {initialProducts.map((product) => {
+                    const productUrl = `/${parentSlug}/${currentFolder}/${product.PRODUCT_ASCII_SLUG}`;
                     const fullProductName = `${product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER} ${product.PRODUCT_NAME}`;
-                    
                     return (
-                        <div class="bg-white border border-gray-100 overflow-hidden group">
+                        <div class="bg-white border border-gray-200 rounded-lg overflow-hidden group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                             <a href={productUrl} class="block">
-                                <img 
-                                    src={product.PRODUCT_IMAGE_PATH_L} 
-                                    alt={product.PRODUCT_IMAGE_NAME}
-                                    class="w-full h-56 object-contain p-4"
-                                    width="225"
-                                    height="225"
-                                    loading="lazy"
-                                    decoding="async"
-                                />
+                                <img src={product.PRODUCT_IMAGE_PATH_L} alt={product.PRODUCT_IMAGE_NAME} class="w-full h-56 object-contain p-4" width="225" height="225" loading="lazy" decoding="async"/>
                                 <div class="p-4 border-t border-gray-100">
-                                    <h3 class="font-medium text-black group-hover:text-signal-green transition-colors mb-4">
-                                        {fullProductName}
-                                    </h3>
-                                    <div class="text-xl font-bold text-black mb-4">
-                                        {product.M_PRODUCT_PRICE}
-                                    </div>
-                                    <span class="block w-full bg-black text-signal-green border border-signal-green py-2 px-4 hover:bg-signal-green hover:text-black transition-all text-center">
-                                        {common.PRODUCT_PAGE_RELATED_PRODUCT_VIEW_BUTTON_TEXT}
-                                    </span>
+                                    <h3 class="font-medium text-black group-hover:text-signal-green transition-colors mb-2 h-12 line-clamp-2">{fullProductName}</h3>
+                                    <div class="text-xl font-bold text-black mb-4">{product.M_PRODUCT_PRICE}</div>
+                                    <span class="block w-full bg-black text-signal-green border border-signal-green py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center font-semibold">{common.PRODUCT_PAGE_RELATED_PRODUCT_VIEW_BUTTON_TEXT}</span>
                                 </div>
                             </a>
                         </div>
                     );
                 })}
             </div>
+             <!-- Sentinel and Messages -->
+             <div id="grid-footer" class="text-center mt-12">
+                <div id="no-results" class="hidden text-gray-500">{common.UI_NO_PRODUCTS_FOUND}</div>
+                <div id="infinite-scroll-trigger" class="h-10 text-gray-500 font-semibold">{common.UI_LOADING_MORE}</div>
+             </div>
         </div>
     </section>
 </BaseLayout>
 
 <style>
-    /* Animations */
-    :global(.animate-fade-in) {
-        animation: fadeIn 0.5s ease-in-out;
-    }
-
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .animate-fade-in { animation: fadeIn 0.5s ease-in-out forwards; }
     @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    /* Product card hover effects - matching homepage */
-    .group:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 </style>
+
+<script define:vars={{ allProducts: filteredProducts, parentSlug, currentFolder, common, BATCH_SIZE }}>
+    // --- DOM ELEMENTS ---
+    const grid = document.getElementById('products-grid');
+    const trigger = document.getElementById('infinite-scroll-trigger');
+    const noResultsMsg = document.getElementById('no-results');
+    const productCountSpan = document.getElementById('product-count');
+    const sortSelect = document.getElementById('sort-select');
+    const featureFilter = document.getElementById('feature-filter');
+    const clearBtn = document.getElementById('clear-filters-btn');
+
+    // --- STATE MANAGEMENT ---
+    let productsToDisplay = [...allProducts];
+    let currentPage = 1;
+    let observer;
+
+    // --- HELPER FUNCTIONS ---
+    const getSlovenianPluralString = (count) => {
+        if (count % 100 === 1) return common.UI_PRODUCT_COUNT_SINGLE;
+        if (count % 100 === 2) return common.UI_PRODUCT_COUNT_DUAL;
+        if (count % 100 === 3 || count % 100 === 4) return common.UI_PRODUCT_COUNT_FEW;
+        return common.UI_PRODUCT_COUNT_PLURAL;
+    };
+    
+    const updateProductCount = (count) => {
+        if (common.M_LANGUAGE_ISO === 'sl') {
+            productCountSpan.textContent = getSlovenianPluralString(count).replace('{count}', count);
+        } else {
+            const template = count === 1 ? common.UI_PRODUCT_COUNT_SINGLE : common.UI_PRODUCT_COUNT_PLURAL;
+            productCountSpan.textContent = template.replace('{count}', count);
+        }
+    };
+    
+    const createProductCardHTML = (product) => {
+        const productUrl = `/${parentSlug}/${currentFolder}/${product.PRODUCT_ASCII_SLUG}`;
+        const fullProductName = `${product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER} ${product.PRODUCT_NAME}`;
+        return `
+            <div class="bg-white border border-gray-200 rounded-lg overflow-hidden group transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-fade-in">
+                <a href="${productUrl}" class="block">
+                    <img src="${product.PRODUCT_IMAGE_PATH_L}" alt="${product.PRODUCT_IMAGE_NAME}" class="w-full h-56 object-contain p-4" width="225" height="225" loading="lazy" decoding="async"/>
+                    <div class="p-4 border-t border-gray-100">
+                        <h3 class="font-medium text-black group-hover:text-signal-green transition-colors mb-2 h-12 line-clamp-2">${fullProductName}</h3>
+                        <div class="text-xl font-bold text-black mb-4">${product.M_PRODUCT_PRICE}</div>
+                        <span class="block w-full bg-black text-signal-green border border-signal-green py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center font-semibold">${common.PRODUCT_PAGE_RELATED_PRODUCT_VIEW_BUTTON_TEXT}</span>
+                    </div>
+                </a>
+            </div>
+        `;
+    };
+
+    // --- CORE LOGIC ---
+    const applyFiltersAndSort = () => {
+        let processedProducts = [...allProducts];
+
+        // Apply feature filter
+        const selectedFeature = featureFilter.value;
+        if (selectedFeature === 'bestsellers') {
+            processedProducts = processedProducts.filter(p => p.PRODUCT_IS_BESTSELLER === "1");
+        }
+
+        // Apply sorting
+        const sortBy = sortSelect.value;
+        processedProducts.sort((a, b) => {
+            switch (sortBy) {
+                case 'newest': return new Date(b.PRODUCT_DATE_PUBLISHED).getTime() - new Date(a.PRODUCT_DATE_PUBLISHED).getTime();
+                case 'price-asc': return parseFloat(a.M_PRODUCT_PRICE_NATIVE) - parseFloat(b.M_PRODUCT_PRICE_NATIVE);
+                case 'price-desc': return parseFloat(b.M_PRODUCT_PRICE_NATIVE) - parseFloat(a.M_PRODUCT_PRICE_NATIVE);
+                case 'rating': return (parseFloat(b.PRODUCT_RATING_VALUE) || 0) - (parseFloat(a.PRODUCT_RATING_VALUE) || 0);
+                case 'az': return a.PRODUCT_NAME.localeCompare(b.PRODUCT_NAME);
+                case 'za': return b.PRODUCT_NAME.localeCompare(a.PRODUCT_NAME);
+                case 'importance': default: 
+                    const rankA = parseInt(a.PRODUCT_IMPORTANCE_RANK, 10) || 0;
+                    const rankB = parseInt(b.PRODUCT_IMPORTANCE_RANK, 10) || 0;
+                    if (rankB !== rankA) return rankB - rankA;
+                    return a.PRODUCT_NAME.localeCompare(b.PRODUCT_NAME);
+            }
+        });
+        
+        return processedProducts;
+    };
+
+    const renderGrid = (products, append = false) => {
+        if (!append) grid.innerHTML = '';
+        const batchHtml = products.map(createProductCardHTML).join('');
+        grid.insertAdjacentHTML('beforeend', batchHtml);
+    };
+
+    const updateDisplay = () => {
+        productsToDisplay = applyFiltersAndSort();
+        currentPage = 1;
+        const initialBatch = productsToDisplay.slice(0, BATCH_SIZE);
+        renderGrid(initialBatch);
+        updateProductCount(productsToDisplay.length);
+        noResultsMsg.style.display = productsToDisplay.length === 0 ? 'block' : 'none';
+        trigger.style.display = productsToDisplay.length > BATCH_SIZE ? 'block' : 'none';
+        setupObserver();
+    };
+    
+    const loadMoreProducts = () => {
+        currentPage++;
+        const startIndex = (currentPage - 1) * BATCH_SIZE;
+        const endIndex = startIndex + BATCH_SIZE;
+        const nextBatch = productsToDisplay.slice(startIndex, endIndex);
+
+        if (nextBatch.length > 0) renderGrid(nextBatch, true);
+        if (endIndex >= productsToDisplay.length) {
+            trigger.style.display = 'none';
+            if(observer) observer.disconnect();
+        }
+    };
+    
+    const setupObserver = () => {
+        if(observer) observer.disconnect();
+        if(productsToDisplay.length <= BATCH_SIZE) return;
+        observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) loadMoreProducts();
+        }, { rootMargin: '400px' });
+        observer.observe(trigger);
+    };
+
+    // --- EVENT LISTENERS & INITIALIZATION ---
+    sortSelect.addEventListener('change', updateDisplay);
+    featureFilter.addEventListener('change', updateDisplay);
+    clearBtn.addEventListener('click', () => {
+        sortSelect.value = 'importance';
+        featureFilter.value = 'all';
+        updateDisplay();
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+        updateProductCount(allProducts.length);
+        setupObserver();
+    });
+</script>
