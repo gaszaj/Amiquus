@@ -326,7 +326,19 @@
     "UI_ARTICLE_COUNT_DUAL": "Najdena {count} članka",
     "UI_ARTICLE_COUNT_FEW": "Najdeni {count} članki",
     "UI_NO_ARTICLES_FOUND": "Noben članek ne ustreza vašim kriterijem.",
-    "UI_LOADING_MORE": "Nalaganje..."
+    "UI_LOADING_MORE": "Nalaganje...",
+    "UI_SORT_IMPORTANCE": "Priporočeno",
+    "UI_SORT_PRICE_ASC": "Cena: od najnižje",
+    "UI_SORT_PRICE_DESC": "Cena: od najvišje",
+    "UI_SORT_RATING": "Najbolje ocenjeni",
+    "UI_FILTER_BY": "Filtriraj:",
+    "UI_FILTER_ALL_PRODUCTS": "Vsi izdelki",
+    "UI_FILTER_BESTSELLERS": "Najbolje prodajani",
+    "UI_NO_PRODUCTS_FOUND": "Noben izdelek ne ustreza vašim kriterijem.",
+    "UI_PRODUCT_COUNT_PLURAL": "Najdenih {count} izdelkov",
+    "UI_PRODUCT_COUNT_SINGLE": "Najden {count} izdelek",
+    "UI_PRODUCT_COUNT_DUAL": "Najdena {count} izdelka",
+    "UI_PRODUCT_COUNT_FEW": "Najdeni {count} izdelki"
   },
   {
     "COMMON_ID": "common002",
@@ -655,7 +667,19 @@
     "UI_ARTICLE_COUNT_DUAL": "Pronađena {count} članka",
     "UI_ARTICLE_COUNT_FEW": "Pronađena {count} članka",
     "UI_NO_ARTICLES_FOUND": "Nijedan članak ne odgovara vašim kriterijima.",
-    "UI_LOADING_MORE": "Učitavanje..."
+    "UI_LOADING_MORE": "Učitavanje...",
+    "UI_SORT_IMPORTANCE": "Preporučeno",
+    "UI_SORT_PRICE_ASC": "Cijena: od najniže",
+    "UI_SORT_PRICE_DESC": "Cijena: od najviše",
+    "UI_SORT_RATING": "Najbolje ocijenjeni",
+    "UI_FILTER_BY": "Filtriraj:",
+    "UI_FILTER_ALL_PRODUCTS": "Svi proizvodi",
+    "UI_FILTER_BESTSELLERS": "Najprodavaniji",
+    "UI_NO_PRODUCTS_FOUND": "Nijedan proizvod ne odgovara vašim kriterijima.",
+    "UI_PRODUCT_COUNT_PLURAL": "Pronađeno {count} proizvoda",
+    "UI_PRODUCT_COUNT_SINGLE": "Pronađen {count} proizvod",
+    "UI_PRODUCT_COUNT_DUAL": "Pronađena {count} proizvoda",
+    "UI_PRODUCT_COUNT_FEW": "Pronađena {count} proizvoda"
   },
   {
     "COMMON_ID": "common003",
