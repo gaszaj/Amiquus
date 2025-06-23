@@ -1,0 +1,202 @@
+---
+import commonData from '../data/common.json';
+
+// Get current locale from URL path, fallback to 'si'
+const locale = Astro.url.pathname.split('/')[1] || 'si';
+
+// Find the matching common data object based on M_SLUG, fallback to the first object (Slovenian)
+const currentLocaleData = commonData.find(item => item.M_SLUG === locale) || commonData[0];
+
+// --- Define all text variables with English fallbacks ---
+const title = currentLocaleData.COOKIE_TITLE || 'We value your privacy';
+const description = currentLocaleData.COOKIE_DESCRIPTION || 'We use cookies to enhance your browsing experience...';
+const linkText = currentLocaleData.COOKIE_LINK_TEXT || 'Read our Cookie Policy';
+const policyUrl = `/${locale}/${currentLocaleData.EEAT_SLUG_COOKIE_POLICY || 'cookie-policy'}`;
+const buttonAcceptAll = currentLocaleData.COOKIE_BUTTON_ACCEPT_ALL || 'Accept All';
+const buttonCustomize = currentLocaleData.COOKIE_BUTTON_CUSTOMIZE || 'Customize';
+const buttonDecline = currentLocaleData.COOKIE_BUTTON_DECLINE || 'Decline';
+const ariaClose = currentLocaleData.COOKIE_ARIA_CLOSE || 'Close cookie settings';
+const ariaOpenSettings = currentLocaleData.COOKIE_ARIA_OPEN_SETTINGS || 'Open cookie settings';
+const customizeTitle = currentLocaleData.COOKIE_CUSTOMIZE_TITLE || 'Customize Consent Preferences';
+const customizeDescription = currentLocaleData.COOKIE_CUSTOMIZE_DESCRIPTION || 'We use cookies to help you navigate efficiently...';
+const buttonSave = currentLocaleData.COOKIE_BUTTON_SAVE || 'Save Preferences';
+const essentialTitle = currentLocaleData.COOKIE_CATEGORY_ESSENTIAL_TITLE || 'Strictly Necessary';
+const essentialDesc = currentLocaleData.COOKIE_CATEGORY_ESSENTIAL_DESC || 'Necessary cookies are required...';
+const analyticsTitle = currentLocaleData.COOKIE_CATEGORY_ANALYTICS_TITLE || 'Analytics';
+const analyticsDesc = currentLocaleData.COOKIE_CATEGORY_ANALYTICS_DESC || 'Analytical cookies are used...';
+const marketingTitle = currentLocaleData.COOKIE_CATEGORY_MARKETING_TITLE || 'Marketing';
+const marketingDesc = currentLocaleData.COOKIE_CATEGORY_MARKETING_DESC || 'Advertisement cookies are used...';
+const alwaysActiveLabel = currentLocaleData.COOKIE_ALWAYS_ACTIVE_LABEL || 'Always Active';
+---
+
+<!-- Container for the entire cookie consent UI -->
+<div id="cookie-container" class="fixed bottom-4 left-4 z-50">
+  
+  <!-- Floating Icon Trigger (now for mobile AND desktop after first interaction) -->
+  <button id="cookie-settings-trigger" class="hidden h-10 w-10 bg-signal-dark rounded-full flex items-center justify-center shadow-lg transition-transform duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-signal-green focus:ring-offset-2 focus:ring-offset-signal-light" aria-label={ariaOpenSettings}>
+    <div class="w-8 h-8">
+      <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24">
+        <g fill="#BCEF2F" fill-opacity="0" stroke="#BCEF2F" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+          <path stroke-dasharray="56" stroke-dashoffset="56" d="M12 4c-4.42 0 -8 3.58 -8 8c0 4.42 3.58 8 8 8c4.42 0 8 -3.58 8 -8v-1h-2c-0.55 0 -1 -0.45 -1 -1v-1h-2c-0.55 0 -1 -0.45 -1 -1v-1h-1c-0.55 0 -1 -0.45 -1 -1Z">
+            <animate fill="freeze" attributeName="fill-opacity" begin="0.84s" dur="0.18s" values="0;0.25"/>
+            <animate fill="freeze" attributeName="stroke-dashoffset" dur="0.72s" values="56;0"/>
+          </path>
+          <g stroke="none">
+            <circle cx="9.5" cy="7.5" r="1.5"><animate fill="freeze" attributeName="fill-opacity" begin="1.08s" dur="0.24s" values="0;1"/></circle><circle cx="11" cy="17.5" r="1.5"><animate fill="freeze" attributeName="fill-opacity" begin="1.2s" dur="0.24s" values="0;1"/></circle><circle cx="6.5" cy="11.5" r="1.5"><animate fill="freeze" attributeName="fill-opacity" begin="1.32s" dur="0.24s" values="0;1"/></circle><circle cx="16.5" cy="14.5" r="1.5"><animate fill="freeze" attributeName="fill-opacity" begin="1.44s" dur="0.24s" values="0;1"/></circle><circle cx="11.5" cy="12.5" r="1.5"><animate fill="freeze" attributeName="fill-opacity" begin="1.56s" dur="0.24s" values="0;1"/></circle>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </button>
+
+  <!-- Main Banner / Pop-up Modal -->
+  <div id="cookie-consent-banner" class="fixed bottom-0 inset-x-0 p-4 bg-signal-dark text-signal-light shadow-[0_-5px_15px_rgba(0,0,0,0.2)] transition-transform duration-500 ease-in-out transform translate-y-full" role="dialog" aria-live="polite" aria-label={title} aria-describedby="cookie-description">
+    
+    <!-- Initial View (Step 1) -->
+    <div id="cookie-initial-view" class="">
+      <div class="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="text-sm md:flex-grow">
+          <h2 class="font-bold text-lg mb-1 text-signal-green">{title}</h2>
+          <p id="cookie-description" class="text-gray-300">{description} <a href={policyUrl} class="underline hover:text-white transition-colors">{linkText}</a>.</p>
+        </div>
+        <div class="flex-shrink-0 w-full md:w-auto flex flex-col sm:flex-row gap-2 mt-4 md:mt-0">
+          <button id="cookie-accept-btn" class="w-full sm:w-auto px-6 py-2 bg-signal-green text-black font-bold border border-signal-green hover:bg-opacity-90 transition-all rounded-md">{buttonAcceptAll}</button>
+          <button id="cookie-customize-btn" class="w-full sm:w-auto px-6 py-2 bg-gray-700 text-white font-bold border border-gray-600 hover:bg-gray-600 transition-all rounded-md">{buttonCustomize}</button>
+          <button id="cookie-decline-btn" class="w-full sm:w-auto px-6 py-2 bg-transparent text-gray-300 font-bold border border-gray-600 hover:bg-gray-800 transition-all rounded-md">{buttonDecline}</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customize/Details View (Step 2) -->
+    <div id="cookie-details-view" class="hidden">
+      <div class="container mx-auto max-h-[80vh] overflow-y-auto">
+        <div class="flex justify-between items-start mb-4">
+          <div><h2 class="font-bold text-lg text-signal-green">{customizeTitle}</h2><p class="text-sm text-gray-300 max-w-3xl">{customizeDescription}</p></div>
+          <button id="cookie-close-details-btn" class="p-1 text-gray-400 hover:text-white" aria-label={ariaClose}><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+        </div>
+        <div class="space-y-4 border-t border-b border-gray-700 py-4 my-4">
+          <div class="flex justify-between items-start gap-4 py-2">
+            <div><h3 class="font-semibold text-white">{essentialTitle}</h3><p class="text-sm text-gray-400">{essentialDesc}</p></div><div class="flex-shrink-0 ml-4 pt-1"><span class="inline-block px-3 py-1 text-xs font-medium text-signal-green bg-gray-900 rounded-full">{alwaysActiveLabel}</span></div>
+          </div>
+          <div class="border-t border-gray-700/50 flex justify-between items-start gap-4 py-3">
+            <div><h3 class="font-semibold text-white">{analyticsTitle}</h3><p class="text-sm text-gray-400">{analyticsDesc}</p></div><div class="flex-shrink-0 ml-4 pt-1"><label for="cookie-analytics" class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="cookie-analytics" class="sr-only peer" checked><div class="w-11 h-6 bg-gray-600 rounded-full peer peer-focus:ring-2 peer-focus:ring-signal-green/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-signal-green"></div></label></div>
+          </div>
+          <div class="border-t border-gray-700/50 flex justify-between items-start gap-4 py-3">
+            <div><h3 class="font-semibold text-white">{marketingTitle}</h3><p class="text-sm text-gray-400">{marketingDesc}</p></div><div class="flex-shrink-0 ml-4 pt-1"><label for="cookie-marketing" class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="cookie-marketing" class="sr-only peer" checked><div class="w-11 h-6 bg-gray-600 rounded-full peer peer-focus:ring-2 peer-focus:ring-signal-green/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-signal-green"></div></label></div>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <button id="cookie-save-prefs-btn" class="px-6 py-2 bg-signal-green text-black font-bold border border-signal-green hover:bg-opacity-90 transition-all rounded-md">{buttonSave}</button>
+          <button id="cookie-accept-all-details-btn" class="px-6 py-2 bg-gray-700 text-white font-bold border border-gray-600 hover:bg-gray-600 transition-all rounded-md">{buttonAcceptAll}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- UI Elements ---
+    const settingsTrigger = document.getElementById('cookie-settings-trigger');
+    const banner = document.getElementById('cookie-consent-banner');
+    const initialView = document.getElementById('cookie-initial-view');
+    const detailsView = document.getElementById('cookie-details-view');
+
+    // --- Buttons ---
+    const acceptBtn = document.getElementById('cookie-accept-btn');
+    const customizeBtn = document.getElementById('cookie-customize-btn');
+    const declineBtn = document.getElementById('cookie-decline-btn');
+    const closeDetailsBtn = document.getElementById('cookie-close-details-btn');
+    const savePrefsBtn = document.getElementById('cookie-save-prefs-btn');
+    const acceptAllDetailsBtn = document.getElementById('cookie-accept-all-details-btn');
+    
+    // --- Checkboxes ---
+    const analyticsCheckbox = document.getElementById('cookie-analytics');
+    const marketingCheckbox = document.getElementById('cookie-marketing');
+
+    // --- State & Config ---
+    const CONSENT_KEY = 'cookie_consent_given';
+    let isBannerOpen = false;
+
+    // --- Core Functions ---
+    const showBanner = () => {
+        if (!banner || isBannerOpen) return;
+        isBannerOpen = true;
+        // The trigger icon must be visible before it can be scaled down
+        if (settingsTrigger) settingsTrigger.classList.remove('hidden'); 
+        banner.style.transform = 'translateY(0)';
+        // Scale down the trigger icon as the banner slides up
+        if (settingsTrigger) setTimeout(() => settingsTrigger.style.transform = 'scale(0)', 10);
+    };
+
+    const hideBanner = () => {
+        if (!banner || !isBannerOpen) return;
+        isBannerOpen = false;
+        banner.style.transform = 'translateY(100%)';
+        // Ensure the trigger icon is not hidden and scale it into view
+        if (settingsTrigger) {
+            settingsTrigger.classList.remove('hidden'); // <-- THE KEY FIX IS HERE
+            settingsTrigger.style.transform = 'scale(1)';
+        }
+    };
+
+    const recordConsentAndShowIcon = (consentType, preferences = {}) => {
+        console.log(`Consent given: ${consentType}`, preferences);
+        localStorage.setItem(CONSENT_KEY, 'true'); 
+        // Also store actual preferences if needed for your analytics scripts
+        // ...
+        
+        // Hide the banner and immediately show the trigger icon in its place.
+        hideBanner();
+    };
+
+    const handleAcceptAll = () => recordConsentAndShowIcon('all');
+    const handleDecline = () => recordConsentAndShowIcon('declined');
+    const handleSavePrefs = () => {
+        const preferences = {
+            necessary: true,
+            analytics: analyticsCheckbox.checked,
+            marketing: marketingCheckbox.checked,
+        };
+        recordConsentAndShowIcon('custom', preferences);
+    };
+
+    const showDetails = () => {
+        if (detailsView) detailsView.classList.remove('hidden');
+        if (initialView) initialView.classList.add('hidden');
+    };
+    
+    const showInitial = () => {
+        if (detailsView) detailsView.classList.add('hidden');
+        if (initialView) initialView.classList.remove('hidden');
+    };
+
+    // --- INITIALIZATION LOGIC ---
+    const consentGiven = localStorage.getItem(CONSENT_KEY) === 'true';
+
+    if (consentGiven) {
+        // User has already made a choice. Show only the trigger icon.
+        if (settingsTrigger) settingsTrigger.classList.remove('hidden');
+    } else {
+        // This is a first-time visit (or localStorage was cleared).
+        if (window.innerWidth >= 768) { // Desktop
+            // Show the full banner automatically.
+            setTimeout(showBanner, 1000);
+        } else { // Mobile
+            // Show only the trigger icon. The banner will appear on click.
+            if (settingsTrigger) settingsTrigger.classList.remove('hidden');
+        }
+    }
+    
+    // --- EVENT LISTENERS ---
+    if(settingsTrigger) settingsTrigger.addEventListener('click', showBanner);
+    
+    if(acceptBtn) acceptBtn.addEventListener('click', handleAcceptAll);
+    if(declineBtn) declineBtn.addEventListener('click', handleDecline);
+    if(savePrefsBtn) savePrefsBtn.addEventListener('click', handleSavePrefs);
+    if(acceptAllDetailsBtn) acceptAllDetailsBtn.addEventListener('click', handleAcceptAll);
+    
+    if(customizeBtn) customizeBtn.addEventListener('click', showDetails);
+    if(closeDetailsBtn) closeDetailsBtn.addEventListener('click', showInitial);
+});
+</script>

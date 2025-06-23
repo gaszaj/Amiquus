@@ -8,6 +8,7 @@ import allLocaleData from '../data/common.json'; // common.json is an array of l
 
 import '@fontsource-variable/inter';
 import '../styles/fonts.css';
+import Cookie from '../components/Cookie.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Schema from '../components/Schema.astro';
@@ -293,8 +294,7 @@ const getAbsoluteOgImageUrl = (imagePath: string) => {
     <Header alternativeLinks={alternativeLinks} languageLinksMap={languageLinksMap} locale={currentSlug} />
     <main class="flex-grow">
       <slot />
-    </main>
-    
+    </main>    
     <!-- Social Sharing Section -->
     <section class="py-12 bg-gray-50">
       <div class="container mx-auto px-4">
@@ -402,6 +402,7 @@ const getAbsoluteOgImageUrl = (imagePath: string) => {
     </section>
     
     <Footer />
+    <Cookie />
 
     <!-- Move to Top Button -->
     <button
