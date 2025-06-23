@@ -23,7 +23,7 @@ const getCountryCode = (locale: string) => {
 // Find matching data for current locale
 const headerFooter = headerFooterData.find(data => data.M_SLUG === currentLocale) || headerFooterData[0];
 const common = commonData.find(data => data.M_SLUG === currentLocale) || commonData[0];
-const www = wwwData.find(data => data.M_SLUG === currentLocale) || wwwData[0];
+const www = wwwData[0];
 
 // Get current country flag
 const currentCountryCode = getCountryCode(currentLocale);
@@ -69,7 +69,7 @@ const bestSellers = products
   .slice(0, 6) // Get top 6 bestsellers for footer
   .map(product => ({
     text: product.PRODUCT_NAME,
-    href: `/${product.M_SLUG}/${product.PAGE_CATEGORY_1_SLUG}/${product.PRODUCT_ASCII_SLUG}`
+    href: `/${product.M_SLUG}/${product.PAGE_CATEGORY_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`
   }));
 
 // Define footer navigation groups with exact EEAT page mapping
