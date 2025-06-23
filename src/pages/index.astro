@@ -12,7 +12,7 @@ import {
 } from 'country-flag-icons/string/3x2';
 
 // --- Replicate Flag Logic from Header.astro ---
-const flagMap = {
+const flagMap: Record<string, string> = {
   AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, 
   CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, 
   ES, FI, FJ, FR, GA, GB, GE, GH, GI, GM, GN, GP, GR, GT, GU, GY, HK, HN, HR, HT, 
@@ -110,8 +110,7 @@ if (redirectSlug) {
             line-height: 1.6;
             color: var(--text-secondary);
             max-width: 90%;
-            margin-left: auto;
-            margin-right: auto;
+            margin-inline: auto; /* Use logical properties for RTL support */
         }
         .language-grid {
             display: grid;
@@ -138,7 +137,7 @@ if (redirectSlug) {
         .flag {
             width: 2rem;
             height: 1.5rem;
-            margin-right: 1rem;
+            margin-inline-end: 1rem; /* Use logical properties for RTL support */
             border-radius: 0.25rem;
             box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
         }
@@ -148,7 +147,7 @@ if (redirectSlug) {
         .country-name {
             font-size: 0.8rem;
             color: var(--text-secondary);
-            margin-left: 0.5rem;
+            margin-inline-start: 0.5rem; /* Use logical properties for RTL support */
         }
         /* Desktop styles */
         @media (min-width: 640px) {
@@ -161,6 +160,33 @@ if (redirectSlug) {
             h1 {
                 font-size: 2rem;
             }
+        }
+
+        /* RTL-specific styles for better text rendering and alignment */
+        :global([dir="rtl"]) .container {
+            text-align: right;
+        }
+
+        :global([dir="rtl"]) h1 {
+            text-align: right;
+        }
+
+        :global([dir="rtl"]) p {
+            text-align: right;
+        }
+
+        :global([dir="rtl"]) .language-button {
+            flex-direction: row-reverse; /* Reverse flag and text order in RTL */
+        }
+
+        :global([dir="rtl"]) .flag {
+            margin-inline-end: 0;
+            margin-inline-start: 1rem;
+        }
+
+        :global([dir="rtl"]) .country-name {
+            margin-inline-start: 0;
+            margin-inline-end: 0.5rem;
         }
     </style>
 </head>

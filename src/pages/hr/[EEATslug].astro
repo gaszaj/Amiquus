@@ -1,11 +1,11 @@
 ---
 // import { getEntry } from 'astro:content'; // Removed as it's not used; data comes from JSON
-import { actions, isInputError } from 'astro:actions'; // Import actions
-import BaseLayout from '../../layouts/BaseLayout.astro'; // Adjusted path assuming layouts is one level up
-import wwwData from '../../data/www.json'; // Adjusted path
-import commonData from '../../data/common.json'; // Adjusted path
-import eeatData from '../../data/eeat.json'; // Adjusted path
-import authorData from '../../data/author.json'; // Add this import
+import { actions, isInputError } from 'astro:actions';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import wwwData from '../../data/www.json';
+import commonData from '../../data/common.json';
+import eeatData from '../../data/eeat.json';
+import authorData from '../../data/author.json';
 import localeData from '../../data/locale.json';
 
 export const prerender = false;
@@ -83,7 +83,7 @@ const articlePublishDate = eeat.EEAT_DATE_PUBLISHED;
 const articleUpdateDate = eeat.EEAT_DATE_UPDATED;
 const publishedTextLabel = common.M_PUBLISHED;
 const updatedTextLabel = common.M_UPDATED;
-const articleDateLocale = `${eeat.M_LANGUAGE_ISO}-${eeat.M_COUNTRY_CODE}`; // Corrected template literal
+const articleDateLocale = `${eeat.M_LANGUAGE_ISO}-${eeat.M_COUNTRY_CODE}`;
 
 // Define keywords for the page
 const pageKeywords = [
@@ -114,11 +114,11 @@ if (submissionResult) {
 const getFieldError = (fieldName: string): string | undefined => formErrors[fieldName]?.[0];
 
 // Build the language link map for the language picker
-const languageLinksMap = {};
+const languageLinksMap: Record<string, string> = {};
 for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
   // Find alternate EEAT entry for this locale by EEAT_FILTERING
   const altEeat = eeatData.find(e =>
-    e.EEAT_FILTERING === eeatEntry.EEAT_FILTERING && // Use filtering, not number!
+    e.EEAT_FILTERING === eeatEntry.EEAT_FILTERING &&
     e.M_SLUG === locale.M_SLUG &&
     e.PUBLISH_Y_N === "1"
   );
@@ -188,7 +188,7 @@ const organizationSchema = {
     common.PAGE_KEYWORD_5,
     common.PAGE_KEYWORD_6
   ].filter(Boolean),
-  "description": common.PAGE_DESCRIPTION,
+  "description": common.PAGE_DESCRIPTION || common.PAGE_SLOGAN,
   "numberOfEmployees": {
     "@type": "QuantitativeValue",
     "minValue": "1",
@@ -362,7 +362,7 @@ const formatDate = (dateString: string, locale: string) => {
               </div>
             )}
 
-            <form method="POST" action={actions.submitContactForm.safe} class="space-y-4">
+            <form method="POST" action={actions.submitContactForm} class="space-y-4">
               <input type="hidden" name="pageUrl" value={Astro.url.href} />
               <input type="hidden" name="pageTitle" value={seoTitle} />
               <input type="hidden" name="locale" value={locale} />
@@ -375,7 +375,7 @@ const formatDate = (dateString: string, locale: string) => {
                   name="fullName"
                   placeholder={common.FORM_PLACEHOLDER_FULLNAME}
                   class:list={[
-                    "w-full px-4 py-2 rounded-lg border focus:ring-1 focus:ring-signal-green",
+                    "w-full ps-4 pe-4 py-2 rounded-lg border focus:ring-1 focus:ring-signal-green",
                     getFieldError('fullName') ? "border-red-500" : "border-gray-300 focus:border-signal-green"
                   ]}
                   required
@@ -390,7 +390,7 @@ const formatDate = (dateString: string, locale: string) => {
                   name="email"
                   placeholder={common.FORM_PLACEHOLDER_EMAIL}
                   class:list={[
-                    "w-full px-4 py-2 rounded-lg border focus:ring-1 focus:ring-signal-green",
+                    "w-full ps-4 pe-4 py-2 rounded-lg border focus:ring-1 focus:ring-signal-green",
                     getFieldError('email') ? "border-red-500" : "border-gray-300 focus:border-signal-green"
                   ]}
                   required
@@ -405,7 +405,7 @@ const formatDate = (dateString: string, locale: string) => {
                   rows="4"
                   placeholder={common.FORM_PLACEHOLDER_MESSAGE_ORDER}
                   class:list={[
-                    "w-full px-4 py-2 rounded-lg border focus:ring-1 focus:ring-signal-green",
+                    "w-full ps-4 pe-4 py-2 rounded-lg border focus:ring-1 focus:ring-signal-green",
                     getFieldError('message') ? "border-red-500" : "border-gray-300 focus:border-signal-green"
                   ]}
                   required
@@ -449,8 +449,7 @@ const formatDate = (dateString: string, locale: string) => {
   /* Base prose container */
   .prose {
     max-width: 65ch;
-    margin-left: auto;
-    margin-right: auto;
+    margin-inline: auto; /* Use logical properties for RTL support */
   }
 
   /* Headings */
@@ -494,18 +493,18 @@ const formatDate = (dateString: string, locale: string) => {
   /* Lists */
   .prose :global(ul) {
     list-style-type: none;
-    margin-left: 1.25rem;
+    margin-inline-start: 1.25rem;
     margin-bottom: 1.25rem;
   }
 
   .prose :global(ol) { 
-    margin-left: 1.25rem;
+    margin-inline-start: 1.25rem;
     margin-bottom: 1.25rem;
   }
 
   .prose :global(li) {
     position: relative;
-    padding-left: 1.5rem;
+    padding-inline-start: 1.5rem;
     margin-bottom: 0.75rem;
     line-height: 1.75;
   }
@@ -513,7 +512,7 @@ const formatDate = (dateString: string, locale: string) => {
   .prose :global(ul li::before) {
     content: "";
     position: absolute;
-    left: 0;
+    inset-inline-start: 0;
     top: 0.75rem; /* Adjusted for line-height */
     width: 0.5rem;
     height: 0.5rem;
@@ -531,7 +530,7 @@ const formatDate = (dateString: string, locale: string) => {
   .prose :global(u::after) {
     content: "";
     position: absolute;
-    left: 0;
+    inset-inline-start: 0;
     bottom: -2px;
     width: 100%;
     height: 2px;
@@ -625,6 +624,23 @@ const formatDate = (dateString: string, locale: string) => {
   :where(input, select, textarea):user-invalid {
       border-color: #ef4444; /* red-500 */
   }
-</style>
 
-<!-- Removed the old client-side script tag as Astro Actions handles submission and validation -->
+  /* RTL-specific styles for better text rendering */
+  [dir="rtl"] .prose :global(p) {
+    letter-spacing: 0;
+  }
+
+  [dir="rtl"] .prose :global(h1),
+  [dir="rtl"] .prose :global(h2),
+  [dir="rtl"] .prose :global(h3),
+  [dir="rtl"] .prose :global(h4),
+  [dir="rtl"] .prose :global(h5),
+  [dir="rtl"] .prose :global(h6) {
+    letter-spacing: 0;
+  }
+
+  /* Ensure proper text truncation in RTL */
+  [dir="rtl"] .prose :global(.line-clamp-3) {
+    text-align: start;
+  }
+</style>

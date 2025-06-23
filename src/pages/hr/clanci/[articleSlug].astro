@@ -555,12 +555,12 @@ const alternativeLinks = getAlternativeLanguageLinks(article, localeData, articl
 
         <div class="flex flex-col sm:flex-row flex-wrap gap-2 sm:items-center">
           <div class="flex items-center">
-            <span class="text-gray-300 mr-2">{layoutContent.authorLabelText}</span>
+            <span class="text-gray-300 me-2">{layoutContent.authorLabelText}</span>
             <a href={articleMetadata.author.profileUrl} class="flex items-center group">
               <img
                 src={articleMetadata.author.image}
                 alt={articleMetadata.author.name}
-                class="w-10 h-10 rounded-full mr-3"
+                class="w-10 h-10 rounded-full me-3"
                 width={200}
                 height={200}
                 fetchpriority="high"
@@ -641,7 +641,7 @@ const alternativeLinks = getAlternativeLanguageLinks(article, localeData, articl
                     <h4 class="font-medium text-signal-dark mb-4 product-title">{sign.name}</h4>
                     <a
                       href={sign.url}
-                      class="block w-full bg-black text-signal-green border border-signal-green font-medium py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center"
+                      class="block w-full bg-black text-signal-green border border-signal-green font-medium py-2 ps-4 pe-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center"
                     >
                       {productButtonText}
                     </a>
@@ -717,7 +717,7 @@ const alternativeLinks = getAlternativeLanguageLinks(article, localeData, articl
                     <summary class="p-4 cursor-pointer font-medium flex items-center justify-between">
                       <span>{item.question}</span>
                       <svg 
-                        class="w-5 h-5 transform transition-transform group-open:rotate-180 faq-chevron" 
+                        class="w-5 h-5 transform transition-transform group-open:rotate-180 faq-chevron rtl:scale-x-[-1]" 
                         fill="none" 
                         stroke="currentColor" 
                         viewBox="0 0 24 24"
@@ -752,7 +752,7 @@ const alternativeLinks = getAlternativeLanguageLinks(article, localeData, articl
                     <h4 class="font-medium text-signal-dark mb-4 product-title">{sign.name}</h4>
                     <a
                       href={sign.url}
-                      class="block w-full bg-black text-signal-green border border-signal-green font-medium py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center"
+                      class="block w-full bg-black text-signal-green border border-signal-green font-medium py-2 ps-4 pe-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center"
                     >
                       {productButtonText}
                     </a>
@@ -946,6 +946,24 @@ const alternativeLinks = getAlternativeLanguageLinks(article, localeData, articl
     width: 1.25rem !important; /* 20px */
     height: 1.25rem !important; /* 20px */
     flex-shrink: 0;
+  }
+
+  /* CHANGE 1: Added RTL-specific styles for better text rendering */
+  [dir="rtl"] h1,
+  [dir="rtl"] h2,
+  [dir="rtl"] h3,
+  [dir="rtl"] h4,
+  [dir="rtl"] h5,
+  [dir="rtl"] h6,
+  [dir="rtl"] p,
+  [dir="rtl"] span,
+  [dir="rtl"] label {
+    letter-spacing: 0;
+  }
+
+  /* CHANGE 2: Ensure proper text alignment in RTL */
+  [dir="rtl"] .text-center {
+    text-align: center;
   }
 </style>
 
