@@ -13,7 +13,7 @@ import pLimit from 'p-limit';
 // --- CONFIGURATION ---
 const CWD = process.cwd();
 const OUTPUT_DIR = path.join(CWD, 'public', 'ogimages', 'ogarticle');
-const CONCURRENCY = 10;
+const CONCURRENCY = 100;
 
 // --- ASSETS ---
 import { 
