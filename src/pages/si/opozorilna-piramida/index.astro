@@ -1,8 +1,8 @@
 ---
 // Path: /src/pages/si/opozorilna-piramida/index.astro
-// Purpose: Display products with advanced sorting, filtering, and infinite scroll.
-// Data: product.json, www.json, common.json, locale.json
-// Dependencies: BaseLayout.astro
+// Purpose: Products listing page with dynamic RTL support
+// Data: JSON dependencies for products, common data, and locale data
+// Dependencies: BaseLayout, infinite scroll, filtering
 
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import productData from '../../../data/product.json';
@@ -112,7 +112,7 @@ const collectionPageSchema = {
 const schema = [collectionPageSchema, organizationSchema];
 
 // --- LANGUAGE LINKS ---
-const languageLinksMap = {};
+const languageLinksMap: Record<string, string> = {};
 for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
   const productForLocale = productData.find(p =>
     p.M_SLUG === localeObj.M_SLUG && p.PUBLISH_Y_N === "1" && p.PAGE_CATEGORY_1_LISTING_SLUG?.trim()
@@ -198,7 +198,7 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
                                 <div class="p-4 border-t border-gray-100">
                                     <h3 class="font-medium text-black group-hover:text-signal-green transition-colors mb-2 h-12 line-clamp-2">{fullProductName}</h3>
                                     <div class="text-xl font-bold text-black mb-4">{product.M_PRODUCT_PRICE}</div>
-                                    <span class="block w-full bg-black text-signal-green border border-signal-green py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center font-semibold">{common.PRODUCT_PAGE_RELATED_PRODUCT_VIEW_BUTTON_TEXT}</span>
+                                    <span class="block w-full bg-black text-signal-green border border-signal-green py-2 ps-4 pe-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center font-semibold">{common.PRODUCT_PAGE_RELATED_PRODUCT_VIEW_BUTTON_TEXT}</span>
                                 </div>
                             </a>
                         </div>
@@ -220,6 +220,24 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* CHANGE 1: Added RTL-specific styles for better text rendering */
+    [dir="rtl"] h1,
+    [dir="rtl"] h2,
+    [dir="rtl"] h3,
+    [dir="rtl"] h4,
+    [dir="rtl"] h5,
+    [dir="rtl"] h6,
+    [dir="rtl"] p,
+    [dir="rtl"] span,
+    [dir="rtl"] label {
+      letter-spacing: 0;
+    }
+
+    /* CHANGE 2: Ensure proper text alignment in RTL */
+    [dir="rtl"] .text-center {
+      text-align: center;
     }
 </style>
 
@@ -265,7 +283,7 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
                     <div class="p-4 border-t border-gray-100">
                         <h3 class="font-medium text-black group-hover:text-signal-green transition-colors mb-2 h-12 line-clamp-2">${fullProductName}</h3>
                         <div class="text-xl font-bold text-black mb-4">${product.M_PRODUCT_PRICE}</div>
-                        <span class="block w-full bg-black text-signal-green border border-signal-green py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center font-semibold">${common.PRODUCT_PAGE_RELATED_PRODUCT_VIEW_BUTTON_TEXT}</span>
+                        <span class="block w-full bg-black text-signal-green border border-signal-green py-2 ps-4 pe-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center font-semibold">${common.PRODUCT_PAGE_RELATED_PRODUCT_VIEW_BUTTON_TEXT}</span>
                     </div>
                 </a>
             </div>

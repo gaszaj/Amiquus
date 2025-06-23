@@ -1,4 +1,9 @@
 ---
+// Path: /src/pages/si/index.astro
+// Purpose: Homepage with dynamic RTL support
+// Data: JSON dependencies for home content, products, and locale data
+// Dependencies: BaseLayout, form validation
+
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import homeData from '../../data/home.json';
 import wwwData from '../../data/www.json';
@@ -86,7 +91,7 @@ const contentOrientation: string = common.M_CONTENT_ORIENTATION || 'ltr';
 // --- Data for the Homepage ---
 
 // Helper function to randomly shuffle and pick n items from an array
-const getRandomItems = <T>(array: T[], count: number): T[] => {
+const getRandomItems = <T,>(array: T[], count: number): T[] => {
   const shuffled = [...array].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 };
@@ -332,7 +337,7 @@ const organizationSchema = {
     common.PAGE_KEYWORD_5,
     common.PAGE_KEYWORD_6
   ].filter(Boolean),
-  "description": common.PAGE_DESCRIPTION,
+  "description": common.PAGE_SLOGAN,
   "numberOfEmployees": {
     "@type": "QuantitativeValue",
     "minValue": "1",
@@ -407,12 +412,11 @@ const pageDescription: string | undefined = home.HOME_META_SEO;
 const pageOgImage: string | undefined = home.HOME_OG_IMAGE_PATH;
 
 // Build the language link map for the language picker
-const languageLinksMap = {};
+const languageLinksMap: Record<string, string> = {};
 for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
   // For homepage, we just use the locale slug as the URL
   languageLinksMap[locale.M_SLUG] = `/${locale.M_SLUG}`;
 }
-
 ---
 
 <BaseLayout 
@@ -447,7 +451,7 @@ for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
         </ul>
         
         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-8">
-          <div class="flex -space-x-3 mb-2 sm:mb-0">
+          <div class="flex -space-x-3 rtl:space-x-reverse mb-2 sm:mb-0">
             {heroData.socialProof.userPhotos.map(photo => (
               <img 
                 src={photo} 
@@ -465,7 +469,7 @@ for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
         
         <a 
           href={heroData.ctaLink} 
-          class="inline-block bg-signal-green text-black font-semibold px-8 py-3 hover:bg-signal-green hover:text-black transition-colors"
+          class="inline-block bg-signal-green text-black font-semibold ps-8 pe-8 py-3 hover:bg-signal-green hover:text-black transition-colors"
         >
           {heroData.ctaText}
         </a>
@@ -538,7 +542,7 @@ for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
                 <h3 class="font-medium text-black group-hover:text-signal-green transition-colors mb-4">
                   {product.title}
                 </h3>
-                <span class="block w-full bg-black text-signal-green border border-signal-green py-2 px-4 hover:bg-signal-green hover:text-black transition-all text-center">
+                <span class="block w-full bg-black text-signal-green border border-signal-green py-2 ps-4 pe-4 hover:bg-signal-green hover:text-black transition-all text-center">
                   {bestsellersSection.productCtaText}
                 </span>
               </div>
@@ -624,7 +628,7 @@ for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
             <input 
               type="text" 
               placeholder={contactSection.formLabels.fullNamePlaceholder}
-              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-signal-green focus:ring-1 focus:ring-signal-green" 
+              class="w-full ps-4 pe-4 py-2 rounded-lg border border-gray-300 focus:border-signal-green focus:ring-1 focus:ring-signal-green" 
               required
             />
           </div>
@@ -633,7 +637,7 @@ for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
             <input 
               type="email" 
               placeholder={contactSection.formLabels.emailPlaceholder}
-              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-signal-green focus:ring-1 focus:ring-signal-green" 
+              class="w-full ps-4 pe-4 py-2 rounded-lg border border-gray-300 focus:border-signal-green focus:ring-1 focus:ring-signal-green" 
               required
             />
           </div>
@@ -642,7 +646,7 @@ for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
             <textarea 
               rows="4" 
               placeholder={contactSection.formLabels.messagePlaceholder}
-              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-signal-green focus:ring-1 focus:ring-signal-green"
+              class="w-full ps-4 pe-4 py-2 rounded-lg border border-gray-300 focus:border-signal-green focus:ring-1 focus:ring-signal-green"
               required
             ></textarea>
           </div>
@@ -747,6 +751,46 @@ details > summary {
 }
 details > summary::-webkit-details-marker {
   display: none;
+}
+
+/* CHANGE 16: Added RTL-specific styles for better text rendering */
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3,
+[dir="rtl"] h4,
+[dir="rtl"] h5,
+[dir="rtl"] h6,
+[dir="rtl"] p,
+[dir="rtl"] span,
+[dir="rtl"] label {
+  letter-spacing: 0;
+}
+
+/* CHANGE 17: Fix marquee animation direction for RTL */
+[dir="rtl"] .pseo-marquee {
+  mask-image: linear-gradient(
+    to left,
+    hsl(0 0% 0% / 0),
+    hsl(0 0% 0% / 1) 10%,
+    hsl(0 0% 0% / 1) 90%,
+    hsl(0 0% 0% / 0)
+  );
+  -webkit-mask-image: linear-gradient(
+    to left,
+    hsl(0 0% 0% / 0),
+    hsl(0 0% 0% / 1) 10%,
+    hsl(0 0% 0% / 1) 90%,
+    hsl(0 0% 0% / 0)
+  );
+}
+
+[dir="rtl"] @keyframes pseo-scroll {
+  0%{
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(100% + var(--gap)));
+  }
 }
 </style>
 
