@@ -101,19 +101,7 @@ const collectionPageSchema = {
                     "@type": "AggregateRating",
                     "ratingValue": product.PRODUCT_RATING_VALUE,
                     "reviewCount": product.PRODUCT_REVIEW_COUNT
-                },
-                "keywords": [
-                    product.PRODUCT_KEYWORD_1,
-                    product.PRODUCT_KEYWORD_2,
-                    product.PRODUCT_KEYWORD_3,
-                    product.PRODUCT_KEYWORD_4,
-                    product.PRODUCT_KEYWORD_5,
-                    product.PRODUCT_KEYWORD_6,
-                    product.PRODUCT_KEYWORD_7
-                ].filter(Boolean),
-                "datePublished": product.PRODUCT_DATE_PUBLISHED,
-                "dateModified": product.PRODUCT_DATE_UPDATED,
-                "category": product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER
+                }
             }
         }))
     }

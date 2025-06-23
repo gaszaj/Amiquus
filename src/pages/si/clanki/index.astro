@@ -1,56 +1,59 @@
 ---
 // Path: /src/pages/si/clanki/index.astro
-// Purpose: Display articles from article.json that match parent folder slug and are published
-// Data: article.json, www.json, common.json
+// Purpose: Display articles with advanced sorting, author filtering, and infinite scroll.
+// Data: article.json, author.json, www.json, common.json
 // Dependencies: BaseLayout.astro
 
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import articleData from '../../../data/article.json';
+import authorData from '../../../data/author.json';
 import wwwData from '../../../data/www.json';
 import commonData from '../../../data/common.json';
 import localeData from '../../../data/locale.json';
 
-// Get the parent folder slug (si in this case)
+// --- DATA FETCHING & INITIAL FILTERING ---
+
 const parentSlug = Astro.url.pathname.split('/')[1];
-
-// Get the current page folder name (clanki in this case)
 const currentFolder = Astro.url.pathname.split('/')[2];
-
-// Find the matching common data object based on M_SLUG
 const common = commonData.find(item => item.M_SLUG === parentSlug) || commonData[0];
-
-// Get the first object from www array
 const www = wwwData[0];
 
-// Filter articles based on requirements
-const filteredArticles = articleData.filter(article => 
-    article.M_SLUG === parentSlug && 
-    article.PUBLISH_Y_N === "1"
-);
+// Filter articles for the current locale and published status
+const filteredArticles = articleData
+    .filter(article => article.M_SLUG === parentSlug && article.PUBLISH_Y_N === "1")
+    .sort((a, b) => new Date(b.ARTICLE_PUBLISH_DATE).getTime() - new Date(a.ARTICLE_PUBLISH_DATE).getTime());
 
-// Helper function for absolute URLs with locale
-const getAbsoluteUrl = (path: string) => {
-    // Get the locale from the URL path (e.g., 'si' from '/si/clanki/')
-    const locale = Astro.url.pathname.split('/')[1];
-    return new URL(`/${locale}${path}`, Astro.url.origin).toString();
-};
+// --- NEW: DYNAMIC AUTHOR FILTER (ENHANCED) ---
 
-// Helper function for base-level URLs (without locale)
-const getBaseUrl = (path: string) => {
-    return new URL(path, Astro.url.origin).toString();
-};
+// 1. Create an efficient lookup map for authors by their ID
+const authorMap = new Map(authorData.map(author => [author.AUTHOR_ID, author]));
 
-// Get language data from the first article (they should all be the same for a given slug)
+// 2. Get a unique list of author IDs from the filtered articles
+const uniqueAuthorIds = [...new Set(filteredArticles.map(article => article.AUTHOR_ID))];
+
+// 3. Create a list of author objects with their ID and resolved name, then sort it
+const uniqueAuthors = uniqueAuthorIds.map(id => {
+    const authorDetails = authorMap.get(id);
+    return {
+        id: id,
+        name: authorDetails?.WWW_AUTHOR_ASCII || id, // Use name, fallback to ID
+    };
+}).sort((a, b) => a.name.localeCompare(b.name));
+
+
+// --- BATCHING FOR INITIAL LOAD ---
+const BATCH_SIZE = 9;
+const initialArticles = filteredArticles.slice(0, BATCH_SIZE);
+
+// --- METADATA AND SEO ---
+
 const languageIso = filteredArticles[0]?.M_LANGUAGE_ISO || 'sl';
 const countryCode = filteredArticles[0]?.M_COUNTRY_CODE || 'SI';
-
-// Find matching content orientation from common.json
 const contentOrientation = commonData.find(item =>
     item.M_LANGUAGE_ISO === languageIso &&
     item.M_COUNTRY_CODE === countryCode
 )?.M_CONTENT_ORIENTATION || 'ltr';
 
-// Define page metadata
 const pageTitle = common.PAGE_CATEGORY_2_LISTING_TITLE;
 const pageDescription = common.PAGE_CATEGORY_2_LISTING_DESCRIPTION;
 const pageOgImage = common.PAGE_CATEGORY_2_LISTING_OG_IMAGE_PATH;
@@ -60,36 +63,9 @@ const pageKeywords = [
     www.PAGE_ORGANISATION_FULL_NAME
 ].join(', ');
 
-// CollectionPage Schema
-const collectionPageSchema = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "@id": Astro.url.href,
-    "name": common.PAGE_CATEGORY_2_LISTING_TITLE,
-    "description": common.PAGE_CATEGORY_2_LISTING_DESCRIPTION,
-    "url": Astro.url.href,
-    "mainEntity": {
-        "@type": "ItemList",
-        "itemListElement": filteredArticles.map((article, index) => ({
-            "@type": "ListItem",
-            "position": index + 1,
-            "item": {
-                "@type": "Article",
-                "@id": `${Astro.url.origin}/${parentSlug}/${currentFolder}/${article.ARTICLE_SLUG}`,
-                "name": article.ARTICLE_NAME,
-                "url": `${Astro.url.origin}/${parentSlug}/${currentFolder}/${article.ARTICLE_SLUG}`,
-                "image": `${Astro.url.origin}${article.ARTICLE_OG_IMAGE_PATH}`,
-                "description": article.ARTICLE_SUBTITLE,
-                "datePublished": article.ARTICLE_PUBLISH_DATE,
-                "dateModified": article.ARTICLE_UPDATE_DATE,
-                "author": {
-                    "@type": "Organization",
-                    "name": www.PAGE_ORGANISATION_FULL_NAME
-                }
-            }
-        }))
-    }
-};
+const getBaseUrl = (path: string) => new URL(path, Astro.url.origin).toString();
+
+// --- SCHEMA.ORG (UNCHANGED LOGIC: USES FULL LIST FOR SEO) ---
 
 // Organization Schema 
 const organizationSchema = {
@@ -175,23 +151,45 @@ const organizationSchema = {
   ]
 };
 
-// Combine schemas
+const collectionPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": Astro.url.href,
+    "name": common.PAGE_CATEGORY_2_LISTING_TITLE,
+    "description": common.PAGE_CATEGORY_2_LISTING_DESCRIPTION,
+    "url": Astro.url.href,
+    "mainEntity": {
+        "@type": "ItemList",
+        "itemListElement": filteredArticles.map((article, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+                "@type": "Article",
+                "@id": `${Astro.url.origin}/${parentSlug}/${currentFolder}/${article.ARTICLE_SLUG}`,
+                "name": article.ARTICLE_NAME,
+                "url": `${Astro.url.origin}/${parentSlug}/${currentFolder}/${article.ARTICLE_SLUG}`,
+                "image": `${Astro.url.origin}${article.ARTICLE_OG_IMAGE_PATH}`,
+                "description": article.ARTICLE_SUBTITLE,
+                "author": {
+                    "@type": "Person",
+                    "name": authorMap.get(article.AUTHOR_ID)?.WWW_AUTHOR_ASCII || authorMap.get(article.AUTHOR_ID)?.AUTHOR_ID
+                }
+            }
+        }))
+    }
+};
+
 const schema = [collectionPageSchema, organizationSchema];
 
-// Build the language link map for the language picker
+// --- LANGUAGE LINKS ---
 const languageLinksMap = {};
 for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
-  // Find any published article for this locale to get the correct PAGE_CATEGORY_2_LISTING_SLUG
   const articleForLocale = articleData.find(a =>
-    a.M_SLUG === localeObj.M_SLUG &&
-    a.PUBLISH_Y_N === "1" &&
-    a.PAGE_CATEGORY_2_LISTING_SLUG && a.PAGE_CATEGORY_2_LISTING_SLUG.trim()
+    a.M_SLUG === localeObj.M_SLUG && a.PUBLISH_Y_N === "1" && a.PAGE_CATEGORY_2_LISTING_SLUG?.trim()
   );
   if (articleForLocale) {
-    // Always use the slug from the article for that locale
     languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}/${articleForLocale.PAGE_CATEGORY_2_LISTING_SLUG}`;
   } else {
-    // Fallback to homepage if no article listing exists
     languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}`;
   }
 }
@@ -219,71 +217,204 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
         </div>
     </div>
 
-    <!-- Articles Grid Section -->
-    <section class="py-16 bg-white">
+    <!-- Articles Section -->
+    <section class="py-16 bg-gray-50">
         <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredArticles.map((article) => {
-                    const articleUrl = `${Astro.url.origin}/${parentSlug}/${currentFolder}/${article.ARTICLE_SLUG}`;
-                    
+            <!-- Controls Bar -->
+            <div class="bg-white p-4 rounded-lg shadow-sm mb-8 border border-gray-200">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <!-- Filters & Sorters -->
+                    <div class="flex flex-wrap items-center gap-x-6 gap-y-4">
+                        <!-- Sort Dropdown -->
+                        <div>
+                            <label for="sort-select" class="block text-sm font-medium text-gray-700 mb-1">{common.UI_SORT_BY}</label>
+                            <select id="sort-select" class="rounded-md border-gray-300 shadow-sm focus:border-signal-green focus:ring focus:ring-signal-green focus:ring-opacity-50">
+                                <option value="newest">{common.UI_SORT_NEWEST}</option>
+                                <option value="oldest">{common.UI_SORT_OLDEST}</option>
+                                <option value="updated">{common.UI_SORT_UPDATED}</option>
+                                <option value="az">{common.UI_SORT_AZ}</option>
+                                <option value="za">{common.UI_SORT_ZA}</option>
+                            </select>
+                        </div>
+                        <!-- Author Filter Dropdown -->
+                        <div>
+                             <label for="author-filter" class="block text-sm font-medium text-gray-700 mb-1">{common.UI_FILTER_BY_AUTHOR}</label>
+                            <select id="author-filter" class="rounded-md border-gray-300 shadow-sm focus:border-signal-green focus:ring focus:ring-signal-green focus:ring-opacity-50">
+                                <option value="all">{common.UI_FILTER_ALL_AUTHORS}</option>
+                                <!-- NEW: Loop over author objects to show names -->
+                                {uniqueAuthors.map(author => (
+                                    <option value={author.id}>{author.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                     <!-- Info & Clear Button -->
+                    <div class="flex items-center gap-4">
+                        <span id="article-count" class="text-sm text-gray-600"></span>
+                        <button id="clear-filters-btn" class="text-sm font-medium text-signal-green hover:underline">{common.UI_BUTTON_CLEAR_FILTERS}</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Articles Grid -->
+            <div id="articles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Initial articles are server-rendered -->
+                {initialArticles.map((article) => {
+                    const articleUrl = `/${parentSlug}/${currentFolder}/${article.ARTICLE_SLUG}`;
                     return (
-                        <div class="bg-white border border-gray-100 overflow-hidden group">
+                        <div class="bg-white border border-gray-200 rounded-lg overflow-hidden group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                             <a href={articleUrl} class="block">
-                                <img 
-                                    src={article.ARTICLE_OG_IMAGE_PATH} 
-                                    alt={article.ARTICLE_OG_IMAGE_ALT}
-                                    class="w-full h-48 object-cover"
-                                    width="1200"
-                                    height="630"
-                                    loading="lazy"
-                                    decoding="async"
-                                />
-                                <div class="p-4 border-t border-gray-100">
-                                    <h3 class="font-medium text-black group-hover:text-signal-green transition-colors mb-2">
-                                        {article.ARTICLE_H2_1}
-                                    </h3>
-                                    <p class="text-gray-600 text-sm mb-2">
-                                        {article.ARTICLE_SUBTITLE}
-                                    </p>
-                                    <p class="text-gray-500 text-xs mb-4">
-                                        {common.ARTICLE_UPDATED_LABEL}: {article.ARTICLE_UPDATE_DATE}
-                                    </p>
-                                    <span class="block w-full bg-black text-signal-green border border-signal-green py-2 px-4 hover:bg-signal-green hover:text-black transition-all text-center">
-                                        {common.ARTICLE_READ_MORE}
-                                    </span>
+                                <img src={article.ARTICLE_OG_IMAGE_PATH} alt={article.ARTICLE_OG_IMAGE_ALT} class="w-full h-48 object-cover" width="1200" height="630" loading="lazy" decoding="async"/>
+                                <div class="p-5">
+                                    <h3 class="font-bold text-lg text-black group-hover:text-signal-green transition-colors mb-2 line-clamp-2">{article.ARTICLE_H2_1}</h3>
+                                    <p class="text-gray-600 text-sm mb-3 line-clamp-3">{article.ARTICLE_SUBTITLE}</p>
+                                    <p class="text-gray-500 text-xs mb-4">{common.ARTICLE_UPDATED_LABEL}: {article.ARTICLE_UPDATE_DATE}</p>
+                                    <span class="block w-full bg-black text-signal-green border border-signal-green py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center font-semibold">{common.ARTICLE_READ_MORE}</span>
                                 </div>
                             </a>
                         </div>
                     );
                 })}
             </div>
+             <!-- Sentinel and Messages -->
+             <div id="grid-footer" class="text-center mt-12">
+                <div id="no-results" class="hidden text-gray-500">{common.UI_NO_ARTICLES_FOUND}</div>
+                <div id="infinite-scroll-trigger" class="h-10 text-gray-500 font-semibold">{common.UI_LOADING_MORE}</div>
+             </div>
         </div>
     </section>
 </BaseLayout>
 
 <style>
-    /* Animations */
-    :global(.animate-fade-in) {
-        animation: fadeIn 0.5s ease-in-out;
-    }
-
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .animate-fade-in { animation: fadeIn 0.5s ease-in-out forwards; }
     @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    /* Article card hover effects */
-    .group:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-    }
-
-    /* Line clamp for article descriptions */
-    .line-clamp-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 </style>
+
+<script define:vars={{ allArticles: filteredArticles, parentSlug, currentFolder, common, BATCH_SIZE }}>
+    // --- DOM ELEMENTS ---
+    const grid = document.getElementById('articles-grid');
+    const trigger = document.getElementById('infinite-scroll-trigger');
+    const noResultsMsg = document.getElementById('no-results');
+    const articleCountSpan = document.getElementById('article-count');
+    const sortSelect = document.getElementById('sort-select');
+    const authorFilter = document.getElementById('author-filter');
+    const clearBtn = document.getElementById('clear-filters-btn');
+
+    // --- STATE MANAGEMENT ---
+    let articlesToDisplay = [...allArticles];
+    let currentPage = 1;
+    let observer;
+
+    // --- HELPER FUNCTIONS ---
+    const getSlovenianPluralString = (count) => {
+        if (count % 100 === 1) return common.UI_ARTICLE_COUNT_SINGLE;
+        if (count % 100 === 2) return common.UI_ARTICLE_COUNT_DUAL;
+        if (count % 100 === 3 || count % 100 === 4) return common.UI_ARTICLE_COUNT_FEW;
+        return common.UI_ARTICLE_COUNT_PLURAL;
+    };
+    
+    const updateArticleCount = (count) => {
+        if (common.M_LANGUAGE_ISO === 'sl') {
+            articleCountSpan.textContent = getSlovenianPluralString(count).replace('{count}', count);
+        } else {
+            const template = count === 1 ? common.UI_ARTICLE_COUNT_SINGLE : common.UI_ARTICLE_COUNT_PLURAL;
+            articleCountSpan.textContent = template.replace('{count}', count);
+        }
+    };
+    
+    const createArticleCardHTML = (article) => {
+        const articleUrl = `/${parentSlug}/${currentFolder}/${article.ARTICLE_SLUG}`;
+        return `
+            <div class="bg-white border border-gray-200 rounded-lg overflow-hidden group transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-fade-in">
+                <a href="${articleUrl}" class="block">
+                    <img src="${article.ARTICLE_OG_IMAGE_PATH}" alt="${article.ARTICLE_OG_IMAGE_ALT}" class="w-full h-48 object-cover" width="1200" height="630" loading="lazy" decoding="async"/>
+                    <div class="p-5">
+                        <h3 class="font-bold text-lg text-black group-hover:text-signal-green transition-colors mb-2 line-clamp-2">${article.ARTICLE_H2_1}</h3>
+                        <p class="text-gray-600 text-sm mb-3 line-clamp-3">${article.ARTICLE_SUBTITLE}</p>
+                        <p class="text-gray-500 text-xs mb-4">${common.ARTICLE_UPDATED_LABEL}: ${article.ARTICLE_UPDATE_DATE}</p>
+                        <span class="block w-full bg-black text-signal-green border border-signal-green py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center font-semibold">${common.ARTICLE_READ_MORE}</span>
+                    </div>
+                </a>
+            </div>
+        `;
+    };
+
+    // --- CORE LOGIC ---
+    const applyFiltersAndSort = () => {
+        let processedArticles = [...allArticles];
+        const selectedAuthor = authorFilter.value;
+        if (selectedAuthor !== 'all') {
+            processedArticles = processedArticles.filter(a => a.AUTHOR_ID === selectedAuthor);
+        }
+
+        const sortBy = sortSelect.value;
+        processedArticles.sort((a, b) => {
+            switch (sortBy) {
+                case 'oldest': return new Date(a.ARTICLE_PUBLISH_DATE).getTime() - new Date(b.ARTICLE_PUBLISH_DATE).getTime();
+                case 'updated': return new Date(b.ARTICLE_UPDATE_DATE).getTime() - new Date(a.ARTICLE_UPDATE_DATE).getTime();
+                case 'az': return a.ARTICLE_NAME.localeCompare(b.ARTICLE_NAME);
+                case 'za': return b.ARTICLE_NAME.localeCompare(a.ARTICLE_NAME);
+                case 'newest': default: return new Date(b.ARTICLE_PUBLISH_DATE).getTime() - new Date(a.ARTICLE_PUBLISH_DATE).getTime();
+            }
+        });
+        
+        return processedArticles;
+    };
+
+    const renderGrid = (articles, append = false) => {
+        if (!append) grid.innerHTML = '';
+        const batchHtml = articles.map(createArticleCardHTML).join('');
+        grid.insertAdjacentHTML('beforeend', batchHtml);
+    };
+
+    const updateDisplay = () => {
+        articlesToDisplay = applyFiltersAndSort();
+        currentPage = 1;
+        const initialBatch = articlesToDisplay.slice(0, BATCH_SIZE);
+        renderGrid(initialBatch);
+        updateArticleCount(articlesToDisplay.length);
+        noResultsMsg.style.display = articlesToDisplay.length === 0 ? 'block' : 'none';
+        trigger.style.display = articlesToDisplay.length > BATCH_SIZE ? 'block' : 'none';
+        setupObserver();
+    };
+    
+    const loadMoreArticles = () => {
+        currentPage++;
+        const startIndex = (currentPage - 1) * BATCH_SIZE;
+        const endIndex = startIndex + BATCH_SIZE;
+        const nextBatch = articlesToDisplay.slice(startIndex, endIndex);
+
+        if (nextBatch.length > 0) renderGrid(nextBatch, true);
+        if (endIndex >= articlesToDisplay.length) {
+            trigger.style.display = 'none';
+            if(observer) observer.disconnect();
+        }
+    };
+    
+    const setupObserver = () => {
+        if(observer) observer.disconnect();
+        if(articlesToDisplay.length <= BATCH_SIZE) return;
+        observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) loadMoreArticles();
+        }, { rootMargin: '400px' });
+        observer.observe(trigger);
+    };
+
+    // --- EVENT LISTENERS & INITIALIZATION ---
+    sortSelect.addEventListener('change', updateDisplay);
+    authorFilter.addEventListener('change', updateDisplay);
+    clearBtn.addEventListener('click', () => {
+        sortSelect.value = 'newest';
+        authorFilter.value = 'all';
+        updateDisplay();
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+        updateArticleCount(allArticles.length);
+        setupObserver();
+    });
+</script>
