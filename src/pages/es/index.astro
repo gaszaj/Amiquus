@@ -1,17 +1,13 @@
 ---
-// Path: /src/pages/si/index.astro
-// Purpose: Homepage with dynamic RTL support
-// Data: JSON dependencies for home content, products, and locale data
-// Dependencies: BaseLayout, form validation
-
+import path from 'path';
+import Database from 'better-sqlite3';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import homeData from '../../data/home.json';
-import wwwData from '../../data/www.json';
-import commonData from '../../data/common.json';
-import products from '../../data/product.json';
-import localeData from '../../data/locale.json';
 
-// --- Interface Definitions  ---
+// --- Database Connection ---
+const dbPath = path.join(process.cwd(), 'src/data/data.db');
+const db = new Database(dbPath, { readonly: true });
+
+// --- Interface Definitions (Unchanged) ---
 interface HeroData {
   title: string;
   subtitle: string;
@@ -56,72 +52,81 @@ interface FormAlerts {
   submissionError: string;
 }
 
-// Get the locale from the URL path (e.g., 'si' from /si/)
+// Get the locale from the URL path
 const locale = Astro.url.pathname.split('/')[1];
 
-// Find the matching data objects based on M_SLUG, with fallbacks
-const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
-const home = homeData.find(item => item.M_SLUG === locale) || homeData[0];
-const product = products.find(item => item.M_SLUG === locale) || products[0];
+// --- Data Fetching from Database ---
+// Fetch all required data in a single, efficient transaction.
+const { home, common, www, bestsellers, publishedLocales } = db.transaction(() => {
+    // Fetch homepage-specific content for the current locale
+    const homeData = db.prepare('SELECT * FROM home WHERE M_SLUG = ?').get(locale);
+    
+    // Fetch common translations and settings for the current locale
+    const commonData = db.prepare('SELECT * FROM common WHERE M_SLUG = ?').get(locale);
+    
+    // Fetch global site data from the 'www' table
+    const wwwData = db.prepare('SELECT * FROM www LIMIT 1').get();
+    
+    // Fetch the top 9 bestsellers for the current locale, sorted by importance.
+    // Casting PRODUCT_IMPORTANCE_RANK to an integer ensures correct numeric sorting.
+    const bestsellerData = db.prepare(`
+        SELECT * FROM product
+        WHERE PUBLISH_Y_N = '1'
+          AND PRODUCT_IS_BESTSELLER = '1'
+          AND M_SLUG = ?
+        ORDER BY CAST(PRODUCT_IMPORTANCE_RANK AS INTEGER) DESC
+        LIMIT 9
+    `).all(locale);
 
-// If we're using fallback data, make sure it matches our locale
-if (common.M_SLUG !== locale || home.M_SLUG !== locale || product.M_SLUG !== locale) {
+    // Fetch all published locales for the language switcher
+    const localeData = db.prepare("SELECT M_SLUG FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all();
+
+    return { 
+        home: homeData,
+        common: commonData,
+        www: wwwData,
+        bestsellers: bestsellerData,
+        publishedLocales: localeData
+    };
+})();
+
+// --- Validation ---
+// If essential data for the homepage (home or common) is not found, redirect to 404.
+if (!home || !common) {
   return Astro.redirect('/404');
 }
 
-const www = wwwData[0];
+// --- Page Logic and Variable Definitions ---
 
-// Helper function for absolute URLs with locale
+// Helper functions for URL generation (unchanged).
 const getAbsoluteUrl = (path: string) => {
     return new URL(`/${locale}${path}`, Astro.url.origin).toString();
 };
-
-// Helper function for base-level URLs (without locale)
 const getBaseUrl = (path: string) => {
     return new URL(path, Astro.url.origin).toString();
 };
 
-// Get language data
+// Language and orientation data
 const languageIso: string = home.M_LANGUAGE_ISO;
 const countryCode: string = home.M_COUNTRY_CODE;
-
-// Find matching content orientation from common.json
 const contentOrientation: string = common.M_CONTENT_ORIENTATION || 'ltr';
 
 // --- Data for the Homepage ---
 
-// Helper function to randomly shuffle and pick n items from an array
+// Helper function for randomizing social proof images (unchanged).
 const getRandomItems = <T,>(array: T[], count: number): T[] => {
   const shuffled = [...array].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 };
-
-// Define all available social proof images
 const allSocialProofImages = [
-  '/socialproof/sp1.webp',
-  '/socialproof/sp2.webp',
-  '/socialproof/sp3.webp',
-  '/socialproof/sp4.webp',
-  '/socialproof/sp5.webp',
-  '/socialproof/sp6.webp',
-  '/socialproof/sp7.webp',
-  '/socialproof/sp8.webp',
-  '/socialproof/sp9.webp',
-  '/socialproof/sp10.webp',
-  '/socialproof/sp11.webp',
-  '/socialproof/sp12.webp',
-  '/socialproof/sp13.webp',
-  '/socialproof/sp14.webp',
-  '/socialproof/sp15.webp',
-  '/socialproof/sp16.webp',
-  '/socialproof/sp17.webp',
-  '/socialproof/sp18.webp',
-  '/socialproof/sp19.webp',
-  '/socialproof/sp20.webp',
-  '/socialproof/sp21.webp',
-  '/socialproof/sp22.webp',
-  '/socialproof/sp23.webp',
-  '/socialproof/sp24.webp'
+  '/socialproof/sp1.webp', '/socialproof/sp2.webp', '/socialproof/sp3.webp',
+  '/socialproof/sp4.webp', '/socialproof/sp5.webp', '/socialproof/sp6.webp',
+  '/socialproof/sp7.webp', '/socialproof/sp8.webp', '/socialproof/sp9.webp',
+  '/socialproof/sp10.webp', '/socialproof/sp11.webp', '/socialproof/sp12.webp',
+  '/socialproof/sp13.webp', '/socialproof/sp14.webp', '/socialproof/sp15.webp',
+  '/socialproof/sp16.webp', '/socialproof/sp17.webp', '/socialproof/sp18.webp',
+  '/socialproof/sp19.webp', '/socialproof/sp20.webp', '/socialproof/sp21.webp',
+  '/socialproof/sp22.webp', '/socialproof/sp23.webp', '/socialproof/sp24.webp'
 ];
 
 // Hero section data
@@ -143,29 +148,15 @@ const heroData: HeroData = {
   }
 };
 
-// Define keywords for the page
+// Page keywords
 const pageKeywords: string = [
   home.M_HOME_NAME,
   common.M_COUNTRY_NATIVE,
   www.PAGE_ORGANISATION_FULL_NAME
 ].join(', ');
 
-// Filter and sort bestsellers based on criteria for specific locale
-const bestsellers = products
-  .filter(product => 
-    product.PUBLISH_Y_N === "1" && 
-    product.PRODUCT_IS_BESTSELLER === "1" &&
-    product.M_SLUG === locale
-  )
-  .sort((a, b) => {
-    // First sort by importance rank (descending)
-    const rankDiff = parseInt(b.PRODUCT_IMPORTANCE_RANK) - parseInt(a.PRODUCT_IMPORTANCE_RANK);
-    if (rankDiff !== 0) return rankDiff;
-    // If ranks are equal, randomize
-    return Math.random() - 0.5;
-  });
-
-// Get top 5 products for marquee
+// Use the pre-fetched and pre-sorted bestsellers array.
+// Get top 5 products for marquee.
 const marqueeItems = bestsellers
   .slice(0, 5)
   .map(product => ({
@@ -174,13 +165,11 @@ const marqueeItems = bestsellers
     alt: `${product.PAGE_COLLECTION_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME} | ${www.PAGE_ORGANISATION_FULL_NAME}`
   }));
 
-// Get top 9 products for bestsellers section
+// Get top 9 products for bestsellers section.
 const bestsellersSection = {
   title: home.HOME_H2_1,
   productCtaText: home.HOME_HERO_BUTTON,
-  products: bestsellers
-    .slice(0, 9)
-    .map(product => ({
+  products: bestsellers.map(product => ({
       title: `${product.PAGE_COLLECTION_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME}`,
       image: getBaseUrl(product.PRODUCT_IMAGE_PATH_L),
       alt: `${product.PAGE_COLLECTION_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME} | ${www.PAGE_ORGANISATION_FULL_NAME}`,
@@ -188,66 +177,43 @@ const bestsellersSection = {
     }))
 };
 
-// Features section data
+// Features section data (unchanged).
 const featuresSection = {
   title: home.HOME_H2_2,
   items: [
-    {
-      icon: "⚡",
-      title: home.HOME_FEATURE_NAME_1,
-      description: home.HOME_FEATURE_LABEL_1
-    },
-    {
-      icon: "🔄",
-      title: home.HOME_FEATURE_NAME_2,
-      description: home.HOME_FEATURE_LABEL_2
-    },
-    {
-      icon: "📦",
-      title: home.HOME_FEATURE_NAME_3,
-      description: home.HOME_FEATURE_LABEL_3
-    }
+    { icon: "⚡", title: home.HOME_FEATURE_NAME_1, description: home.HOME_FEATURE_LABEL_1 },
+    { icon: "🔄", title: home.HOME_FEATURE_NAME_2, description: home.HOME_FEATURE_LABEL_2 },
+    { icon: "📦", title: home.HOME_FEATURE_NAME_3, description: home.HOME_FEATURE_LABEL_3 }
   ] as FeatureItem[] 
 };
 
-// Institutions section data
+// Institutions section data (unchanged).
 const institutionsSection = {
   title: home.HOME_H2_4,
   items: [
-    home.INSTITUTION_1,
-    home.INSTITUTION_2,
-    home.INSTITUTION_3,
-    home.INSTITUTION_4,
-    home.INSTITUTION_5,
-    home.INSTITUTION_6
+    home.INSTITUTION_1, home.INSTITUTION_2, home.INSTITUTION_3,
+    home.INSTITUTION_4, home.INSTITUTION_5, home.INSTITUTION_6
   ]
 };
 
-// FAQ section data
+// FAQ section data (unchanged).
 const faqSection = {
   title: home.HOME_H2_5,
   subtitle: home.HOME_FAQ_TEXT,
   items: [
-    { question: home.HOME_Q1, answer: home.HOME_A1 },
-    { question: home.HOME_Q2, answer: home.HOME_A2 },
-    { question: home.HOME_Q3, answer: home.HOME_A3 },
-    { question: home.HOME_Q4, answer: home.HOME_A4 },
-    { question: home.HOME_Q5, answer: home.HOME_A5 },
-    { question: home.HOME_Q6, answer: home.HOME_A6 },
-    { question: home.HOME_Q7, answer: home.HOME_A7 },
-    { question: home.HOME_Q8, answer: home.HOME_A8 },
-    { question: home.HOME_Q9, answer: home.HOME_A9 },
-    { question: home.HOME_Q10, answer: home.HOME_A10 },
-    { question: home.HOME_Q11, answer: home.HOME_A11 },
-    { question: home.HOME_Q12, answer: home.HOME_A12 },
-    { question: home.HOME_Q13, answer: home.HOME_A13 },
-    { question: home.HOME_Q14, answer: home.HOME_A14 },
+    { question: home.HOME_Q1, answer: home.HOME_A1 }, { question: home.HOME_Q2, answer: home.HOME_A2 },
+    { question: home.HOME_Q3, answer: home.HOME_A3 }, { question: home.HOME_Q4, answer: home.HOME_A4 },
+    { question: home.HOME_Q5, answer: home.HOME_A5 }, { question: home.HOME_Q6, answer: home.HOME_A6 },
+    { question: home.HOME_Q7, answer: home.HOME_A7 }, { question: home.HOME_Q8, answer: home.HOME_A8 },
+    { question: home.HOME_Q9, answer: home.HOME_A9 }, { question: home.HOME_Q10, answer: home.HOME_A10 },
+    { question: home.HOME_Q11, answer: home.HOME_A11 }, { question: home.HOME_Q12, answer: home.HOME_A12 },
+    { question: home.HOME_Q13, answer: home.HOME_A13 }, { question: home.HOME_Q14, answer: home.HOME_A14 },
     { question: home.HOME_Q15, answer: home.HOME_A15 }
-  ] as FaqItem[] // Type assertion
+  ] as FaqItem[]
 };
 
-// Contact section data
-const contactSection = { // Type assertion can be added
+// Contact section data (unchanged).
+const contactSection = {
   title: home.HOME_H2_6,
   subtitle: home.HOME_CONTACT_SUBTITLE,
   formLabels: {
@@ -262,16 +228,15 @@ const contactSection = { // Type assertion can be added
   }
 };
 
-// Form alert messages for client-side script
-const formAlertMessages: FormAlerts = { // Type assertion
+// Form alert messages for client-side script (unchanged).
+const formAlertMessages: FormAlerts = {
   invalidEmail: common.M_EMAIL_INVALID,
   termsNotAccepted: common.M_TERMS_REQUIRED,
   submissionSuccess: common.M_CONFIRMATION_TEXT,
   submissionError: common.M_FORM_ERROR
 };
 
-// --- Schema Definition ---
-// WebPage and Article Schema
+// --- Schema Definitions (Unchanged) ---
 const webpageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
@@ -305,7 +270,6 @@ const webpageSchema = {
   }
 };
 
-// FAQ Schema
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -319,7 +283,6 @@ const faqSchema = {
   }))
 };
 
-// Organization Schema 
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
@@ -403,19 +366,17 @@ const organizationSchema = {
   ]
 };
 
-// Combine all schemas
 const schema: object[] | null = [webpageSchema, faqSchema, organizationSchema];
 
-// --- Props for BaseLayout (to be used directly in the template below) ---
+// --- Final Props & Language Links ---
 const pageTitle: string = home.HOME_H1;
 const pageDescription: string | undefined = home.HOME_META_SEO;
 const pageOgImage: string | undefined = home.HOME_OG_IMAGE_PATH;
 
-// Build the language link map for the language picker
+// Build the language link map using the pre-fetched locales.
 const languageLinksMap: Record<string, string> = {};
-for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
-  // For homepage, we just use the locale slug as the URL
-  languageLinksMap[locale.M_SLUG] = `/${locale.M_SLUG}`;
+for (const l of publishedLocales) {
+  languageLinksMap[l.M_SLUG] = `/${l.M_SLUG}`;
 }
 ---
 
@@ -753,7 +714,7 @@ details > summary::-webkit-details-marker {
   display: none;
 }
 
-/* CHANGE 16: Added RTL-specific styles for better text rendering */
+/* RTL-specific styles */
 [dir="rtl"] h1,
 [dir="rtl"] h2,
 [dir="rtl"] h3,
@@ -766,7 +727,6 @@ details > summary::-webkit-details-marker {
   letter-spacing: 0;
 }
 
-/* CHANGE 17: Fix marquee animation direction for RTL */
 [dir="rtl"] .pseo-marquee {
   mask-image: linear-gradient(
     to left,
@@ -802,7 +762,6 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       
       const emailInput = form.querySelector('input[type="email"]');
-      // Basic check, consider more robust validation
       if (emailInput && (!emailInput.value || !emailInput.value.includes('@'))) { 
         alert(alerts.invalidEmail); 
         return;
@@ -815,8 +774,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-        // Form submission logic here (e.g., send data to a server)
-        // For now, we just show the success message
         console.log('Form data would be submitted here.');
         alert(alerts.submissionSuccess);
         form.reset();

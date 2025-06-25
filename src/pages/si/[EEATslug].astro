@@ -1,78 +1,92 @@
 ---
-// import { getEntry } from 'astro:content'; // Removed as it's not used; data comes from JSON
+import path from 'path';
+import Database from 'better-sqlite3';
 import { actions, isInputError } from 'astro:actions';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import wwwData from '../../data/www.json';
-import commonData from '../../data/common.json';
-import eeatData from '../../data/eeat.json';
-import authorData from '../../data/author.json';
-import localeData from '../../data/locale.json';
+
+// --- Database Connection ---
+// Establish a connection to the SQLite database.
+// This is more efficient than loading multiple large JSON files into memory.
+const dbPath = path.join(process.cwd(), 'src/data/data.db');
+const db = new Database(dbPath, { readonly: true }); // Open in read-only mode for safety
 
 export const prerender = false;
 
-// Get the locale from the URL path (e.g., 'si' from /si/)
+// --- Data Fetching from Database ---
+
+// Get the locale and slug from the URL parameters
+const { EEATslug } = Astro.params;
 const locale = Astro.url.pathname.split('/')[1];
 
-// Get the slug from the URL
-const { EEATslug } = Astro.params;  
+// 1. Fetch the primary EEAT page data for the current locale and slug.
+// Uses .get() as we expect only one record.
+const eeatEntry = db.prepare('SELECT * FROM eeat WHERE M_SLUG = ? AND EEAT_SLUG = ?').get(locale, EEATslug);
 
-// Filter eeatData to only include entries matching the current locale
-const localeEeatData = eeatData.filter(entry => entry.M_SLUG === locale);
-
-// Find the matching EEAT entry from the filtered data
-const eeatEntry = localeEeatData.find(entry => entry.EEAT_SLUG === EEATslug);
-
-// Check if entry exists
+// If no entry is found, redirect to 404.
 if (!eeatEntry) {
   return Astro.redirect('/404');
 }
 
+// 2. Perform validation checks based on the fetched data.
 const filteringNumber = parseInt(eeatEntry.EEAT_FILTERING);
-
-// Get authors for the current locale when EEAT_FILTERING is 20 or 13
-const authors = (filteringNumber === 20 || filteringNumber === 13)
-  ? authorData.filter(author => author.M_SLUG === locale && author.PUBLISH_Y_N === "1")
-  : [];
-
-// Check if entry is published and has a valid filtering number (1-28)
-const isValidPage = eeatEntry.PUBLISH_Y_N === "1" &&
-  filteringNumber >= 1 && filteringNumber <= 28;
+const isValidPage = eeatEntry.PUBLISH_Y_N === "1" && filteringNumber >= 1 && filteringNumber <= 28;
 
 if (!isValidPage) {
   return Astro.redirect('/404');
 }
 
-// Determine if the page should display a contact form
-const isContactPage = filteringNumber === 24 || filteringNumber === 25;
+// 3. Fetch all other required data in a single transaction for efficiency.
+// This is much faster than running multiple separate queries.
+const { www, common, authors, publishedLocales, altEeatEntries } = db.transaction(() => {
+    // Fetch global site data (www table)
+    const wwwData = db.prepare('SELECT * FROM www LIMIT 1').get();
 
+    // Fetch common translations and settings for the current locale.
+    // If a locale-specific entry doesn't exist, it will be null. The template should handle this gracefully or have a fallback.
+    const commonData = db.prepare('SELECT * FROM common WHERE M_SLUG = ?').get(locale);
+
+    // Conditionally fetch authors only if the page requires them (e.g., "About Us" or "Editorial Policy").
+    // Uses .all() as we expect multiple authors.
+    const authorData = (filteringNumber === 20 || filteringNumber === 13)
+      ? db.prepare("SELECT * FROM author WHERE M_SLUG = ? AND PUBLISH_Y_N = '1'").all(locale)
+      : [];
+    
+    // Fetch all published locales for the language switcher.
+    const locales = db.prepare("SELECT M_SLUG FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all();
+    
+    // Fetch all alternate EEAT page slugs for the current page type across all locales.
+    // This is more efficient than querying inside a loop.
+    const alts = db.prepare("SELECT M_SLUG, EEAT_SLUG FROM eeat WHERE EEAT_FILTERING = ? AND PUBLISH_Y_N = '1'").all(eeatEntry.EEAT_FILTERING);
+
+    return { 
+        www: wwwData, 
+        common: commonData || {}, // Fallback to an empty object if no common data is found
+        authors: authorData,
+        publishedLocales: locales,
+        altEeatEntries: alts
+    };
+})();
+
+// --- Page Logic and Variable Definitions ---
+
+// Assign the main entry to a simpler variable name.
 const eeat = eeatEntry;
 
-// Get the first object from www data (keeping as is)
-const www = wwwData[0];
+// Determine if the page should display a contact form.
+const isContactPage = filteringNumber === 24 || filteringNumber === 25;
 
-// Find the matching common data object based on M_SLUG
-const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
-
-// Helper function for absolute URLs with locale
+// Helper functions for URL generation (unchanged).
 const getAbsoluteUrl = (path: string) => {
-    // Get the locale from the URL path (e.g., 'si' from '/si/')
-    const locale = Astro.url.pathname.split('/')[1];
     return new URL(`/${locale}${path}`, Astro.url.origin).toString();
 };
-
-// Helper function for base-level URLs (without locale)
 const getBaseUrl = (path: string) => {
     return new URL(path, Astro.url.origin).toString();
 };
 
-// Get language data
+// Define content variables for the template (unchanged).
 const languageIso = eeat.M_LANGUAGE_ISO;
 const countryCode = eeat.M_COUNTRY_CODE;
-
-// Find matching content orientation from commonData (already refined above)
 const contentOrientation = common.M_CONTENT_ORIENTATION || 'ltr';
-
-// Define content for the page
 const seoTitle = eeat.EEAT_NAME;
 const headline = eeat.EEAT_H1;
 const pageDescription = eeat.EEAT_META_SEO;
@@ -84,15 +98,13 @@ const articleUpdateDate = eeat.EEAT_DATE_UPDATED;
 const publishedTextLabel = common.M_PUBLISHED;
 const updatedTextLabel = common.M_UPDATED;
 const articleDateLocale = `${eeat.M_LANGUAGE_ISO}-${eeat.M_COUNTRY_CODE}`;
-
-// Define keywords for the page
 const pageKeywords = [
   eeat.EEAT_NAME,
   eeat.M_COUNTRY_NATIVE,
   www.PAGE_ORGANISATION_FULL_NAME
 ].join(', ');
 
-// --- FORM HANDLING ---
+// --- FORM HANDLING (Unchanged) ---
 const submissionResult = await Astro.getActionResult(actions.submitContactForm);
 const formErrors: Record<string, string[] | undefined> = {};
 let genericError: string | undefined = undefined;
@@ -106,30 +118,29 @@ if (submissionResult) {
       genericError = submissionResult.error.message;
     }
   } else if (submissionResult.data?.success) {
-    // The success message now comes directly from the server action, already translated.
     successMessage = submissionResult.data.message;
   }
 }
 
 const getFieldError = (fieldName: string): string | undefined => formErrors[fieldName]?.[0];
 
-// Build the language link map for the language picker
+// --- Language Link Generation (Refactored for Performance) ---
+// Create a lookup map from the pre-fetched alternate entries.
+const altEeatMap = new Map(altEeatEntries.map(e => [e.M_SLUG, e.EEAT_SLUG]));
+
+// Build the language link map for the language picker.
 const languageLinksMap: Record<string, string> = {};
-for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
-  // Find alternate EEAT entry for this locale by EEAT_FILTERING
-  const altEeat = eeatData.find(e =>
-    e.EEAT_FILTERING === eeatEntry.EEAT_FILTERING &&
-    e.M_SLUG === locale.M_SLUG &&
-    e.PUBLISH_Y_N === "1"
-  );
-  if (altEeat) {
-    languageLinksMap[locale.M_SLUG] = `/${altEeat.M_SLUG}/${altEeat.EEAT_SLUG}`;
+for (const l of publishedLocales) {
+  const altSlug = altEeatMap.get(l.M_SLUG);
+  if (altSlug) {
+    languageLinksMap[l.M_SLUG] = `/${l.M_SLUG}/${altSlug}`;
   } else {
-    languageLinksMap[locale.M_SLUG] = `/${locale.M_SLUG}`;
+    // Fallback to the locale's homepage if no direct equivalent page exists.
+    languageLinksMap[l.M_SLUG] = `/${l.M_SLUG}`;
   }
 }
 
-// WebPage and Article Schema
+// --- Schema Definitions (Unchanged) ---
 const webpageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
@@ -163,14 +174,12 @@ const webpageSchema = {
       "@type": "Organization",
       "name": www.PAGE_ORGANISATION_FULL_NAME
     },
-    // Assuming EEAT_HOUR_PUBLISHED and _UPDATED are in HH:MM format
-    "datePublished": `${articlePublishDate}T${eeat.EEAT_HOUR_PUBLISHED || '00:00'}:00+02:00`, // Added :00 for seconds, ensure format
-    "dateModified": `${articleUpdateDate}T${eeat.EEAT_HOUR_UPDATED || '00:00'}:00+02:00`,   // Added :00 for seconds
+    "datePublished": `${articlePublishDate}T${eeat.EEAT_HOUR_PUBLISHED || '00:00:00'}+02:00`,
+    "dateModified": `${articleUpdateDate}T${eeat.EEAT_HOUR_UPDATED || '00:00:00'}+02:00`,
     "inLanguage": articleDateLocale
   }
 };
 
-// Organization Schema 
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
@@ -254,10 +263,9 @@ const organizationSchema = {
   ]
 };
 
-// Combine schemas into an array
 const combinedSchema = [webpageSchema, organizationSchema];
 
-// Format dates
+// --- Helper Functions (Unchanged) ---
 const formatDate = (dateString: string, locale: string) => {
   if (!dateString) return '';
   return new Date(dateString).toLocaleDateString(locale, {
