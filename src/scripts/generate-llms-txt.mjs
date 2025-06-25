@@ -1,44 +1,57 @@
 // src/scripts/generate-llms-txt.mjs
 
-import { readFileSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import path from 'path';
+import Database from 'better-sqlite3';
 
 // --- Configuration ---
 const SITE_URL = 'https://eusignal.netlify.app';
-const PUBLIC_DIR = path.join(process.cwd(), 'public');
+const CWD = process.cwd();
+const PUBLIC_DIR = path.join(CWD, 'public');
 const OUTPUT_FILE = path.join(PUBLIC_DIR, 'llms.txt');
-
-// --- Helper function to read JSON files ---
-const readJsonFile = (filePath) => {
-  const absolutePath = path.join(process.cwd(), filePath);
-  try {
-    const fileContent = readFileSync(absolutePath, 'utf-8');
-    return JSON.parse(fileContent);
-  } catch (error) {
-    console.error(`Error reading JSON file: ${filePath}`, error);
-    return null;
-  }
-};
+const DB_PATH = path.join(CWD, 'src/data/data.db');
 
 // --- Main Exported Function ---
 export async function generateLlmsTxt(logger) {
   logger.info('🚀 Generating llms.txt...');
-
+  let db;
+  
   try {
-    // 1. Load all data sources
-    const wwwData = readJsonFile('src/data/www.json');
-    const localeData = readJsonFile('src/data/locale.json');
-    const commonData = readJsonFile('src/data/common.json');
-    const eeatData = readJsonFile('src/data/eeat.json');
+    // --- Database Connection and Data Fetching ---
+    db = new Database(DB_PATH, { readonly: true });
 
-    if (!wwwData || !localeData || !commonData || !eeatData) {
-      logger.error('❌ Missing one or more required JSON data files. Aborting.');
+    // Fetch all necessary data from the database in a single transaction for performance
+    const { 
+        globalData, 
+        publishedLocales, 
+        commonData, 
+        eeatData 
+    } = db.transaction(() => {
+        // Get global website data (first record)
+        const global = db.prepare("SELECT * FROM www LIMIT 1").get();
+        
+        // Get published locales
+        const locales = db.prepare("SELECT * FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all();
+        
+        // Get common data for all published locales
+        const common = db.prepare("SELECT * FROM common WHERE M_SLUG IN (SELECT M_SLUG FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1')").all();
+        
+        // Get published EEAT pages
+        const eeat = db.prepare("SELECT * FROM eeat WHERE PUBLISH_Y_N = '1'").all();
+
+        return { 
+            globalData: global, 
+            publishedLocales: locales, 
+            commonData: common, 
+            eeatData: eeat 
+        };
+    })();
+
+    if (!globalData || !publishedLocales || !commonData || !eeatData) {
+      logger.error('❌ Missing one or more required data from database. Aborting.');
       return;
     }
 
-    const globalData = wwwData[0];
-    const publishedLocales = localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1");
     const publishedLocaleCount = publishedLocales.length;
     
     const content = [];
@@ -174,5 +187,10 @@ export async function generateLlmsTxt(logger) {
   } catch (error) {
     logger.error('❌ Error generating llms.txt:', error);
     process.exit(1);
+  } finally {
+    // Ensure the database connection is always closed
+    if (db) {
+      db.close();
+    }
   }
 }
