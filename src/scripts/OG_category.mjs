@@ -12,7 +12,7 @@ import pLimit from 'p-limit';
 
 // --- CONFIGURATION ---
 const CWD = process.cwd();
-const OUTPUT_DIR = path.join(CWD, 'public', 'ogimages', 'ogcategory');
+const OUTPUT_DIR = path.join(CWD, 'public', 'ogimages', 'ogcollection');
 const CONCURRENCY = 10;
 
 // --- FONT CONFIGURATION ---
@@ -145,7 +145,7 @@ function detectCategories(commonData) {
     const categories = new Set();
     commonData.forEach(locale => {
         Object.keys(locale).forEach(key => {
-            const match = key.match(/^PAGE_CATEGORY_(\d+)_LISTING_TITLE$/);
+            const match = key.match(/^PAGE_COLLECTION_(\d+)_LISTING_TITLE$/);
             if (match) {
                 categories.add(parseInt(match[1], 10));
             }
@@ -164,9 +164,9 @@ async function generateImageForCategory(locale, categoryNumber, commonAssets, co
     const orientation = locale.M_CONTENT_ORIENTATION || 'ltr';
     
     // Get category-specific text from the locale data
-    const title = locale[`PAGE_CATEGORY_${categoryNumber}_LISTING_TITLE`] || `Category ${categoryNumber}`;
-    const description = locale[`PAGE_CATEGORY_${categoryNumber}_LISTING_DESCRIPTION`] || `Browse all items in category ${categoryNumber}`;
-    const imagePath = locale[`PAGE_CATEGORY_${categoryNumber}_LISTING_OG_IMAGE_PATH`];
+    const title = locale[`PAGE_COLLECTION_${categoryNumber}_LISTING_TITLE`] || `Category ${categoryNumber}`;
+    const description = locale[`PAGE_COLLECTION_${categoryNumber}_LISTING_DESCRIPTION`] || `Browse all items in category ${categoryNumber}`;
+    const imagePath = locale[`PAGE_COLLECTION_${categoryNumber}_LISTING_OG_IMAGE_PATH`];
     
     // Determine output filename
     const imageName = imagePath 

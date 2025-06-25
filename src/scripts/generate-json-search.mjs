@@ -31,8 +31,8 @@ export async function generateSearchIndexes(logger) {
         const searchEntries = [];
         eeatData.filter(p => p.PAGE_LOCALE === localeCode && p.PUBLISH_Y_N === "1").forEach(p => searchEntries.push({ TITLE: p.EEAT_NAME, EXCERPT: p.EEAT_META_SEO, HREF: `${SITE_URL}/${p.M_SLUG}/${p.EEAT_SLUG}` }));
         authorData.filter(p => p.PAGE_LOCALE === localeCode && p.PUBLISH_Y_N === "1").forEach(p => searchEntries.push({ TITLE: `${p.WWW_AUTHOR} — ${p.EEAT_NAME_20_SINGULAR}`, EXCERPT: p.AUTHOR_FULL_BIO, IMAGE: `${SITE_URL}${p.AUTHOR_PROFILE_IMAGE_PATH}`, HREF: `${SITE_URL}/${p.M_SLUG}/${p.EEAT_URL_20}/${p.WWW_AUTHOR_SLUG}` }));
-        articleData.filter(p => p.PAGE_LOCALE === localeCode && p.PUBLISH_Y_N === "1").forEach(p => searchEntries.push({ TITLE: p.ARTICLE_NAME, EXCERPT: p.ARTICLE_META_SEO, HREF: `${SITE_URL}/${p.M_SLUG}/${p.ARTICLE_LIST_SLUG}/${p.ARTICLE_SLUG}` }));
-        productData.filter(p => p.PAGE_LOCALE === localeCode && p.PUBLISH_Y_N === "1").forEach(p => searchEntries.push({ TITLE: p.PRODUCT_NAME, EXCERPT: p.PRODUCT_META_SEO, IMAGE: `${SITE_URL}${p.PRODUCT_IMAGE_PATH_S}`, HREF: `${SITE_URL}/${p.M_SLUG}/${p.PRODUCT_CATEGORY_1_SLUG}/${p.PRODUCT_ASCII_SLUG}` }));
+        articleData.filter(p => p.PAGE_LOCALE === localeCode && p.PUBLISH_Y_N === "1").forEach(p => searchEntries.push({ TITLE: p.ARTICLE_NAME, EXCERPT: p.ARTICLE_META_SEO, HREF: `${SITE_URL}/${p.M_SLUG}/${p.PAGE_COLLECTION_2_LISTING_SLUG}/${p.ARTICLE_SLUG}` }));
+        productData.filter(p => p.PAGE_LOCALE === localeCode && p.PUBLISH_Y_N === "1").forEach(p => searchEntries.push({ TITLE: p.PRODUCT_NAME, EXCERPT: p.PRODUCT_META_SEO, IMAGE: `${SITE_URL}${p.PRODUCT_IMAGE_PATH_S}`, HREF: `${SITE_URL}/${p.M_SLUG}/${p.PAGE_COLLECTION_1_LISTING_SLUG}/${p.PRODUCT_ASCII_SLUG}` }));
         return searchEntries;
     };
 

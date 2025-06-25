@@ -55,16 +55,16 @@ export async function generateSitemaps(logger) {
       
       const publishedArticles = articleData.filter(p => p.PAGE_LOCALE === localeCode && p.PUBLISH_Y_N === "1");
       if (publishedArticles.length > 0) {
-        publishedArticles.forEach(p => urlEntries.push({ loc: `${SITE_URL}/${p.M_SLUG}/${p.ARTICLE_LIST_SLUG}/${p.ARTICLE_SLUG}`, lastmod: formatLastMod(p.ARTICLE_UPDATE_DATE, p.ARTICLE_HOUR_UPDATED), changefreq: 'monthly', priority: 0.8 }));
+        publishedArticles.forEach(p => urlEntries.push({ loc: `${SITE_URL}/${p.M_SLUG}/${p.PAGE_COLLECTION_2_LISTING_SLUG}/${p.ARTICLE_SLUG}`, lastmod: formatLastMod(p.ARTICLE_UPDATE_DATE, p.ARTICLE_HOUR_UPDATED), changefreq: 'monthly', priority: 0.8 }));
         const mostRecentArticle = publishedArticles.sort((a, b) => new Date(formatLastMod(b.ARTICLE_UPDATE_DATE, b.ARTICLE_HOUR_UPDATED)).getTime() - new Date(formatLastMod(a.ARTICLE_UPDATE_DATE, a.ARTICLE_HOUR_UPDATED)).getTime())[0];
-        urlEntries.push({ loc: `${SITE_URL}/${publishedArticles[0].M_SLUG}/${publishedArticles[0].ARTICLE_LIST_SLUG}`, lastmod: formatLastMod(mostRecentArticle.ARTICLE_UPDATE_DATE, mostRecentArticle.ARTICLE_HOUR_UPDATED), changefreq: 'weekly', priority: 0.9 });
+        urlEntries.push({ loc: `${SITE_URL}/${publishedArticles[0].M_SLUG}/${publishedArticles[0].PAGE_COLLECTION_2_LISTING_SLUG}`, lastmod: formatLastMod(mostRecentArticle.ARTICLE_UPDATE_DATE, mostRecentArticle.ARTICLE_HOUR_UPDATED), changefreq: 'weekly', priority: 0.9 });
       }
 
       const publishedProducts = productData.filter(p => p.PAGE_LOCALE === localeCode && p.PUBLISH_Y_N === "1");
       if (publishedProducts.length > 0) {
-        publishedProducts.forEach(p => urlEntries.push({ loc: `${SITE_URL}/${p.M_SLUG}/${p.PRODUCT_CATEGORY_1_SLUG}/${p.PRODUCT_ASCII_SLUG}`, lastmod: formatLastMod(p.PRODUCT_DATE_UPDATED, p.PRODUCT_HOUR_UPDATED), changefreq: 'monthly', priority: 0.9 }));
+        publishedProducts.forEach(p => urlEntries.push({ loc: `${SITE_URL}/${p.M_SLUG}/${p.PAGE_COLLECTION_1_LISTING_SLUG}/${p.PRODUCT_ASCII_SLUG}`, lastmod: formatLastMod(p.PRODUCT_DATE_UPDATED, p.PRODUCT_HOUR_UPDATED), changefreq: 'monthly', priority: 0.9 }));
         const mostRecentProduct = publishedProducts.sort((a, b) => new Date(formatLastMod(b.PRODUCT_DATE_UPDATED, b.PRODUCT_HOUR_UPDATED)).getTime() - new Date(formatLastMod(a.PRODUCT_DATE_UPDATED, a.PRODUCT_HOUR_UPDATED)).getTime())[0];
-        urlEntries.push({ loc: `${SITE_URL}/${publishedProducts[0].M_SLUG}/${publishedProducts[0].PRODUCT_CATEGORY_1_SLUG}`, lastmod: formatLastMod(mostRecentProduct.PRODUCT_DATE_UPDATED, mostRecentProduct.PRODUCT_HOUR_UPDATED), changefreq: 'monthly', priority: 0.9 });
+        urlEntries.push({ loc: `${SITE_URL}/${publishedProducts[0].M_SLUG}/${publishedProducts[0].PAGE_COLLECTION_1_LISTING_SLUG}`, lastmod: formatLastMod(mostRecentProduct.PRODUCT_DATE_UPDATED, mostRecentProduct.PRODUCT_HOUR_UPDATED), changefreq: 'monthly', priority: 0.9 });
       }
 
       const urlset = urlEntries.map(entry => `<url><loc>${entry.loc}</loc><lastmod>${entry.lastmod}</lastmod><changefreq>${entry.changefreq}</changefreq><priority>${entry.priority.toFixed(1)}</priority></url>`).join('');

@@ -7,6 +7,7 @@ import manageLocales from './integrations/locale-manager.js';
 import sitemapGenerator from './integrations/sitemap-generator.js';
 import searchIndexGenerator from './integrations/search-index-generator.js';
 import llmsTxtGenerator from './integrations/llms-txt-generator.js';
+import productImageProcessor from './integrations/product-image-processor.js';
 
 const compressIntegration = (await import("@playform/compress")).default;
 
@@ -21,6 +22,7 @@ export default defineConfig({
   },
   integrations: [
     jsonProcessor(),
+    productImageProcessor(),
     manageLocales(), 
     sitemapGenerator(),
     searchIndexGenerator(),

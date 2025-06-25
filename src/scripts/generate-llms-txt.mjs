@@ -107,16 +107,16 @@ export async function generateLlmsTxt(logger) {
 
     // --- Dynamic Category & Author Pages ---
     const firstCommonEntryKeys = Object.keys(commonData[0]);
-    const dynamicCategoryKeys = firstCommonEntryKeys.filter(key => key.startsWith('PAGE_CATEGORY_') && key.endsWith('_LISTING_SLUG'));
-    // Restore AUTHOR_LIST_SLUG to the processing array
-    const slugKeysToProcess = [...dynamicCategoryKeys, 'AUTHOR_LIST_SLUG'];
+    const dynamicCategoryKeys = firstCommonEntryKeys.filter(key => key.startsWith('PAGE_COLLECTION_') && key.endsWith('_LISTING_SLUG'));
+    // Restore PAGE_COLLECTION_2_LISTING_SLUG to the processing array
+    const slugKeysToProcess = [...dynamicCategoryKeys, 'PAGE_COLLECTION_2_LISTING_SLUG'];
 
     for (const key of slugKeysToProcess) {
       const titleKey = key.replace('_SLUG', '_TITLE');
       let title = key.replace(/_/g, ' ').replace('PAGE ', '').replace('SLUG', '').trim();
       
-      // Special handling for AUTHOR_LIST_SLUG
-      if (key === 'AUTHOR_LIST_SLUG') {
+      // Special handling for PAGE_COLLECTION_2_LISTING_SLUG
+      if (key === 'PAGE_COLLECTION_2_LISTING_SLUG') {
         title = 'AUTHOR LIST';
         content.push(`## Find out reputable in-real life people that create content on eusignal.com:`);
       } else {
@@ -128,9 +128,9 @@ export async function generateLlmsTxt(logger) {
         const common = commonData.find(c => c.M_SLUG === locale.M_SLUG);
         if (common && common[key]) {
           let linkText;
-          if (key === 'AUTHOR_LIST_SLUG') {
-            // Use ARTICLE_AUTHORS_TITLE for author list or create a fallback
-            const authorTitle = common.ARTICLE_AUTHORS_TITLE;
+          if (key === 'PAGE_COLLECTION_2_LISTING_SLUG') {
+            // Use PAGE_COLLECTION_2_LISTING_TITLE for author list or create a fallback
+            const authorTitle = common.PAGE_COLLECTION_2_LISTING_TITLE;
             linkText = `${locale.M_COUNTRY} - ${authorTitle}`;
           } else if (common[titleKey]) {
             linkText = `${locale.M_COUNTRY} - ${common[titleKey]}`;

@@ -111,7 +111,7 @@ export async function syncLocaleDirectories(logger = console) {
     // Dynamic Slug Key Detection
     const firstCommonEntryKeys = Object.keys(commonData[0]);
     const dynamicCategorySlugs = firstCommonEntryKeys.filter(key =>
-        key.startsWith('PAGE_CATEGORY_') && key.endsWith('_LISTING_SLUG')
+        key.startsWith('PAGE_COLLECTION_') && key.endsWith('_LISTING_SLUG')
     );
     const slugKeysToProcess = [FIXED_SLUG_KEY, ...dynamicCategorySlugs];
 

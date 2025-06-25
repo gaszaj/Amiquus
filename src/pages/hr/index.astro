@@ -169,9 +169,9 @@ const bestsellers = products
 const marqueeItems = bestsellers
   .slice(0, 5)
   .map(product => ({
-    url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_CATEGORY_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`),
+    url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_COLLECTION_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`),
     image: getBaseUrl(product.PRODUCT_IMAGE_PATH_L),
-    alt: `${product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME} | ${www.PAGE_ORGANISATION_FULL_NAME}`
+    alt: `${product.PAGE_COLLECTION_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME} | ${www.PAGE_ORGANISATION_FULL_NAME}`
   }));
 
 // Get top 9 products for bestsellers section
@@ -181,10 +181,10 @@ const bestsellersSection = {
   products: bestsellers
     .slice(0, 9)
     .map(product => ({
-      title: `${product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME}`,
+      title: `${product.PAGE_COLLECTION_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME}`,
       image: getBaseUrl(product.PRODUCT_IMAGE_PATH_L),
-      alt: `${product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME} | ${www.PAGE_ORGANISATION_FULL_NAME}`,
-      url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_CATEGORY_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
+      alt: `${product.PAGE_COLLECTION_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME} | ${www.PAGE_ORGANISATION_FULL_NAME}`,
+      url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_COLLECTION_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
     }))
 };
 

@@ -67,7 +67,7 @@ const productCoreData = {
     windResistance: common.PRODUCT_SPECIFICATIONS_VALUE_5,
     setupTime: common.PRODUCT_SPECIFICATIONS_VALUE_6
   },
-  category: product.PAGE_CATEGORY_1_LISTING_SLUG,
+  category: product.PAGE_COLLECTION_1_LISTING_SLUG,
   productId: product.PRODUCT_ID
 };
 
@@ -99,10 +99,10 @@ const filteredRelatedProducts: RelatedProductInfo[] = [
   if (!p) return null;
   return {
     id: p.PRODUCT_ID,
-    title: `${p.PAGE_CATEGORY_1_LISTING_SLUG_HELPER} — ${p.PRODUCT_NAME}`,
+    title: `${p.PAGE_COLLECTION_1_LISTING_SLUG_HELPER} — ${p.PRODUCT_NAME}`,
     image: getBaseUrl(p.PRODUCT_IMAGE_PATH_L),
-    category: p.PAGE_CATEGORY_1_LISTING_SLUG,
-    url: getBaseUrl(`/${p.M_SLUG}/${p.PAGE_CATEGORY_1_LISTING_SLUG}/${p.PRODUCT_ASCII_SLUG}`)
+    category: p.PAGE_COLLECTION_1_LISTING_SLUG,
+    url: getBaseUrl(`/${p.M_SLUG}/${p.PAGE_COLLECTION_1_LISTING_SLUG}/${p.PRODUCT_ASCII_SLUG}`)
   };
 }).filter(Boolean).filter(p => p!.id !== product.PRODUCT_ID).slice(0, 3) as RelatedProductInfo[];
 
@@ -114,7 +114,7 @@ const relatedArticles: RelatedArticleInfo[] = [
     if (!a) return null;
     return {
       title: a.ARTICLE_H1,
-      url: `/${a.M_SLUG}/${a.PAGE_CATEGORY_2_LISTING_SLUG}/${a.ARTICLE_SLUG}`,
+      url: `/${a.M_SLUG}/${a.PAGE_COLLECTION_2_LISTING_SLUG}/${a.ARTICLE_SLUG}`,
       date: a.ARTICLE_PUBLISH_DATE
     };
   }).filter(Boolean) as RelatedArticleInfo[];
@@ -141,7 +141,7 @@ const combinedSchema = [{
   "name": product.PRODUCT_H1,
   "image": getBaseUrl(product.PRODUCT_IMAGE_PATH_L),
   "mpn": product.PRODUCT_MPN,
-  "category": product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER,
+  "category": product.PAGE_COLLECTION_1_LISTING_SLUG_HELPER,
   "weight": {
     "@type": "QuantitativeValue",
     "value": common.PRODUCT_SPECIFICATIONS_VALUE_3.replace(/[^0-9.]/g, ''),
@@ -307,8 +307,8 @@ const getFieldError = (fieldName: string): string | undefined => formErrors[fiel
 // Language switcher data
 const languageLinksMap: Record<string, string> = {};
 for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
-  const productForLocale = productData.find(p => p.M_SLUG === localeObj.M_SLUG && p.PUBLISH_Y_N === "1" && p.PAGE_CATEGORY_1_LISTING_SLUG);
-  languageLinksMap[localeObj.M_SLUG] = productForLocale ? `/${localeObj.M_SLUG}/${productForLocale.PAGE_CATEGORY_1_LISTING_SLUG}` : `/${localeObj.M_SLUG}`;
+  const productForLocale = productData.find(p => p.M_SLUG === localeObj.M_SLUG && p.PUBLISH_Y_N === "1" && p.PAGE_COLLECTION_1_LISTING_SLUG);
+  languageLinksMap[localeObj.M_SLUG] = productForLocale ? `/${localeObj.M_SLUG}/${productForLocale.PAGE_COLLECTION_1_LISTING_SLUG}` : `/${localeObj.M_SLUG}`;
 }
 
 ---

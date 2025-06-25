@@ -43,11 +43,11 @@ const contentOrientation = commonData.find(item =>
     item.M_COUNTRY_CODE === countryCode
 )?.M_CONTENT_ORIENTATION || 'ltr';
 
-const pageTitle = common.PAGE_CATEGORY_1_LISTING_TITLE;
-const pageDescription = common.PAGE_CATEGORY_1_LISTING_DESCRIPTION;
-const pageOgImage = common.PAGE_CATEGORY_1_LISTING_OG_IMAGE_PATH;
+const pageTitle = common.PAGE_COLLECTION_1_LISTING_TITLE;
+const pageDescription = common.PAGE_COLLECTION_1_LISTING_DESCRIPTION;
+const pageOgImage = common.PAGE_COLLECTION_1_LISTING_OG_IMAGE_PATH;
 const pageKeywords = [
-    common.PAGE_CATEGORY_1_LISTING_TITLE,
+    common.PAGE_COLLECTION_1_LISTING_TITLE,
     common.M_COUNTRY_NATIVE,
     www.PAGE_ORGANISATION_FULL_NAME
 ].join(', ');
@@ -79,8 +79,8 @@ const collectionPageSchema = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     "@id": Astro.url.href,
-    "name": common.PAGE_CATEGORY_1_LISTING_TITLE,
-    "description": common.PAGE_CATEGORY_1_LISTING_DESCRIPTION,
+    "name": common.PAGE_COLLECTION_1_LISTING_TITLE,
+    "description": common.PAGE_COLLECTION_1_LISTING_DESCRIPTION,
     "url": Astro.url.href,
     "mainEntity": {
         "@type": "ItemList",
@@ -115,10 +115,10 @@ const schema = [collectionPageSchema, organizationSchema];
 const languageLinksMap: Record<string, string> = {};
 for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
   const productForLocale = productData.find(p =>
-    p.M_SLUG === localeObj.M_SLUG && p.PUBLISH_Y_N === "1" && p.PAGE_CATEGORY_1_LISTING_SLUG?.trim()
+    p.M_SLUG === localeObj.M_SLUG && p.PUBLISH_Y_N === "1" && p.PAGE_COLLECTION_1_LISTING_SLUG?.trim()
   );
   if (productForLocale) {
-    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}/${productForLocale.PAGE_CATEGORY_1_LISTING_SLUG}`;
+    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}/${productForLocale.PAGE_COLLECTION_1_LISTING_SLUG}`;
   } else {
     languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}`;
   }
@@ -141,7 +141,7 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
         <div class="container mx-auto px-4">
             <div class="max-w-4xl mx-auto">
                 <h1 class="text-4xl md:text-5xl font-bold mb-6 animate-fade-in">
-                    {filteredProducts[0]?.PAGE_CATEGORY_1_LISTING_SLUG_HELPER || 'Products'}
+                    {filteredProducts[0]?.PAGE_COLLECTION_1_LISTING_SLUG_HELPER || 'Products'}
                 </h1>
             </div>
         </div>
@@ -190,7 +190,7 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
                 <!-- Initial products are server-rendered -->
                 {initialProducts.map((product) => {
                     const productUrl = `/${parentSlug}/${currentFolder}/${product.PRODUCT_ASCII_SLUG}`;
-                    const fullProductName = `${product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER} ${product.PRODUCT_NAME}`;
+                    const fullProductName = `${product.PAGE_COLLECTION_1_LISTING_SLUG_HELPER} ${product.PRODUCT_NAME}`;
                     return (
                         <div class="bg-white border border-gray-200 rounded-lg overflow-hidden group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                             <a href={productUrl} class="block">
@@ -275,7 +275,7 @@ for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) 
     
     const createProductCardHTML = (product) => {
         const productUrl = `/${parentSlug}/${currentFolder}/${product.PRODUCT_ASCII_SLUG}`;
-        const fullProductName = `${product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER} ${product.PRODUCT_NAME}`;
+        const fullProductName = `${product.PAGE_COLLECTION_1_LISTING_SLUG_HELPER} ${product.PRODUCT_NAME}`;
         return `
             <div class="bg-white border border-gray-200 rounded-lg overflow-hidden group transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-fade-in">
                 <a href="${productUrl}" class="block">
