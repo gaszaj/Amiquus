@@ -223,7 +223,7 @@ const allDomainArticles: RelatedArticleInfo[] = relatedArticleIds
     
     return {
       title: relatedArticle.ARTICLE_H1,
-      url: `/${relatedArticle.M_SLUG}/${relatedArticle.PAGE_CATEGORY_2_LISTING_SLUG}/${relatedArticle.ARTICLE_SLUG}`,
+      url: `/${relatedArticle.M_SLUG}/${relatedArticle.PAGE_COLLECTION_2_LISTING_SLUG}/${relatedArticle.ARTICLE_SLUG}`,
       date: relatedArticle.ARTICLE_PUBLISH_DATE
     };
   })
@@ -253,9 +253,9 @@ const basicSigns: BasicSign[] = [
   const product = findProductById(id);
   if (!product) return null;
   return {
-    name: `${product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME}`,
+    name: `${product.PAGE_COLLECTION_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME}`,
     image: getBaseUrl(product.PRODUCT_IMAGE_PATH_S),
-    url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_CATEGORY_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
+    url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_COLLECTION_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
   };
 }).filter(Boolean) as BasicSign[];
 
@@ -270,9 +270,9 @@ const additionalSigns: AdditionalSign[] = [
   const product = findProductById(id);
   if (!product) return null;
   return {
-    name: `${product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME}`,
+    name: `${product.PAGE_COLLECTION_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME}`,
     image: getBaseUrl(product.PRODUCT_IMAGE_PATH_S),
-    url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_CATEGORY_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
+    url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_COLLECTION_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
   };
 }).filter(Boolean) as AdditionalSign[];
 
@@ -318,8 +318,8 @@ const articleSchema = {
       {
         "@type": "ListItem",
         "position": 2,
-        "name": common.PAGE_CATEGORY_2_LISTING_TITLE,
-        "item": getAbsoluteUrl(`/${common.PAGE_CATEGORY_2_LISTING_SLUG}`)
+        "name": common.PAGE_COLLECTION_2_LISTING_TITLE,
+        "item": getAbsoluteUrl(`/${common.PAGE_COLLECTION_2_LISTING_SLUG}`)
       },
       {
         "@type": "ListItem",
@@ -502,7 +502,7 @@ for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
     a.PUBLISH_Y_N === "1"
   );
   if (altArticle) {
-    languageLinksMap[locale.M_SLUG] = `/${altArticle.M_SLUG}/${altArticle.PAGE_CATEGORY_2_LISTING_SLUG}/${altArticle.ARTICLE_SLUG}`;
+    languageLinksMap[locale.M_SLUG] = `/${altArticle.M_SLUG}/${altArticle.PAGE_COLLECTION_2_LISTING_SLUG}/${altArticle.ARTICLE_SLUG}`;
   } else {
     languageLinksMap[locale.M_SLUG] = `/${locale.M_SLUG}`;
   }
@@ -519,7 +519,7 @@ const getAlternativeLanguageLinks = (currentArticle, localeData, articleDataJson
       a.PUBLISH_Y_N === "1"
     );
     if (altArticle) {
-      languageLinksMap[locale.M_SLUG] = `/${altArticle.M_SLUG}/${altArticle.PAGE_CATEGORY_2_LISTING_SLUG}/${altArticle.ARTICLE_SLUG}`;
+      languageLinksMap[locale.M_SLUG] = `/${altArticle.M_SLUG}/${altArticle.PAGE_COLLECTION_2_LISTING_SLUG}/${altArticle.ARTICLE_SLUG}`;
     } else {
       languageLinksMap[locale.M_SLUG] = `/${locale.M_SLUG}`;
     }

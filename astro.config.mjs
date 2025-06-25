@@ -8,6 +8,7 @@ import sitemapGenerator from './integrations/sitemap-generator.js';
 import searchIndexGenerator from './integrations/search-index-generator.js';
 import llmsTxtGenerator from './integrations/llms-txt-generator.js';
 import productImageProcessor from './integrations/product-image-processor.js';
+import jsonToDb from './integrations/json-to-db.js';
 
 const compressIntegration = (await import("@playform/compress")).default;
 
@@ -22,6 +23,7 @@ export default defineConfig({
   },
   integrations: [
     jsonProcessor(),
+    jsonToDb(),
     productImageProcessor(),
     manageLocales(), 
     sitemapGenerator(),
