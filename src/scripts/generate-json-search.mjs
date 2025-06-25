@@ -1,31 +1,56 @@
 // src/scripts/generate-json-search.mjs
 
-import { readFileSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import path from 'path';
+import Database from 'better-sqlite3';
 
 // --- Configuration ---
 const SITE_URL = 'https://eusignal.netlify.app';
-const PUBLIC_DIR = path.join(process.cwd(), 'public');
-
-// --- Helper function to read JSON files ---
-const readJsonFile = (filePath) => {
-  const absolutePath = path.join(process.cwd(), filePath);
-  const fileContent = readFileSync(absolutePath, 'utf-8');
-  return JSON.parse(fileContent);
-};
+const CWD = process.cwd();
+const PUBLIC_DIR = path.join(CWD, 'public');
+const DB_PATH = path.join(CWD, 'src/data/data.db');
 
 // --- Main Exported Function ---
 // This is the core logic, which is imported by the integration.
 export async function generateSearchIndexes(logger) {
   logger.info('🚀 Generating JSON search indexes...');
+  let db;
+  
   try {
-    // Read data at the time of execution
-    const localesData = readJsonFile('src/data/locale.json');
-    const eeatData = readJsonFile('src/data/eeat.json');
-    const authorData = readJsonFile('src/data/author.json');
-    const articleData = readJsonFile('src/data/article.json');
-    const productData = readJsonFile('src/data/product.json');
+    // --- Database Connection and Data Fetching ---
+    db = new Database(DB_PATH, { readonly: true });
+
+    // Fetch all necessary data from the database in a single transaction for performance
+    const { 
+        publishedLocales, 
+        eeatData, 
+        authorData, 
+        articleData, 
+        productData 
+    } = db.transaction(() => {
+        // Get published locales
+        const locales = db.prepare("SELECT * FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all();
+        
+        // Get published EEAT pages
+        const eeat = db.prepare("SELECT * FROM eeat WHERE PUBLISH_Y_N = '1'").all();
+        
+        // Get published authors
+        const author = db.prepare("SELECT * FROM author WHERE PUBLISH_Y_N = '1'").all();
+        
+        // Get published articles
+        const article = db.prepare("SELECT * FROM article WHERE PUBLISH_Y_N = '1'").all();
+        
+        // Get published products
+        const product = db.prepare("SELECT * FROM product WHERE PUBLISH_Y_N = '1'").all();
+
+        return { 
+            publishedLocales: locales, 
+            eeatData: eeat, 
+            authorData: author, 
+            articleData: article, 
+            productData: product 
+        };
+    })();
 
     const generateLocaleSearchIndex = (localeCode) => {
         const searchEntries = [];
@@ -36,7 +61,6 @@ export async function generateSearchIndexes(logger) {
         return searchEntries;
     };
 
-    const publishedLocales = localesData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1");
     for (const locale of publishedLocales) {
       const localeCode = locale.M_HREFLANG_CODE;
       const searchIndex = generateLocaleSearchIndex(localeCode);
@@ -49,5 +73,10 @@ export async function generateSearchIndexes(logger) {
   } catch (error) {
     logger.error('❌ Error generating JSON search indexes:', error);
     process.exit(1);
+  } finally {
+    // Ensure the database connection is always closed
+    if (db) {
+      db.close();
+    }
   }
 }

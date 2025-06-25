@@ -1,7 +1,7 @@
 // Path: /src/scripts/OG_article.mjs
 // Purpose: Generate Open Graph images for article pages
-// Data: JSON dependencies (article.json, www.json)
-// Dependencies: Playwright, Sharp, p-limit, country-flag-icons
+// Data: Database dependencies (article, www tables)
+// Dependencies: Playwright, Sharp, p-limit, country-flag-icons, better-sqlite3
 
 import { readFileSync } from 'fs';
 import { mkdir, rm } from 'fs/promises';
@@ -9,11 +9,13 @@ import path from 'path';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 import pLimit from 'p-limit';
+import Database from 'better-sqlite3';
 
 // --- CONFIGURATION ---
 const CWD = process.cwd();
 const OUTPUT_DIR = path.join(CWD, 'public', 'ogimages', 'ogarticle');
-const CONCURRENCY = 100;
+const CONCURRENCY = 30;
+const DB_PATH = path.join(CWD, 'src/data/data.db');
 
 // --- ASSETS ---
 import { 
@@ -48,7 +50,6 @@ const FONT_MAP = {
 };
 
 // --- HELPERS ---
-const readJsonFile = (filePath) => JSON.parse(readFileSync(path.join(CWD, filePath), 'utf-8'));
 const readImageAsBase64 = (filePath) => readFileSync(path.join(CWD, filePath), 'base64');
 
 // --- HTML TEMPLATE ---
@@ -107,19 +108,34 @@ async function generateImageForArticle(article, { brandingData, logoBase64 }, co
 async function main() {
     console.log('🚀 Starting Article OG image generation...');
     let browser;
+    let db;
     try {
         await rm(OUTPUT_DIR, { recursive: true, force: true });
         await mkdir(OUTPUT_DIR, { recursive: true });
         console.log(`✅ Cleaned output directory: ${OUTPUT_DIR}`);
-        const articles = readJsonFile('src/data/article.json').filter(p => p.PUBLISH_Y_N === "1");
+
+        // --- Database Connection and Data Fetching ---
+        db = new Database(DB_PATH, { readonly: true });
+
+        // Fetch all necessary data from the database in a single transaction for performance
+        const { articles, brandingData } = db.transaction(() => {
+            // Get published articles
+            const article = db.prepare("SELECT * FROM article WHERE PUBLISH_Y_N = '1'").all();
+            
+            // Get branding data (first record)
+            const www = db.prepare("SELECT * FROM www LIMIT 1").get();
+
+            return { articles: article, brandingData: www };
+        })();
+
         if (!articles.length) {
             console.log("🟡 No published articles found to process. Exiting.");
             return;
         }
-        const brandingData = readJsonFile('src/data/www.json')[0];
+
         const logoPath = brandingData.PAGE_LOGO_IMAGE_PATH_5;
         if (!logoPath) {
-            throw new Error('Branding data or logo path not found in www.json.');
+            throw new Error('Branding data or logo path not found in database.');
         }
         const commonAssets = { brandingData, logoBase64: readImageAsBase64(logoPath) };
         browser = await chromium.launch();
@@ -165,6 +181,10 @@ async function main() {
         process.exit(1);
     } finally {
         if (browser) await browser.close();
+        // Ensure the database connection is always closed
+        if (db) {
+            db.close();
+        }
     }
 }
 

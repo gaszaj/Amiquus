@@ -4,12 +4,14 @@ import path from 'path';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 import pLimit from 'p-limit';
+import Database from 'better-sqlite3';
 
 // --- CONFIGURATION ---
 const CWD = process.cwd();
 const PUBLIC_DIR = path.join(CWD, 'public');
 const OUTPUT_DIR = path.join(PUBLIC_DIR, 'ogimages', 'ogauthor');
 const CONCURRENCY = 10;
+const DB_PATH = path.join(CWD, 'src/data/data.db');
 
 // --- FONT CONFIGURATION ---
 // Maps language ISO codes to their specific Google Font URL and font-family stack.
@@ -45,7 +47,6 @@ import {
 const flagMap = { AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, ES, FI, FJ, FR, GA, GB, GE, GH, GI, GM, GN, GP, GR, GT, GU, GY, HK, HN, HR, HT, HU, ID, IE, IL, IN, IS, IT, JM, JO, JP, KE, KR, KW, KY, LB, LI, LS, LT, LU, LV, LY, MA, MC, MD, ME, MK, MM, MN, MR, MU, MW, MX, MY, MZ, NG, NI, NL, NO, NP, NZ, OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL, SM, SN, SR, SV, SZ, TD, TH, TN, TR, TT, UA, UG, US, UY, VE, VN, YT, ZA };
 
 // --- HELPER FUNCTIONS ---
-const readJsonFile = (filePath) => JSON.parse(readFileSync(path.join(CWD, filePath), 'utf-8'));
 const readImageAsBase64 = (filePath) => readFileSync(path.join(CWD, filePath), 'base64');
 
 // --- HTML TEMPLATE GENERATOR ---
@@ -136,12 +137,25 @@ async function generateImageForAuthor(author, commonAssets, context) {
 async function main() {
     console.log('🚀 Starting Author page OG image generation...');
     let browser;
+    let db;
     try {
         console.log(`🧹 Clearing destination directory: ${OUTPUT_DIR}`);
         await rm(OUTPUT_DIR, { recursive: true, force: true });
         await mkdir(OUTPUT_DIR, { recursive: true });
 
-        const allPublishedAuthors = readJsonFile('src/data/author.json').filter(p => p.PUBLISH_Y_N === "1");
+        // --- Database Connection and Data Fetching ---
+        db = new Database(DB_PATH, { readonly: true });
+
+        // Fetch all necessary data from the database in a single transaction for performance
+        const { allPublishedAuthors, brandingData } = db.transaction(() => {
+            // Get published authors
+            const author = db.prepare("SELECT * FROM author WHERE PUBLISH_Y_N = '1'").all();
+            
+            // Get branding data (first record)
+            const www = db.prepare("SELECT * FROM www LIMIT 1").get();
+
+            return { allPublishedAuthors: author, brandingData: www };
+        })();
         
         // --- NEW: Pre-process authors to check for images ---
         const authorsToProcess = [];
@@ -172,10 +186,8 @@ async function main() {
             return;
         }
 
-        const wwwData = readJsonFile('src/data/www.json');
-        const brandingData = wwwData[0];
         const logoPath = brandingData.PAGE_LOGO_IMAGE_PATH_5;
-        if (!brandingData || !logoPath) throw new Error('Could not find required branding or logo data.');
+        if (!brandingData || !logoPath) throw new Error('Could not find required branding or logo data in database.');
 
         const commonAssets = {
             brandingData,
@@ -212,6 +224,10 @@ async function main() {
         process.exit(1);
     } finally {
         if (browser) await browser.close();
+        // Ensure the database connection is always closed
+        if (db) {
+            db.close();
+        }
     }
 }
 

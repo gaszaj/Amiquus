@@ -7,6 +7,7 @@ import path from 'path';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 import pLimit from 'p-limit';
+import Database from 'better-sqlite3';
 import { AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, ES, FI, FJ, FR, GA, GB, GE, GH, GI, GM, GN, GP, GR, GT, GU, GY, HK, HN, HR, HT, HU, ID, IE, IL, IN, IS, IT, JM, JO, JP, KE, KR, KW, KY, LB, LI, LS, LT, LU, LV, LY, MA, MC, MD, ME, MK, MM, MN, MR, MU, MW, MX, MY, MZ, NG, NI, NL, NO, NP, NZ, OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL, SM, SN, SR, SV, SZ, TD, TH, TN, TR, TT, UA, UG, US, UY, VE, VN, YT, ZA } from 'country-flag-icons/string/3x2';
 
 // --- CONFIGURATION ---
@@ -14,6 +15,7 @@ const CWD = process.cwd();
 const PUBLIC_DIR = path.join(CWD, 'public');
 const OUTPUT_DIR = path.join(PUBLIC_DIR, 'ogimages', 'ogproducts');
 const CONCURRENCY = 10;
+const DB_PATH = path.join(CWD, 'src', 'data', 'data.db');
 
 // --- FONT CONFIGURATION ---
 // Maps language ISO codes to their specific Google Font URL and font-family stack.
@@ -39,7 +41,6 @@ const FONT_MAP = {
 const flagMap = { AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, ES, FI, FJ, FR, GA, GB, GE, GH, GI, GM, GN, GP, GR, GT, GU, GY, HK, HN, HR, HT, HU, ID, IE, IL, IN, IS, IT, JM, JO, JP, KE, KR, KW, KY, LB, LI, LS, LT, LU, LV, LY, MA, MC, MD, ME, MK, MM, MN, MR, MU, MW, MX, MY, MZ, NG, NI, NL, NO, NP, NZ, OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL, SM, SN, SR, SV, SZ, TD, TH, TN, TR, TT, UA, UG, US, UY, VE, VN, YT, ZA };
 
 // --- HELPERS ---
-const readJsonFile = (fp) => JSON.parse(readFileSync(path.join(CWD, fp), 'utf-8'));
 const readImageAsBase64 = (fp) => readFileSync(path.join(CWD, fp), 'base64');
 
 // --- HTML TEMPLATE ---
@@ -57,7 +58,7 @@ const generateProductHtmlTemplate = (data) => `
     .left-section { width: 65%; padding: 2rem 1.3rem; display: flex; flex-direction: column; height: 100%; container-type: inline-size; z-index: 1; }
     .logo { width: 300px; height: auto; flex-shrink: 0; margin-bottom: 0.5rem; }
     .product-title { margin-bottom: 1.25rem; flex-shrink: 0; }
-    .category { font-size: clamp(2.5rem, 4cqi, 3rem); font-weight: 600; color: ${data.branding.PAGE_COLOR_PRIMARY}; margin-bottom: 0.5rem; opacity: 0.8; }
+    .collection { font-size: clamp(2.5rem, 4cqi, 3rem); font-weight: 600; color: ${data.branding.PAGE_COLOR_PRIMARY}; margin-bottom: 0.5rem; opacity: 0.8; }
     .product-name { font-size: clamp(3rem, 4.5cqi, 4rem); font-weight: 700; line-height: 1.2; color: ${data.branding.PAGE_COLOR_PRIMARY}; margin-bottom: 1.5rem; max-width: 90%; }
     .product-info { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; flex-shrink: 0; }
     .price { font-size: clamp(1.8rem, 4.5cqi, 2.5rem); font-weight: 700; color: ${data.branding.PAGE_COLOR_SUCCESS}; background-color: rgba(34, 197, 94, 0.1); padding: 0.5rem 1rem; border-radius: 8px; }
@@ -97,7 +98,7 @@ const generateProductHtmlTemplate = (data) => `
     <div class="left-section">
         <img src="data:image/png;base64,${data.logoBase64}" alt="Logo" class="logo">
         <div class="product-title">
-            <div class="category">${data.category}</div>
+            <div class="collection">${data.collection}</div>
             <div class="product-name">${data.productName}</div>
         </div>
         <div class="product-info">
@@ -111,7 +112,7 @@ const generateProductHtmlTemplate = (data) => `
         </ul>
     </div>
     <div class="right-section">
-        ${data.hasProductImage ? `<img src="data:image/webp;base64,${data.productImageBase64}" alt="Product Image" class="product-image">` : `<div class="product-placeholder"><div class="placeholder-text">${data.category}<br>${data.productName}</div></div>`}
+        ${data.hasProductImage ? `<img src="data:image/webp;base64,${data.productImageBase64}" alt="Product Image" class="product-image">` : `<div class="product-placeholder"><div class="placeholder-text">${data.collection}<br>${data.productName}</div></div>`}
     </div>
     <footer class="footer">
         <div class="footer-item"><svg class="footer-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg><span class="footer-text">${data.branding.PAGE_ORGANISATION_URL_NAME}</span></div>
@@ -142,7 +143,7 @@ async function generateImageForProduct(product, commonAssets, context) {
         orientation: orientation,
         fontUrl: fontDetails.url,
         fontFamily: fontDetails.family,
-        category: product.PAGE_CATEGORY_1_LISTING_SLUG_HELPER,
+        collection: product.PAGE_COLLECTION_1_LISTING_SLUG_HELPER,
         productName: product.PRODUCT_NAME,
         price: product.M_PRODUCT_PRICE,
         rating: product.PRODUCT_RATING_VALUE,
@@ -173,12 +174,26 @@ async function generateImageForProduct(product, commonAssets, context) {
 async function main() {
     console.log('🚀 Starting Product page OG image generation...');
     let browser;
+    let db;
     try {
         console.log(`🧹 Clearing destination directory: ${OUTPUT_DIR}`);
         await rm(OUTPUT_DIR, { recursive: true, force: true });
         await mkdir(OUTPUT_DIR, { recursive: true });
 
-        const allPublishedProducts = readJsonFile('src/data/product.json').filter(p => p.PUBLISH_Y_N === "1");
+        // Connect to database and load data in a transaction for performance
+        console.log('📊 Loading data from database...');
+        db = new Database(DB_PATH);
+        
+        const { allPublishedProducts, brandingData } = db.transaction(() => {
+            // Get all published products
+            const products = db.prepare('SELECT * FROM product WHERE PUBLISH_Y_N = ?').all('1');
+            
+            // Get branding data from www table
+            const www = db.prepare('SELECT * FROM www LIMIT 1').get();
+            
+            return { allPublishedProducts: products, brandingData: www };
+        })();
+
         if (allPublishedProducts.length === 0) {
             console.log("\nNo published products found. Exiting.");
             return;
@@ -197,9 +212,8 @@ async function main() {
             missingImagePaths.forEach(p => console.warn(`  - public\\${p.replace(/\//g, '\\')}`));
         }
 
-        const brandingData = readJsonFile('src/data/www.json')[0];
         const logoPath = brandingData?.PAGE_LOGO_IMAGE_PATH_5;
-        if (!logoPath) throw new Error('PAGE_LOGO_IMAGE_PATH_5 not found in www.json.');
+        if (!logoPath) throw new Error('PAGE_LOGO_IMAGE_PATH_5 not found in database.');
         
         const commonAssets = { brandingData, logoBase64: readImageAsBase64(logoPath) };
 
@@ -226,6 +240,7 @@ async function main() {
         process.exit(1);
     } finally {
         if (browser) await browser.close();
+        if (db) db.close();
     }
 }
 

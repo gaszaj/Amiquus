@@ -1,7 +1,7 @@
 // Path: /src/scripts/OG_category.mjs
 // Purpose: Generate Open Graph images for category listing pages
-// Data: JSON dependencies (common.json, locale.json, www.json)
-// Dependencies: Playwright, Sharp, p-limit, country-flag-icons
+// Data: Database dependencies (common, locale, www tables)
+// Dependencies: Playwright, Sharp, p-limit, country-flag-icons, better-sqlite3
 
 import { readFileSync } from 'fs';
 import { mkdir, rm } from 'fs/promises';
@@ -9,11 +9,13 @@ import path from 'path';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 import pLimit from 'p-limit';
+import Database from 'better-sqlite3';
 
 // --- CONFIGURATION ---
 const CWD = process.cwd();
 const OUTPUT_DIR = path.join(CWD, 'public', 'ogimages', 'ogcollection');
 const CONCURRENCY = 10;
+const DB_PATH = path.join(CWD, 'src/data/data.db');
 
 // --- FONT CONFIGURATION ---
 // Maps language ISO codes to their specific Google Font URL and font-family stack.
@@ -52,7 +54,6 @@ import {
 const flagMap = { AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, ES, FI, FJ, FR, GA, GB, GE, GH, GI, GM, GN, GP, GR, GT, GU, GY, HK, HN, HR, HT, HU, ID, IE, IL, IN, IS, IT, JM, JO, JP, KE, KR, KW, KY, LB, LI, LS, LT, LU, LV, LY, MA, MC, MD, ME, MK, MM, MN, MR, MU, MW, MX, MY, MZ, NG, NI, NL, NO, NP, NZ, OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL, SM, SN, SR, SV, SZ, TD, TH, TN, TR, TT, UA, UG, US, UY, VE, VN, YT, ZA };
 
 // --- HELPERS ---
-const readJsonFile = (filePath) => JSON.parse(readFileSync(path.join(CWD, filePath), 'utf-8'));
 const readImageAsBase64 = (filePath) => readFileSync(path.join(CWD, filePath), 'base64');
 
 // --- HTML TEMPLATE ---
@@ -141,17 +142,17 @@ const generateCategoryHtmlTemplate = (data) => `
 </html>`;
 
 // --- CATEGORY DETECTION (No changes needed, logic is specific and correct) ---
-function detectCategories(commonData) {
-    const categories = new Set();
+function detectCollections(commonData) {
+    const collections = new Set();
     commonData.forEach(locale => {
         Object.keys(locale).forEach(key => {
             const match = key.match(/^PAGE_COLLECTION_(\d+)_LISTING_TITLE$/);
             if (match) {
-                categories.add(parseInt(match[1], 10));
+                collections.add(parseInt(match[1], 10));
             }
         });
     });
-    return Array.from(categories).sort((a, b) => a - b);
+    return Array.from(collections).sort((a, b) => a - b);
 }
 
 // --- IMAGE GENERATION ---
@@ -209,18 +210,30 @@ async function generateImageForCategory(locale, categoryNumber, commonAssets, co
 
 // --- MAIN EXECUTION (Corrected to use www.json for branding) ---
 async function main() {
-    console.log('🚀 Starting Category OG image generation...');
+    console.log('🚀 Starting Collection OG image generation...');
     let browser;
+    let db;
     try {
         await rm(OUTPUT_DIR, { recursive: true, force: true });
         await mkdir(OUTPUT_DIR, { recursive: true });
         console.log(`✅ Cleaned output directory: ${OUTPUT_DIR}`);
 
-        // Load all required data
-        const commonData = readJsonFile('src/data/common.json');
-        const localeData = readJsonFile('src/data/locale.json');
-        // FIX: Load site-wide branding data from www.json, not common.json
-        const brandingData = readJsonFile('src/data/www.json')[0];
+        // --- Database Connection and Data Fetching ---
+        db = new Database(DB_PATH, { readonly: true });
+
+        // Fetch all necessary data from the database in a single transaction for performance
+        const { commonData, localeData, brandingData } = db.transaction(() => {
+            // Get all common data
+            const common = db.prepare("SELECT * FROM common").all();
+            
+            // Get all locales
+            const locale = db.prepare("SELECT * FROM locale").all();
+            
+            // Get branding data (first record)
+            const www = db.prepare("SELECT * FROM www LIMIT 1").get();
+
+            return { commonData: common, localeData: locale, brandingData: www };
+        })();
         
         const publishedLocales = localeData.filter(locale => locale.M_LOCALE_PUBLISH_Y_N === "1");
         if (publishedLocales.length === 0) {
@@ -228,17 +241,17 @@ async function main() {
             return;
         }
         
-        const categories = detectCategories(commonData);
-        console.log(`📊 Detected ${categories.length} categories: ${categories.join(', ')}`);
-        if (categories.length === 0) {
-            console.log("🟡 No categories found in common.json. Exiting.");
+        const collections = detectCollections(commonData);
+        console.log(`📊 Detected ${collections.length} collections: ${collections.join(', ')}`);
+        if (collections.length === 0) {
+            console.log("🟡 No collections found in common data. Exiting.");
             return;
         }
         
         // FIX: Get logo path from the correct branding data object
         const logoPath = brandingData.PAGE_LOGO_IMAGE_PATH_5;
         if (!logoPath) {
-            throw new Error('Branding data or PAGE_LOGO_IMAGE_PATH_5 not found in www.json.');
+            throw new Error('Branding data or PAGE_LOGO_IMAGE_PATH_5 not found in database.');
         }
 
         // Prepare common assets using the correct branding information
@@ -262,7 +275,7 @@ async function main() {
                 continue;
             }
             
-            for (const categoryNumber of categories) {
+            for (const categoryNumber of collections) {
                 tasks.push(
                     limit(() => generateImageForCategory(matchingCommon, categoryNumber, commonAssets, context))
                 );
@@ -273,9 +286,9 @@ async function main() {
         const successful = results.filter(r => r.status === 'fulfilled').length;
         const failedCount = tasks.length - successful;
 
-        console.log('\n✨ Category OG image generation complete!');
+        console.log('\n✨ Collection OG image generation complete!');
         console.log(`🟢 Successful: ${successful}/${tasks.length}`);
-        console.log(`📊 Generated for ${publishedLocales.length} locales × ${categories.length} categories`);
+        console.log(`📊 Generated for ${publishedLocales.length} locales × ${collections.length} collection images`);
         
         if (failedCount > 0) {
             console.error(`🔴 Failed: ${failedCount}/${tasks.length}`);
@@ -291,6 +304,10 @@ async function main() {
         process.exit(1);
     } finally {
         if (browser) await browser.close();
+        // Ensure the database connection is always closed
+        if (db) {
+            db.close();
+        }
     }
 }
 
