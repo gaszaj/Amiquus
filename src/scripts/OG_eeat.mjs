@@ -1,6 +1,7 @@
-import { readFileSync } from 'fs';
 import { mkdir, rm } from 'fs/promises';
+import { readFileSync } from 'fs'; // Corrected: import readFileSync from 'fs'
 import path from 'path';
+import Database from 'better-sqlite3';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 import pLimit from 'p-limit';
@@ -8,6 +9,7 @@ import pLimit from 'p-limit';
 // --- CONFIGURATION ---
 const CWD = process.cwd();
 const PUBLIC_DIR = path.join(CWD, 'public');
+const DB_PATH = path.join(CWD, 'src/data/data.db');
 const OUTPUT_DIR = path.join(PUBLIC_DIR, 'ogimages', 'ogeeat');
 const CONCURRENCY = 10;
 
@@ -45,8 +47,8 @@ import {
 const flagMap = { AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, ES, FI, FJ, FR, GA, GB, GE, GH, GI, GM, GN, GP, GR, GT, GU, GY, HK, HN, HR, HT, HU, ID, IE, IL, IN, IS, IT, JM, JO, JP, KE, KR, KW, KY, LB, LI, LS, LT, LU, LV, LY, MA, MC, MD, ME, MK, MM, MN, MR, MU, MW, MX, MY, MZ, NG, NI, NL, NO, NP, NZ, OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL, SM, SN, SR, SV, SZ, TD, TH, TN, TR, TT, UA, UG, US, UY, VE, VN, YT, ZA };
 
 // --- HELPER FUNCTIONS ---
-const readJsonFile = (filePath) => JSON.parse(readFileSync(path.join(CWD, filePath), 'utf-8'));
-const readImageAsBase64 = (filePath) => readFileSync(path.join(CWD, filePath), 'base64');
+// Reads an image file and encodes it to Base64.
+const readImageAsBase64 = (filePath) => readFileSync(path.join(CWD, filePath), { encoding: 'base64' });
 
 // --- HTML TEMPLATE GENERATOR ---
 const generateEeatHtmlTemplate = (data) => `
@@ -155,19 +157,23 @@ async function generateImageForEeat(eeat, commonAssets, context) {
 async function main() {
     console.log('🚀 Starting EEAT page OG image generation...');
     let browser;
+    let db;
     try {
         console.log(`🧹 Clearing destination directory: ${OUTPUT_DIR}`);
         await rm(OUTPUT_DIR, { recursive: true, force: true });
         await mkdir(OUTPUT_DIR, { recursive: true });
 
-        const eeatData = readJsonFile('src/data/eeat.json').filter(p => p.PUBLISH_Y_N === "1");
-        const wwwData = readJsonFile('src/data/www.json');
+        // --- Data Fetching from Database ---
+        db = new Database(DB_PATH, { readonly: true });
         
-        const brandingData = wwwData[0];
+        const eeatData = db.prepare("SELECT * FROM eeat WHERE PUBLISH_Y_N = '1'").all();
+        const brandingData = db.prepare("SELECT * FROM www LIMIT 1").get();
+        // --- End of Data Fetching ---
+        
         const logoPath = brandingData.PAGE_LOGO_IMAGE_PATH_5;
 
         if (!brandingData || !logoPath) {
-            throw new Error('Could not find required branding or logo data in JSON files.');
+            throw new Error('Could not find required branding or logo data in the database.');
         }
 
         const commonAssets = {
@@ -203,6 +209,7 @@ async function main() {
         process.exit(1);
     } finally {
         if (browser) await browser.close();
+        if (db) db.close(); // Ensure the database connection is closed.
     }
 }
 
