@@ -1,6 +1,7 @@
 ---
 // pages/index.astro
-import localeData from '../data/locale.json';
+import path from 'path';
+import Database from 'better-sqlite3';
 import { 
   AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, 
   CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, 
@@ -10,6 +11,12 @@ import {
   OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL, 
   SM, SN, SR, SV, SZ, TD, TH, TN, TR, TT, UA, UG, US, UY, VE, VN, YT, ZA 
 } from 'country-flag-icons/string/3x2';
+
+// --- Database Connection ---
+// Establish a connection to the SQLite database.
+// This is more efficient than loading multiple large JSON files into memory.
+const dbPath = path.join(process.cwd(), 'src/data/data.db');
+const db = new Database(dbPath, { readonly: true }); // Open in read-only mode for safety
 
 // --- Replicate Flag Logic from Header.astro ---
 const flagMap: Record<string, string> = {
@@ -24,9 +31,8 @@ const flagMap: Record<string, string> = {
 
 // --- Language Detection & Redirect Logic (Unchanged) ---
 
-const publishedLocales = localeData.filter(
-  (locale) => locale.M_LOCALE_PUBLISH_Y_N === "1"
-);
+// Fetch published locales from database
+const publishedLocales = db.prepare("SELECT * FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all() as any[];
 
 const acceptLanguage = Astro.request.headers.get('accept-language');
 let redirectSlug = null;

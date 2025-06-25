@@ -1,27 +1,40 @@
 ---
 // Path: /src/pages/si/opozorilna-piramida/index.astro
 // Purpose: Products listing page with dynamic RTL support
-// Data: JSON dependencies for products, common data, and locale data
+// Data: Database dependencies for products, common data, and locale data
 // Dependencies: BaseLayout, infinite scroll, filtering
 
+import path from 'path';
+import Database from 'better-sqlite3';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import productData from '../../../data/product.json';
-import wwwData from '../../../data/www.json';
-import commonData from '../../../data/common.json';
-import localeData from '../../../data/locale.json';
+
+// --- Database Connection ---
+// Establish a connection to the SQLite database.
+// This is more efficient than loading multiple large JSON files into memory.
+const dbPath = path.join(process.cwd(), 'src/data/data.db');
+const db = new Database(dbPath, { readonly: true }); // Open in read-only mode for safety
 
 // --- DATA FETCHING & INITIAL FILTERING ---
 
 const parentSlug = Astro.url.pathname.split('/')[1];
 const currentFolder = Astro.url.pathname.split('/')[2];
-const common = commonData.find(item => item.M_SLUG === parentSlug) || commonData[0];
-const www = wwwData[0];
 
-// Filter products for the current locale, published status, and apply a default sort.
-// Default Sort: By Importance Rank (desc), then by Product Name (A-Z).
-const filteredProducts = productData
-    .filter(product => product.M_SLUG === parentSlug && product.PUBLISH_Y_N === "1")
-    .sort((a, b) => {
+// Fetch all required data in a single transaction for efficiency
+const { common, www, filteredProducts, publishedLocales } = db.transaction(() => {
+    // Fetch common translations and settings for the current locale.
+    const commonData = db.prepare('SELECT * FROM common WHERE M_SLUG = ?').get(parentSlug) as any;
+    
+    // Fetch global site data (www table)
+    const wwwData = db.prepare('SELECT * FROM www LIMIT 1').get() as any;
+    
+    // Fetch all products for the current locale with published status
+    const products = db.prepare("SELECT * FROM product WHERE M_SLUG = ? AND PUBLISH_Y_N = '1'").all(parentSlug) as any[];
+    
+    // Fetch all published locales for the language switcher
+    const locales = db.prepare("SELECT M_SLUG FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all() as any[];
+
+    // Sort products by importance rank (desc), then by Product Name (A-Z)
+    const sortedProducts = products.sort((a, b) => {
         const rankA = parseInt(a.PRODUCT_IMPORTANCE_RANK, 10) || 0;
         const rankB = parseInt(b.PRODUCT_IMPORTANCE_RANK, 10) || 0;
         if (rankB !== rankA) {
@@ -29,6 +42,14 @@ const filteredProducts = productData
         }
         return a.PRODUCT_NAME.localeCompare(b.PRODUCT_NAME); // Then A-Z
     });
+
+    return {
+        common: commonData || {},
+        www: wwwData,
+        filteredProducts: sortedProducts,
+        publishedLocales: locales
+    };
+})();
 
 // --- BATCHING FOR INITIAL LOAD ---
 const BATCH_SIZE = 12;
@@ -38,10 +59,7 @@ const initialProducts = filteredProducts.slice(0, BATCH_SIZE);
 
 const languageIso = filteredProducts[0]?.M_LANGUAGE_ISO || 'sl';
 const countryCode = filteredProducts[0]?.M_COUNTRY_CODE || 'SI';
-const contentOrientation = commonData.find(item =>
-    item.M_LANGUAGE_ISO === languageIso &&
-    item.M_COUNTRY_CODE === countryCode
-)?.M_CONTENT_ORIENTATION || 'ltr';
+const contentOrientation = common.M_CONTENT_ORIENTATION || 'ltr';
 
 const pageTitle = common.PAGE_COLLECTION_1_LISTING_TITLE;
 const pageDescription = common.PAGE_COLLECTION_1_LISTING_DESCRIPTION;
@@ -113,10 +131,8 @@ const schema = [collectionPageSchema, organizationSchema];
 
 // --- LANGUAGE LINKS ---
 const languageLinksMap: Record<string, string> = {};
-for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
-  const productForLocale = productData.find(p =>
-    p.M_SLUG === localeObj.M_SLUG && p.PUBLISH_Y_N === "1" && p.PAGE_COLLECTION_1_LISTING_SLUG?.trim()
-  );
+for (const localeObj of publishedLocales) {
+  const productForLocale = db.prepare("SELECT * FROM product WHERE M_SLUG = ? AND PUBLISH_Y_N = '1' AND PAGE_COLLECTION_1_LISTING_SLUG IS NOT NULL AND PAGE_COLLECTION_1_LISTING_SLUG != '' LIMIT 1").get(localeObj.M_SLUG) as any;
   if (productForLocale) {
     languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}/${productForLocale.PAGE_COLLECTION_1_LISTING_SLUG}`;
   } else {

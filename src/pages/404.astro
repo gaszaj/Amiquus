@@ -1,12 +1,38 @@
 ---
 // pages/404.astro
 
+import path from 'path';
+import Database from 'better-sqlite3';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import commonData from '../data/common.json';
-import eeatData from '../data/eeat.json';
-import localeData from '../data/locale.json';
 
-const supportedSlugs = localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1").map(l => l.M_SLUG);
+// --- Database Connection ---
+// Establish a connection to the SQLite database.
+// This is more efficient than loading multiple large JSON files into memory.
+const dbPath = path.join(process.cwd(), 'src/data/data.db');
+const db = new Database(dbPath, { readonly: true }); // Open in read-only mode for safety
+
+// --- DATA FETCHING & LANGUAGE DETECTION ---
+
+// Fetch all required data in a single transaction for efficiency
+const { supportedSlugs, eeatEntries, commonEntries, publishedLocales } = db.transaction(() => {
+    // Fetch all published locales for language detection
+    const locales = db.prepare("SELECT M_SLUG FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all() as any[];
+    const supportedSlugs = locales.map(l => l.M_SLUG);
+    
+    // Fetch all eeat entries for 404 page lookup
+    const eeatEntries = db.prepare("SELECT * FROM eeat WHERE EEAT_FILTERING = '01'").all() as any[];
+    
+    // Fetch all common data for language-specific settings
+    const commonEntries = db.prepare("SELECT * FROM common").all() as any[];
+
+    return {
+        supportedSlugs,
+        eeatEntries,
+        commonEntries,
+        publishedLocales: locales
+    };
+})();
+
 const defaultSlug = 'si'; // Your primary fallback language
 
 let determinedSlug = defaultSlug;
@@ -32,7 +58,7 @@ if (langCookie && supportedSlugs.includes(langCookie.value)) {
 
 // --- DATA FETCHING AND RENDERING LOGIC (Remains the same as before) ---
 
-const eeat = eeatData.find(entry => 
+const eeat = eeatEntries.find((entry: any) => 
   entry.M_SLUG === determinedSlug && 
   entry.EEAT_FILTERING === "01"
 );
@@ -46,11 +72,11 @@ const pageData = eeat || {
   M_COUNTRY_CODE: "US",
 };
 
-const common = commonData.find(item => item.M_SLUG === determinedSlug);
+const common = commonEntries.find((item: any) => item.M_SLUG === determinedSlug);
 
 // Fix TypeScript error by properly typing the languageLinksMap
 const languageLinksMap: Record<string, string> = {};
-for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
+for (const locale of publishedLocales) {
     languageLinksMap[locale.M_SLUG] = `/${locale.M_SLUG}/`;
 }
 

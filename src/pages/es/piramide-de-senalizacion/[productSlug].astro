@@ -1,36 +1,57 @@
 ---
 // Path: /src/pages/si/opozorilna-piramida/[productSlug].astro
 // Purpose: Product detail page with dynamic RTL support
-// Data: JSON dependencies for product data, common data, and locale data
+// Data: Database dependencies for product data, common data, and locale data
 // Dependencies: BaseLayout, form actions, validation
 
-import productData from '../../../data/product.json';
-import wwwData from '../../../data/www.json';
-import commonData from '../../../data/common.json';
-import articleDataJson from '../../../data/article.json';
-import localeData from '../../../data/locale.json';
-
+import path from 'path';
+import Database from 'better-sqlite3';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { actions, isInputError } from 'astro:actions';
+
+// --- Database Connection ---
+// Establish a connection to the SQLite database.
+// This is more efficient than loading multiple large JSON files into memory.
+const dbPath = path.join(process.cwd(), 'src/data/data.db');
+const db = new Database(dbPath, { readonly: true }); // Open in read-only mode for safety
 
 // --- DATA FETCHING & PROCESSING ---
 const { productSlug } = Astro.params;
 const locale = Astro.url.pathname.split('/')[1];
 
-const product = productData.find(
-  (entry) => 
-    entry.PRODUCT_ASCII_SLUG === productSlug && 
-    entry.M_SLUG === locale &&
-    entry.PUBLISH_Y_N === "1"
-);
+// --- Data Fetching from Database ---
+
+// 1. Fetch the primary product data for the current locale and slug.
+// Uses .get() as we expect only one record.
+const product = db.prepare("SELECT * FROM product WHERE PRODUCT_ASCII_SLUG = ? AND M_SLUG = ? AND PUBLISH_Y_N = '1'").get(productSlug, locale) as any;
 
 if (!product) {
   return Astro.redirect('/404');
 }
 
-// Find the matching common data object based on M_SLUG. This is our single source of truth for UI strings.
-const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
-const www = wwwData[0];
+// 2. Fetch all other required data in a single transaction for efficiency.
+// This is much faster than running multiple separate queries.
+const { common, www, articleData, publishedLocales } = db.transaction(() => {
+    // Fetch common translations and settings for the current locale.
+    // If a locale-specific entry doesn't exist, it will be null. The template should handle this gracefully or have a fallback.
+    const commonData = db.prepare('SELECT * FROM common WHERE M_SLUG = ?').get(locale) as any;
+    
+    // Fetch global site data (www table)
+    const wwwData = db.prepare('SELECT * FROM www LIMIT 1').get() as any;
+    
+    // Fetch all articles for article lookups
+    const articles = db.prepare("SELECT * FROM article WHERE PUBLISH_Y_N = '1'").all() as any[];
+    
+    // Fetch all published locales for the language switcher.
+    const locales = db.prepare("SELECT M_SLUG FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all() as any[];
+
+    return { 
+        common: commonData || {}, // Fallback to an empty object if no common data is found
+        www: wwwData,
+        articleData: articles,
+        publishedLocales: locales
+    };
+})();
 
 const languageIso = product.M_LANGUAGE_ISO;
 const countryCode = product.M_COUNTRY_CODE;
@@ -88,8 +109,12 @@ const productFaqItems: FaqItemData[] = [
 ].filter(item => item.question && item.answer);
 
 // Helper functions for finding related content
-const findProductById = (id: string) => productData.find(p => p.PRODUCT_ID === id && p.PUBLISH_Y_N === "1");
-const findArticleById = (id: string) => articleDataJson.find(a => a.PAGE_ID === id && a.PUBLISH_Y_N === "1");
+const findProductById = (id: string) => {
+  return db.prepare("SELECT * FROM product WHERE PRODUCT_ID = ? AND PUBLISH_Y_N = '1'").get(id) as any;
+};
+const findArticleById = (id: string) => {
+  return articleData.find((a: any) => a.PAGE_ID === id && a.PUBLISH_Y_N === "1");
+};
 
 // Get related products
 const filteredRelatedProducts: RelatedProductInfo[] = [
@@ -184,7 +209,7 @@ const combinedSchema = [{
     "@type": "Offer",
     "url": Astro.url.href,
     "priceCurrency": product.M_CURRENCY_CODE,
-    "price": product.M_PRODUCT_PRICE_RECALC,
+    "price": product.M_PRODUCT_PRICE,
     "priceValidUntil": product.PRODUCT_EXPIRATION_DATE,
     "availability": "https://schema.org/InStock",
     "itemCondition": "https://schema.org/NewCondition"
@@ -306,8 +331,8 @@ const getFieldError = (fieldName: string): string | undefined => formErrors[fiel
 
 // Language switcher data
 const languageLinksMap: Record<string, string> = {};
-for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
-  const productForLocale = productData.find(p => p.M_SLUG === localeObj.M_SLUG && p.PUBLISH_Y_N === "1" && p.PAGE_COLLECTION_1_LISTING_SLUG);
+for (const localeObj of publishedLocales) {
+  const productForLocale = db.prepare("SELECT * FROM product WHERE M_SLUG = ? AND PUBLISH_Y_N = '1' AND PAGE_COLLECTION_1_LISTING_SLUG IS NOT NULL LIMIT 1").get(localeObj.M_SLUG) as any;
   languageLinksMap[localeObj.M_SLUG] = productForLocale ? `/${localeObj.M_SLUG}/${productForLocale.PAGE_COLLECTION_1_LISTING_SLUG}` : `/${localeObj.M_SLUG}`;
 }
 

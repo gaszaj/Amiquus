@@ -1,14 +1,18 @@
 ---
 // Path: /src/pages/si/avtorji-in-uredniki/[authorSlug].astro
 // Purpose: Author profile page with dynamic RTL support
-// Data: JSON dependencies for author data, common data, and locale data
+// Data: Database dependencies for author data, common data, and locale data
 // Dependencies: BaseLayout, country-flag-icons
 
+import path from 'path';
+import Database from 'better-sqlite3';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import authorDataJson from '../../../data/author.json';
-import wwwData from '../../../data/www.json';
-import commonData from '../../../data/common.json';
-import localeData from '../../../data/locale.json';
+
+// --- Database Connection ---
+// Establish a connection to the SQLite database.
+// This is more efficient than loading multiple large JSON files into memory.
+const dbPath = path.join(process.cwd(), 'src/data/data.db');
+const db = new Database(dbPath, { readonly: true }); // Open in read-only mode for safety
 
 // Type Definitions (from original author.astro)
 export interface SocialLinksInfo {
@@ -130,21 +134,41 @@ const { authorSlug } = Astro.params;
 // Get the locale from the URL path (e.g., 'si' from /si/avtorji-in-uredniki/...)
 const locale = Astro.url.pathname.split('/')[1];
 
-// Find the matching common data object based on M_SLUG
-const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
+// --- Data Fetching from Database ---
 
-// Filter authorData to only include entries matching the current locale
-const localeAuthorData = authorDataJson.filter(entry => entry.M_SLUG === locale);
-
-// Find the matching author entry from the filtered data
-const author = localeAuthorData.find(entry => entry.WWW_AUTHOR_SLUG === authorSlug);
+// 1. Fetch the primary author data for the current locale and slug.
+// Uses .get() as we expect only one record.
+const author = db.prepare('SELECT * FROM author WHERE M_SLUG = ? AND WWW_AUTHOR_SLUG = ?').get(locale, authorSlug) as AuthorDataEntry;
 
 // Check if author exists and is published
 if (!author || author.PUBLISH_Y_N !== "1") {
   return Astro.redirect('/404');
 }
 
-const www = wwwData[0];
+// 2. Fetch all other required data in a single transaction for efficiency.
+// This is much faster than running multiple separate queries.
+const { www, common, publishedLocales, altAuthorEntries } = db.transaction(() => {
+    // Fetch global site data (www table)
+    const wwwData = db.prepare('SELECT * FROM www LIMIT 1').get() as any;
+
+    // Fetch common translations and settings for the current locale.
+    // If a locale-specific entry doesn't exist, it will be null. The template should handle this gracefully or have a fallback.
+    const commonData = db.prepare('SELECT * FROM common WHERE M_SLUG = ?').get(locale) as any;
+    
+    // Fetch all published locales for the language switcher.
+    const locales = db.prepare("SELECT M_SLUG FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all() as any[];
+    
+    // Fetch all alternate author entries for the current author across all locales.
+    // This is more efficient than querying inside a loop.
+    const alts = db.prepare("SELECT M_SLUG, EEAT_URL_20, WWW_AUTHOR_SLUG FROM author WHERE WWW_AUTHOR_NUMBER = ? AND PUBLISH_Y_N = '1'").all(author.WWW_AUTHOR_NUMBER) as any[];
+
+    return { 
+        www: wwwData, 
+        common: commonData || {}, // Fallback to an empty object if no common data is found
+        publishedLocales: locales,
+        altAuthorEntries: alts
+    };
+})();
 
 // Helper function for absolute URLs with locale
 const getAbsoluteUrl = (path: string): string => {
@@ -439,13 +463,12 @@ const combinedSchema = [webpageSchema, personSchema, organizationSchema];
 
 // Build the language link map for the language picker
 const languageLinksMap: Record<string, string> = {};
-for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
+// Create a lookup map from the pre-fetched alternate entries.
+const altAuthorMap = new Map(altAuthorEntries.map((a: any) => [a.M_SLUG, a]));
+
+for (const localeObj of publishedLocales) {
   // Find alternate author entry for this locale by WWW_AUTHOR_NUMBER
-  const altAuthor = authorDataJson.find(a =>
-    a.WWW_AUTHOR_NUMBER === author.WWW_AUTHOR_NUMBER &&
-    a.M_SLUG === localeObj.M_SLUG &&
-    a.PUBLISH_Y_N === "1"
-  );
+  const altAuthor = altAuthorMap.get(localeObj.M_SLUG) as any;
   if (altAuthor) {
     languageLinksMap[localeObj.M_SLUG] = `/${altAuthor.M_SLUG}/${altAuthor.EEAT_URL_20}/${altAuthor.WWW_AUTHOR_SLUG}`;
   } else {

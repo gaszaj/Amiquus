@@ -1,10 +1,12 @@
 ---
-// Import JSON data
-import wwwData from '../data/www.json';
-const www = wwwData[0]; // Get the first (and only) object from wwwData array
+// Path: /src/layouts/BaseLayout.astro
+// Purpose: Base layout component with metadata, social sharing, and global styles
+// Data: Database dependencies for www, site.webmanifest, and common data
+// Dependencies: Cookie, Header, Footer, Schema components
 
+import path from 'path';
+import Database from 'better-sqlite3';
 import manifestData from '../data/site.webmanifest.json';
-import allLocaleData from '../data/common.json'; // common.json is an array of locale objects
 
 import '@fontsource-variable/inter';
 import '../styles/fonts.css';
@@ -30,7 +32,7 @@ export interface Props {
     languageIso: string;
     hreflang: string;
     href: string;
-  }>;
+  }> | null;
   languageLinksMap: Record<string, string>;
   currentSlug?: string;
 }
@@ -49,6 +51,26 @@ const {
   languageLinksMap,
   currentSlug
 } = Astro.props;
+
+// --- Database Connection ---
+// Establish a connection to the SQLite database.
+// This is more efficient than loading multiple large JSON files into memory.
+const dbPath = path.join(process.cwd(), 'src/data/data.db');
+const db = new Database(dbPath, { readonly: true }); // Open in read-only mode for safety
+
+// Fetch all required data in a single transaction for efficiency
+const { www, allLocaleData } = db.transaction(() => {
+    // Fetch global site data (www table)
+    const wwwData = db.prepare('SELECT * FROM www LIMIT 1').get() as any;
+    
+    // Fetch all common data for locale lookups
+    const commonEntries = db.prepare('SELECT * FROM common').all() as any[];
+
+    return {
+        www: wwwData,
+        allLocaleData: commonEntries
+    };
+})();
 
 // Define default English texts (these will be used if common.json doesn't provide specific translations)
 let socialSharingTitle = "Send this link to a friend";
@@ -103,7 +125,7 @@ if (currentLocaleData) {
 const fullLocale = `${languageIso}-${countryCode}`;
 
 // 2. REFACTOR getFontLoadingStrategy INTO A SIMPLE MAP
-const localeFontMap = {
+const localeFontMap: Record<string, { fontLink: string }> = {
   ar: { fontLink: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap' },
   he: { fontLink: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;700&display=swap' },
   hi: { fontLink: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap' },
@@ -128,7 +150,8 @@ const fontStrategy = localeFontMap[languageIso] || { fontLink: null };
 const publicPath = (src: string) => `/${src.startsWith('/') ? src.substring(1) : src}`;
 
 // Helper to create absolute URL for OG images
-const getAbsoluteOgImageUrl = (imagePath: string) => {
+const getAbsoluteOgImageUrl = (imagePath: string | undefined) => {
+  if (!imagePath) return '';
   return `${Astro.url.origin}${imagePath}`;
 };
 ---
@@ -173,7 +196,7 @@ const getAbsoluteOgImageUrl = (imagePath: string) => {
       const absoluteUrl = new URL(url, Astro.url.origin).toString();
 
       return (
-        <link rel="alternate" hrefLang={hreflang} href={absoluteUrl} />
+        <link rel="alternate" hreflang={hreflang} href={absoluteUrl} />
       );
     })}
     {(() => {
@@ -182,7 +205,7 @@ const getAbsoluteOgImageUrl = (imagePath: string) => {
       const defaultUrl = languageLinksMap?.[defaultLocale] 
         ? new URL(languageLinksMap[defaultLocale], Astro.url.origin).toString()
         : new URL(`/${defaultLocale}`, Astro.url.origin).toString();
-      return <link rel="alternate" hrefLang="x-default" href={defaultUrl} />;
+      return <link rel="alternate" hreflang="x-default" href={defaultUrl} />;
     })()}
 
     <!-- Robots Meta Tag -->
@@ -291,7 +314,7 @@ const getAbsoluteOgImageUrl = (imagePath: string) => {
     {schema && <Schema schema={schema} />}
   </head>
   <body class="min-h-screen bg-signal-light flex flex-col">
-    <Header alternativeLinks={alternativeLinks} languageLinksMap={languageLinksMap} locale={currentSlug} />
+    <Header alternativeLinks={alternativeLinks || undefined} languageLinksMap={languageLinksMap} locale={currentSlug} />
     <main class="flex-grow">
       <slot />
     </main>    

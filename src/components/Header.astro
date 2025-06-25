@@ -1,6 +1,11 @@
 ---
-// Import JSON data
-import headerFooterData from '../data/headerfooter.json';
+// Path: /src/components/Header.astro
+// Purpose: Header component with navigation, search, and language switcher
+// Data: Database dependencies for headerfooter, common, locale, and www data
+// Dependencies: country-flag-icons
+
+import path from 'path';
+import Database from 'better-sqlite3';
 import { 
   AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, 
   CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, 
@@ -10,9 +15,6 @@ import {
   OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL, 
   SM, SN, SR, SV, SZ, TD, TH, TN, TR, TT, UA, UG, US, UY, VE, VN, YT, ZA 
 } from 'country-flag-icons/string/3x2';
-import commonData from '../data/common.json';
-import localeData from '../data/locale.json';
-import wwwData from '../data/www.json';
 
 export interface Props {
   alternativeLinks?: Array<{
@@ -32,10 +34,33 @@ const { alternativeLinks, languageLinksMap = {}, locale: propLocale } = Astro.pr
 // Get the locale from the URL path (e.g., 'si' from /si/...)
 const locale = propLocale || Astro.url.pathname.split('/')[1] || 'si'; 
 
-// Find the matching headerFooter and common data objects based on M_SLUG
-const headerFooter = headerFooterData.find(item => item.M_SLUG === locale) || headerFooterData[0];
-const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
-const www = wwwData[0];
+// --- Database Connection ---
+// Establish a connection to the SQLite database.
+// This is more efficient than loading multiple large JSON files into memory.
+const dbPath = path.join(process.cwd(), 'src/data/data.db');
+const db = new Database(dbPath, { readonly: true }); // Open in read-only mode for safety
+
+// Fetch all required data in a single transaction for efficiency
+const { headerFooter, common, www, localeData } = db.transaction(() => {
+    // Fetch headerfooter data for the current locale
+    const headerFooterData = db.prepare('SELECT * FROM headerfooter WHERE M_SLUG = ?').get(locale) as any;
+    
+    // Fetch common data for the current locale
+    const commonData = db.prepare('SELECT * FROM common WHERE M_SLUG = ?').get(locale) as any;
+    
+    // Fetch global site data (www table)
+    const wwwData = db.prepare('SELECT * FROM www LIMIT 1').get() as any;
+    
+    // Fetch all locale data for language switcher
+    const locales = db.prepare('SELECT * FROM locale').all() as any[];
+
+    return {
+        headerFooter: headerFooterData || {},
+        common: commonData || {},
+        www: wwwData,
+        localeData: locales
+    };
+})();
 
 // Define default English texts for aria-labels (these will be used if common.json doesn't provide specific translations)
 let ariaLabelSearch1 = "Open mobile menu";

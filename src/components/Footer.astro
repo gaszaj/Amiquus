@@ -1,11 +1,18 @@
 ---
-// Import JSON data
-import headerFooterData from '../data/headerfooter.json';
-import commonData from '../data/common.json';
-import eeatData from '../data/eeat.json';
-import products from '../data/product.json';
-import wwwData from '../data/www.json';
+// Path: /src/components/Footer.astro
+// Purpose: Footer component with dynamic navigation and social links
+// Data: Database dependencies for headerfooter, common, eeat, product, and www data
+// Dependencies: country-flag-icons
+
+import path from 'path';
+import Database from 'better-sqlite3';
 import * as flags from 'country-flag-icons/string/3x2';
+
+// --- Database Connection ---
+// Establish a connection to the SQLite database.
+// This is more efficient than loading multiple large JSON files into memory.
+const dbPath = path.join(process.cwd(), 'src/data/data.db');
+const db = new Database(dbPath, { readonly: true }); // Open in read-only mode for safety
 
 const currentYear = new Date().getFullYear();
 
@@ -20,10 +27,31 @@ const getCountryCode = (locale: string) => {
   return parts.length > 1 ? parts[1].toUpperCase() : locale.toUpperCase();
 };
 
-// Find matching data for current locale
-const headerFooter = headerFooterData.find(data => data.M_SLUG === currentLocale) || headerFooterData[0];
-const common = commonData.find(data => data.M_SLUG === currentLocale) || commonData[0];
-const www = wwwData[0];
+// Fetch all required data in a single transaction for efficiency
+const { headerFooter, common, www, eeatData, products } = db.transaction(() => {
+    // Fetch headerfooter data for the current locale
+    const headerFooterData = db.prepare('SELECT * FROM headerfooter WHERE M_SLUG = ?').get(currentLocale) as any;
+    
+    // Fetch common data for the current locale
+    const commonData = db.prepare('SELECT * FROM common WHERE M_SLUG = ?').get(currentLocale) as any;
+    
+    // Fetch global site data (www table)
+    const wwwData = db.prepare('SELECT * FROM www LIMIT 1').get() as any;
+    
+    // Fetch all eeat entries for navigation
+    const eeatEntries = db.prepare('SELECT * FROM eeat').all() as any[];
+    
+    // Fetch all products for bestsellers
+    const productEntries = db.prepare('SELECT * FROM product').all() as any[];
+
+    return {
+        headerFooter: headerFooterData || {},
+        common: commonData || {},
+        www: wwwData,
+        eeatData: eeatEntries,
+        products: productEntries
+    };
+})();
 
 // Get current country flag
 const currentCountryCode = getCountryCode(currentLocale);

@@ -1,9 +1,24 @@
 ---
-import commonData from '../data/common.json';
+// Path: /src/components/Cookie.astro
+// Purpose: Cookie consent banner component with RTL support
+// Data: Database dependencies for common data
+// Dependencies: None
+
+import path from 'path';
+import Database from 'better-sqlite3';
+
+// --- Database Connection ---
+// Establish a connection to the SQLite database.
+// This is more efficient than loading multiple large JSON files into memory.
+const dbPath = path.join(process.cwd(), 'src/data/data.db');
+const db = new Database(dbPath, { readonly: true }); // Open in read-only mode for safety
 
 // --- No changes to the script setup ---
 const locale = Astro.url.pathname.split('/')[1] || 'si';
-const currentLocaleData = commonData.find(item => item.M_SLUG === locale) || commonData[0];
+
+// Fetch common data for the current locale from database
+const currentLocaleData = db.prepare('SELECT * FROM common WHERE M_SLUG = ?').get(locale) as any || {};
+
 const title = currentLocaleData.COOKIE_TITLE || 'We value your privacy';
 const description = currentLocaleData.COOKIE_DESCRIPTION || 'We use cookies...';
 const linkText = currentLocaleData.COOKIE_LINK_TEXT || 'Read our Cookie Policy';

@@ -1,35 +1,59 @@
 ---
 // Path: /src/pages/si/clanki/index.astro
 // Purpose: Articles listing page with dynamic RTL support
-// Data: JSON dependencies for articles, authors, and locale data
+// Data: Database dependencies for articles, authors, and locale data
 // Dependencies: BaseLayout, infinite scroll, filtering
 
+import path from 'path';
+import Database from 'better-sqlite3';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import articleData from '../../../data/article.json';
-import authorData from '../../../data/author.json';
-import wwwData from '../../../data/www.json';
-import commonData from '../../../data/common.json';
-import localeData from '../../../data/locale.json';
+
+// --- Database Connection ---
+// Establish a connection to the SQLite database.
+// This is more efficient than loading multiple large JSON files into memory.
+const dbPath = path.join(process.cwd(), 'src/data/data.db');
+const db = new Database(dbPath, { readonly: true }); // Open in read-only mode for safety
 
 // --- DATA FETCHING & INITIAL FILTERING ---
 
 const parentSlug = Astro.url.pathname.split('/')[1];
 const currentFolder = Astro.url.pathname.split('/')[2];
-const common = commonData.find(item => item.M_SLUG === parentSlug) || commonData[0];
-const www = wwwData[0];
 
-// Filter articles for the current locale and published status
-const filteredArticles = articleData
-    .filter(article => article.M_SLUG === parentSlug && article.PUBLISH_Y_N === "1")
-    .sort((a, b) => new Date(b.ARTICLE_PUBLISH_DATE).getTime() - new Date(a.ARTICLE_PUBLISH_DATE).getTime());
+// --- Data Fetching from Database ---
+
+// Fetch all required data in a single transaction for efficiency.
+const { common, www, filteredArticles, authorData, publishedLocales } = db.transaction(() => {
+    // Fetch common translations and settings for the current locale.
+    const commonData = db.prepare('SELECT * FROM common WHERE M_SLUG = ?').get(parentSlug) as any;
+    
+    // Fetch global site data (www table)
+    const wwwData = db.prepare('SELECT * FROM www LIMIT 1').get() as any;
+    
+    // Filter articles for the current locale and published status
+    const articles = db.prepare("SELECT * FROM article WHERE M_SLUG = ? AND PUBLISH_Y_N = '1' ORDER BY ARTICLE_PUBLISH_DATE DESC").all(parentSlug) as any[];
+    
+    // Fetch all authors for author lookups
+    const authors = db.prepare('SELECT * FROM author').all() as any[];
+    
+    // Fetch all published locales for the language switcher.
+    const locales = db.prepare("SELECT M_SLUG FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all() as any[];
+
+    return { 
+        common: commonData || {}, // Fallback to an empty object if no common data is found
+        www: wwwData,
+        filteredArticles: articles,
+        authorData: authors,
+        publishedLocales: locales
+    };
+})();
 
 // --- NEW: DYNAMIC AUTHOR FILTER (ENHANCED) ---
 
 // 1. Create an efficient lookup map for authors by their ID
-const authorMap = new Map(authorData.map(author => [author.AUTHOR_ID, author]));
+const authorMap = new Map(authorData.map((author: any) => [author.AUTHOR_ID, author]));
 
 // 2. Get a unique list of author IDs from the filtered articles
-const uniqueAuthorIds = [...new Set(filteredArticles.map(article => article.AUTHOR_ID))];
+const uniqueAuthorIds = [...new Set(filteredArticles.map((article: any) => article.AUTHOR_ID))];
 
 // 3. Create a list of author objects with their ID and resolved name, then sort it
 const uniqueAuthors = uniqueAuthorIds.map(id => {
@@ -49,10 +73,7 @@ const initialArticles = filteredArticles.slice(0, BATCH_SIZE);
 
 const languageIso = filteredArticles[0]?.M_LANGUAGE_ISO || 'sl';
 const countryCode = filteredArticles[0]?.M_COUNTRY_CODE || 'SI';
-const contentOrientation = commonData.find(item =>
-    item.M_LANGUAGE_ISO === languageIso &&
-    item.M_COUNTRY_CODE === countryCode
-)?.M_CONTENT_ORIENTATION || 'ltr';
+const contentOrientation = common.M_CONTENT_ORIENTATION || 'ltr';
 
 const pageTitle = common.PAGE_COLLECTION_2_LISTING_TITLE;
 const pageDescription = common.PAGE_COLLECTION_2_LISTING_DESCRIPTION;
@@ -160,7 +181,7 @@ const collectionPageSchema = {
     "url": Astro.url.href,
     "mainEntity": {
         "@type": "ItemList",
-        "itemListElement": filteredArticles.map((article, index) => ({
+        "itemListElement": filteredArticles.map((article: any, index: number) => ({
             "@type": "ListItem",
             "position": index + 1,
             "item": {
@@ -183,8 +204,8 @@ const schema = [collectionPageSchema, organizationSchema];
 
 // --- LANGUAGE LINKS ---
 const languageLinksMap: Record<string, string> = {};
-for (const localeObj of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
-  const articleForLocale = articleData.find(a =>
+for (const localeObj of publishedLocales) {
+  const articleForLocale = filteredArticles.find((a: any) =>
     a.M_SLUG === localeObj.M_SLUG && a.PUBLISH_Y_N === "1" && a.PAGE_COLLECTION_2_LISTING_SLUG?.trim()
   );
   if (articleForLocale) {

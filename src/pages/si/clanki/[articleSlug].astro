@@ -1,11 +1,13 @@
 ---
+import path from 'path';
+import Database from 'better-sqlite3';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import articleDataJson from '../../../data/article.json';
-import wwwData from '../../../data/www.json';
-import commonData from '../../../data/common.json';
-import authorDataJson from '../../../data/author.json';
-import products from '../../../data/product.json';
-import localeData from '../../../data/locale.json';
+
+// --- Database Connection ---
+// Establish a connection to the SQLite database.
+// This is more efficient than loading multiple large JSON files into memory.
+const dbPath = path.join(process.cwd(), 'src/data/data.db');
+const db = new Database(dbPath, { readonly: true }); // Open in read-only mode for safety
 
 // --- Type Definitions for Props (originally from ArticleLayout.astro) ---
 export interface AuthorInfo {
@@ -83,25 +85,48 @@ const { articleSlug } = Astro.params;
 // Get the locale from the URL path (e.g., 'si' from /si/clanki/...)
 const locale = Astro.url.pathname.split('/')[1];
 
-// Find the matching common data object based on M_SLUG
-const common = commonData.find(item => item.M_SLUG === locale) || commonData[0];
+// --- Data Fetching from Database ---
 
-// Filter articleData to only include entries matching the current locale
-const localeArticleData = articleDataJson.filter(entry => entry.M_SLUG === locale);
-
-// Find the matching article entry from the filtered data
-const article = localeArticleData.find(entry => entry.ARTICLE_SLUG === articleSlug);
+// 1. Fetch the primary article data for the current locale and slug.
+// Uses .get() as we expect only one record.
+const article = db.prepare('SELECT * FROM article WHERE M_SLUG = ? AND ARTICLE_SLUG = ?').get(locale, articleSlug) as any;
 
 if (!article || article.PUBLISH_Y_N !== "1") {
   return Astro.redirect('/404');
 }
 
-const www = wwwData[0];
+// 2. Fetch all other required data in a single transaction for efficiency.
+// This is much faster than running multiple separate queries.
+const { www, common, authorData, products, publishedLocales, altArticleEntries } = db.transaction(() => {
+    // Fetch global site data (www table)
+    const wwwData = db.prepare('SELECT * FROM www LIMIT 1').get() as any;
 
-// Find the author data from author.json based on matching AUTHOR_ID with PAGE_ID
-const authorData = authorDataJson.find(
-  (author) => author.PAGE_ID === article.AUTHOR_ID
-);
+    // Fetch common translations and settings for the current locale.
+    // If a locale-specific entry doesn't exist, it will be null. The template should handle this gracefully or have a fallback.
+    const commonData = db.prepare('SELECT * FROM common WHERE M_SLUG = ?').get(locale) as any;
+    
+    // Find the author data from author table based on matching AUTHOR_ID with PAGE_ID
+    const authorDataResult = db.prepare('SELECT * FROM author WHERE PAGE_ID = ?').get(article.AUTHOR_ID) as any;
+    
+    // Fetch all products for product lookups
+    const productsData = db.prepare("SELECT * FROM product WHERE PUBLISH_Y_N = '1'").all() as any[];
+    
+    // Fetch all published locales for the language switcher.
+    const locales = db.prepare("SELECT M_SLUG FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all() as any[];
+    
+    // Fetch all alternate article entries for the current article across all locales.
+    // This is more efficient than querying inside a loop.
+    const alts = db.prepare("SELECT M_SLUG, PAGE_COLLECTION_2_LISTING_SLUG, ARTICLE_SLUG FROM article WHERE ARTICLE_NUMBER = ? AND PUBLISH_Y_N = '1'").all(article.ARTICLE_NUMBER) as any[];
+
+    return { 
+        www: wwwData, 
+        common: commonData || {}, // Fallback to an empty object if no common data is found
+        authorData: authorDataResult,
+        products: productsData,
+        publishedLocales: locales,
+        altArticleEntries: alts
+    };
+})();
 
 if (!authorData) {
   return Astro.redirect('/404');
@@ -129,10 +154,7 @@ const languageIso = article.M_LANGUAGE_ISO;
 const countryCode = article.M_COUNTRY_CODE;
 
 // Find matching content orientation from common.json
-const contentOrientation = commonData.find(item =>
-  item.M_LANGUAGE_ISO === languageIso &&
-  item.M_COUNTRY_CODE === countryCode
-)?.M_CONTENT_ORIENTATION; // Default to 'ltr' if no match found
+const contentOrientation = common.M_CONTENT_ORIENTATION || 'ltr';
 
 // --- Article Specific Metadata ---
 const articleMetadata = {
@@ -199,7 +221,7 @@ const pageKeywords = [
 // --- Related Articles Data and Logic ---
 // Helper function to find article by ID
 const findArticleById = (articleId: string) => {
-  return articleDataJson.find(entry => entry.PAGE_ID === articleId && entry.PUBLISH_Y_N === "1");
+  return db.prepare("SELECT * FROM article WHERE PAGE_ID = ? AND PUBLISH_Y_N = '1'").get(articleId) as any;
 };
 
 // Get related articles from the current article's data
@@ -241,7 +263,7 @@ const relatedArticlesForPage: RelatedArticlesContent = {
 const findProductById = (productId: string) => {
   // Remove 'p' prefix if it exists
   const cleanId = productId.replace('p', '');
-  return products.find(p => p.PRODUCT_ID === cleanId && p.PUBLISH_Y_N === "1");
+  return products.find((p: any) => p.PRODUCT_ID === cleanId && p.PUBLISH_Y_N === "1");
 };
 
 // Get basic signs (first 3 products)
@@ -463,7 +485,8 @@ const mainContent = { // Content for the main article body
   },
   h2_3: {
     text: article.ARTICLE_H2_3,
-    content: article.ARTICLE_MAIN_CONTENT_5
+    content: article.ARTICLE_MAIN_CONTENT_5,
+    conclusion: article.ARTICLE_MAIN_CONTENT_6
   },
   h2_4: {
     text: article.ARTICLE_H2_4,
@@ -493,31 +516,28 @@ const formatDate = (dateString: string, locale: string, options: Intl.DateTimeFo
 const tocHeadings = articleMetadata.headings.filter(heading => heading.depth >= 2 && heading.depth <= 3);
 
 // Build the language link map
-const languageLinksMap = {};
-for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
+const languageLinksMap: Record<string, string> = {};
+// Create a lookup map from the pre-fetched alternate entries.
+const altArticleMap = new Map(altArticleEntries.map((a: any) => [a.M_SLUG, a]));
+
+for (const localeObj of publishedLocales) {
   // Find alternate article for this locale
-  const altArticle = articleDataJson.find(a =>
-    a.ARTICLE_NUMBER === article.ARTICLE_NUMBER &&
-    a.M_SLUG === locale.M_SLUG &&
-    a.PUBLISH_Y_N === "1"
-  );
+  const altArticle = altArticleMap.get(localeObj.M_SLUG);
   if (altArticle) {
-    languageLinksMap[locale.M_SLUG] = `/${altArticle.M_SLUG}/${altArticle.PAGE_COLLECTION_2_LISTING_SLUG}/${altArticle.ARTICLE_SLUG}`;
+    languageLinksMap[localeObj.M_SLUG] = `/${altArticle.M_SLUG}/${altArticle.PAGE_COLLECTION_2_LISTING_SLUG}/${altArticle.ARTICLE_SLUG}`;
   } else {
-    languageLinksMap[locale.M_SLUG] = `/${locale.M_SLUG}`;
+    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}`;
   }
 }
 
 // Get alternative language links for the current article
-const getAlternativeLanguageLinks = (currentArticle, localeData, articleDataJson) => {
-  const languageLinksMap = {};
-  for (const locale of localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1")) {
+const getAlternativeLanguageLinks = (currentArticle: any, publishedLocales: any[], altArticleEntries: any[]) => {
+  const languageLinksMap: Record<string, string> = {};
+  const altArticleMap = new Map(altArticleEntries.map((a: any) => [a.M_SLUG, a]));
+  
+  for (const locale of publishedLocales) {
     // Find alternate article for this locale
-    const altArticle = articleDataJson.find(a =>
-      a.ARTICLE_NUMBER === currentArticle.ARTICLE_NUMBER &&
-      a.M_SLUG === locale.M_SLUG &&
-      a.PUBLISH_Y_N === "1"
-    );
+    const altArticle = altArticleMap.get(locale.M_SLUG);
     if (altArticle) {
       languageLinksMap[locale.M_SLUG] = `/${altArticle.M_SLUG}/${altArticle.PAGE_COLLECTION_2_LISTING_SLUG}/${altArticle.ARTICLE_SLUG}`;
     } else {
@@ -528,7 +548,17 @@ const getAlternativeLanguageLinks = (currentArticle, localeData, articleDataJson
 };
 
 // Usage:
-const alternativeLinks = getAlternativeLanguageLinks(article, localeData, articleDataJson);
+const alternativeLinks = getAlternativeLanguageLinks(article, publishedLocales, altArticleEntries);
+
+// Convert alternativeLinks to the expected array format for BaseLayout
+const alternativeLinksArray = Object.entries(alternativeLinks).map(([code, href]) => ({
+  code,
+  country: code.toUpperCase(),
+  name: code.toUpperCase(),
+  languageIso: code,
+  hreflang: code,
+  href
+}));
 ---
 
 <BaseLayout
@@ -540,7 +570,7 @@ const alternativeLinks = getAlternativeLanguageLinks(article, localeData, articl
   ogImage={articleMetadata.ogImage}
   keywords={pageKeywords}
   schema={combinedSchema}
-  alternativeLinks={alternativeLinks}
+  alternativeLinks={alternativeLinksArray}
   languageLinksMap={languageLinksMap}
 >
   <!-- Hero Section with Dark Background -->
