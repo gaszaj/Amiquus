@@ -5,29 +5,21 @@ import { actions, isInputError } from 'astro:actions';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 // --- Database Connection ---
-// Establish a connection to the SQLite database.
-// This is more efficient than loading multiple large JSON files into memory.
 const dbPath = path.join(process.cwd(), 'src/data/data.db');
-const db = new Database(dbPath, { readonly: true }); // Open in read-only mode for safety
+const db = new Database(dbPath, { readonly: true });
 
 export const prerender = false;
 
 // --- Data Fetching from Database ---
-
-// Get the locale and slug from the URL parameters
 const { EEATslug } = Astro.params;
 const locale = Astro.url.pathname.split('/')[1];
 
-// 1. Fetch the primary EEAT page data for the current locale and slug.
-// Uses .get() as we expect only one record.
 const eeatEntry = db.prepare('SELECT * FROM eeat WHERE M_SLUG = ? AND EEAT_SLUG = ?').get(locale, EEATslug);
 
-// If no entry is found, redirect to 404.
 if (!eeatEntry) {
   return Astro.redirect('/404');
 }
 
-// 2. Perform validation checks based on the fetched data.
 const filteringNumber = parseInt(eeatEntry.EEAT_FILTERING);
 const isValidPage = eeatEntry.PUBLISH_Y_N === "1" && filteringNumber >= 1 && filteringNumber <= 28;
 
@@ -35,63 +27,70 @@ if (!isValidPage) {
   return Astro.redirect('/404');
 }
 
-// 3. Fetch all other required data in a single transaction for efficiency.
-// This is much faster than running multiple separate queries.
-const { www, common, authors, publishedLocales, altEeatEntries } = db.transaction(() => {
-    // Fetch global site data (www table)
+const { www, common, authors, publishedLocales, altEeatEntries, eeatSlugMap } = db.transaction(() => {
     const wwwData = db.prepare('SELECT * FROM www LIMIT 1').get();
-
-    // Fetch common translations and settings for the current locale.
-    // If a locale-specific entry doesn't exist, it will be null. The template should handle this gracefully or have a fallback.
     const commonData = db.prepare('SELECT * FROM common WHERE M_SLUG = ?').get(locale);
-
-    // Conditionally fetch authors only if the page requires them (e.g., "About Us" or "Editorial Policy").
-    // Uses .all() as we expect multiple authors.
     const authorData = (filteringNumber === 20 || filteringNumber === 13)
       ? db.prepare("SELECT * FROM author WHERE M_SLUG = ? AND PUBLISH_Y_N = '1'").all(locale)
       : [];
-    
-    // Fetch all published locales for the language switcher.
     const locales = db.prepare("SELECT M_SLUG FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all();
-    
-    // Fetch all alternate EEAT page slugs for the current page type across all locales.
-    // This is more efficient than querying inside a loop.
     const alts = db.prepare("SELECT M_SLUG, EEAT_SLUG FROM eeat WHERE EEAT_FILTERING = ? AND PUBLISH_Y_N = '1'").all(eeatEntry.EEAT_FILTERING);
+    const eeatSlugsForLocale = db.prepare("SELECT EEAT_FILTERING, EEAT_SLUG FROM eeat WHERE M_SLUG = ? AND PUBLISH_Y_N = '1'").all(locale);
+    const slugMap = new Map(eeatSlugsForLocale.map(e => [e.EEAT_FILTERING, e.EEAT_SLUG]));
 
     return { 
         www: wwwData, 
-        common: commonData || {}, // Fallback to an empty object if no common data is found
+        common: commonData || {},
         authors: authorData,
         publishedLocales: locales,
-        altEeatEntries: alts
+        altEeatEntries: alts,
+        eeatSlugMap: slugMap
     };
 })();
 
 // --- Page Logic and Variable Definitions ---
-
-// Assign the main entry to a simpler variable name.
 const eeat = eeatEntry;
+const isContactPage = filteringNumber === 19 || filteringNumber === 24 || filteringNumber === 25;
 
-// Determine if the page should display a contact form.
-const isContactPage = filteringNumber === 24 || filteringNumber === 25;
-
-// Helper functions for URL generation (unchanged).
-const getAbsoluteUrl = (path: string) => {
-    return new URL(`/${locale}${path}`, Astro.url.origin).toString();
+const processDynamicLinks = (htmlContent: string | null, slugMap: Map<string, string>, currentLocale: string) => {
+  if (!htmlContent) return '';
+  const linkRegex = /<a\s+(?:[^>]*?\s+)?data-eeat-link="([^"]+)"(?:\s+data-anchor-slug="([^"]+)")?([^>]*)>(.*?)<\/a>/g;
+  return htmlContent.replace(linkRegex, (match, linkId, anchorSlug, otherAttributes, anchorText) => {
+    let resolvedUrl = '#'; 
+    if (linkId === 'home') {
+      resolvedUrl = `/${currentLocale}`;
+    } else {
+      const slug = slugMap.get(linkId);
+      if (slug) {
+        resolvedUrl = `/${currentLocale}/${slug}`;
+      }
+    }
+    if (anchorSlug) {
+      resolvedUrl += `#${anchorSlug}`;
+    }
+    return `<a href="${resolvedUrl}"${otherAttributes}>${anchorText}</a>`;
+  });
 };
-const getBaseUrl = (path: string) => {
-    return new URL(path, Astro.url.origin).toString();
-};
 
-// Define content variables for the template (unchanged).
+const getAbsoluteUrl = (path: string) => new URL(`/${locale}${path}`, Astro.url.origin).toString();
+const getBaseUrl = (path: string) => new URL(path, Astro.url.origin).toString();
+
+let processedContent1 = processDynamicLinks(eeat.EEAT_CONTENT, eeatSlugMap, locale);
+let processedContent2 = processDynamicLinks(eeat.EEAT_CONTENT_2, eeatSlugMap, locale);
+
+const baseUrl = getBaseUrl('/');
+processedContent1 = processedContent1.replace(/%%BASE_URL%%/g, baseUrl.slice(0, -1));
+processedContent2 = processedContent2.replace(/%%BASE_URL%%/g, baseUrl.slice(0, -1));
+
+const pageContent = processedContent1;
+const pageContent2 = processedContent2;
+
 const languageIso = eeat.M_LANGUAGE_ISO;
 const countryCode = eeat.M_COUNTRY_CODE;
 const contentOrientation = common.M_CONTENT_ORIENTATION || 'ltr';
 const seoTitle = eeat.EEAT_NAME;
 const headline = eeat.EEAT_H1;
 const pageDescription = eeat.EEAT_META_SEO;
-const pageContent = eeat.EEAT_CONTENT;
-const pageContent2 = eeat.EEAT_CONTENT_2;
 const pageogImage = eeat.EEAT_OG_IMAGE_PATH;
 const articlePublishDate = eeat.EEAT_DATE_PUBLISHED;
 const articleUpdateDate = eeat.EEAT_DATE_UPDATED;
@@ -104,7 +103,7 @@ const pageKeywords = [
   www.PAGE_ORGANISATION_FULL_NAME
 ].join(', ');
 
-// --- FORM HANDLING (Unchanged) ---
+// --- FORM HANDLING ---
 const submissionResult = await Astro.getActionResult(actions.submitContactForm);
 const formErrors: Record<string, string[] | undefined> = {};
 let genericError: string | undefined = undefined;
@@ -114,7 +113,7 @@ if (submissionResult) {
   if (submissionResult.error) {
     if (isInputError(submissionResult.error)) {
       Object.assign(formErrors, submissionResult.error.fields);
-  } else {
+    } else {
       genericError = submissionResult.error.message;
     }
   } else if (submissionResult.data?.success) {
@@ -124,23 +123,19 @@ if (submissionResult) {
 
 const getFieldError = (fieldName: string): string | undefined => formErrors[fieldName]?.[0];
 
-// --- Language Link Generation (Refactored for Performance) ---
-// Create a lookup map from the pre-fetched alternate entries.
+// --- Language Link Generation ---
 const altEeatMap = new Map(altEeatEntries.map(e => [e.M_SLUG, e.EEAT_SLUG]));
-
-// Build the language link map for the language picker.
 const languageLinksMap: Record<string, string> = {};
 for (const l of publishedLocales) {
   const altSlug = altEeatMap.get(l.M_SLUG);
   if (altSlug) {
     languageLinksMap[l.M_SLUG] = `/${l.M_SLUG}/${altSlug}`;
   } else {
-    // Fallback to the locale's homepage if no direct equivalent page exists.
     languageLinksMap[l.M_SLUG] = `/${l.M_SLUG}`;
   }
 }
 
-// --- Schema Definitions (Unchanged) ---
+// --- Schema Definitions ---
 const webpageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
@@ -265,7 +260,7 @@ const organizationSchema = {
 
 const combinedSchema = [webpageSchema, organizationSchema];
 
-// --- Helper Functions (Unchanged) ---
+// --- Helper Functions ---
 const formatDate = (dateString: string, locale: string) => {
   if (!dateString) return '';
   return new Date(dateString).toLocaleDateString(locale, {
@@ -351,7 +346,7 @@ const formatDate = (dateString: string, locale: string) => {
     </div>
   </div>
 
-  <!-- If Contact Page: Form + Main Content Part 2 (eeat.EEAT_CONTENT_2) -->
+  <!-- If Contact Page: Form + Main Content Part 2 -->
   {isContactPage && (
     <>
       <!-- Contact Form Section -->
@@ -439,7 +434,7 @@ const formatDate = (dateString: string, locale: string) => {
         </div>
       </section>
 
-      <!-- Main Content Part 2 (eeat.EEAT_CONTENT_2) for contact pages -->
+      <!-- Main Content Part 2 for contact pages -->
       {pageContent2 && (
         <div class="container mx-auto px-4 py-12">
           <div class="prose prose-lg max-w-4xl mx-auto">
@@ -462,26 +457,26 @@ const formatDate = (dateString: string, locale: string) => {
   }
 
   /* Headings */
-  .prose :global(h2) {
-    color: black;
-    font-size: 1.875rem; /* 30px */
-    font-weight: 700;
-    margin-top: 2.5rem;
-    margin-bottom: 1.5rem;
-  }
-
+  .prose :global(h2),
   .prose :global(h3) {
     color: black;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
+    font-weight: 700;
+  }
+  .prose :global(h2) {
+    font-size: 1.875rem; /* 30px */
+    margin-block-start: 2.5rem;
+    margin-block-end: 1.5rem;
+  }
+  .prose :global(h3) {
     font-size: 1.5rem; /* 24px */
-    font-weight: 600;
+    margin-block-start: 2rem;
+    margin-block-end: 1rem;
   }
 
   /* Paragraphs */
   .prose :global(p) {
     color: #374151; /* Tailwind gray-700 */
-    margin-bottom: 1.25rem;
+    margin-block-end: 1.25rem;
     line-height: 1.75;
   }
 
@@ -490,166 +485,141 @@ const formatDate = (dateString: string, locale: string) => {
     color: black;
     text-decoration: underline;
     text-decoration-color: #BCEF2F; /* signal-green */
-    text-underline-offset: 2px;
+    text-underline-offset: 4px;
+    text-decoration-skip-ink: auto;
     transition: color 0.2s ease, text-decoration-color 0.2s ease;
   }
-
   .prose :global(a:hover) {
-    color: #BCEF2F; /* signal-green */
+    color: #BCEF2F;
     text-decoration-color: black;
   }
 
-  /* Lists */
-  .prose :global(ul) {
-    list-style-type: none;
-    margin-inline-start: 1.25rem;
-    margin-bottom: 1.25rem;
-  }
-
-  .prose :global(ol) { 
-    margin-inline-start: 1.25rem;
-    margin-bottom: 1.25rem;
+  /* --- MODIFIED: List Styling --- */
+  .prose :global(ul),
+  .prose :global(ol) {
+    list-style: none;
+    margin-block-end: 1.25rem;
+    padding-inline-start: 0;
   }
 
   .prose :global(li) {
     position: relative;
-    padding-inline-start: 1.5rem;
-    margin-bottom: 0.75rem;
+    padding-inline-start: 1.75rem; 
+    margin-block-end: 0.75rem;
     line-height: 1.75;
   }
 
-  .prose :global(ul li::before) {
+  /* Marker for Unordered Lists (ul > li) */
+  /* This rule now ONLY applies to direct children of a UL, fixing the nested list issue. */
+  .prose :global(ul > li::before) {
     content: "";
     position: absolute;
-    inset-inline-start: 0;
-    top: 0.75rem; /* Adjusted for line-height */
+    inset-inline-start: 0.25rem;
+    top: 0.75rem;
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 50%;
-    background: #BCEF2F; /* signal-green */
+    background: #BCEF2F;
     border: 2px solid black;
   }
   
-  /* Underline */
-  .prose :global(u) {
-    text-decoration: none;
-    position: relative;
+  /* Counter for Ordered Lists (ol) */
+  .prose :global(ol) {
+    counter-reset: list-counter;
   }
-
-  .prose :global(u::after) {
-    content: "";
+  /* Marker for Ordered Lists (ol > li) */
+  /* This rule now ONLY applies to direct children of an OL, fixing the nested list issue. */
+  .prose :global(ol > li::before) {
+    content: counter(list-counter) ".";
+    counter-increment: list-counter;
     position: absolute;
     inset-inline-start: 0;
-    bottom: -2px;
-    width: 100%;
-    height: 2px;
-    background: repeating-linear-gradient(
-      45deg,
-      #BCEF2F,
-      #BCEF2F 2px,
-      transparent 2px,
-      transparent 4px
-    );
-  }
-
-  /* Bold text */
-  .prose :global(b) {
-    font-weight: 700;
-  }
-
-  /* List items with links */
-  .prose :global(li a) {
-    display: inline-block;
-  }
-
-  /* Spacing between sections */
-  .prose :global(h2 + p) {
-    margin-top: 1rem;
-  }
-
-  .prose :global(p + ul) {
-    margin-top: 0.5rem;
+    font-weight: 600;
+    color: black;
   }
   
-  /* FAQ Section styling */
-  .prose :global(.faq-section) {
-    margin-top: 2rem;
-  }
+  /* Text Formatting */
+  .prose :global(u) { /* No changes needed */ }
+  .prose :global(b), .prose :global(strong) { font-weight: 700; color: black; }
+  .prose :global(i), .prose :global(em) { font-style: italic; }
 
-  .prose :global(.faq-section p) {
-    margin-bottom: 1.5rem;
+  /* Tables */
+  .prose :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin-block: 2rem;
+    font-size: 0.9em;
   }
+  .prose :global(thead) { background-color: #f3f4f6; }
+  .prose :global(th), .prose :global(td) {
+    border: 1px solid #e5e7eb;
+    padding-block: 0.75rem;
+    padding-inline: 1rem;
+    text-align: start;
+  }
+  .prose :global(th) { font-weight: 600; color: #111827; }
+  .prose :global(tbody tr:nth-child(even)) { background-color: #f9fafb; }
+
+  /* Spacing & Misc */
+  .prose :global(h2 + p) { margin-block-start: 1rem; }
+  .prose :global(p + ul), .prose :global(p + ol) { margin-block-start: 0.5rem; }
+  .prose :global(.faq-section) { margin-block-start: 2rem; }
+  .prose :global(.faq-section p) { margin-block-end: 1.5rem; }
+
+  /* Highlight Classes */
+  .prose :global(.pseo1) {
+    background-color: #f9fafb;
+    border-inline-start: 4px solid #BCEF2F;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+  }
+  .prose :global(.pseo2) { /* No changes needed */ }
+  .prose :global(.pseo3) { /* No changes needed */ }
 
   /* Animations */
-  :global(.animate-fade-in) {
-    animation: fadeIn 0.5s ease-in-out;
-  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  :global(.animate-fade-in) { animation: fadeIn 0.5s ease-in-out; }
+  :global(.animate-slide-up) { animation: slideUp 0.5s ease-out; }
 
-  :global(.animate-slide-up) {
-    animation: slideUp 0.5s ease-out;
-  }
+  /* Author Cards */
+  .prose :global(.author-card) { text-decoration: none; }
+  .prose :global(.author-card:hover) { text-decoration: none; }
+  .prose :global(.author-card h3) { text-decoration: none; }
+  .prose :global(.author-card:hover h3) { text-decoration: none; }
+  .prose :global(.author-card img) { backface-visibility: hidden; transform: translateZ(0); -webkit-font-smoothing: subpixel-antialiased; }
 
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
+  /* Form Validation */
+  :where(input, select, textarea):user-invalid { border-color: #ef4444; }
 
-  @keyframes slideUp {
-    from {
-      transform: translateY(20px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  /* Add these new styles for author cards */
-  .prose :global(.author-card) {
-    text-decoration: none;
-  }
-
-  .prose :global(.author-card:hover) {
-    text-decoration: none;
-  }
-
-  .prose :global(.author-card h3) {
-    text-decoration: none;
-  }
-
-  .prose :global(.author-card:hover h3) {
-    text-decoration: none;
-  }
-
-  /* Ensure images maintain aspect ratio during hover */
-  .prose :global(.author-card img) {
-    backface-visibility: hidden;
-    transform: translateZ(0);
-    -webkit-font-smoothing: subpixel-antialiased;
-  }
-
-  /* Client side validation styles for modern browsers */
-  :where(input, select, textarea):user-invalid {
-      border-color: #ef4444; /* red-500 */
-  }
-
-  /* RTL-specific styles for better text rendering */
-  [dir="rtl"] .prose :global(p) {
-    letter-spacing: 0;
-  }
-
+  /* RTL Specifics */
+  [dir="rtl"] .prose :global(p),
   [dir="rtl"] .prose :global(h1),
   [dir="rtl"] .prose :global(h2),
-  [dir="rtl"] .prose :global(h3),
-  [dir="rtl"] .prose :global(h4),
-  [dir="rtl"] .prose :global(h5),
-  [dir="rtl"] .prose :global(h6) {
+  [dir="rtl"] .prose :global(h3) {
     letter-spacing: 0;
   }
-
-  /* Ensure proper text truncation in RTL */
   [dir="rtl"] .prose :global(.line-clamp-3) {
     text-align: start;
+  }
+
+  /* Definition Lists (dl, dt, dd) Styling */
+  .prose :global(dl) {
+    margin-block: 2rem 2rem; /* Add vertical spacing before and after the list */
+    padding: 0;
+  }
+  .prose :global(dt) {
+    font-weight: 700; /* Make term bold */
+    color: #111827;   /* Use dark color for term */
+    margin-top: 1.25rem; /* Space above each term */
+    margin-bottom: 0.25rem; /* Small space below term */
+    font-size: 1.1em; /* Slightly larger font for term */
+  }
+  .prose :global(dd) {
+    margin-left: 1.5rem; /* Indent definition */
+    margin-bottom: 1rem; /* Space below each definition */
+    color: #374151; /* Subtle gray for definition text */
+    font-size: 1em;
+    line-height: 1.7;
   }
 </style>

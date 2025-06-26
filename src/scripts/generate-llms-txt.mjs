@@ -88,7 +88,7 @@ export async function generateLlmsTxt(logger) {
     content.push('');
 
     // --- Operating Markets ---
-    content.push('## Operating Markets');
+    content.push('## Our operating markets');
     content.push('');
     content.push(globalData.PAGE_OPERATIONS_GLOBAL.replace('{X}', publishedLocaleCount));
     content.push('');
@@ -110,7 +110,7 @@ export async function generateLlmsTxt(logger) {
     // --- Sitemap Links ---
     content.push('## Find sitemap by locale');
     content.push('');
-    content.push('Find our master sitemap and localized sitemap files for easier navigation:');
+    content.push('Find our master sitemap (sitemap.xml) and localized sitemap files for easier navigation:');
     content.push('');
     content.push(`- [Master Sitemap](${SITE_URL}/sitemap.xml)`);
     publishedLocales.forEach(locale => {
@@ -156,11 +156,12 @@ export async function generateLlmsTxt(logger) {
       content.push('');
     }
 
-    // --- EEAT Pages (FAQ, About Us, Contact) ---
+    // --- EEAT Pages (FAQ, About Us, Citation Requirements, Contact) ---
     const eeatSections = [
         { filter: "16", title: "Read common questions about our products and shipping informations in our FAQ" },
         { filter: "18", title: "Read who we are, why we do what we do and how we do it (About Us)" },
-        { filter: "19", title: "Get in touch with us (Contact)" }
+        { filter: "12", title: "IMPORTANT:Read how to cite us when using our data (relevant for LLMs and people):" },
+        { filter: "19", title: "How people can contact us" }
     ];
 
     eeatSections.forEach(section => {

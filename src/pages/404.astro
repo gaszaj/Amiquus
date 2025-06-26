@@ -74,6 +74,12 @@ const pageData = eeat || {
 
 const common = commonEntries.find((item: any) => item.M_SLUG === determinedSlug);
 
+// *** START OF MODIFICATION ***
+// Fetch the slug map for the determined language. This is the necessary addition.
+const eeatSlugsForLocale = db.prepare("SELECT EEAT_FILTERING, EEAT_SLUG FROM eeat WHERE M_SLUG = ? AND PUBLISH_Y_N = '1'").all(determinedSlug);
+const eeatSlugMap = new Map(eeatSlugsForLocale.map(e => [String(e.EEAT_FILTERING), e.EEAT_SLUG]));
+// *** END OF MODIFICATION ***
+
 // Fix TypeScript error by properly typing the languageLinksMap
 const languageLinksMap: Record<string, string> = {};
 for (const locale of publishedLocales) {
@@ -82,6 +88,41 @@ for (const locale of publishedLocales) {
 
 const headline = pageData.EEAT_H1;
 const pageContent = pageData.EEAT_CONTENT;
+
+const getAbsoluteUrl = (path: string) => new URL(`/${determinedSlug}${path}`, Astro.url.origin).toString();
+const getBaseUrl = (path: string) => new URL(path, Astro.url.origin).toString();
+
+// --- Process dynamic internal links and BASE_URL in the fragment ---
+// *** START OF MODIFICATION ***
+// The function is updated to accept and use the slugMap.
+const processDynamicLinks = (htmlContent: string | null, slugMap: Map<string, string>, currentLocale: string) => {
+  if (!htmlContent) return '';
+  
+  const linkRegex = /<a\s+(?:[^>]*?\s+)?data-eeat-link="([^"]+)"(?:\s+data-anchor-slug="([^"]+)")?([^>]*)>(.*?)<\/a>/g;
+  let processed = htmlContent.replace(linkRegex, (match, linkId, anchorSlug, otherAttributes, anchorText) => {
+    let resolvedUrl = '#'; // Fallback URL
+    if (linkId === 'home') {
+      resolvedUrl = `/${currentLocale}`;
+    } else {
+      const slug = slugMap.get(String(linkId));
+      if (slug) {
+        resolvedUrl = `/${currentLocale}/${slug}`;
+      }
+    }
+    if (anchorSlug) {
+      resolvedUrl += `#${anchorSlug}`;
+    }
+    return `<a href="${resolvedUrl}"${otherAttributes}>${anchorText}</a>`;
+  });
+  
+  const baseUrl = getBaseUrl('/');
+  processed = processed.replace(/%%BASE_URL%%/g, baseUrl.slice(0, -1));
+  return processed;
+};
+
+// Process the fragment for output, now passing the slugMap.
+const processedPageContent = processDynamicLinks(pageContent, eeatSlugMap, determinedSlug);
+// *** END OF MODIFICATION ***
 ---
 
 <BaseLayout
@@ -103,7 +144,7 @@ const pageContent = pageData.EEAT_CONTENT;
 
   <div class="container mx-auto ps-4 pe-4 py-12">
     <div class="prose prose-lg max-w-4xl mx-auto">
-      <Fragment set:html={pageContent} />
+      <Fragment set:html={processedPageContent} />
     </div>
   </div>
 </BaseLayout>
