@@ -1,0 +1,436 @@
+---
+// Path: /src/pages/si/kompleti/[bundleSlug].astro
+// Purpose: Bundle detail page with a 3-column layout, interactive customizer, and full order form.
+// Data: Database dependencies for bundle, products, common data, and locales.
+// Dependencies: BaseLayout, client-side scripts, astro:actions
+
+import path from 'path';
+import Database from 'better-sqlite3';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { actions, isInputError } from 'astro:actions';
+
+// --- Database Connection ---
+const dbPath = path.join(process.cwd(), 'src/data/data.db');
+const db = new Database(dbPath, { readonly: true });
+
+// --- DATA FETCHING & PROCESSING ---
+const { bundleSlug } = Astro.params;
+const locale = Astro.url.pathname.split('/')[1];
+
+const bundle = db.prepare("SELECT * FROM bundle WHERE BUNDLE_ASCII_SLUG = ? AND M_SLUG = ? AND PUBLISH_Y_N = '1'").get(bundleSlug, locale) as any;
+
+if (!bundle) {
+  return Astro.redirect('/404');
+}
+
+const includedProductIds = bundle.BUNDLE_PRODUCT_IDS.split(',').map(id => id.trim());
+
+const { common, www, includedProducts, relatedBundles, relatedArticles, publishedLocales, altBundleEntries } = db.transaction(() => {
+    const commonData = db.prepare('SELECT * FROM common WHERE M_SLUG = ?').get(locale) as any;
+    const wwwData = db.prepare('SELECT * FROM www LIMIT 1').get() as any;
+
+    const productsStmt = db.prepare(`SELECT * FROM product WHERE PRODUCT_ID IN (${includedProductIds.map(() => '?').join(',')})`);
+    const products = productsStmt.all(...includedProductIds) as any[];
+
+    const relatedB = bundle.BUNDLE_RELATED_B1 ? (db.prepare("SELECT * FROM bundle WHERE BUNDLE_ID = ? AND PUBLISH_Y_N = '1'").get(bundle.BUNDLE_RELATED_B1) as any) : null;
+    const relatedA = bundle.BUNDLE_RELATED_A1 ? (db.prepare("SELECT * FROM article WHERE PAGE_ID = ? AND PUBLISH_Y_N = '1'").get(bundle.BUNDLE_RELATED_A1) as any) : null;
+    
+    const locales = db.prepare("SELECT M_SLUG FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all() as any[];
+    
+    // Fetch alternate versions of this bundle for hreflang links
+    const alts = db.prepare("SELECT M_SLUG, PAGE_COLLECTION_3_LISTING_SLUG, BUNDLE_ASCII_SLUG FROM bundle WHERE BUNDLE_ID = ? AND PUBLISH_Y_N = '1'").all(bundle.BUNDLE_ID) as any[];
+
+    const productsMap = new Map(products.map(p => [p.PRODUCT_ID, p]));
+    const orderedProducts = includedProductIds.map(id => productsMap.get(id)).filter(Boolean);
+
+    return {
+        common: commonData || {},
+        www: wwwData,
+        includedProducts: orderedProducts,
+        relatedBundles: relatedB ? [relatedB] : [],
+        relatedArticles: relatedA ? [relatedA] : [],
+        publishedLocales: locales,
+        altBundleEntries: alts,
+    };
+})();
+
+// --- LOCALE & LANGUAGE LOGIC ---
+const languageIso = bundle.M_LANGUAGE_ISO;
+const countryCode = bundle.M_COUNTRY_CODE;
+const contentOrientation = common.M_CONTENT_ORIENTATION || 'ltr';
+
+// --- METADATA AND CONTENT PREPARATION ---
+const getBaseUrl = (path: string) => new URL(path, Astro.url.origin).toString();
+const productListForDownsell = includedProducts.map(p => `<a href='/${p.M_SLUG}/${p.PAGE_COLLECTION_1_LISTING_SLUG}/${p.PRODUCT_ASCII_SLUG}' class='font-semibold underline text-blue-900 hover:text-blue-700'>${p.PRODUCT_NAME}</a>`).join(', ');
+const downsellText = bundle.BUNDLE_DOWSELL_TEXT.replace('{PRODUCT_LIST}', productListForDownsell);
+const pageKeywords = [bundle.BUNDLE_NAME, common.PAGE_COLLECTION_3_LISTING_SLUG_HELPER, common.M_COUNTRY_NATIVE, www.PAGE_ORGANISATION_FULL_NAME].join(', ');
+
+const bundleFaqItems = [
+    { question: bundle.BUNDLE_Q1, answer: bundle.BUNDLE_A1 }, { question: bundle.BUNDLE_Q2, answer: bundle.BUNDLE_A2 },
+    { question: bundle.BUNDLE_Q3, answer: bundle.BUNDLE_A3 }, { question: bundle.BUNDLE_Q4, answer: bundle.BUNDLE_A4 },
+    { question: bundle.BUNDLE_Q5, answer: bundle.BUNDLE_A5 }, { question: bundle.BUNDLE_Q6, answer: bundle.BUNDLE_A6 }
+].filter(item => item.question && item.answer);
+
+const productQuantityOptions: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+// --- FORM HANDLING ---
+const submissionResult = await Astro.getActionResult(actions.submitOrder);
+const formErrors: Record<string, string[] | undefined> = {};
+let genericError: string | undefined = undefined;
+let successMessage: string | undefined = undefined;
+
+if (submissionResult) {
+  if (submissionResult.error) {
+    if (isInputError(submissionResult.error)) {
+      Object.assign(formErrors, submissionResult.error.fields);
+    } else {
+      genericError = submissionResult.error.message;
+    }
+  } else if (submissionResult.data?.success) {
+    successMessage = submissionResult.data.message;
+  }
+}
+const getFieldError = (fieldName: string): string | undefined => formErrors[fieldName]?.[0];
+
+// --- LANGUAGE SWITCHER LOGIC ---
+const languageLinksMap: Record<string, string> = {};
+const altBundleMap = new Map(altBundleEntries.map((b: any) => [b.M_SLUG, b]));
+for (const localeObj of publishedLocales) {
+  const altBundle = altBundleMap.get(localeObj.M_SLUG);
+  if (altBundle) {
+    languageLinksMap[localeObj.M_SLUG] = `/${altBundle.M_SLUG}/${altBundle.PAGE_COLLECTION_3_LISTING_SLUG}/${altBundle.BUNDLE_ASCII_SLUG}`;
+  } else {
+    languageLinksMap[localeObj.M_SLUG] = `/${localeObj.M_SLUG}`;
+  }
+}
+
+// --- SCHEMA MARKUP ---
+const combinedSchema = [{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": bundle.BUNDLE_PAGE_TITLE,
+  "description": bundle.BUNDLE_META_SEO,
+  "url": Astro.url.href,
+  "image": getBaseUrl(bundle.BUNDLE_OG_IMAGE_PATH),
+  "mainEntity": {
+    "@type": "ItemList",
+    "name": bundle.BUNDLE_H1,
+    "itemListElement": includedProducts.map((product, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "Product",
+        "name": product.PRODUCT_H1,
+        "url": getBaseUrl(`/${product.M_SLUG}/${product.PAGE_COLLECTION_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`),
+        "image": getBaseUrl(product.PRODUCT_IMAGE_PATH_L),
+        "mpn": product.PRODUCT_MPN,
+        "description": product.PRODUCT_META_SEO,
+        "brand": { "@type": "Brand", "name": www.PAGE_ORGANISATION_FULL_NAME },
+        "offers": {
+          "@type": "Offer",
+          "url": getBaseUrl(`/${product.M_SLUG}/${product.PAGE_COLLECTION_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`),
+          "priceCurrency": product.M_CURRENCY_CODE,
+          "price": product.M_PRODUCT_PRICE_RECALC,
+          "availability": "https://schema.org/InStock",
+          "itemCondition": "https://schema.org/NewCondition"
+        }
+      }
+    }))
+  }
+},
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": bundleFaqItems.map(item => ({
+    "@type": "Question",
+    "name": item.question,
+    "acceptedAnswer": { "@type": "Answer", "text": item.answer }
+  }))
+}];
+---
+<BaseLayout {languageIso} {countryCode} {contentOrientation} title={bundle.BUNDLE_PAGE_TITLE} description={bundle.BUNDLE_META_SEO} keywords={pageKeywords} schema={combinedSchema} {languageLinksMap}>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex flex-col lg:flex-row lg:gap-8 rtl:lg:flex-row-reverse">
+        
+        <!-- Left Sidebar: Price Calculator (Desktop Only) -->
+        <aside class="hidden lg:block lg:w-1/5">
+            <div class="sticky top-24">
+                <div id="price-summary-desktop" class="bg-black text-white rounded-lg shadow-lg p-6">
+                     <h2 class="text-xl font-bold mb-4 text-white">{common.BUNDLE_PRICE_LABEL}</h2>
+                     <div class="space-y-2 text-sm">
+                         <div class="flex justify-between items-center">
+                             <span class="text-gray-300">Cena izbranih znakov:</span>
+                             <span id="original-price-desktop" class="text-gray-300"></span>
+                         </div>
+                         <div class="flex justify-between items-center text-signal-green">
+                             <span class="font-semibold">{common.BUNDLE_SAVINGS_LABEL}:</span>
+                             <span id="savings-display-desktop" class="font-bold"></span>
+                         </div>
+                     </div>
+                     <hr class="border-gray-600 my-4"/>
+                     <div class="flex justify-between items-center text-2xl font-bold">
+                         <span>{common.BUNDLE_TOTAL_LABEL}:</span>
+                         <span id="total-price-display-desktop"></span>
+                     </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="lg:w-3/5">
+            <h1 class="text-3xl lg:text-4xl font-bold text-signal-dark mb-4">{bundle.BUNDLE_H1}</h1>
+            <p class="text-lg text-gray-600 mb-8">{bundle.BUNDLE_SUBTITLE}</p>
+
+            <div class="bg-gray-50 p-6 rounded-lg mb-8 border border-gray-200">
+                <h2 class="font-bold text-xl mb-4">{common.BUNDLE_BENEFITS_TITLE}</h2>
+                <ul class="space-y-2">
+                    {[bundle.BUNDLE_BENEFIT_1, bundle.BUNDLE_BENEFIT_2, bundle.BUNDLE_BENEFIT_3].filter(Boolean).map(benefit => (
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-green-500 me-3 mt-1 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                            <span>{benefit}</span>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+            <section id="bundle-customizer" class="mb-8">
+                <h2 class="text-2xl font-bold mb-2">{common.BUNDLE_CUSTOMIZE_TITLE}</h2>
+                <p class="text-gray-500 mb-6">{common.BUNDLE_CUSTOMIZE_DESC}</p>
+                <div class="space-y-4">
+                    {includedProducts.map(product => (
+                        <div class="bundle-item flex items-center bg-white p-4 rounded-lg border shadow-sm transition-all" data-price={product.M_PRODUCT_PRICE_RECALC}>
+                            <input type="checkbox" class="h-6 w-6 rounded border-gray-300 text-signal-green focus:ring-signal-green me-4 flex-shrink-0" checked>
+                            <img src={getBaseUrl(product.PRODUCT_IMAGE_PATH_L)} alt={product.PRODUCT_NAME} class="w-24 h-24 object-contain rounded-md me-4" loading="lazy">
+                            <div class="flex-grow">
+                                <p class="font-semibold text-signal-dark">{product.PRODUCT_NAME}</p>
+                                <a href={`/${product.M_SLUG}/${product.PAGE_COLLECTION_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`} target="_blank" class="text-sm text-gray-500 hover:underline">{common.PRODUCT_PAGE_RELATED_PRODUCT_VIEW_BUTTON_TEXT}</a>
+                            </div>
+                            <span class="font-bold text-lg ms-4">{product.M_PRODUCT_PRICE}</span>
+                        </div>
+                    ))}
+                </div>
+            </section>
+            
+            <!-- Mobile Price Calculator and Form -->
+            <div class="lg:hidden">
+                <div id="price-summary-mobile" class="bg-black text-white rounded-lg shadow-lg p-6 my-8">
+                     <h2 class="text-xl font-bold mb-4 text-white">{common.BUNDLE_PRICE_LABEL}</h2>
+                     <div class="space-y-2 text-sm">
+                         <div class="flex justify-between items-center">
+                             <span class="text-gray-300">Cena izbranih znakov:</span>
+                             <span id="original-price-mobile" class="text-gray-300"></span>
+                         </div>
+                         <div class="flex justify-between items-center text-signal-green">
+                             <span class="font-semibold">{common.BUNDLE_SAVINGS_LABEL}:</span>
+                             <span id="savings-display-mobile" class="font-bold"></span>
+                         </div>
+                     </div>
+                     <hr class="border-gray-600 my-4"/>
+                     <div class="flex justify-between items-center text-2xl font-bold">
+                         <span>{common.BUNDLE_TOTAL_LABEL}:</span>
+                         <span id="total-price-display-mobile"></span>
+                     </div>
+                </div>
+
+                <section id="narocilnica-mobile" class="scroll-mt-24 mb-8 bg-white rounded-lg shadow-sm p-6 md:p-8 border-2 border-signal-green">
+                  <!-- Mobile form content will be here -->
+                </section>
+            </div>
+
+            <div class="prose max-w-none my-8">
+                <h3>Opis kompleta</h3>
+                <p>{bundle.BUNDLE_DESCRIPTION_LONG}</p>
+            </div>
+            
+            <div class="bg-blue-50 border border-blue-200 text-blue-800 p-6 rounded-lg my-8">
+                <h3 class="font-bold mb-2 text-blue-900">{common.BUNDLE_DOWSELL_TITLE}</h3>
+                <p class="text-blue-800" set:html={downsellText} />
+            </div>
+
+            <section class="bg-signal-green rounded-xl p-6 md:p-8 mt-12">
+                <h2 class="text-2xl font-bold mb-6 text-black">{common.FORM_FAQ_TITLE}</h2>
+                <div class="space-y-4">
+                  {bundleFaqItems.map((item) => (
+                    <details class="bg-signal-green rounded-lg group">
+                      <summary class="p-4 cursor-pointer font-medium text-black hover:bg-[#a5d429] flex items-center justify-between rounded-t-lg border border-black group-open:rounded-b-none">
+                        <span>{item.question}</span>
+                        <svg class="w-6 h-6 transform transition-transform group-open:rotate-180 rtl:scale-x-[-1]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                      </summary>
+                      <div class="p-4 text-white bg-black rounded-b-lg">{item.answer}</div>
+                    </details>
+                  ))}
+                </div>
+            </section>
+        </main>
+
+        <!-- Right Sidebar: Order Form (Desktop Only) -->
+        <aside class="hidden lg:block lg:w-1/5">
+             <div id="narocilnica-desktop" class="sticky top-24">
+                <!-- Desktop form content will be here -->
+             </div>
+        </aside>
+
+    </div>
+</div>
+</BaseLayout>
+
+<div id="form-template" class="hidden">
+    <h2 class="text-2xl font-bold mb-6 text-black">{common.FORM_INQUIRY_TITLE}</h2>
+    <p class="text-signal-gray mb-6">{common.FORM_ORDER_SUBTITLE_BASE} prilagojenega kompleta.</p>
+    {successMessage && !submissionResult?.error && (
+        <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">{successMessage}</div>
+    )}
+    {genericError && (
+        <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">{genericError}</div>
+    )}
+    <form method="POST" action={actions.submitOrder.safe} class="grid grid-cols-1 gap-4">
+        <input type="hidden" class="form-product-title" name="productTitle" value="" />
+        <input type="hidden" name="pageUrl" value={Astro.url.href} />
+        <input type="hidden" name="locale" value={locale} />
+        <input type="hidden" class="form-selected-products" name="Selected Products" value="" />
+        <input type="hidden" class="form-final-price" name="Final Price" value="" />
+        <div>
+            <label for="form-name" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_NAME}</label>
+            <input id="form-name" type="text" name="Name" placeholder={common.FORM_PLACEHOLDER_NAME} class:list={["w-full ps-3 pe-3 py-2 border rounded-md", getFieldError('Name') ? 'border-red-500' : 'border-gray-300']} required />
+        </div>
+        <div>
+            <label for="form-surname" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_SURNAME}</label>
+            <input id="form-surname" type="text" name="Last Name" placeholder={common.FORM_PLACEHOLDER_SURNAME} class:list={["w-full ps-3 pe-3 py-2 border rounded-md", getFieldError('Last Name') ? 'border-red-500' : 'border-gray-300']} required />
+        </div>
+        <div>
+            <label for="form-company" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_COMPANY}</label>
+            <input id="form-company" type="text" name="Company" placeholder={common.FORM_PLACEHOLDER_COMPANY} class="w-full ps-3 pe-3 py-2 border border-gray-300 rounded-md" />
+        </div>
+        <div>
+            <label for="form-vatid" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_VAT_ID}</label>
+            <input id="form-vatid" type="text" name="VAT ID" placeholder={common.FORM_PLACEHOLDER_VAT_ID} class="w-full ps-3 pe-3 py-2 border border-gray-300 rounded-md" />
+        </div>
+        <div>
+            <label for="form-street" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_STREET}</label>
+            <input id="form-street" type="text" name="Street" placeholder={common.FORM_PLACEHOLDER_STREET} class:list={["w-full ps-3 pe-3 py-2 border rounded-md", getFieldError('Street') ? 'border-red-500' : 'border-gray-300']} required />
+        </div>
+        <div>
+            <label for="form-city" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_CITY}</label>
+            <input id="form-city" type="text" name="Location" placeholder={common.FORM_PLACEHOLDER_CITY} class:list={["w-full ps-3 pe-3 py-2 border rounded-md", getFieldError('Location') ? 'border-red-500' : 'border-gray-300']} required />
+        </div>
+        <div>
+            <label for="form-zip" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_ZIP}</label>
+            <input id="form-zip" type="text" name="Postal Code" placeholder={common.FORM_PLACEHOLDER_ZIP} class:list={["w-full ps-3 pe-3 py-2 border rounded-md", getFieldError('Postal Code') ? 'border-red-500' : 'border-gray-300']} required />
+        </div>
+        <div>
+            <label for="form-email" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_EMAIL}</label>
+            <input id="form-email" type="email" name="email" placeholder={common.FORM_PLACEHOLDER_EMAIL} class:list={["w-full ps-3 pe-3 py-2 border rounded-md", getFieldError('email') ? 'border-red-500' : 'border-gray-300']} required />
+        </div>
+        <div>
+            <label for="form-phone" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_PHONE}</label>
+            <input id="form-phone" type="tel" name="Telephone Number" placeholder={common.FORM_PLACEHOLDER_PHONE} class:list={["w-full ps-3 pe-3 py-2 border rounded-md", getFieldError('Telephone Number') ? 'border-red-500' : 'border-gray-300']} required />
+        </div>
+        <div>
+            <label for="form-quantity" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_QUANTITY} (kompletov)</label>
+            <select id="form-quantity" name="Quantity" class:list={["w-full ps-3 pe-3 py-2 border rounded-md", getFieldError('Quantity') ? 'border-red-500' : 'border-gray-300']} required>
+                {productQuantityOptions.map(qty => <option value={String(qty)}>{qty}</option>)}
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_PAYMENT}*</label>
+            <div role="radiogroup" class="flex flex-col sm:flex-row sm:gap-4">
+                <label class="flex items-center"><input type="radio" name="Payment" value="Cash on Delivery" class="me-2" required /><span>{common.FORM_OPTION_PAYMENT_COD}</span></label>
+                <label class="flex items-center"><input type="radio" name="Payment" value="Proforma Invoice" class="me-2" required /><span>{common.FORM_OPTION_PAYMENT_PREINVOICE}</span></label>
+            </div>
+        </div>
+        <div>
+            <label for="form-message" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_MESSAGE}</label>
+            <textarea id="form-message" name="Message" rows="3" placeholder={common.FORM_PLACEHOLDER_MESSAGE_ORDER} class="w-full ps-3 pe-3 py-2 border border-gray-300 rounded-md"></textarea>
+        </div>
+        <div>
+            <label class="flex items-center">
+                <input id="form-terms" type="checkbox" name="Conditions" class="mr-2" required />
+                <span class="text-sm">{common.FORM_LABEL_TERMS}</span>
+            </label>
+        </div>
+        <div>
+            <button type="submit" class="w-full bg-black text-signal-green border border-signal-green font-semibold py-3 px-6 rounded-lg hover:bg-signal-green hover:text-black transition-colors flex items-center justify-center">
+                {common.FORM_BUTTON_SUBMIT_ORDER}
+            </button>
+        </div>
+    </form>
+</div>
+
+
+<script define:vars={{ currencySymbol: common.M_CURRENCY_SYMBOL, bundleName: bundle.BUNDLE_NAME }}>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Form Cloning for Desktop/Mobile ---
+        const formTemplate = document.getElementById('form-template');
+        const desktopFormContainer = document.getElementById('narocilnica-desktop');
+        const mobileFormContainer = document.getElementById('narocilnica-mobile');
+
+        if (formTemplate && desktopFormContainer && mobileFormContainer) {
+            desktopFormContainer.innerHTML = formTemplate.innerHTML;
+            mobileFormContainer.innerHTML = formTemplate.innerHTML;
+        }
+
+        // --- Price Calculation Logic ---
+        const customizer = document.getElementById('bundle-customizer');
+        if (!customizer) return;
+        
+        const items = Array.from(customizer.querySelectorAll('.bundle-item'));
+        
+        // Price display elements
+        const totalPriceEls = document.querySelectorAll('#total-price-display-desktop, #total-price-display-mobile');
+        const originalPriceEls = document.querySelectorAll('#original-price-desktop, #original-price-mobile');
+        const savingsEls = document.querySelectorAll('#savings-display-desktop, #savings-display-mobile');
+        
+        // Form hidden inputs
+        const productTitleInputs = document.querySelectorAll('.form-product-title');
+        const selectedProductsInputs = document.querySelectorAll('.form-selected-products');
+        const finalPriceInputs = document.querySelectorAll('.form-final-price');
+
+        function calculateTotal() {
+            let currentTotal = 0;
+            let selectedCount = 0;
+            let selectedProductNames = [];
+
+            items.forEach(item => {
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                const price = parseFloat(item.dataset.price);
+                if (isNaN(price)) return; // Safety check
+
+                const productName = item.querySelector('p.font-semibold').textContent.trim();
+                
+                if (checkbox.checked) {
+                    currentTotal += price;
+                    selectedCount++;
+                    selectedProductNames.push(productName);
+                }
+            });
+
+            const discount = selectedCount >= 2 ? 0.075 : 0;
+            const finalPrice = currentTotal * (1 - discount);
+            const savings = currentTotal - finalPrice;
+            
+            const formatCurrency = (value) => `${currencySymbol}${value.toFixed(2).replace('.', ',')}`;
+
+            totalPriceEls.forEach(el => el.textContent = formatCurrency(finalPrice));
+            originalPriceEls.forEach(el => el.textContent = formatCurrency(currentTotal));
+            savingsEls.forEach(el => el.textContent = formatCurrency(savings));
+            
+            productTitleInputs.forEach(input => input.value = `${bundleName} (${selectedCount} izbranih)`);
+            selectedProductsInputs.forEach(input => input.value = selectedProductNames.join('; '));
+            finalPriceInputs.forEach(input => input.value = formatCurrency(finalPrice));
+
+            items.forEach(item => {
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                item.classList.toggle('opacity-50', !checkbox.checked);
+                item.classList.toggle('bg-gray-100', !checkbox.checked);
+            });
+        }
+
+        items.forEach(item => {
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            checkbox.addEventListener('change', calculateTotal);
+        });
+
+        calculateTotal();
+    });
+</script>

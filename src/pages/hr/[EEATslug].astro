@@ -623,39 +623,39 @@ const formatDate = (dateString: string, locale: string) => {
     line-height: 1.7;
   }
 
-  /* --- Responsive Table Styling for .prose --- */
-  /*
-    To ensure tables are mobile-friendly, we wrap tables in a div with overflow-x: auto.
-    This allows horizontal scrolling on small screens. We also ensure min-width and spacing.
-    RTL support is preserved by using logical properties.
-  */
-  .prose :global(.table-responsive) {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    margin-block: 2rem;
-  }
-  .prose :global(.table-responsive table) {
-    min-width: 600px; /* Ensures table doesn't shrink too much on mobile */
-    width: 100%;
-    border-collapse: collapse;
-  }
-  /* For RTL: ensure scroll direction is correct */
-  [dir="rtl"] .prose :global(.table-responsive) {
-    direction: rtl;
-  }
+/* --- Responsive Table Styling for .prose --- */
+/*
+To ensure tables are mobile-friendly, we wrap tables in a div with overflow-x: auto.
+This allows horizontal scrolling on small screens. We also ensure min-width and spacing.
+RTL support is preserved by using logical properties.
+*/
+.prose :global(.table-responsive) {
+max-width: 100%; /* FIX: Changed from `width: 100%`. This is more robust for preventing the container from exceeding its parent's bounds. */
+overflow-x: auto;
+-webkit-overflow-scrolling: touch;
+margin-block: 2rem;
+}
+.prose :global(.table-responsive table) {
+min-width: 600px; /* Ensures table doesn't shrink too much on mobile */
+width: 100%;
+border-collapse: collapse;
+}
+/* For RTL: ensure scroll direction is correct */
+[dir="rtl"] .prose :global(.table-responsive) {
+direction: rtl;
+}
 
-  /* Optional: visually indicate scrollability on mobile */
-  @media (max-width: 640px) {
-    .prose :global(.table-responsive) {
-      border-inline-start: 4px solid #BCEF2F;
-      border-radius: 4px;
-      background: #f9fafb;
-      padding-block: 0.5rem;
-      padding-inline: 0.5rem;
-    }
-    .prose :global(table) {
-      font-size: 0.95em;
-    }
-  }
+/* Optional: visually indicate scrollability on mobile */
+@media (max-width: 640px) {
+.prose :global(.table-responsive) {
+border-inline-start: 4px solid #BCEF2F;
+border-radius: 4px;
+background: #f9fafb;
+padding-block: 0.5rem;
+padding-inline: 0.5rem;
+}
+.prose :global(table) {
+font-size: 0.95em;
+}
+}
 </style>
