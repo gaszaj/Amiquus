@@ -430,13 +430,16 @@ const getAbsoluteOgImageUrl = (imagePath: string | undefined) => {
     <Footer />
     <Cookie />
 
-    <!-- Move to Top Button -->
-    {/* CHANGE 3: Replaced `right-[25px]` with the logical property `end-[25px]`. 
-        This will be `right` in LTR and `left` in RTL automatically. */}
+<!-- Move to Top Button with Scroll Progress Indicator -->
+<div
+  id="moveToTopContainer"
+  class="fixed bottom-[25px] end-[25px] w-10 h-10 rounded-lg shadow-lg flex items-center justify-center opacity-0 invisible transition-all duration-300"
+  style="background: conic-gradient(black var(--scroll-progress, 0%), transparent var(--scroll-progress, 0%));"
+>
     <button
-      id="moveToTop"
-      class="fixed bottom-[25px] end-[25px] w-10 h-10 bg-[#BCEF2F] rounded-lg shadow-lg flex items-center justify-center opacity-0 invisible transition-all duration-300 hover:bg-[#a5d429] focus:outline-none focus:ring-2 focus:ring-[#BCEF2F] focus:ring-opacity-50"
-      aria-label={ariaLabelMoveToTop}
+      id="moveToTopButton"
+      aria-label="Move to top"
+      class="w-[calc(100%-4px)] h-[calc(100%-4px)] bg-[#BCEF2F] rounded-[6px] flex items-center justify-center transition-colors duration-300 hover:bg-[#a5d429] focus:outline-none focus:ring-2 focus:ring-[#BCEF2F] focus:ring-opacity-50"
     >
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path stroke-dasharray="20" stroke-dashoffset="20" d="M12 21l0 -17.5">
@@ -446,7 +449,8 @@ const getAbsoluteOgImageUrl = (imagePath: string | undefined) => {
         <animate fill="freeze" attributeName="stroke-dashoffset" begin="0.24s" dur="0.24s" values="12;0"/>
       </path>
     </svg>
-    </button>
+  </button>
+</div>
   </body>
 </html>
 
@@ -523,28 +527,63 @@ const getAbsoluteOgImageUrl = (imagePath: string | undefined) => {
     });
 
     // Move to Top Button functionality
-    const moveToTopButton = document.getElementById('moveToTop');
-    
-    if (moveToTopButton) {
-      // Show/hide button based on scroll position
-      window.addEventListener('scroll', () => {
-        if (window.scrollY > 750) {
-          moveToTopButton.classList.remove('opacity-0', 'invisible');
-          moveToTopButton.classList.add('opacity-100', 'visible');
-        } else {
-          moveToTopButton.classList.add('opacity-0', 'invisible');
-          moveToTopButton.classList.remove('opacity-100', 'visible');
-        }
-      });
+const moveToTopContainer = document.getElementById('moveToTopContainer');
+const moveToTopButton = document.getElementById('moveToTopButton');
+// Find the main content area of the page
+const mainElement = document.querySelector('main');
 
-      // Scroll to top when clicked
-      moveToTopButton.addEventListener('click', () => {
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth'
-        });
-      });
+if (moveToTopContainer && moveToTopButton && mainElement) {
+  // Show/hide button and update scroll progress
+  window.addEventListener('scroll', () => {
+    // Visibility logic (remains the same)
+    if (window.scrollY > 400) {
+      moveToTopContainer.classList.remove('opacity-0', 'invisible');
+      moveToTopContainer.classList.add('opacity-100', 'visible');
+    } else {
+      moveToTopContainer.classList.add('opacity-0', 'invisible');
+      moveToTopContainer.classList.remove('opacity-100', 'visible');
     }
+
+    // --- NEW SCROLL PROGRESS CALCULATION ---
+    
+    const viewportHeight = window.innerHeight;
+    // The top of the main element relative to the document
+    const mainTop = mainElement.offsetTop;
+    // The total height of the main element
+    const mainHeight = mainElement.offsetHeight;
+    
+    // The total distance we can scroll within the context of the main element
+    // This is the height of the main content minus the part that's already visible in the viewport
+    const scrollableDistanceInMain = mainHeight - viewportHeight;
+
+    // The current scroll position relative to the start of the main element
+    const scrollInMain = window.scrollY - mainTop;
+
+    let progress = 0;
+    // Only calculate progress if the main element is scrollable
+    if (scrollableDistanceInMain > 0) {
+      // Calculate the percentage scrolled through the main element's scrollable distance
+      progress = (scrollInMain / scrollableDistanceInMain) * 100;
+    } else if (window.scrollY > mainTop + mainHeight) {
+      // If main content is fully scrolled past, set progress to 100
+      progress = 100;
+    }
+
+    // Clamp the value between 0% and 100% to prevent visual glitches
+    const clampedProgress = Math.max(0, Math.min(progress, 100));
+
+    // Update CSS custom property for the conic gradient
+    moveToTopContainer.style.setProperty('--scroll-progress', `${clampedProgress}%`);
+  });
+
+  // Scroll to top when clicked (remains the same)
+  moveToTopButton.addEventListener('click', () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  });
+}
 
     // Social Sharing functionality
     function initSocialSharing() {

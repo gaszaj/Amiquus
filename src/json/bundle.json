@@ -6,6 +6,8 @@
       "PUBLISH_Y_N": "1",
       "M_COUNTRY_NUMBER": "001",
       "PAGE_LOCALE": "sl-SI",
+      "M_COUNTRY_CODE": "SI",
+      "M_LANGUAGE_ISO": "sl",
       "M_SLUG": "si",
       "PAGE_COLLECTION_3_LISTING_SLUG": "kompleti",
       "BUNDLE_PRICE": "€349.99",
