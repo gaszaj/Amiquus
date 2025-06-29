@@ -17,20 +17,42 @@ const db = new Database(dbPath, { readonly: true });
 const { bundleSlug } = Astro.params;
 const locale = Astro.url.pathname.split('/')[1];
 
+// Get the bundle first
 const bundle = db.prepare("SELECT * FROM bundle WHERE BUNDLE_ASCII_SLUG = ? AND M_SLUG = ? AND PUBLISH_Y_N = '1'").get(bundleSlug, locale) as any;
 
 if (!bundle) {
   return Astro.redirect('/404');
 }
 
-const includedProductIds = bundle.BUNDLE_PRODUCT_IDS.split(',').map(id => id.trim());
+// --- REVERSED LOGIC: Find products that belong to this bundle ---
+// Get all products where PRODUCT_BUNDLES_NUMBER contains the current bundle ID
+const bundleId = bundle.BUNDLE_ID;
+const productsQuery = `
+  SELECT * FROM product 
+  WHERE PRODUCT_BUNDLES_NUMBER IS NOT NULL 
+  AND PRODUCT_BUNDLES_NUMBER LIKE ? 
+  AND PUBLISH_Y_N = '1'
+`;
+const products = db.prepare(productsQuery).all(`%${bundleId}%`) as any[];
 
-const { common, www, includedProducts, relatedBundles, relatedArticles, publishedLocales, altBundleEntries } = db.transaction(() => {
+// Filter products to ensure they exactly match the bundle ID (not partial matches)
+const includedProducts = products.filter(product => {
+  if (!product.PRODUCT_BUNDLES_NUMBER) return false;
+  const bundleIds = product.PRODUCT_BUNDLES_NUMBER.split(',').map(id => id.trim());
+  return bundleIds.includes(bundleId);
+}).map(product => {
+  // Use the new numeric price column
+  const numericPrice = parseFloat(product.M_PRODUCT_PRICE_NUMERIC) || 0;
+  
+  return {
+    ...product,
+    M_PRODUCT_PRICE_RECALC: numericPrice
+  };
+});
+
+const { common, www, relatedBundles, relatedArticles, publishedLocales, altBundleEntries } = db.transaction(() => {
     const commonData = db.prepare('SELECT * FROM common WHERE M_SLUG = ?').get(locale) as any;
     const wwwData = db.prepare('SELECT * FROM www LIMIT 1').get() as any;
-
-    const productsStmt = db.prepare(`SELECT * FROM product WHERE PRODUCT_ID IN (${includedProductIds.map(() => '?').join(',')})`);
-    const products = productsStmt.all(...includedProductIds) as any[];
 
     const relatedB = bundle.BUNDLE_RELATED_B1 ? (db.prepare("SELECT * FROM bundle WHERE BUNDLE_ID = ? AND PUBLISH_Y_N = '1'").get(bundle.BUNDLE_RELATED_B1) as any) : null;
     const relatedA = bundle.BUNDLE_RELATED_A1 ? (db.prepare("SELECT * FROM article WHERE PAGE_ID = ? AND PUBLISH_Y_N = '1'").get(bundle.BUNDLE_RELATED_A1) as any) : null;
@@ -40,13 +62,9 @@ const { common, www, includedProducts, relatedBundles, relatedArticles, publishe
     // Fetch alternate versions of this bundle for hreflang links
     const alts = db.prepare("SELECT M_SLUG, PAGE_COLLECTION_3_LISTING_SLUG, BUNDLE_ASCII_SLUG FROM bundle WHERE BUNDLE_ID = ? AND PUBLISH_Y_N = '1'").all(bundle.BUNDLE_ID) as any[];
 
-    const productsMap = new Map(products.map(p => [p.PRODUCT_ID, p]));
-    const orderedProducts = includedProductIds.map(id => productsMap.get(id)).filter(Boolean);
-
     return {
         common: commonData || {},
         www: wwwData,
-        includedProducts: orderedProducts,
         relatedBundles: relatedB ? [relatedB] : [],
         relatedArticles: relatedA ? [relatedA] : [],
         publishedLocales: locales,
@@ -167,9 +185,17 @@ const combinedSchema = [{
             <div class="sticky top-24">
                 <div id="price-summary-desktop" class="bg-black text-white rounded-lg shadow-lg p-6">
                      <h2 class="text-xl font-bold mb-4 text-white">{common.BUNDLE_PRICE_LABEL}</h2>
+                     
+                     <!-- Product Breakdown -->
+                     <div id="product-breakdown-desktop" class="space-y-2 mb-4 text-sm">
+                         <!-- Dynamic product items will be inserted here -->
+                     </div>
+                     
+                     <hr class="border-gray-600 my-4"/>
+                     
                      <div class="space-y-2 text-sm">
                          <div class="flex justify-between items-center">
-                             <span class="text-gray-300">Cena izbranih znakov:</span>
+                             <span class="text-gray-300">{common.BUNDLE_PRICE_ALL_SELECTED}:</span>
                              <span id="original-price-desktop" class="text-gray-300"></span>
                          </div>
                          <div class="flex justify-between items-center text-signal-green">
@@ -208,14 +234,33 @@ const combinedSchema = [{
                 <p class="text-gray-500 mb-6">{common.BUNDLE_CUSTOMIZE_DESC}</p>
                 <div class="space-y-4">
                     {includedProducts.map(product => (
-                        <div class="bundle-item flex items-center bg-white p-4 rounded-lg border shadow-sm transition-all" data-price={product.M_PRODUCT_PRICE_RECALC}>
-                            <input type="checkbox" class="h-6 w-6 rounded border-gray-300 text-signal-green focus:ring-signal-green me-4 flex-shrink-0" checked>
+                        <div class="bundle-item flex items-center bg-white p-4 rounded-lg border shadow-sm transition-all" data-price={product.M_PRODUCT_PRICE_RECALC} data-product-id={product.PRODUCT_ID}>
+                            <input type="checkbox" class="product-checkbox h-6 w-6 rounded border-gray-300 text-signal-green focus:ring-signal-green me-4 flex-shrink-0" checked>
                             <img src={getBaseUrl(product.PRODUCT_IMAGE_PATH_L)} alt={product.PRODUCT_NAME} class="w-24 h-24 object-contain rounded-md me-4" loading="lazy">
                             <div class="flex-grow">
                                 <p class="font-semibold text-signal-dark">{product.PRODUCT_NAME}</p>
                                 <a href={`/${product.M_SLUG}/${product.PAGE_COLLECTION_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`} target="_blank" class="text-sm text-gray-500 hover:underline">{common.PRODUCT_PAGE_RELATED_PRODUCT_VIEW_BUTTON_TEXT}</a>
                             </div>
-                            <span class="font-bold text-lg ms-4">{product.M_PRODUCT_PRICE}</span>
+                            
+                            <!-- Quantity Controls -->
+                            <div class="flex items-center me-4">
+                                <button type="button" class="quantity-btn-minus w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-l-md flex items-center justify-center text-gray-700 font-bold transition-colors" disabled>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                    </svg>
+                                </button>
+                                <span class="quantity-display w-12 h-8 bg-white border-t border-b border-gray-300 flex items-center justify-center text-sm font-medium">1</span>
+                                <button type="button" class="quantity-btn-plus w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-r-md flex items-center justify-center text-gray-700 font-bold transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <div class="text-right">
+                                <span class="font-bold text-lg product-price-display">{product.M_PRODUCT_PRICE}</span>
+                                <div class="text-sm text-gray-500 product-total-display"></div>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -225,9 +270,17 @@ const combinedSchema = [{
             <div class="lg:hidden">
                 <div id="price-summary-mobile" class="bg-black text-white rounded-lg shadow-lg p-6 my-8">
                      <h2 class="text-xl font-bold mb-4 text-white">{common.BUNDLE_PRICE_LABEL}</h2>
+                     
+                     <!-- Product Breakdown -->
+                     <div id="product-breakdown-mobile" class="space-y-2 mb-4 text-sm">
+                         <!-- Dynamic product items will be inserted here -->
+                     </div>
+                     
+                     <hr class="border-gray-600 my-4"/>
+                     
                      <div class="space-y-2 text-sm">
                          <div class="flex justify-between items-center">
-                             <span class="text-gray-300">Cena izbranih znakov:</span>
+                             <span class="text-gray-300">{common.BUNDLE_PRICE_ALL_SELECTED}</span>
                              <span id="original-price-mobile" class="text-gray-300"></span>
                          </div>
                          <div class="flex justify-between items-center text-signal-green">
@@ -248,7 +301,7 @@ const combinedSchema = [{
             </div>
 
             <div class="prose max-w-none my-8">
-                <h3>Opis kompleta</h3>
+                <h3>{common.BUNDLE_DESCRIPTION_SINGLE}</h3>
                 <p>{bundle.BUNDLE_DESCRIPTION_LONG}</p>
             </div>
             
@@ -379,7 +432,7 @@ const combinedSchema = [{
             mobileFormContainer.innerHTML = formTemplate.innerHTML;
         }
 
-        // --- Price Calculation Logic ---
+        // --- Enhanced Price Calculation Logic with Quantity Controls ---
         const customizer = document.getElementById('bundle-customizer');
         if (!customizer) return;
         
@@ -389,57 +442,154 @@ const combinedSchema = [{
         const totalPriceEls = document.querySelectorAll('#total-price-display-desktop, #total-price-display-mobile');
         const originalPriceEls = document.querySelectorAll('#original-price-desktop, #original-price-mobile');
         const savingsEls = document.querySelectorAll('#savings-display-desktop, #savings-display-mobile');
+        const productBreakdownEls = document.querySelectorAll('#product-breakdown-desktop, #product-breakdown-mobile');
         
         // Form hidden inputs
         const productTitleInputs = document.querySelectorAll('.form-product-title');
         const selectedProductsInputs = document.querySelectorAll('.form-selected-products');
         const finalPriceInputs = document.querySelectorAll('.form-final-price');
 
+        // Initialize quantity controls for each product
+        items.forEach(item => {
+            const checkbox = item.querySelector('.product-checkbox');
+            const minusBtn = item.querySelector('.quantity-btn-minus');
+            const plusBtn = item.querySelector('.quantity-btn-plus');
+            const quantityDisplay = item.querySelector('.quantity-display');
+            const productPriceDisplay = item.querySelector('.product-price-display');
+            const productTotalDisplay = item.querySelector('.product-total-display');
+            
+            let quantity = 1; // Default quantity when checked
+            
+            // Update quantity display and controls
+            function updateQuantityDisplay() {
+                quantityDisplay.textContent = quantity;
+                minusBtn.disabled = quantity <= 0;
+                plusBtn.disabled = quantity >= 26;
+                
+                // Update individual product total
+                const price = parseFloat(item.dataset.price);
+                const total = price * quantity;
+                productTotalDisplay.textContent = quantity > 1 ? `${currencySymbol}${total.toFixed(2).replace('.', ',')}` : '';
+            }
+            
+            // Handle checkbox changes
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked) {
+                    quantity = 1; // Reset to 1 when checked
+                    item.classList.remove('opacity-50', 'bg-gray-100');
+                } else {
+                    quantity = 0; // Reset to 0 when unchecked
+                    item.classList.add('opacity-50', 'bg-gray-100');
+                }
+                updateQuantityDisplay();
+                calculateTotal();
+            });
+            
+            // Handle minus button
+            minusBtn.addEventListener('click', () => {
+                if (quantity > 0 && checkbox.checked) {
+                    quantity--;
+                    updateQuantityDisplay();
+                    calculateTotal();
+                }
+            });
+            
+            // Handle plus button
+            plusBtn.addEventListener('click', () => {
+                if (quantity < 26 && checkbox.checked) {
+                    quantity++;
+                    updateQuantityDisplay();
+                    calculateTotal();
+                }
+            });
+            
+            // Store quantity in the item for calculation
+            item.dataset.quantity = '1';
+            
+            // Initial setup
+            updateQuantityDisplay();
+        });
+
         function calculateTotal() {
             let currentTotal = 0;
             let selectedCount = 0;
             let selectedProductNames = [];
+            let totalItems = 0;
+            let productBreakdown = [];
 
             items.forEach(item => {
-                const checkbox = item.querySelector('input[type="checkbox"]');
+                const checkbox = item.querySelector('.product-checkbox');
                 const price = parseFloat(item.dataset.price);
+                const quantity = parseInt(item.querySelector('.quantity-display').textContent) || 0;
+                
                 if (isNaN(price)) return; // Safety check
 
                 const productName = item.querySelector('p.font-semibold').textContent.trim();
                 
-                if (checkbox.checked) {
-                    currentTotal += price;
+                if (checkbox.checked && quantity > 0) {
+                    const itemTotal = price * quantity;
+                    currentTotal += itemTotal;
                     selectedCount++;
-                    selectedProductNames.push(productName);
+                    totalItems += quantity;
+                    selectedProductNames.push(`${productName} (${quantity}x)`);
+                    
+                    // Add to breakdown for sidebar display
+                    productBreakdown.push({
+                        name: productName,
+                        quantity: quantity,
+                        price: price,
+                        total: itemTotal
+                    });
                 }
             });
 
-            const discount = selectedCount >= 2 ? 0.075 : 0;
+            // Apply 7% discount when 2 or more pieces total (any combination)
+            const discount = totalItems >= 2 ? 0.07 : 0;
             const finalPrice = currentTotal * (1 - discount);
             const savings = currentTotal - finalPrice;
             
             const formatCurrency = (value) => `${currencySymbol}${value.toFixed(2).replace('.', ',')}`;
 
+            // Update price displays
             totalPriceEls.forEach(el => el.textContent = formatCurrency(finalPrice));
             originalPriceEls.forEach(el => el.textContent = formatCurrency(currentTotal));
             savingsEls.forEach(el => el.textContent = formatCurrency(savings));
             
-            productTitleInputs.forEach(input => input.value = `${bundleName} (${selectedCount} izbranih)`);
+            // Update form inputs
+            productTitleInputs.forEach(input => input.value = `${bundleName} ${totalItems >= 2 ? common.BUNDLE_ITEMS_PLURAL : ''}`);
             selectedProductsInputs.forEach(input => input.value = selectedProductNames.join('; '));
             finalPriceInputs.forEach(input => input.value = formatCurrency(finalPrice));
 
-            items.forEach(item => {
-                const checkbox = item.querySelector('input[type="checkbox"]');
-                item.classList.toggle('opacity-50', !checkbox.checked);
-                item.classList.toggle('bg-gray-100', !checkbox.checked);
+            // Update product breakdown in sidebars
+            updateProductBreakdown(productBreakdown);
+        }
+
+        function updateProductBreakdown(products) {
+            const formatCurrency = (value) => `${currencySymbol}${value.toFixed(2).replace('.', ',')}`;
+            
+            productBreakdownEls.forEach(breakdownEl => {
+                if (products.length === 0) {
+                    breakdownEl.innerHTML = `<div class="text-gray-400 italic">${common.BUNDLE_NO_SELECTED_ITEMS}</div>`;
+                    return;
+                }
+                
+                const breakdownHTML = products.map(product => `
+                    <div class="flex justify-between items-start py-1 border-b border-gray-700 last:border-b-0">
+                        <div class="flex-1 me-2">
+                            <div class="font-medium text-white">${product.name}</div>
+                            <div class="text-gray-400 text-xs">${product.quantity}x @ ${formatCurrency(product.price)}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-semibold text-white">${formatCurrency(product.total)}</div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                breakdownEl.innerHTML = breakdownHTML;
             });
         }
 
-        items.forEach(item => {
-            const checkbox = item.querySelector('input[type="checkbox"]');
-            checkbox.addEventListener('change', calculateTotal);
-        });
-
+        // Initial calculation
         calculateTotal();
     });
 </script>

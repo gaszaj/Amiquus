@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'; // Adjust path if your BaseLayout is elsewhere
+
+const pageTitle = "Naročilo uspešno oddano";
+const successMessage = "Hvala za vaše naročilo! Uspešno ste oddali podatke. Kmalu boste prejeli potrditveni email s podrobnostmi vašega naročila. V primeru kakršnihkoli vprašanj smo vam na voljo.";
+const backToHomeLink = "/"; // Link to your homepage
+const backToHomeText = "Nazaj na prvo stran";
+---
+
+<BaseLayout title={pageTitle}>
+  <div class="container mx-auto px-4 py-16 text-center">
+    <div class="max-w-xl mx-auto">
+      <svg
+        class="text-green-500 mx-auto mb-8"
+        width="128"
+        height="128"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        style="display: block;"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <h1 class="text-4xl font-bold text-signal-dark mb-6">{pageTitle}</h1>
+      <p class="text-lg text-gray-700 mb-10">{successMessage}</p>
+      <a href={backToHomeLink} class="inline-block bg-black text-signal-green border border-signal-green font-semibold py-3 px-8 rounded-lg hover:bg-signal-green hover:text-black transition-colors">
+        {backToHomeText}
+      </a>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  /* You can add page-specific styles here if needed */
+</style>
