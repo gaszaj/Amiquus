@@ -22,12 +22,51 @@ const { common, www, allBundles, publishedLocales, productMap } = db.transaction
     const bundles = db.prepare("SELECT * FROM bundle WHERE M_SLUG = ? AND PUBLISH_Y_N = '1'").all(parentSlug) as any[];
     const locales = db.prepare("SELECT M_SLUG FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all() as any[];
     
-    // Fetch all products to create a lookup map
-    const allProducts = db.prepare("SELECT PRODUCT_ID, PRODUCT_IMAGE_PATH_L, PRODUCT_ASCII_SLUG, PAGE_COLLECTION_1_LISTING_SLUG FROM product WHERE PUBLISH_Y_N = '1'").all() as any[];
+    // Fetch all products to create a lookup map with numeric prices
+    const allProducts = db.prepare("SELECT PRODUCT_ID, PRODUCT_IMAGE_PATH_L, PRODUCT_ASCII_SLUG, PAGE_COLLECTION_1_LISTING_SLUG, M_PRODUCT_PRICE_NUMERIC, M_PRODUCT_PRICE, PRODUCT_BUNDLES_NUMBER FROM product WHERE PUBLISH_Y_N = '1'").all() as any[];
     const pMap = new Map(allProducts.map(p => [p.PRODUCT_ID, p]));
 
+    // Calculate dynamic prices for each bundle
+    const bundlesWithCalculatedPrices = bundles.map(bundle => {
+        const bundleId = bundle.BUNDLE_ID;
+        
+        // Find all products that belong to this bundle
+        const bundleProducts = allProducts.filter(product => {
+            if (!product.PRODUCT_BUNDLES_NUMBER) return false;
+            const bundleIds = product.PRODUCT_BUNDLES_NUMBER.split(',').map(id => id.trim());
+            return bundleIds.includes(bundleId);
+        });
+        
+        // Calculate total price (assuming quantity 1 for each product)
+        const totalPrice = bundleProducts.reduce((sum, product) => {
+            const price = parseFloat(product.M_PRODUCT_PRICE_NUMERIC) || 0;
+            return sum + price;
+        }, 0);
+        
+        // Calculate savings (7% discount when 2 or more products)
+        const discount = bundleProducts.length >= 2 ? 0.07 : 0;
+        const finalPrice = totalPrice * (1 - discount);
+        const savings = totalPrice - finalPrice;
+        
+        // Format prices for display
+        const formatCurrency = (value: number) => {
+            const currencySymbol = commonData?.M_CURRENCY_SYMBOL || '€';
+            return `${currencySymbol}${value.toFixed(2).replace('.', ',')}`;
+        };
+        
+        return {
+            ...bundle,
+            BUNDLE_PRICE_RECALC: finalPrice,
+            BUNDLE_PRICE: formatCurrency(finalPrice),
+            BUNDLE_ORIGINAL_PRICE: formatCurrency(totalPrice),
+            BUNDLE_SAVINGS_AMOUNT: formatCurrency(savings),
+            BUNDLE_PRODUCT_COUNT: bundleProducts.length,
+            BUNDLE_PRODUCTS: bundleProducts
+        };
+    });
+
     // Sort bundles by importance rank (desc), then by name (A-Z)
-    const sortedBundles = bundles.sort((a, b) => {
+    const sortedBundles = bundlesWithCalculatedPrices.sort((a, b) => {
         const rankA = parseInt(a.BUNDLE_IMPORTANCE_RANK, 10) || 0;
         const rankB = parseInt(b.BUNDLE_IMPORTANCE_RANK, 10) || 0;
         if (rankB !== rankA) return rankB - rankA;
@@ -221,8 +260,8 @@ for (const localeObj of publishedLocales) {
             <div id="bundles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {initialBundles.map((bundle) => {
                     const bundleUrl = `/${parentSlug}/${currentFolder}/${bundle.BUNDLE_ASCII_SLUG}`;
-                    const productIds = bundle.BUNDLE_PRODUCT_IDS.split(',').map(id => id.trim());
-                    const collageProducts = productIds.slice(0, 3).map(id => productMap.get(id)).filter(Boolean);
+                    // Use the calculated products from the bundle
+                    const collageProducts = bundle.BUNDLE_PRODUCTS.slice(0, 3);
                     return (
                         <div class="bg-white border border-gray-200 rounded-lg overflow-hidden group flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                             <a href={bundleUrl} class="flex-grow flex flex-col">
@@ -236,8 +275,16 @@ for (const localeObj of publishedLocales) {
                                         <h3 class="font-bold text-lg text-black group-hover:text-signal-green transition-colors mb-2">{bundle.BUNDLE_NAME}</h3>
                                         <div class="flex justify-between items-baseline mb-4">
                                             <span class="text-2xl font-bold text-black">{bundle.BUNDLE_PRICE}</span>
-                                            <span class="text-green-600 font-semibold bg-green-100 px-2 py-1 rounded">{common.BUNDLE_SAVINGS_LABEL} {bundle.BUNDLE_SAVINGS_AMOUNT}</span>
+                                            {bundle.BUNDLE_PRODUCT_COUNT >= 2 && (
+                                                <span class="text-green-600 font-semibold bg-green-100 px-2 py-1 rounded">{common.BUNDLE_SAVINGS_LABEL} {bundle.BUNDLE_SAVINGS_AMOUNT}</span>
+                                            )}
                                         </div>
+                                        {bundle.BUNDLE_PRODUCT_COUNT >= 2 && (
+                                            <div class="text-sm text-gray-500 mb-2">
+                                                <span class="line-through">{bundle.BUNDLE_ORIGINAL_PRICE}</span>
+                                                <span class="text-green-600 font-semibold ms-2">{common.BUNDLE_DISCOUNT_TEXT}</span>
+                                            </div>
+                                        )}
                                     </div>
                                     <span class="block w-full mt-2 bg-black text-signal-green border border-signal-green py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center font-semibold">{common.BUNDLE_VIEW_BUNDLE_BUTTON}</span>
                                 </div>
@@ -256,11 +303,7 @@ for (const localeObj of publishedLocales) {
 </BaseLayout>
 
 <script define:vars={{ allBundles, productMap, parentSlug, currentFolder, common, BATCH_SIZE }}>
-    // This script is very similar to the articles/products listing script.
-    // Key differences:
-    // 1. Variable names changed to 'bundle'
-    // 2. The createBundleCardHTML function includes the product collage logic.
-    // 3. Sorting options are adjusted for bundles (price, name, importance).
+    // --- DOM ELEMENTS ---
     const grid = document.getElementById('bundles-grid');
     const trigger = document.getElementById('infinite-scroll-trigger');
     const noResultsMsg = document.getElementById('no-results');
@@ -268,10 +311,12 @@ for (const localeObj of publishedLocales) {
     const sortSelect = document.getElementById('sort-select');
     const clearBtn = document.getElementById('clear-filters-btn');
 
+    // --- STATE MANAGEMENT ---
     let bundlesToDisplay = [...allBundles];
     let currentPage = 1;
     let observer;
 
+    // --- HELPER FUNCTIONS ---
     const getPluralString = (count) => {
         if (common.M_LANGUAGE_ISO === 'sl') {
             if (count % 100 === 1) return common.UI_BUNDLE_COUNT_SINGLE;
@@ -288,13 +333,21 @@ for (const localeObj of publishedLocales) {
 
     const createBundleCardHTML = (bundle) => {
         const bundleUrl = `/${parentSlug}/${currentFolder}/${bundle.BUNDLE_ASCII_SLUG}`;
-        const productIds = bundle.BUNDLE_PRODUCT_IDS.split(',').map(id => id.trim());
-        const collageProducts = productIds.slice(0, 3).map(id => productMap.get(id)).filter(Boolean);
+        const collageProducts = bundle.BUNDLE_PRODUCTS.slice(0, 3);
         
         const collageHTML = collageProducts.map((p, i) => {
             const posClass = i === 0 ? 'top-2 left-2' : i === 1 ? 'top-2 right-2' : 'bottom-2 left-1/4';
             return `<img src="${p.PRODUCT_IMAGE_PATH_L}" alt="" class="absolute w-1/2 h-1/2 object-contain transition-transform duration-300 group-hover:scale-105 ${posClass}" loading="lazy" decoding="async"/>`;
         }).join('');
+
+        const savingsHTML = bundle.BUNDLE_PRODUCT_COUNT >= 2 ? 
+            `<span class="text-green-600 font-semibold bg-green-100 px-2 py-1 rounded">${common.BUNDLE_SAVINGS_LABEL} ${bundle.BUNDLE_SAVINGS_AMOUNT}</span>` : '';
+        
+        const originalPriceHTML = bundle.BUNDLE_PRODUCT_COUNT >= 2 ? 
+            `<div class="text-sm text-gray-500 mb-2">
+                <span class="line-through">${bundle.BUNDLE_ORIGINAL_PRICE}</span>
+                <span class="text-green-600 font-semibold ms-2">${common.BUNDLE_DISCOUNT_TEXT}</span>
+            </div>` : '';
 
         return `
             <div class="bg-white border border-gray-200 rounded-lg overflow-hidden group flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-fade-in">
@@ -305,8 +358,9 @@ for (const localeObj of publishedLocales) {
                             <h3 class="font-bold text-lg text-black group-hover:text-signal-green transition-colors mb-2">${bundle.BUNDLE_NAME}</h3>
                             <div class="flex justify-between items-baseline mb-4">
                                 <span class="text-2xl font-bold text-black">${bundle.BUNDLE_PRICE}</span>
-                                <span class="text-green-600 font-semibold bg-green-100 px-2 py-1 rounded">${common.BUNDLE_SAVINGS_LABEL} ${bundle.BUNDLE_SAVINGS_AMOUNT}</span>
+                                ${savingsHTML}
                             </div>
+                            ${originalPriceHTML}
                         </div>
                         <span class="block w-full mt-2 bg-black text-signal-green border border-signal-green py-2 px-4 rounded-md hover:bg-signal-green hover:text-black transition-all text-center font-semibold">${common.BUNDLE_VIEW_BUNDLE_BUTTON}</span>
                     </div>
@@ -314,8 +368,118 @@ for (const localeObj of publishedLocales) {
             </div>
         `;
     };
+
+    // --- CORE LOGIC ---
+    const applyFiltersAndSort = () => {
+        let processedBundles = [...allBundles];
+
+        // Apply sorting
+        const sortBy = sortSelect.value;
+        processedBundles.sort((a, b) => {
+            switch (sortBy) {
+                case 'price-asc': 
+                    return a.BUNDLE_PRICE_RECALC - b.BUNDLE_PRICE_RECALC;
+                case 'price-desc': 
+                    return b.BUNDLE_PRICE_RECALC - a.BUNDLE_PRICE_RECALC;
+                case 'az': 
+                    return a.BUNDLE_NAME.localeCompare(b.BUNDLE_NAME);
+                case 'za': 
+                    return b.BUNDLE_NAME.localeCompare(a.BUNDLE_NAME);
+                case 'importance': 
+                default: 
+                    const rankA = parseInt(a.BUNDLE_IMPORTANCE_RANK, 10) || 0;
+                    const rankB = parseInt(b.BUNDLE_IMPORTANCE_RANK, 10) || 0;
+                    if (rankB !== rankA) return rankB - rankA;
+                    return a.BUNDLE_NAME.localeCompare(b.BUNDLE_NAME);
+            }
+        });
+        
+        return processedBundles;
+    };
+
+    const renderGrid = (bundles, append = false) => {
+        if (!append) grid.innerHTML = '';
+        const batchHtml = bundles.map(createBundleCardHTML).join('');
+        grid.insertAdjacentHTML('beforeend', batchHtml);
+    };
+
+    const updateDisplay = () => {
+        bundlesToDisplay = applyFiltersAndSort();
+        currentPage = 1;
+        const initialBatch = bundlesToDisplay.slice(0, BATCH_SIZE);
+        renderGrid(initialBatch);
+        updateBundleCount(bundlesToDisplay.length);
+        noResultsMsg.style.display = bundlesToDisplay.length === 0 ? 'block' : 'none';
+        trigger.style.display = bundlesToDisplay.length > BATCH_SIZE ? 'block' : 'none';
+        setupObserver();
+    };
     
-    // ... Rest of the script (applyFiltersAndSort, renderGrid, updateDisplay, loadMore, setupObserver)
-    // would be almost identical to the product/article listing page script,
-    // just with 'article' replaced by 'bundle' and sorting logic adjusted.
+    const loadMoreBundles = () => {
+        currentPage++;
+        const startIndex = (currentPage - 1) * BATCH_SIZE;
+        const endIndex = startIndex + BATCH_SIZE;
+        const nextBatch = bundlesToDisplay.slice(startIndex, endIndex);
+
+        if (nextBatch.length > 0) renderGrid(nextBatch, true);
+        if (endIndex >= bundlesToDisplay.length) {
+            trigger.style.display = 'none';
+            if(observer) observer.disconnect();
+        }
+    };
+    
+    const setupObserver = () => {
+        if(observer) observer.disconnect();
+        if(bundlesToDisplay.length <= BATCH_SIZE) return;
+        observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) loadMoreBundles();
+        }, { rootMargin: '400px' });
+        observer.observe(trigger);
+    };
+
+    // --- EVENT LISTENERS & INITIALIZATION ---
+    sortSelect.addEventListener('change', updateDisplay);
+    clearBtn.addEventListener('click', () => {
+        sortSelect.value = 'importance';
+        updateDisplay();
+    });
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        updateBundleCount(allBundles.length);
+        setupObserver();
+    });
 </script>
+
+<style>
+    .animate-fade-in { 
+        animation: fadeIn 0.5s ease-in-out forwards; 
+    }
+    
+    @keyframes fadeIn {
+        from { 
+            opacity: 0; 
+            transform: translateY(10px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+    }
+
+    /* RTL-specific styles for better text rendering */
+    [dir="rtl"] h1,
+    [dir="rtl"] h2,
+    [dir="rtl"] h3,
+    [dir="rtl"] h4,
+    [dir="rtl"] h5,
+    [dir="rtl"] h6,
+    [dir="rtl"] p,
+    [dir="rtl"] span,
+    [dir="rtl"] label {
+        letter-spacing: 0;
+    }
+
+    /* Ensure proper text alignment in RTL */
+    [dir="rtl"] .text-center {
+        text-align: center;
+    }
+</style>

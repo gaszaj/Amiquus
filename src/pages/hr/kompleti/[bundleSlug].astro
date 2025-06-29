@@ -41,13 +41,12 @@ const includedProducts = products.filter(product => {
   const bundleIds = product.PRODUCT_BUNDLES_NUMBER.split(',').map(id => id.trim());
   return bundleIds.includes(bundleId);
 }).map(product => {
-  // Transform price from "€126,99" format to numeric value
-  const priceString = product.M_PRODUCT_PRICE || '';
-  const numericPrice = parseFloat(priceString.replace(/[€,\s]/g, '').replace(',', '.'));
+  // Use the new numeric price column
+  const numericPrice = parseFloat(product.M_PRODUCT_PRICE_NUMERIC) || 0;
   
   return {
     ...product,
-    M_PRODUCT_PRICE_RECALC: numericPrice || 0
+    M_PRODUCT_PRICE_RECALC: numericPrice
   };
 });
 
@@ -281,7 +280,7 @@ const combinedSchema = [{
                      
                      <div class="space-y-2 text-sm">
                          <div class="flex justify-between items-center">
-                             <span class="text-gray-300">Cena izbranih znakov:</span>
+                             <span class="text-gray-300">{common.BUNDLE_PRICE_ALL_SELECTED}</span>
                              <span id="original-price-mobile" class="text-gray-300"></span>
                          </div>
                          <div class="flex justify-between items-center text-signal-green">
@@ -302,7 +301,7 @@ const combinedSchema = [{
             </div>
 
             <div class="prose max-w-none my-8">
-                <h3>Opis kompleta</h3>
+                <h3>{common.BUNDLE_DESCRIPTION_SINGLE}</h3>
                 <p>{bundle.BUNDLE_DESCRIPTION_LONG}</p>
             </div>
             
@@ -450,14 +449,6 @@ const combinedSchema = [{
         const selectedProductsInputs = document.querySelectorAll('.form-selected-products');
         const finalPriceInputs = document.querySelectorAll('.form-final-price');
 
-        // Helper function to parse price from formatted string
-        function parsePrice(priceString) {
-            if (!priceString) return 0;
-            // Remove currency symbol, spaces, and convert comma to dot
-            const cleanPrice = priceString.replace(/[€,\s]/g, '').replace(',', '.');
-            return parseFloat(cleanPrice) || 0;
-        }
-
         // Initialize quantity controls for each product
         items.forEach(item => {
             const checkbox = item.querySelector('.product-checkbox');
@@ -476,7 +467,7 @@ const combinedSchema = [{
                 plusBtn.disabled = quantity >= 26;
                 
                 // Update individual product total
-                const price = parsePrice(item.dataset.price);
+                const price = parseFloat(item.dataset.price);
                 const total = price * quantity;
                 productTotalDisplay.textContent = quantity > 1 ? `${currencySymbol}${total.toFixed(2).replace('.', ',')}` : '';
             }
@@ -528,7 +519,7 @@ const combinedSchema = [{
 
             items.forEach(item => {
                 const checkbox = item.querySelector('.product-checkbox');
-                const price = parsePrice(item.dataset.price);
+                const price = parseFloat(item.dataset.price);
                 const quantity = parseInt(item.querySelector('.quantity-display').textContent) || 0;
                 
                 if (isNaN(price)) return; // Safety check
@@ -552,8 +543,8 @@ const combinedSchema = [{
                 }
             });
 
-            // Apply discount logic: 7.5% discount when 2 or more products are selected
-            const discount = selectedCount >= 2 ? 0.075 : 0;
+            // Apply 7% discount when 2 or more pieces total (any combination)
+            const discount = totalItems >= 2 ? 0.07 : 0;
             const finalPrice = currentTotal * (1 - discount);
             const savings = currentTotal - finalPrice;
             
@@ -565,7 +556,7 @@ const combinedSchema = [{
             savingsEls.forEach(el => el.textContent = formatCurrency(savings));
             
             // Update form inputs
-            productTitleInputs.forEach(input => input.value = `${bundleName} (${totalItems} kosov)`);
+            productTitleInputs.forEach(input => input.value = `${bundleName} ${totalItems >= 2 ? common.BUNDLE_ITEMS_PLURAL : ''}`);
             selectedProductsInputs.forEach(input => input.value = selectedProductNames.join('; '));
             finalPriceInputs.forEach(input => input.value = formatCurrency(finalPrice));
 
@@ -578,7 +569,7 @@ const combinedSchema = [{
             
             productBreakdownEls.forEach(breakdownEl => {
                 if (products.length === 0) {
-                    breakdownEl.innerHTML = '<div class="text-gray-400 italic">Ni izbranih izdelkov</div>';
+                    breakdownEl.innerHTML = `<div class="text-gray-400 italic">${common.BUNDLE_NO_SELECTED_ITEMS}</div>`;
                     return;
                 }
                 
