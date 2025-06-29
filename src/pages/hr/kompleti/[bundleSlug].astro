@@ -420,8 +420,26 @@ const combinedSchema = [{
 </div>
 
 
-<script define:vars={{ currencySymbol: common.M_CURRENCY_SYMBOL, bundleName: bundle.BUNDLE_NAME }}>
+<script define:vars={{ currencySymbol: common.M_CURRENCY_SYMBOL, bundleName: bundle.BUNDLE_NAME, bundleId: bundle.BUNDLE_ID }}>
     document.addEventListener('DOMContentLoaded', () => {
+        // --- Cookie Management Functions ---
+        const getCookie = (name) => {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        };
+
+        const setCookie = (name, value, days = 30) => {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+        };
+
+        const deleteCookie = (name) => {
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+        };
+
         // --- Form Cloning for Desktop/Mobile ---
         const formTemplate = document.getElementById('form-template');
         const desktopFormContainer = document.getElementById('narocilnica-desktop');
@@ -449,6 +467,63 @@ const combinedSchema = [{
         const selectedProductsInputs = document.querySelectorAll('.form-selected-products');
         const finalPriceInputs = document.querySelectorAll('.form-final-price');
 
+        // --- Load Saved Quantities from Cookie ---
+        const loadSavedQuantities = () => {
+            const cookieName = `bundle_${bundleId}_quantities`;
+            const savedData = getCookie(cookieName);
+            
+            if (savedData) {
+                try {
+                    const quantities = JSON.parse(savedData);
+                    items.forEach(item => {
+                        const productId = item.dataset.productId;
+                        const savedQuantity = quantities[productId];
+                        
+                        if (savedQuantity !== undefined) {
+                            const checkbox = item.querySelector('.product-checkbox');
+                            const quantityDisplay = item.querySelector('.quantity-display');
+                            
+                            // Set checkbox state
+                            checkbox.checked = savedQuantity > 0;
+                            
+                            // Set quantity
+                            quantityDisplay.textContent = savedQuantity;
+                            
+                            // Update visual state
+                            if (savedQuantity === 0) {
+                                item.classList.add('opacity-50', 'bg-gray-100');
+                            } else {
+                                item.classList.remove('opacity-50', 'bg-gray-100');
+                            }
+                        }
+                    });
+                } catch (e) {
+                    console.error('Error parsing saved quantities:', e);
+                }
+            }
+        };
+
+        // --- Save Quantities to Cookie ---
+        const saveQuantities = () => {
+            const quantities = {};
+            items.forEach(item => {
+                const productId = item.dataset.productId;
+                const checkbox = item.querySelector('.product-checkbox');
+                const quantityDisplay = item.querySelector('.quantity-display');
+                const quantity = checkbox.checked ? parseInt(quantityDisplay.textContent) || 0 : 0;
+                quantities[productId] = quantity;
+            });
+            
+            const cookieName = `bundle_${bundleId}_quantities`;
+            setCookie(cookieName, JSON.stringify(quantities), 30); // Save for 30 days
+        };
+
+        // --- Clear Saved Quantities ---
+        const clearSavedQuantities = () => {
+            const cookieName = `bundle_${bundleId}_quantities`;
+            deleteCookie(cookieName);
+        };
+
         // Initialize quantity controls for each product
         items.forEach(item => {
             const checkbox = item.querySelector('.product-checkbox');
@@ -470,6 +545,9 @@ const combinedSchema = [{
                 const price = parseFloat(item.dataset.price);
                 const total = price * quantity;
                 productTotalDisplay.textContent = quantity > 1 ? `${currencySymbol}${total.toFixed(2).replace('.', ',')}` : '';
+                
+                // Save to cookie whenever quantity changes
+                saveQuantities();
             }
             
             // Handle checkbox changes
@@ -505,9 +583,6 @@ const combinedSchema = [{
             
             // Store quantity in the item for calculation
             item.dataset.quantity = '1';
-            
-            // Initial setup
-            updateQuantityDisplay();
         });
 
         function calculateTotal() {
@@ -589,7 +664,17 @@ const combinedSchema = [{
             });
         }
 
-        // Initial calculation
+        // --- Initialize with saved quantities ---
+        loadSavedQuantities();
+        
+        // --- Initial calculation after loading saved quantities ---
         calculateTotal();
+        
+        // --- Add reset button functionality (optional) ---
+        // You can add a reset button to clear saved quantities
+        // Example: document.getElementById('reset-bundle').addEventListener('click', () => {
+        //     clearSavedQuantities();
+        //     location.reload();
+        // });
     });
 </script>
