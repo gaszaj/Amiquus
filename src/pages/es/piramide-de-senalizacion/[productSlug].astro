@@ -515,7 +515,7 @@ const combinedSchema = [{
                              data-price={relatedProduct.M_PRODUCT_PRICE_RECALC}>
                           <div class="flex items-center gap-4">
                             <div class="relative">
-                              <img src={getBaseUrl(relatedProduct.PRODUCT_IMAGE_PATH_L)} alt={relatedProduct.PRODUCT_NAME} class="w-16 h-16 object-contain rounded-md" />
+                              <img src={getBaseUrl(relatedProduct.PRODUCT_IMAGE_PATH_L)} alt={relatedProduct.PRODUCT_H1} class="w-16 h-16 object-contain rounded-md" />
                             </div>
                             
                             <div class="flex-1">
@@ -524,7 +524,7 @@ const combinedSchema = [{
                                   {common.PRODUCT_RELATED_PRODUCT_LABEL}
                                 </span>
                               </div>
-                              <h5 class="font-semibold text-signal-dark mb-1">{relatedProduct.PRODUCT_NAME}</h5>
+                              <h5 class="font-semibold text-signal-dark mb-1">{relatedProduct.PRODUCT_H1}</h5>
                               <p class="text-sm text-gray-600 mb-2">{common.PRODUCT_SKU_LABEL}: {relatedProduct.PRODUCT_ID}</p>
                               <p class="font-bold text-lg text-signal-dark">{relatedProduct.M_PRODUCT_PRICE}</p>
                               
@@ -1161,9 +1161,9 @@ const combinedSchema = [{
           if (quantity > 0) {
             totalItems += quantity;
             totalPrice += quantity * product.M_PRODUCT_PRICE_RECALC;
-            selectedProducts.push(`${product.PRODUCT_NAME} (${quantity}x)`);
+            selectedProducts.push(`${product.PRODUCT_H1} (${quantity}x)`);
             orderItems.push({
-              name: product.PRODUCT_NAME,
+              name: product.PRODUCT_H1,
               sku: product.PRODUCT_ID,
               quantity: quantity,
               price: product.M_PRODUCT_PRICE_RECALC,
@@ -1253,7 +1253,7 @@ const combinedSchema = [{
         const mainQuantity = parseInt(document.querySelector('.main-product-quantity').textContent);
         if (mainQuantity === 0) {
           e.preventDefault();
-          alert('Prosimo, izberite vsaj 1 kos glavnega izdelka.');
+          alert(common.PRODUCT_QUANTITY_MIN_REACHED_TOOLTIP);
           return false;
         }
       });
@@ -1265,7 +1265,7 @@ const combinedSchema = [{
     const buyInPairsElements = document.querySelectorAll('[data-buy-pairs="true"]');
     buyInPairsElements.forEach(element => {
       element.classList.add('tooltip');
-      element.setAttribute('data-tooltip', 'Priporočamo nakup v paru za optimalno zaščito');
+      element.setAttribute('data-tooltip', common.PRODUCT_BUY_PAIRS_TOOLTIP);
     });
 
     // Smooth scroll to form
