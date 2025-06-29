@@ -536,13 +536,13 @@ const combinedSchema = [{
                     
                     <!-- Quantity Selector -->
                     <div class="flex items-center justify-center gap-1">
-                      <button type="button" class="main-product-minus w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-l-md flex items-center justify-center text-gray-700 font-bold transition-colors" disabled>
+                      <button type="button" class="main-product-minus mobile-main-product-minus w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-l-md flex items-center justify-center text-gray-700 font-bold transition-colors" disabled>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
                         </svg>
                       </button>
-                      <span class="main-product-quantity w-10 h-8 bg-white border-t border-b border-gray-300 flex items-center justify-center text-base font-bold">1</span>
-                      <button type="button" class="main-product-plus w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-r-md flex items-center justify-center text-gray-700 font-bold transition-colors">
+                      <span class="main-product-quantity mobile-main-product-quantity w-10 h-8 bg-white border-t border-b border-gray-300 flex items-center justify-center text-base font-bold">1</span>
+                      <button type="button" class="main-product-plus mobile-main-product-plus w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-r-md flex items-center justify-center text-gray-700 font-bold transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
@@ -619,8 +619,8 @@ const combinedSchema = [{
                     <!-- Mobile Related Products Layout (visible only on mobile) -->
                     <div class="space-y-3 md:hidden">
                       {relatedProducts.map(relatedProduct => (
-                        <div class="related-product-card bg-white border border-gray-200 rounded-lg p-3 hover:border-signal-green transition-colors" 
-                             data-product-id={relatedProduct.PRODUCT_ID} 
+                        <div class="related-product-card mobile-related-product-card bg-white border border-gray-200 rounded-lg p-3 hover:border-signal-green transition-colors" 
+                             data-mobile-product-id={relatedProduct.PRODUCT_ID}
                              data-price={relatedProduct.M_PRODUCT_PRICE_RECALC}>
                           <div class="flex flex-col gap-2">
                             <!-- Product Label -->
@@ -652,13 +652,13 @@ const combinedSchema = [{
                             
                             <!-- Quantity Selector -->
                             <div class="flex items-center justify-center gap-1">
-                              <button type="button" class="related-product-minus w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-l-md flex items-center justify-center text-gray-700 font-bold transition-colors" disabled>
+                              <button type="button" class="related-product-minus mobile-related-product-minus w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-l-md flex items-center justify-center text-gray-700 font-bold transition-colors" disabled>
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
                                 </svg>
                               </button>
-                              <span class="related-product-quantity w-8 h-6 bg-white border-t border-b border-gray-300 flex items-center justify-center text-xs font-bold">0</span>
-                              <button type="button" class="related-product-plus w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-r-md flex items-center justify-center text-gray-700 font-bold transition-colors">
+                              <span class="related-product-quantity mobile-related-product-quantity w-8 h-6 bg-white border-t border-b border-gray-300 flex items-center justify-center text-xs font-bold">0</span>
+                              <button type="button" class="related-product-plus mobile-related-product-plus w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-r-md flex items-center justify-center text-gray-700 font-bold transition-colors">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </svg>
@@ -1099,10 +1099,15 @@ const combinedSchema = [{
       }
 
       initializeElements() {
-        // Main product elements
+        // Main product elements - handle both desktop and mobile
         this.mainProductMinus = document.querySelector('.main-product-minus');
         this.mainProductPlus = document.querySelector('.main-product-plus');
         this.mainProductQuantityDisplay = document.querySelector('.main-product-quantity');
+        
+        // Mobile main product elements
+        this.mobileMainProductMinus = document.querySelector('.mobile-main-product-minus');
+        this.mobileMainProductPlus = document.querySelector('.mobile-main-product-plus');
+        this.mobileMainProductQuantityDisplay = document.querySelector('.mobile-main-product-quantity');
         
         // Related product elements
         this.relatedProductCards = document.querySelectorAll('.related-product-card');
@@ -1158,7 +1163,15 @@ const combinedSchema = [{
             // Load main product quantity
             if (quantities.mainProduct !== undefined) {
               this.mainProductQuantity = Math.max(this.minQuantity, Math.min(this.maxQuantity, quantities.mainProduct));
-              this.mainProductQuantityDisplay.textContent = this.mainProductQuantity;
+              
+              // Update both desktop and mobile displays
+              if (this.mainProductQuantityDisplay) {
+                this.mainProductQuantityDisplay.textContent = this.mainProductQuantity;
+              }
+              if (this.mobileMainProductQuantityDisplay) {
+                this.mobileMainProductQuantityDisplay.textContent = this.mainProductQuantity;
+              }
+              
               this.updateMainProductButtonStates();
             }
             
@@ -1168,16 +1181,28 @@ const combinedSchema = [{
                 const safeQuantity = Math.max(this.minQuantity, Math.min(this.maxQuantity, quantity));
                 this.relatedProductQuantities.set(productId, safeQuantity);
                 
-                // Update display
-                const card = document.querySelector(`[data-product-id="${productId}"]`);
-                if (card) {
-                  const quantityDisplay = card.querySelector('.related-product-quantity');
-                  const minusBtn = card.querySelector('.related-product-minus');
-                  const plusBtn = card.querySelector('.related-product-plus');
+                // Update display for desktop
+                const desktopCard = document.querySelector(`[data-product-id="${productId}"]`);
+                if (desktopCard) {
+                  const quantityDisplay = desktopCard.querySelector('.related-product-quantity');
+                  const minusBtn = desktopCard.querySelector('.related-product-minus');
+                  const plusBtn = desktopCard.querySelector('.related-product-plus');
                   
-                  quantityDisplay.textContent = safeQuantity;
-                  minusBtn.disabled = safeQuantity <= this.minQuantity;
-                  plusBtn.disabled = safeQuantity >= this.maxQuantity;
+                  if (quantityDisplay) quantityDisplay.textContent = safeQuantity;
+                  if (minusBtn) minusBtn.disabled = safeQuantity <= this.minQuantity;
+                  if (plusBtn) plusBtn.disabled = safeQuantity >= this.maxQuantity;
+                }
+                
+                // Update display for mobile
+                const mobileCard = document.querySelector(`[data-mobile-product-id="${productId}"]`);
+                if (mobileCard) {
+                  const mobileQuantityDisplay = mobileCard.querySelector('.mobile-related-product-quantity');
+                  const mobileMinusBtn = mobileCard.querySelector('.mobile-related-product-minus');
+                  const mobilePlusBtn = mobileCard.querySelector('.mobile-related-product-plus');
+                  
+                  if (mobileQuantityDisplay) mobileQuantityDisplay.textContent = safeQuantity;
+                  if (mobileMinusBtn) mobileMinusBtn.disabled = safeQuantity <= this.minQuantity;
+                  if (mobilePlusBtn) mobilePlusBtn.disabled = safeQuantity >= this.maxQuantity;
                 }
               });
             }
@@ -1197,7 +1222,7 @@ const combinedSchema = [{
       }
 
       bindEvents() {
-        // Main product quantity controls
+        // Main product quantity controls - desktop
         if (this.mainProductMinus) {
           this.mainProductMinus.addEventListener('click', () => this.updateMainProductQuantity(-1));
         }
@@ -1205,7 +1230,15 @@ const combinedSchema = [{
           this.mainProductPlus.addEventListener('click', () => this.updateMainProductQuantity(1));
         }
 
-        // Related product quantity controls
+        // Main product quantity controls - mobile
+        if (this.mobileMainProductMinus) {
+          this.mobileMainProductMinus.addEventListener('click', () => this.updateMainProductQuantity(-1));
+        }
+        if (this.mobileMainProductPlus) {
+          this.mobileMainProductPlus.addEventListener('click', () => this.updateMainProductQuantity(1));
+        }
+
+        // Related product quantity controls - desktop
         this.relatedProductCards.forEach(card => {
           const productId = card.dataset.productId;
           const minusBtn = card.querySelector('.related-product-minus');
@@ -1218,11 +1251,28 @@ const combinedSchema = [{
             plusBtn.addEventListener('click', () => this.updateRelatedProductQuantity(productId, 1));
           }
         });
+
+        // Related product quantity controls - mobile
+        const mobileRelatedProductCards = document.querySelectorAll('.mobile-related-product-card');
+        mobileRelatedProductCards.forEach(card => {
+          const productId = card.dataset.mobileProductId;
+          const mobileMinusBtn = card.querySelector('.mobile-related-product-minus');
+          const mobilePlusBtn = card.querySelector('.mobile-related-product-plus');
+
+          if (mobileMinusBtn) {
+            mobileMinusBtn.addEventListener('click', () => this.updateRelatedProductQuantity(productId, -1));
+          }
+          if (mobilePlusBtn) {
+            mobilePlusBtn.addEventListener('click', () => this.updateRelatedProductQuantity(productId, 1));
+          }
+        });
       }
 
       updateMainProductButtonStates() {
-        this.mainProductMinus.disabled = this.mainProductQuantity <= this.minQuantity;
-        this.mainProductPlus.disabled = this.mainProductQuantity >= this.maxQuantity;
+        if (this.mainProductMinus) this.mainProductMinus.disabled = this.mainProductQuantity <= this.minQuantity;
+        if (this.mainProductPlus) this.mainProductPlus.disabled = this.mainProductQuantity >= this.maxQuantity;
+        if (this.mobileMainProductMinus) this.mobileMainProductMinus.disabled = this.mainProductQuantity <= this.minQuantity;
+        if (this.mobileMainProductPlus) this.mobileMainProductPlus.disabled = this.mainProductQuantity >= this.maxQuantity;
       }
 
       updateMainProductQuantity(change) {
@@ -1230,7 +1280,15 @@ const combinedSchema = [{
         
         if (newQuantity >= this.minQuantity && newQuantity <= this.maxQuantity) {
           this.mainProductQuantity = newQuantity;
-          this.mainProductQuantityDisplay.textContent = newQuantity;
+          
+          // Update both desktop and mobile displays
+          if (this.mainProductQuantityDisplay) {
+            this.mainProductQuantityDisplay.textContent = newQuantity;
+          }
+          if (this.mobileMainProductQuantityDisplay) {
+            this.mobileMainProductQuantityDisplay.textContent = newQuantity;
+          }
+          
           this.updateMainProductButtonStates();
           this.saveQuantitiesToCookie();
           this.calculateTotal();
@@ -1244,15 +1302,29 @@ const combinedSchema = [{
         if (newQuantity >= this.minQuantity && newQuantity <= this.maxQuantity) {
           this.relatedProductQuantities.set(productId, newQuantity);
           
-          // Update display
-          const card = document.querySelector(`[data-product-id="${productId}"]`);
-          const quantityDisplay = card.querySelector('.related-product-quantity');
-          const minusBtn = card.querySelector('.related-product-minus');
-          const plusBtn = card.querySelector('.related-product-plus');
+          // Update display for desktop
+          const desktopCard = document.querySelector(`[data-product-id="${productId}"]`);
+          if (desktopCard) {
+            const quantityDisplay = desktopCard.querySelector('.related-product-quantity');
+            const minusBtn = desktopCard.querySelector('.related-product-minus');
+            const plusBtn = desktopCard.querySelector('.related-product-plus');
+            
+            if (quantityDisplay) quantityDisplay.textContent = newQuantity;
+            if (minusBtn) minusBtn.disabled = newQuantity <= this.minQuantity;
+            if (plusBtn) plusBtn.disabled = newQuantity >= this.maxQuantity;
+          }
           
-          quantityDisplay.textContent = newQuantity;
-          minusBtn.disabled = newQuantity <= this.minQuantity;
-          plusBtn.disabled = newQuantity >= this.maxQuantity;
+          // Update display for mobile
+          const mobileCard = document.querySelector(`[data-mobile-product-id="${productId}"]`);
+          if (mobileCard) {
+            const mobileQuantityDisplay = mobileCard.querySelector('.mobile-related-product-quantity');
+            const mobileMinusBtn = mobileCard.querySelector('.mobile-related-product-minus');
+            const mobilePlusBtn = mobileCard.querySelector('.mobile-related-product-plus');
+            
+            if (mobileQuantityDisplay) mobileQuantityDisplay.textContent = newQuantity;
+            if (mobileMinusBtn) mobileMinusBtn.disabled = newQuantity <= this.minQuantity;
+            if (mobilePlusBtn) mobilePlusBtn.disabled = newQuantity >= this.maxQuantity;
+          }
           
           this.saveQuantitiesToCookie();
           this.calculateTotal();
