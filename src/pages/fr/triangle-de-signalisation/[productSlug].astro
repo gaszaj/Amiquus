@@ -1,0 +1,1498 @@
+---
+// Path: /src/pages/si/opozorilna-piramida/[productSlug].astro
+// Purpose: Enhanced product detail page with dynamic cross-selling/up-selling form
+// Data: Database dependencies for product data, related products, bundles, common data, and locale data
+// Dependencies: BaseLayout, form actions, validation, enhanced JavaScript calculator
+
+import path from 'path';
+import Database from 'better-sqlite3';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { actions, isInputError } from 'astro:actions';
+
+// --- Database Connection ---
+const dbPath = path.join(process.cwd(), 'src/data/data.db');
+const db = new Database(dbPath, { readonly: true });
+
+// --- DATA FETCHING & PROCESSING ---
+const { productSlug } = Astro.params;
+const locale = Astro.url.pathname.split('/')[1];
+
+// Fetch the primary product data
+const product = db.prepare("SELECT * FROM product WHERE PRODUCT_ASCII_SLUG = ? AND M_SLUG = ? AND PUBLISH_Y_N = '1'").get(productSlug, locale) as any;
+
+if (!product) {
+  return Astro.redirect('/404');
+}
+
+// --- Enhanced Data Fetching with Related Products and Bundles ---
+const { common, www, articleData, publishedLocales, relatedProducts, availableBundles } = db.transaction(() => {
+    const commonData = db.prepare('SELECT * FROM common WHERE M_SLUG = ?').get(locale) as any;
+    const wwwData = db.prepare('SELECT * FROM www LIMIT 1').get() as any;
+    const articles = db.prepare("SELECT * FROM article WHERE PUBLISH_Y_N = '1'").all() as any[];
+    const locales = db.prepare("SELECT M_SLUG FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all() as any[];
+
+    // Fetch related products with enhanced data
+    const relatedProductIds = [
+      product.PRODUCT_RELATED_P1, product.PRODUCT_RELATED_P2, product.PRODUCT_RELATED_P3, 
+      product.PRODUCT_RELATED_P4, product.PRODUCT_RELATED_P5, product.PRODUCT_RELATED_P6
+    ].filter(Boolean);
+
+    const relatedProductsData = relatedProductIds.map(id => {
+      const p = db.prepare("SELECT * FROM product WHERE PRODUCT_ID = ? AND PUBLISH_Y_N = '1'").get(id) as any;
+      if (!p || p.PRODUCT_ID === product.PRODUCT_ID) return null;
+      
+      return {
+        ...p,
+        M_PRODUCT_PRICE_RECALC: parseFloat(p.M_PRODUCT_PRICE_NUMERIC) || 0,
+        isRelated: true
+      };
+    }).filter(Boolean);
+
+    // Find bundles that contain this product
+    const productBundleIds = product.PRODUCT_BUNDLES_NUMBER ? 
+      product.PRODUCT_BUNDLES_NUMBER.split(',').map((id: string) => id.trim()) : [];
+    
+    const availableBundlesData = productBundleIds.map((bundleId: string) => {
+      const bundle = db.prepare("SELECT * FROM bundle WHERE BUNDLE_ID = ? AND M_SLUG = ? AND PUBLISH_Y_N = '1'").get(bundleId, locale) as any;
+      if (!bundle) return null;
+      
+      // Calculate bundle savings
+      const bundleProducts = db.prepare(`
+        SELECT * FROM product 
+        WHERE PRODUCT_BUNDLES_NUMBER LIKE ? 
+        AND PUBLISH_Y_N = '1'
+      `).all(`%${bundleId}%`) as any[];
+      
+      const totalPrice = bundleProducts.reduce((sum, p) => {
+        return sum + (parseFloat(p.M_PRODUCT_PRICE_NUMERIC) || 0);
+      }, 0);
+      
+      const bundlePrice = parseFloat(bundle.BUNDLE_PRICE_RECALC) || totalPrice;
+      const savings = totalPrice - bundlePrice;
+      
+      return {
+        ...bundle,
+        BUNDLE_SAVINGS_AMOUNT: savings,
+        BUNDLE_TOTAL_PRICE: totalPrice,
+        BUNDLE_PRODUCT_COUNT: bundleProducts.length
+      };
+    }).filter(Boolean);
+
+    return { 
+        common: commonData || {},
+        www: wwwData,
+        articleData: articles,
+        publishedLocales: locales,
+        relatedProducts: relatedProductsData,
+        availableBundles: availableBundlesData
+    };
+})();
+
+const languageIso = product.M_LANGUAGE_ISO;
+const countryCode = product.M_COUNTRY_CODE;
+const contentOrientation = common.M_CONTENT_ORIENTATION || 'ltr';
+
+// Helper functions
+const getAbsoluteUrl = (path: string): string => new URL(`/${locale}${path}`, Astro.url.origin).toString();
+const getBaseUrl = (path: string): string => new URL(path, Astro.url.origin).toString();
+
+// Enhanced product data with numeric price
+const productCoreData = {
+  h1: product.PRODUCT_H1,
+  seoTitle: `${product.PRODUCT_NAME} — ${product.PRODUCT_KEYWORD_1}`,
+  subtitle: product.PRODUCT_SUBTITLE,
+  description: product.PRODUCT_META_SEO,
+  price: product.M_PRODUCT_PRICE,
+  priceNumeric: parseFloat(product.M_PRODUCT_PRICE_NUMERIC) || 0,
+  ogImage: product.PRODUCT_OG_IMAGE_PATH,
+  image: product.PRODUCT_IMAGE_PATH_L,
+  sku: product.PRODUCT_ID,
+  buyInPairs: product.PRODUCT_BUY_2 === "1",
+  specifications: {
+    dimensions: common.PRODUCT_SPECIFICATIONS_VALUE_1,
+    material: common.PRODUCT_SPECIFICATIONS_VALUE_2,
+    weight: common.PRODUCT_SPECIFICATIONS_VALUE_3,
+    visibility: common.PRODUCT_SPECIFICATIONS_VALUE_4,
+    windResistance: common.PRODUCT_SPECIFICATIONS_VALUE_5,
+    setupTime: common.PRODUCT_SPECIFICATIONS_VALUE_6
+  },
+  category: product.PAGE_COLLECTION_1_LISTING_SLUG,
+  productId: product.PRODUCT_ID
+};
+
+// Enhanced FAQ items
+const productFaqItems = [
+  { question: product.PRODUCT_Q1, answer: product.PRODUCT_A1 },
+  { question: product.PRODUCT_Q2, answer: product.PRODUCT_A2 },
+  { question: product.PRODUCT_Q3, answer: product.PRODUCT_A3 },
+  { question: product.PRODUCT_Q4, answer: product.PRODUCT_A4 },
+  { question: product.PRODUCT_Q5, answer: product.PRODUCT_A5 },
+  { question: product.PRODUCT_Q6, answer: product.PRODUCT_A6 },
+  { question: product.PRODUCT_Q7, answer: product.PRODUCT_A7 },
+  { question: product.PRODUCT_Q8, answer: product.PRODUCT_A8 },
+  { question: product.PRODUCT_Q9, answer: product.PRODUCT_A9 },
+  { question: product.PRODUCT_Q10, answer: product.PRODUCT_A10 },
+  { question: product.PRODUCT_Q11, answer: product.PRODUCT_A11 },
+  { question: product.PRODUCT_Q12, answer: product.PRODUCT_A12 },
+  { question: product.PRODUCT_Q13, answer: product.PRODUCT_A13 }
+].filter(item => item.question && item.answer);
+
+// Enhanced related articles
+const findArticleById = (id: string) => {
+  return articleData.find((a: any) => a.PAGE_ID === id && a.PUBLISH_Y_N === "1");
+};
+
+const relatedArticles = [
+  product.PRODUCT_RELATED_A1, product.PRODUCT_RELATED_A2, product.PRODUCT_RELATED_A3, 
+  product.PRODUCT_RELATED_A4, product.PRODUCT_RELATED_A5, product.PRODUCT_RELATED_A6, product.PRODUCT_RELATED_A7
+].map(id => {
+    const a = findArticleById(id);
+    if (!a) return null;
+    return {
+      title: a.ARTICLE_H1,
+      url: `/${a.M_SLUG}/${a.PAGE_COLLECTION_2_LISTING_SLUG}/${a.ARTICLE_SLUG}`,
+      date: a.ARTICLE_PUBLISH_DATE
+    };
+  }).filter(Boolean);
+
+const pageKeywords = [
+  product.PRODUCT_NAME,
+  product.PRODUCT_KEYWORD_1,
+  product.PRODUCT_KEYWORD_2,
+  product.PRODUCT_KEYWORD_3,
+  product.PRODUCT_KEYWORD_4,
+  product.PRODUCT_KEYWORD_5,
+  product.PRODUCT_KEYWORD_6,
+  product.PRODUCT_KEYWORD_7,
+  common.M_COUNTRY_NATIVE,
+  www.PAGE_ORGANISATION_FULL_NAME
+].join(', ');
+
+// --- FORM HANDLING ---
+const submissionResult = await Astro.getActionResult(actions.submitOrder);
+const formErrors: Record<string, string[] | undefined> = {};
+let genericError: string | undefined = undefined;
+let successMessage: string | undefined = undefined;
+
+if (submissionResult) {
+  if (submissionResult.error) {
+    if (isInputError(submissionResult.error)) {
+      Object.assign(formErrors, submissionResult.error.fields);
+    } else {
+      genericError = submissionResult.error.message;
+    }
+  } else if (submissionResult.data?.success) {
+    successMessage = submissionResult.data.message;
+  }
+}
+
+const getFieldError = (fieldName: string): string | undefined => formErrors[fieldName]?.[0];
+
+// Language switcher data
+const languageLinksMap: Record<string, string> = {};
+for (const localeObj of publishedLocales) {
+  const productForLocale = db.prepare("SELECT * FROM product WHERE M_SLUG = ? AND PUBLISH_Y_N = '1' AND PAGE_COLLECTION_1_LISTING_SLUG IS NOT NULL LIMIT 1").get(localeObj.M_SLUG) as any;
+  languageLinksMap[localeObj.M_SLUG] = productForLocale ? `/${localeObj.M_SLUG}/${productForLocale.PAGE_COLLECTION_1_LISTING_SLUG}` : `/${localeObj.M_SLUG}`;
+}
+
+// --- Enhanced Schema Markup ---
+const combinedSchema = [{
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": product.PRODUCT_H1,
+  "image": getBaseUrl(product.PRODUCT_IMAGE_PATH_L),
+  "mpn": product.PRODUCT_MPN,
+  "category": product.PAGE_COLLECTION_1_LISTING_SLUG_HELPER,
+  "weight": {
+    "@type": "QuantitativeValue",
+    "value": common.PRODUCT_SPECIFICATIONS_VALUE_3.replace(/[^0-9.]/g, ''),
+    "unitCode": "KGM"
+  },
+  "keywords": [
+    product.PRODUCT_NAME,
+    common.M_LANGUAGE_NATIVE,
+    product.PRODUCT_KEYWORD_1,
+    product.PRODUCT_KEYWORD_2,
+    product.PRODUCT_KEYWORD_3,
+    product.PRODUCT_KEYWORD_4,
+    product.PRODUCT_KEYWORD_5,
+    product.PRODUCT_KEYWORD_6,
+    product.PRODUCT_KEYWORD_7
+  ],
+  "description": product.PRODUCT_META_SEO,
+  "brand": {
+    "@type": "Brand",
+    "name": www.PAGE_ORGANISATION_URL_NAME
+  },
+  "review": {
+    "@type": "Review",
+    "reviewRating": {
+      "@type": "Rating",
+      "ratingValue": product.PRODUCT_RATING_VALUE,
+      "bestRating": 5
+    },
+    "author": {
+      "@type": "Person",
+      "name": product.PRODUCT_TESTIMONIAL_PERSON_1
+    }
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": product.PRODUCT_RATING_VALUE,
+    "reviewCount": product.PRODUCT_REVIEW_COUNT
+  },
+  "offers": {
+    "@type": "Offer",
+    "url": Astro.url.href,
+    "priceCurrency": product.M_CURRENCY_CODE,
+    "price": productCoreData.priceNumeric,
+    "priceValidUntil": product.PRODUCT_EXPIRATION_DATE,
+    "availability": "https://schema.org/InStock",
+    "itemCondition": "https://schema.org/NewCondition"
+  }
+}, {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": productFaqItems.map(item => ({
+    "@type": "Question",
+    "name": item.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": item.answer
+    }
+  }))
+}, {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": www.PAGE_ORGANISATION_FULL_NAME,
+  "url": getBaseUrl('/'),
+  "foundingDate": www.PAGE_FOUNDING_DATE,
+  "logo": getBaseUrl(www.PAGE_LOGO_IMAGE_PATH_1),
+  "keywords": [
+    www.PAGE_ORGANISATION_FULL_NAME,
+    common.M_COUNTRY_NATIVE,
+    common.PAGE_KEYWORD_1,
+    common.PAGE_KEYWORD_2,
+    common.PAGE_KEYWORD_3,
+    common.PAGE_KEYWORD_4,
+    common.PAGE_KEYWORD_5,
+    common.PAGE_KEYWORD_6
+  ].filter(Boolean),
+  "description": common.PAGE_DESCRIPTION,
+  "numberOfEmployees": {
+    "@type": "QuantitativeValue",
+    "minValue": "1",
+    "maxValue": "9"
+  },
+  "slogan": common.PAGE_SLOGAN,
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": www.PAGE_INFO_EMAIL,
+    "contactType": common.M_CUSTOMER_SUPPORT
+  },
+  "sameAs": [
+    www.PAGE_INSTAGRAM_URL,
+    www.PAGE_FACEBOOK_URL,
+    www.PAGE_TWITTER_URL,
+    www.PAGE_LINKEDIN_URL,
+    www.PAGE_YOUTUBE_URL,
+    www.PAGE_PINTEREST_URL,
+    www.PAGE_BLUESKY_URL
+  ].filter(Boolean),
+  "areaServed": {
+    "@type": "Country",
+    "name": common.M_COUNTRY,
+    "identifier": common.M_COUNTRY_CODE
+  }
+}];
+
+---
+
+<BaseLayout
+  languageIso={languageIso}
+  countryCode={countryCode}
+  contentOrientation={contentOrientation}
+  title={productCoreData.seoTitle}
+  description={productCoreData.description}
+  ogImage={productCoreData.ogImage}
+  keywords={pageKeywords}
+  schema={combinedSchema}
+  languageLinksMap={languageLinksMap}
+>
+  <div class="container mx-auto px-4 py-8">
+    <div class="flex flex-col lg:flex-row rtl:lg:flex-row-reverse gap-8">
+      
+      <!-- Main Content Area -->
+      <div class="lg:w-2/3">
+        <h1 class="text-3xl font-bold text-signal-dark mb-6">{productCoreData.h1}</h1>
+        
+        <!-- Product Gallery -->
+        <div class="product-gallery mb-8">
+          <div class="border-2 border-signal-green rounded-lg p-2">
+            <img
+              src={productCoreData.image}
+              alt={productCoreData.h1}
+              class="w-full h-[350px] object-contain animate-fade-in"
+              width="350"
+              height="350"
+              fetchpriority="high"
+            />
+          </div>
+        </div>
+        
+        <p class="text-lg text-gray-600 mb-6">{productCoreData.subtitle}</p>
+
+        <!-- Mobile Specifications -->
+        <div class="lg:hidden mb-8">
+          <div class="bg-black text-white rounded-lg shadow-sm p-6">
+            <h3 class="text-lg font-semibold mb-4 text-white">{common.PRODUCT_SPECIFICATIONS_TITLE}</h3>
+            <ul class="space-y-4">
+              <li class="flex items-start">
+                <span class="text-signal-green me-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M3 5h11m-2 2l2-2l-2-2M5 3L3 5l2 2m14 3v11m-2-2l2 2l2-2m0-7l-2-2l-2 2M3 12a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
+                </span>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_1}</span><span class="text-sm text-gray-300">{productCoreData.specifications.dimensions}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green me-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                </span>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_2}</span><span class="text-sm text-gray-300">{productCoreData.specifications.material}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green me-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 7q.425 0 .713-.288T13 6t-.288-.712T12 5t-.712.288T11 6t.288.713T12 7m2.825 0h1.75q.75 0 1.3.5t.675 1.225l1.425 10q.125.9-.462 1.588T18 21H6q-.925 0-1.513-.687t-.462-1.588l1.425-10Q5.575 8 6.125 7.5t1.3-.5h1.75q-.075-.25-.125-.487T9 6q0-1.25.875-2.125T12 3t2.125.875T15 6q0 .275-.05.513T14.825 7"/></svg>
+                </span>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_3}</span><span class="text-sm text-gray-300">{productCoreData.specifications.weight}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green me-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                </span>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_4}</span><span class="text-sm text-gray-300">{productCoreData.specifications.visibility}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green me-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 512 512" aria-hidden="true">
+                    <defs>
+                      <symbol id="meteoconsWind_mobile" viewBox="0 0 342 234">
+                        <path fill="none" stroke="currentColor" stroke-dasharray="148" stroke-linecap="round" stroke-miterlimit="10" stroke-width="18" d="M264.2 21.3A40 40 0 1 1 293 89H9">
+                          <animate attributeName="stroke-dashoffset" dur="7.2s" repeatCount="indefinite" values="0; 2960"/>
+                        </path>
+                        <path fill="none" stroke="currentColor" stroke-dasharray="110" stroke-linecap="round" stroke-miterlimit="10" stroke-width="18" d="M148.2 212.7A40 40 0 1 0 177 145H9">
+                          <animate attributeName="stroke-dashoffset" dur="7.2s" repeatCount="indefinite" values="0; 1540"/>
+                        </path>
+                      </symbol>
+                    </defs>
+                    <use width="342" height="234" href="#meteoconsWind_mobile" transform="translate(85 139)"/>
+                  </svg>
+                </span>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_5}</span><span class="text-sm text-gray-300">{productCoreData.specifications.windResistance}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green me-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,20a9,9,0,1,1,9-9A9,9,0,0,1,12,21Z"/>
+                    <rect width="2" height="7" x="11" y="6" fill="currentColor" rx="1">
+                      <animateTransform attributeName="transform" dur="10.8s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/>
+                    </rect>
+                    <rect width="2" height="9" x="11" y="11" fill="currentColor" rx="1">
+                      <animateTransform attributeName="transform" dur="0.9s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/>
+                    </rect>
+                  </svg>
+                </span>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_6}</span><span class="text-sm text-gray-300">{productCoreData.specifications.setupTime}</span></div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Enhanced Product Details with Cross-Selling -->
+        <div class="product-details">
+          <p class="text-2xl text-black font-semibold pl-4 pr-4 underline decoration-signal-green mb-4">{productCoreData.price}</p>
+          
+          <!-- Bundle Suggestion (if available) -->
+          {availableBundles.length > 0 && (
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div class="flex-1">
+                  <h3 class="font-semibold text-blue-900 mb-1">{common.PRODUCT_BUNDLE_SUGGESTION_TITLE}</h3>
+                  <p class="text-blue-800 text-sm mb-2">
+                    {common.PRODUCT_BUNDLE_SUGGESTION_TEXT
+                      .replace('{BUNDLE_NAME}', availableBundles[0].BUNDLE_NAME)
+                      .replace('{SAVINGS_AMOUNT}', `${common.M_CURRENCY_SYMBOL}${availableBundles[0].BUNDLE_SAVINGS_AMOUNT.toFixed(2).replace('.', ',')}`)}
+                  </p>
+                  <a href={`/${locale}/${availableBundles[0].PAGE_COLLECTION_3_LISTING_SLUG}/${availableBundles[0].BUNDLE_ASCII_SLUG}`} 
+                     class="inline-flex items-center text-blue-700 hover:text-blue-900 font-medium text-sm">
+                    {common.PRODUCT_BUNDLE_VIEW_BUTTON}
+                    <svg class="w-4 h-4 ms-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <!-- Enhanced Order Form with Cross-Selling -->
+          <section id="enhanced-order-form" class="scroll-mt-24 mb-8">
+            <div class="bg-white rounded-lg shadow-sm p-8 border-2 border-signal-green">
+              <h2 class="text-2xl font-bold mb-6 text-black">{common.FORM_INQUIRY_TITLE}</h2>
+              <p class="text-signal-gray mb-6">{common.FORM_ORDER_SUBTITLE_BASE} {productCoreData.h1}.</p>
+
+              {successMessage && !submissionResult?.error && (
+                <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
+                  {successMessage}
+                </div>
+              )}
+
+              {genericError && (
+                <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+                  {genericError}
+                </div>
+              )}
+
+              <!-- Enhanced Product Selection Section -->
+              <div class="mb-8">
+                <h3 class="text-lg font-semibold mb-4 text-signal-dark">{common.PRODUCT_CROSS_SELL_TITLE}</h3>
+                <p class="text-gray-600 mb-6">{common.PRODUCT_CROSS_SELL_SUBTITLE}</p>
+
+                <!-- Main Product Card - Desktop Layout (hidden on mobile) -->
+                <div class="main-product-card bg-gradient-to-r from-signal-green/5 to-signal-green/10 border-2 border-signal-green rounded-lg p-6 mb-6 hidden md:block">
+                  <div class="flex items-center gap-4">
+                    <div class="relative">
+                      <img src={productCoreData.image} alt={productCoreData.h1} class="w-20 h-20 object-contain rounded-md" />
+                    </div>
+                    
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2 mb-1">
+                        <span class="bg-signal-green text-black text-xs px-2 py-1 rounded-full font-semibold">
+                          {common.PRODUCT_MAIN_PRODUCT_LABEL}
+                        </span>
+                      </div>
+                      <h4 class="font-semibold text-signal-dark mb-1">{productCoreData.h1}</h4>
+                      <p class="text-sm text-gray-600 mb-2">{common.PRODUCT_SKU_LABEL}: {productCoreData.sku}</p>
+                      <p class="font-bold text-lg text-signal-dark">{productCoreData.price}</p>
+                      
+                      {productCoreData.buyInPairs && (
+                        <div class="flex items-center gap-2 mt-2">
+                          <svg class="w-4 h-4 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 0 1 1 1v3a1 1 0 002 0V6a1 1 0 0 1-1-1z" clip-rule="evenodd"></path>
+                          </svg>
+                          <span class="text-sm text-yellow-700 font-medium">{common.PRODUCT_BUY_PAIRS_TOOLTIP}</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <!-- Quantity Controls for Main Product -->
+                    <div class="flex items-center gap-2">
+                      <button type="button" class="main-product-minus w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-l-md flex items-center justify-center text-gray-700 font-bold transition-colors" disabled>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                        </svg>
+                      </button>
+                      <span class="main-product-quantity w-16 h-10 bg-white border-t border-b border-gray-300 flex items-center justify-center text-lg font-bold">1</span>
+                      <button type="button" class="main-product-plus w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-r-md flex items-center justify-center text-gray-700 font-bold transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Main Product Card - Mobile Layout (visible only on mobile) -->
+                <div class="main-product-card bg-gradient-to-r from-signal-green/5 to-signal-green/10 border-2 border-signal-green rounded-lg p-4 mb-4 md:hidden">
+                  <div class="flex flex-col gap-3">
+                    <!-- Product Label -->
+                    <div class="flex justify-center">
+                      <span class="bg-signal-green text-black text-[10px] px-2 py-1 rounded-full font-semibold">
+                        {common.PRODUCT_MAIN_PRODUCT_LABEL}
+                      </span>
+                    </div>
+                    
+                    <!-- Product Image -->
+                    <div class="flex justify-center">
+                      <img src={productCoreData.image} alt={productCoreData.h1} class="w-16 h-16 object-contain rounded-md" />
+                    </div>
+                    
+                    <!-- Product Name -->
+                    <div class="text-center">
+                      <h4 class="font-semibold text-signal-dark text-sm leading-tight">{productCoreData.h1}</h4>
+                    </div>
+                    
+                    <!-- SKU -->
+                    <div class="text-center">
+                      <span class="text-[10px] text-gray-500">{common.PRODUCT_SKU_LABEL}: {productCoreData.sku}</span>
+                    </div>
+                    
+                    <!-- Price -->
+                    <div class="text-center">
+                      <span class="font-bold text-signal-dark text-base">{productCoreData.price}</span>
+                    </div>
+                    
+                    <!-- Quantity Selector -->
+                    <div class="flex items-center justify-center gap-1">
+                      <button type="button" class="main-product-minus mobile-main-product-minus w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-l-md flex items-center justify-center text-gray-700 font-bold transition-colors" disabled>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                        </svg>
+                      </button>
+                      <span class="main-product-quantity mobile-main-product-quantity w-10 h-8 bg-white border-t border-b border-gray-300 flex items-center justify-center text-base font-bold">1</span>
+                      <button type="button" class="main-product-plus mobile-main-product-plus w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-r-md flex items-center justify-center text-gray-700 font-bold transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                      </button>
+                    </div>
+                    
+                    <!-- Buy in Pair Message -->
+                    {productCoreData.buyInPairs && (
+                      <div class="flex items-center justify-center gap-1">
+                        <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 0 1 1 1v3a1 1 0 002 0V6a1 1 0 0 1-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-[10px] text-yellow-700 font-medium">{common.PRODUCT_BUY_PAIRS_TOOLTIP}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <!-- Related Products Section -->
+                {relatedProducts.length > 0 && (
+                  <div class="related-products-section">
+                    <h4 class="text-md font-semibold mb-4 text-signal-dark">{common.PRODUCT_PAGE_RELATED_PRODUCTS_TITLE}</h4>
+                    
+                    <!-- Desktop Related Products Layout (hidden on mobile) -->
+                    <div class="space-y-4 hidden md:block">
+                      {relatedProducts.map(relatedProduct => (
+                        <div class="related-product-card bg-white border border-gray-200 rounded-lg p-4 hover:border-signal-green transition-colors" 
+                             data-product-id={relatedProduct.PRODUCT_ID} 
+                             data-price={relatedProduct.M_PRODUCT_PRICE_RECALC}>
+                          <div class="flex items-center gap-4">
+                            <div class="relative">
+                              <img src={getBaseUrl(relatedProduct.PRODUCT_IMAGE_PATH_L)} alt={relatedProduct.PRODUCT_H1} class="w-16 h-16 object-contain rounded-md" />
+                            </div>
+                            
+                            <div class="flex-1">
+                              <div class="flex items-center gap-2 mb-1">
+                                <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                                  {common.PRODUCT_RELATED_PRODUCT_LABEL}
+                                </span>
+                              </div>
+                              <h5 class="font-semibold text-signal-dark mb-1">{relatedProduct.PRODUCT_H1}</h5>
+                              <p class="text-sm text-gray-600 mb-2">{common.PRODUCT_SKU_LABEL}: {relatedProduct.PRODUCT_ID}</p>
+                              <p class="font-bold text-lg text-signal-dark">{relatedProduct.M_PRODUCT_PRICE}</p>
+                              
+                              {relatedProduct.PRODUCT_BUY_2 === "1" && (
+                                <div class="flex items-center gap-2 mt-2">
+                                  <svg class="w-4 h-4 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 0 1 1 1v3a1 1 0 002 0V6a1 1 0 0 1-1-1z" clip-rule="evenodd"></path>
+                                  </svg>
+                                  <span class="text-sm text-yellow-700 font-medium">{common.PRODUCT_BUY_PAIRS_TOOLTIP}</span>
+                                </div>
+                              )}
+                            </div>
+                            
+                            <!-- Quantity Controls for Related Products -->
+                            <div class="flex items-center gap-2">
+                              <button type="button" class="related-product-minus w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-l-md flex items-center justify-center text-gray-700 font-bold transition-colors" disabled>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                </svg>
+                              </button>
+                              <span class="related-product-quantity w-12 h-8 bg-white border-t border-b border-gray-300 flex items-center justify-center text-sm font-bold">0</span>
+                              <button type="button" class="related-product-plus w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-r-md flex items-center justify-center text-gray-700 font-bold transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <!-- Mobile Related Products Layout (visible only on mobile) -->
+                    <div class="space-y-3 md:hidden">
+                      {relatedProducts.map(relatedProduct => (
+                        <div class="related-product-card mobile-related-product-card bg-white border border-gray-200 rounded-lg p-3 hover:border-signal-green transition-colors" 
+                             data-mobile-product-id={relatedProduct.PRODUCT_ID}
+                             data-price={relatedProduct.M_PRODUCT_PRICE_RECALC}>
+                          <div class="flex flex-col gap-2">
+                            <!-- Product Label -->
+                            <div class="flex justify-center">
+                              <span class="bg-blue-500 text-white text-[10px] px-2 py-1 rounded-full font-semibold">
+                                {common.PRODUCT_RELATED_PRODUCT_LABEL}
+                              </span>
+                            </div>
+                            
+                            <!-- Product Image -->
+                            <div class="flex justify-center">
+                              <img src={getBaseUrl(relatedProduct.PRODUCT_IMAGE_PATH_L)} alt={relatedProduct.PRODUCT_H1} class="w-12 h-12 object-contain rounded-md" />
+                            </div>
+                            
+                            <!-- Product Name -->
+                            <div class="text-center">
+                              <h5 class="font-semibold text-signal-dark text-sm leading-tight">{relatedProduct.PRODUCT_H1}</h5>
+                            </div>
+                            
+                            <!-- SKU -->
+                            <div class="text-center">
+                              <span class="text-[10px] text-gray-500">{common.PRODUCT_SKU_LABEL}: {relatedProduct.PRODUCT_ID}</span>
+                            </div>
+                            
+                            <!-- Price -->
+                            <div class="text-center">
+                              <span class="font-bold text-signal-dark text-base">{relatedProduct.M_PRODUCT_PRICE}</span>
+                            </div>
+                            
+                            <!-- Quantity Selector -->
+                            <div class="flex items-center justify-center gap-1">
+                              <button type="button" class="related-product-minus mobile-related-product-minus w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-l-md flex items-center justify-center text-gray-700 font-bold transition-colors" disabled>
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                </svg>
+                              </button>
+                              <span class="related-product-quantity mobile-related-product-quantity w-8 h-6 bg-white border-t border-b border-gray-300 flex items-center justify-center text-xs font-bold">0</span>
+                              <button type="button" class="related-product-plus mobile-related-product-plus w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-r-md flex items-center justify-center text-gray-700 font-bold transition-colors">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                              </button>
+                            </div>
+                            
+                            <!-- Buy in Pair Message -->
+                            {relatedProduct.PRODUCT_BUY_2 === "1" && (
+                              <div class="flex items-center justify-center gap-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 0 1 1 1v3a1 1 0 002 0V6a1 1 0 0 1-1-1z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span class="text-[10px] text-yellow-700 font-medium">{common.PRODUCT_BUY_PAIRS_TOOLTIP}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <!-- Pre-Order Details Table -->
+              <div id="pre-order-details" class="bg-gray-50 rounded-lg p-4 mb-6 hidden">
+                <h4 class="font-semibold text-lg mb-3 text-signal-dark">{common.PRODUCT_PRE_ORDER_DETAILS_TITLE}</h4>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm">
+                    <thead class="bg-gray-100">
+                      <tr>
+                        <th class="text-left p-2 font-medium">{common.PRODUCT_PRE_ORDER_TABLE_PRODUCT}</th>
+                        <th class="text-left p-2 font-medium">{common.PRODUCT_PRE_ORDER_TABLE_SKU}</th>
+                        <th class="text-right p-2 font-medium">{common.PRODUCT_PRE_ORDER_TABLE_QUANTITY}</th>
+                        <th class="text-right p-2 font-medium">{common.PRODUCT_PRE_ORDER_TABLE_PRICE}</th>
+                        <th class="text-right p-2 font-medium">{common.PRODUCT_PRE_ORDER_TABLE_TOTAL}</th>
+                      </tr>
+                    </thead>
+                    <tbody id="pre-order-items">
+                      <!-- Dynamic content will be inserted here -->
+                    </tbody>
+                    <tfoot class="bg-gray-100 font-semibold">
+                      <tr>
+                        <td colspan="4" class="text-right p-2">{common.PRODUCT_PRE_ORDER_TABLE_SUBTOTAL}:</td>
+                        <td id="pre-order-subtotal" class="text-right p-2">€0,00</td>
+                      </tr>
+                      <tr id="pre-order-savings-row" class="hidden">
+                        <td colspan="4" class="text-right p-2 text-signal-green">{common.PRODUCT_PRE_ORDER_TABLE_SAVINGS}:</td>
+                        <td id="pre-order-savings" class="text-right p-2 text-signal-green">-€0,00</td>
+                      </tr>
+                      <tr class="text-lg">
+                        <td colspan="4" class="text-right p-2 font-bold">{common.PRODUCT_PRE_ORDER_TABLE_TOTAL}:</td>
+                        <td id="pre-order-total" class="text-right p-2 font-bold">€0,00</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Enhanced Price Summary -->
+              <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                <h4 class="font-semibold text-lg mb-4">{common.PRODUCT_TOTAL_PRICE}</h4>
+                <div class="space-y-2">
+                  <div class="flex justify-between items-center">
+                    <span class="text-gray-600">{common.PRODUCT_TOTAL_ITEMS}:</span>
+                    <span id="total-items-display" class="font-semibold">1</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-gray-600">{common.PRODUCT_TOTAL_PRICE}:</span>
+                    <span id="total-price-display" class="font-bold text-xl text-signal-dark">{productCoreData.price}</span>
+                  </div>
+                  <div id="savings-display" class="flex justify-between items-center text-signal-green hidden">
+                    <span class="font-semibold">{common.PRODUCT_SAVINGS_AMOUNT}:</span>
+                    <span id="savings-amount" class="font-bold"></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Customer Information Form -->
+              <form id="enhancedProductOrderForm" method="POST" action={actions.submitOrder} class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="hidden" name="productTitle" value={productCoreData.h1} />
+                <input type="hidden" name="pageUrl" value={Astro.url.href} />
+                <input type="hidden" name="locale" value={locale} />
+                <input type="hidden" id="selected-products-input" name="Selected Products" value="" />
+                <input type="hidden" id="final-price-input" name="Final Price" value={productCoreData.price} />
+
+                <div>
+                  <label for="form-name" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_NAME}</label>
+                  <input id="form-name" type="text" name="Name" placeholder={common.FORM_PLACEHOLDER_NAME} class:list={["w-full ps-3 pe-3 py-2 border rounded-md", getFieldError('Name') ? 'border-red-500' : 'border-gray-300']} required />
+                  {getFieldError('Name') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_NAME_REQUIRED}</p>}
+                </div>
+                <div>
+                  <label for="form-surname" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_SURNAME}</label>
+                  <input id="form-surname" type="text" name="Last Name" placeholder={common.FORM_PLACEHOLDER_SURNAME} class:list={["w-full ps-3 pe-3 py-2 border rounded-md", getFieldError('Last Name') ? 'border-red-500' : 'border-gray-300']} required />
+                  {getFieldError('Last Name') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_SURNAME_REQUIRED}</p>}
+                </div>
+                <div>
+                  <label for="form-company" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_COMPANY}</label>
+                  <input id="form-company" type="text" name="Company" placeholder={common.FORM_PLACEHOLDER_COMPANY} class="w-full ps-3 pe-3 py-2 border border-gray-300 rounded-md" />
+                </div>
+                <div>
+                  <label for="form-vatid" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_VAT_ID}</label>
+                  <input id="form-vatid" type="text" name="VAT ID" placeholder={common.FORM_PLACEHOLDER_VAT_ID} class="w-full ps-3 pe-3 py-2 border border-gray-300 rounded-md" />
+                </div>
+                <div>
+                  <label for="form-street" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_STREET}</label>
+                  <input id="form-street" type="text" name="Street" placeholder={common.FORM_PLACEHOLDER_STREET} class:list={["w-full ps-3 pe-3 py-2 border rounded-md", getFieldError('Street') ? 'border-red-500' : 'border-gray-300']} required />
+                  {getFieldError('Street') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_STREET_REQUIRED}</p>}
+                </div>
+                <div>
+                  <label for="form-city" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_CITY}</label>
+                  <input id="form-city" type="text" name="Location" placeholder={common.FORM_PLACEHOLDER_CITY} class:list={["w-full ps-3 pe-3 py-2 border rounded-md", getFieldError('Location') ? 'border-red-500' : 'border-gray-300']} required />
+                  {getFieldError('Location') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_CITY_REQUIRED}</p>}
+                </div>
+                <div>
+                  <label for="form-zip" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_ZIP}</label>
+                  <input id="form-zip" type="text" name="Postal Code" placeholder={common.FORM_PLACEHOLDER_ZIP} class:list={["w-full ps-3 pe-3 py-2 border rounded-md", getFieldError('Postal Code') ? 'border-red-500' : 'border-gray-300']} required />
+                  {getFieldError('Postal Code') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_ZIP_REQUIRED}</p>}
+                </div>
+                <div>
+                  <label for="form-email" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_EMAIL}</label>
+                  <input id="form-email" type="email" name="email" placeholder={common.FORM_PLACEHOLDER_EMAIL} class:list={["w-full ps-3 pe-3 py-2 border rounded-md", getFieldError('email') ? 'border-red-500' : 'border-gray-300']} required />
+                  {getFieldError('email') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_EMAIL_INVALID}</p>}
+                </div>
+                <div>
+                  <label for="form-phone" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_PHONE}</label>
+                  <input id="form-phone" type="tel" name="Telephone Number" placeholder={common.FORM_PLACEHOLDER_PHONE} class:list={["w-full ps-3 pe-3 py-2 border rounded-md", getFieldError('Telephone Number') ? 'border-red-500' : 'border-gray-300']} required />
+                  {getFieldError('Telephone Number') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_PHONE_REQUIRED}</p>}
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_PAYMENT} ({productCoreData.price} + {common.M_VAT_NAME_LABEL})*</label>
+                  <div role="radiogroup">
+                    <label class="flex items-center"><input type="radio" name="Payment" value="Cash on Delivery" class="me-2" required /><span>{common.FORM_OPTION_PAYMENT_COD}</span></label>
+                    <label class="flex items-center"><input type="radio" name="Payment" value="Proforma Invoice" class="me-2" required /><span>{common.FORM_OPTION_PAYMENT_PREINVOICE}</span></label>
+                    {getFieldError('Payment') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_PAYMENT_REQUIRED}</p>}
+                  </div>
+                </div>
+                <div class="md:col-span-2">
+                  <label for="form-message" class="block text-sm font-medium text-signal-gray mb-1">{common.FORM_LABEL_MESSAGE}</label>
+                  <textarea id="form-message" name="Message" rows="4" placeholder={common.FORM_PLACEHOLDER_MESSAGE_ORDER} class="w-full ps-3 pe-3 py-2 border border-gray-300 rounded-md"></textarea>
+                </div>
+                <div class="md:col-span-2">
+                  <label class="flex items-center">
+                    <input id="form-terms" type="checkbox" name="Conditions" class:list={["mr-2", getFieldError('Conditions') ? 'border-red-500' : '']} required />
+                    <span class="text-sm">{common.FORM_LABEL_TERMS}</span>
+                  </label>
+                  {getFieldError('Conditions') && <p class="text-red-500 text-sm mt-1">{common.FORM_VALIDATION_TERMS_REQUIRED}</p>}
+                </div>
+
+                <div class="md:col-span-2">
+                  <button type="submit" class="w-full bg-black text-signal-green border border-signal-green font-semibold py-3 px-6 rounded-lg hover:bg-signal-green hover:text-black transition-colors flex items-center justify-center relative overflow-hidden">
+                    <span class="relative z-10">{common.FORM_BUTTON_SUBMIT_ORDER}</span>
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shine_2s_infinite]" aria-hidden="true"></div>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <!-- Content Sections -->
+          <div class="prose max-w-none mb-8">
+            <div class="product-description space-y-6">
+              <section aria-labelledby="peer-pressure-heading" class="bg-signal-green/5 p-6 rounded-lg border-l-4 border-signal-green mb-8">
+                <div class="flex items-center gap-4">
+                  <svg class="w-12 h-12 text-signal-green" viewBox="0 0 16 16" aria-hidden="true">
+                    <g fill="#000">
+                      <path d="M12.5 16a3.5 3.5 0 1 0 0-7a3.5 3.5 0 0 0 0 7m1.679-4.493l-1.335 2.226a.75.75 0 0 1-1.174.144l-.774-.773a.5.5 0 0 1 .708-.708l.547.548l1.17-1.951a.5.5 0 1 1 .858.514M11 5a3 3 0 1 1-6 0a3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4a2 2 0 0 0 0 4"/>
+                      <path d="M8.256 14a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z"/>
+                    </g>
+                  </svg>
+                  <h2 id="peer-pressure-heading" class="text-xl font-semibold">{product.PRODUCT_PEER_PRESSURE_1}</h2>
+                </div>
+              </section>
+
+              <section aria-labelledby="authority-proof-heading" class="bg-gray-50 p-6 rounded-lg">
+                <h2 id="authority-proof-heading" class="text-xl font-semibold mb-4">{product.PRODUCT_AUTHORITY_PROOF_H2}</h2>
+                <ul class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <li class="flex items-center gap-4">
+                    <svg class="w-10 h-10 text-green-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    <span class="text-lg">{product.PRODUCT_AUTHORITY_PROOF_1}</span>
+                  </li>
+                  <li class="flex items-center gap-4">
+                    <svg class="w-10 h-10 text-green-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    <span class="text-lg">{product.PRODUCT_AUTHORITY_PROOF_2}</span>
+                  </li>
+                  <li class="flex items-center gap-4">
+                    <svg class="w-10 h-10 text-green-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    <span class="text-lg">{product.PRODUCT_AUTHORITY_PROOF_3}</span>
+                  </li>
+                </ul>
+              </section>
+              
+              <section aria-labelledby="fear-trigger-heading" class="bg-yellow-50 p-6 rounded-lg">
+                <div class="flex flex-col space-y-4">
+                  <div class="flex items-center gap-4">
+                    <svg class="w-12 h-12 text-yellow-700" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2m0 2a8 8 0 1 0 0 16a8 8 0 0 0 0-16m0 11a1 1 0 1 1 0 2a1 1 0 0 1 0-2m0-9a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1"/></svg>
+                    <h2 id="fear-trigger-heading" class="text-xl font-semibold text-yellow-800">{product.PRODUCT_FEAR_TRIGGER_1}</h2>
+                  </div>
+                  <p class="text-yellow-700 ms-16">
+                    {product.PRODUCT_FEAR_TRIGGER_2}
+                  </p>
+                </div>
+              </section>
+
+              <div class="space-y-4">
+                <p>{product.PRODUCT_USE_CASES_COMPILED}</p>
+                <ul class="list-disc pl-6 space-y-2">
+                  <li>{product.PRODUCT_USE_CASE_1}</li>
+                  <li>{product.PRODUCT_USE_CASE_2}</li>
+                  <li>{product.PRODUCT_USE_CASE_3}</li>
+                </ul>
+              </div>
+
+              <section aria-labelledby="push-trigger-heading" class="bg-signal-green/10 p-6 rounded-lg border-l-4 border-signal-green">
+                <h2 id="push-trigger-heading" class="text-xl font-semibold">{product.PRODUCT_PUSH_TRIGGER_1}</h2>
+              </section>
+            </div>
+          </div>
+
+          <!-- FAQ Section -->
+          <section class="bg-signal-green rounded-xl p-8 mt-12">
+            <h2 class="text-2xl font-bold mb-6 text-black">{common.FORM_FAQ_TITLE}</h2>
+            <div class="space-y-4">
+              {productFaqItems.map((item) => (
+                <details class="bg-signal-green rounded-lg group">
+                  <summary class="p-4 cursor-pointer font-medium text-black hover:bg-[#a5d429] flex items-center justify-between rounded-t-lg border border-black group-open:rounded-b-none">
+                    {item.question}
+                    <svg class="w-6 h-6 transform transition-transform group-open:rotate-180 rtl:scale-x-[-1]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                  </summary>
+                  <div class="p-4 text-white bg-black rounded-b-lg">{item.answer}</div>
+                </details>
+              ))}
+            </div>
+            <div class="text-center mt-8">
+              <a href="#enhanced-order-form" class="inline-flex items-center bg-white text-black border border-black font-medium py-3 ps-6 pe-6 rounded-lg hover:bg-black hover:text-white transition-colors">
+                <svg class="w-5 h-5 me-2 transition-colors" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+                {common.FORM_BUTTON_BACK_TO_ORDER}
+              </a>
+            </div>
+          </section>
+        </div>
+
+        {/* Related Articles Section */}
+        {relatedArticles.length > 0 && (
+          <section aria-labelledby="related-articles-heading" class="mt-16">
+            <h2 id="related-articles-heading" class="text-2xl font-bold mb-6">{common.ARTICLE_RELATED_ARTICLES}</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {relatedArticles.map(article => article && (
+                <article class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                  <h3 class="font-semibold text-lg mb-2">
+                    <a href={article.url} class="text-signal-dark hover:text-signal-green transition-colors">
+                      {article.title}
+                    </a>
+                  </h3>
+                  <p class="text-signal-gray text-sm">
+                    {new Date(article.date).toLocaleDateString(`${languageIso}-${countryCode}`, { 
+                      year: 'numeric', 
+                      month: 'short', 
+                      day: 'numeric' 
+                    })}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+
+      <!-- Desktop Sidebar -->
+      <div class="hidden lg:block lg:w-1/3">
+        <aside class="bg-black text-white rounded-lg shadow-sm p-6 sticky top-20">
+          <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-4 text-white">{common.PRODUCT_SPECIFICATIONS_TITLE}</h3>
+            <ul class="space-y-4">
+              <li class="flex items-start">
+                <span class="text-signal-green me-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M3 5h11m-2 2l2-2l-2-2M5 3L3 5l2 2m14 3v11m-2-2l2 2l2-2m0-7l-2-2l-2 2M3 12a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
+                </span>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_1}</span><span class="text-sm text-gray-300">{productCoreData.specifications.dimensions}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green me-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                </span>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_2}</span><span class="text-sm text-gray-300">{productCoreData.specifications.material}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green me-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 7q.425 0 .713-.288T13 6t-.288-.712T12 5t-.712.288T11 6t.288.713T12 7m2.825 0h1.75q.75 0 1.3.5t.675 1.225l1.425 10q.125.9-.462 1.588T18 21H6q-.925 0-1.513-.687t-.462-1.588l1.425-10Q5.575 8 6.125 7.5t1.3-.5h1.75q-.075-.25-.125-.487T9 6q0-1.25.875-2.125T12 3t2.125.875T15 6q0 .275-.05.513T14.825 7"/></svg>
+                </span>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_3}</span><span class="text-sm text-gray-300">{productCoreData.specifications.weight}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green me-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                </span>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_4}</span><span class="text-sm text-gray-300">{productCoreData.specifications.visibility}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green me-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 512 512" aria-hidden="true">
+                    <defs>
+                      <symbol id="meteoconsWind_desktop" viewBox="0 0 342 234">
+                        <path fill="none" stroke="currentColor" stroke-dasharray="148" stroke-linecap="round" stroke-miterlimit="10" stroke-width="18" d="M264.2 21.3A40 40 0 1 1 293 89H9">
+                          <animate attributeName="stroke-dashoffset" dur="7.2s" repeatCount="indefinite" values="0; 2960"/>
+                        </path>
+                        <path fill="none" stroke="currentColor" stroke-dasharray="110" stroke-linecap="round" stroke-miterlimit="10" stroke-width="18" d="M148.2 212.7A40 40 0 1 0 177 145H9">
+                          <animate attributeName="stroke-dashoffset" dur="7.2s" repeatCount="indefinite" values="0; 1540"/>
+                        </path>
+                      </symbol>
+                    </defs>
+                    <use width="342" height="234" href="#meteoconsWind_desktop" transform="translate(85 139)"/>
+                  </svg>
+                </span>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_5}</span><span class="text-sm text-gray-300">{productCoreData.specifications.windResistance}</span></div>
+              </li>
+              <li class="flex items-start">
+                <span class="text-signal-green me-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,20a9,9,0,1,1,9-9A9,9,0,0,1,12,21Z"/>
+                    <rect width="2" height="7" x="11" y="6" fill="currentColor" rx="1">
+                      <animateTransform attributeName="transform" dur="10.8s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/>
+                    </rect>
+                    <rect width="2" height="9" x="11" y="11" fill="currentColor" rx="1">
+                      <animateTransform attributeName="transform" dur="0.9s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/>
+                    </rect>
+                  </svg>
+                </span>
+                <div><span class="block font-medium text-white">{common.PRODUCT_SPECIFICATIONS_LABEL_6}</span><span class="text-sm text-gray-300">{productCoreData.specifications.setupTime}</span></div>
+              </li>
+            </ul>
+          </div>
+          <div class="mb-6 border-t border-gray-700 pt-6">
+            <h3 class="text-lg font-semibold mb-4 text-white">{common.M_CUSTOMER_SUPPORT}</h3>
+            <div class="flex items-center">
+              <span class="text-signal-green me-3"><svg class="rtl:scale-x-[-1]" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><mask id="lineMdEmailArrowRightFilled_customerSupport"><g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="64" stroke-dashoffset="64" d="M4 5h16c0.55 0 1 0.45 1 1v12c0 0.55 -0.45 1 -1 1h-16c-0.55 0 -1 -0.45 -1 -1v-12c0 -0.55 0.45 -1 1 -1Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.72s" values="64;0"/></path><path stroke-dasharray="24" stroke-dashoffset="24" d="M3 6.5l9 5.5l9 -5.5"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.72s" dur="0.24s" values="24;0"/></path><path fill="#fff" fill-opacity="0" stroke="none" d="M12 11l-8 -5h16l-8 5Z"><animate fill="freeze" attributeName="fill-opacity" begin="1.44s" dur="0.6s" values="0;1"/></path><path fill="#000" fill-opacity="0" stroke="none" d="M19 13c3.31 0 6 2.69 6 6c0 3.31 -2.69 6 -6 6c-3.31 0 -6 -2.69 -6 -6c0 -3.31 2.69 -6 6 -6Z"><set fill="freeze" attributeName="fill-opacity" begin="0.96s" to="1"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M16 19h5"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.96s" dur="0.24s" values="6;0"/></path><path stroke-dasharray="4" stroke-dashoffset="4" d="M21 19l-2 2M21 19l-2 -2"><animate fill="freeze" attributeName="stroke-dashoffset" begin="1.2s" dur="0.24s" values="4;0"/></path></g></mask><rect width="24" height="24" fill="currentColor" mask="url(#lineMdEmailArrowRightFilled_customerSupport)"/></svg></span>
+              <a href={`mailto:${www.PAGE_INFO_EMAIL}`} class="text-signal-green hover:underline">{www.PAGE_INFO_EMAIL}</a>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  @keyframes shine { 100% { transform: translateX(100%); } }
+  .animate-\[shine\_2s\_infinite\] { animation: shine 2s infinite; }
+  details > summary { list-style: none; }
+  details > summary::-webkit-details-marker { display: none; }
+  
+  /* Client side validation styles for modern browsers */
+  :where(input, select, textarea):user-invalid {
+      border-color: #ef4444; /* red-500 */
+  }
+
+  /* RTL-specific styles for better text rendering */
+  [dir="rtl"] h1,
+  [dir="rtl"] h2,
+  [dir="rtl"] h3,
+  [dir="rtl"] h4,
+  [dir="rtl"] h5,
+  [dir="rtl"] h6,
+  [dir="rtl"] p,
+  [dir="rtl"] span,
+  [dir="rtl"] label {
+    letter-spacing: 0;
+  }
+
+  /* Ensure proper text alignment in RTL */
+  [dir="rtl"] .text-center {
+    text-align: center;
+  }
+
+  /* Enhanced product card animations */
+  .main-product-card,
+  .related-product-card {
+    transition: all 0.3s ease;
+  }
+
+  .main-product-card:hover,
+  .related-product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Quantity button states */
+  .quantity-btn-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Tooltip styles */
+  .tooltip {
+    position: relative;
+  }
+
+  .tooltip:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    z-index: 10;
+  }
+</style>
+
+<script define:vars={{ 
+  currencySymbol: common.M_CURRENCY_SYMBOL, 
+  mainProductPrice: productCoreData.priceNumeric,
+  mainProductName: productCoreData.h1,
+  mainProductSku: productCoreData.sku,
+  relatedProducts: relatedProducts,
+  maxQuantity: 26,
+  minQuantity: 0
+}}>
+  document.addEventListener('DOMContentLoaded', () => {
+    // --- Enhanced Product Order Calculator with Cookie Support ---
+    class ProductOrderCalculator {
+      constructor() {
+        this.mainProductQuantity = 1;
+        this.relatedProductQuantities = new Map();
+        this.relatedProducts = relatedProducts;
+        this.maxQuantity = maxQuantity;
+        this.minQuantity = minQuantity;
+        this.currencySymbol = currencySymbol;
+        this.cookieName = `product_order_${mainProductSku}`;
+        
+        this.initializeElements();
+        this.loadQuantitiesFromCookie();
+        this.bindEvents();
+        this.calculateTotal();
+      }
+
+      initializeElements() {
+        // Main product elements - handle both desktop and mobile
+        this.mainProductMinus = document.querySelector('.main-product-minus');
+        this.mainProductPlus = document.querySelector('.main-product-plus');
+        this.mainProductQuantityDisplay = document.querySelector('.main-product-quantity');
+        
+        // Mobile main product elements
+        this.mobileMainProductMinus = document.querySelector('.mobile-main-product-minus');
+        this.mobileMainProductPlus = document.querySelector('.mobile-main-product-plus');
+        this.mobileMainProductQuantityDisplay = document.querySelector('.mobile-main-product-quantity');
+        
+        // Related product elements
+        this.relatedProductCards = document.querySelectorAll('.related-product-card');
+        
+        // Display elements
+        this.totalItemsDisplay = document.getElementById('total-items-display');
+        this.totalPriceDisplay = document.getElementById('total-price-display');
+        this.savingsDisplay = document.getElementById('savings-display');
+        this.savingsAmount = document.getElementById('savings-amount');
+        
+        // Pre-order details table
+        this.preOrderDetails = document.getElementById('pre-order-details');
+        this.preOrderItems = document.getElementById('pre-order-items');
+        this.preOrderSubtotal = document.getElementById('pre-order-subtotal');
+        this.preOrderSavingsRow = document.getElementById('pre-order-savings-row');
+        this.preOrderSavings = document.getElementById('pre-order-savings');
+        this.preOrderTotal = document.getElementById('pre-order-total');
+        
+        // Form inputs
+        this.selectedProductsInput = document.getElementById('selected-products-input');
+        this.finalPriceInput = document.getElementById('final-price-input');
+        
+        // Initialize related product quantities
+        this.relatedProducts.forEach(product => {
+          this.relatedProductQuantities.set(product.PRODUCT_ID, 0);
+        });
+      }
+
+      // Cookie management functions
+      getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+      }
+
+      setCookie(name, value, days = 30) {
+        const expires = new Date();
+        expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+        document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Strict`;
+      }
+
+      deleteCookie(name) {
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+      }
+
+      loadQuantitiesFromCookie() {
+        const savedData = this.getCookie(this.cookieName);
+        if (savedData) {
+          try {
+            const quantities = JSON.parse(savedData);
+            
+            // Load main product quantity
+            if (quantities.mainProduct !== undefined) {
+              this.mainProductQuantity = Math.max(this.minQuantity, Math.min(this.maxQuantity, quantities.mainProduct));
+              
+              // Update both desktop and mobile displays
+              if (this.mainProductQuantityDisplay) {
+                this.mainProductQuantityDisplay.textContent = this.mainProductQuantity;
+              }
+              if (this.mobileMainProductQuantityDisplay) {
+                this.mobileMainProductQuantityDisplay.textContent = this.mainProductQuantity;
+              }
+              
+              this.updateMainProductButtonStates();
+            }
+            
+            // Load related product quantities
+            if (quantities.relatedProducts) {
+              Object.entries(quantities.relatedProducts).forEach(([productId, quantity]) => {
+                const safeQuantity = Math.max(this.minQuantity, Math.min(this.maxQuantity, quantity));
+                this.relatedProductQuantities.set(productId, safeQuantity);
+                
+                // Update display for desktop
+                const desktopCard = document.querySelector(`[data-product-id="${productId}"]`);
+                if (desktopCard) {
+                  const quantityDisplay = desktopCard.querySelector('.related-product-quantity');
+                  const minusBtn = desktopCard.querySelector('.related-product-minus');
+                  const plusBtn = desktopCard.querySelector('.related-product-plus');
+                  
+                  if (quantityDisplay) quantityDisplay.textContent = safeQuantity;
+                  if (minusBtn) minusBtn.disabled = safeQuantity <= this.minQuantity;
+                  if (plusBtn) plusBtn.disabled = safeQuantity >= this.maxQuantity;
+                }
+                
+                // Update display for mobile
+                const mobileCard = document.querySelector(`[data-mobile-product-id="${productId}"]`);
+                if (mobileCard) {
+                  const mobileQuantityDisplay = mobileCard.querySelector('.mobile-related-product-quantity');
+                  const mobileMinusBtn = mobileCard.querySelector('.mobile-related-product-minus');
+                  const mobilePlusBtn = mobileCard.querySelector('.mobile-related-product-plus');
+                  
+                  if (mobileQuantityDisplay) mobileQuantityDisplay.textContent = safeQuantity;
+                  if (mobileMinusBtn) mobileMinusBtn.disabled = safeQuantity <= this.minQuantity;
+                  if (mobilePlusBtn) mobilePlusBtn.disabled = safeQuantity >= this.maxQuantity;
+                }
+              });
+            }
+          } catch (e) {
+            console.error('Error parsing saved quantities:', e);
+            this.deleteCookie(this.cookieName);
+          }
+        }
+      }
+
+      saveQuantitiesToCookie() {
+        const quantities = {
+          mainProduct: this.mainProductQuantity,
+          relatedProducts: Object.fromEntries(this.relatedProductQuantities)
+        };
+        this.setCookie(this.cookieName, JSON.stringify(quantities), 30);
+      }
+
+      bindEvents() {
+        // Main product quantity controls - desktop
+        if (this.mainProductMinus) {
+          this.mainProductMinus.addEventListener('click', () => this.updateMainProductQuantity(-1));
+        }
+        if (this.mainProductPlus) {
+          this.mainProductPlus.addEventListener('click', () => this.updateMainProductQuantity(1));
+        }
+
+        // Main product quantity controls - mobile
+        if (this.mobileMainProductMinus) {
+          this.mobileMainProductMinus.addEventListener('click', () => this.updateMainProductQuantity(-1));
+        }
+        if (this.mobileMainProductPlus) {
+          this.mobileMainProductPlus.addEventListener('click', () => this.updateMainProductQuantity(1));
+        }
+
+        // Related product quantity controls - desktop
+        this.relatedProductCards.forEach(card => {
+          const productId = card.dataset.productId;
+          const minusBtn = card.querySelector('.related-product-minus');
+          const plusBtn = card.querySelector('.related-product-plus');
+
+          if (minusBtn) {
+            minusBtn.addEventListener('click', () => this.updateRelatedProductQuantity(productId, -1));
+          }
+          if (plusBtn) {
+            plusBtn.addEventListener('click', () => this.updateRelatedProductQuantity(productId, 1));
+          }
+        });
+
+        // Related product quantity controls - mobile
+        const mobileRelatedProductCards = document.querySelectorAll('.mobile-related-product-card');
+        mobileRelatedProductCards.forEach(card => {
+          const productId = card.dataset.mobileProductId;
+          const mobileMinusBtn = card.querySelector('.mobile-related-product-minus');
+          const mobilePlusBtn = card.querySelector('.mobile-related-product-plus');
+
+          if (mobileMinusBtn) {
+            mobileMinusBtn.addEventListener('click', () => this.updateRelatedProductQuantity(productId, -1));
+          }
+          if (mobilePlusBtn) {
+            mobilePlusBtn.addEventListener('click', () => this.updateRelatedProductQuantity(productId, 1));
+          }
+        });
+      }
+
+      updateMainProductButtonStates() {
+        if (this.mainProductMinus) this.mainProductMinus.disabled = this.mainProductQuantity <= this.minQuantity;
+        if (this.mainProductPlus) this.mainProductPlus.disabled = this.mainProductQuantity >= this.maxQuantity;
+        if (this.mobileMainProductMinus) this.mobileMainProductMinus.disabled = this.mainProductQuantity <= this.minQuantity;
+        if (this.mobileMainProductPlus) this.mobileMainProductPlus.disabled = this.mainProductQuantity >= this.maxQuantity;
+      }
+
+      updateMainProductQuantity(change) {
+        const newQuantity = this.mainProductQuantity + change;
+        
+        if (newQuantity >= this.minQuantity && newQuantity <= this.maxQuantity) {
+          this.mainProductQuantity = newQuantity;
+          
+          // Update both desktop and mobile displays
+          if (this.mainProductQuantityDisplay) {
+            this.mainProductQuantityDisplay.textContent = newQuantity;
+          }
+          if (this.mobileMainProductQuantityDisplay) {
+            this.mobileMainProductQuantityDisplay.textContent = newQuantity;
+          }
+          
+          this.updateMainProductButtonStates();
+          this.saveQuantitiesToCookie();
+          this.calculateTotal();
+        }
+      }
+
+      updateRelatedProductQuantity(productId, change) {
+        const currentQuantity = this.relatedProductQuantities.get(productId) || 0;
+        const newQuantity = currentQuantity + change;
+        
+        if (newQuantity >= this.minQuantity && newQuantity <= this.maxQuantity) {
+          this.relatedProductQuantities.set(productId, newQuantity);
+          
+          // Update display for desktop
+          const desktopCard = document.querySelector(`[data-product-id="${productId}"]`);
+          if (desktopCard) {
+            const quantityDisplay = desktopCard.querySelector('.related-product-quantity');
+            const minusBtn = desktopCard.querySelector('.related-product-minus');
+            const plusBtn = desktopCard.querySelector('.related-product-plus');
+            
+            if (quantityDisplay) quantityDisplay.textContent = newQuantity;
+            if (minusBtn) minusBtn.disabled = newQuantity <= this.minQuantity;
+            if (plusBtn) plusBtn.disabled = newQuantity >= this.maxQuantity;
+          }
+          
+          // Update display for mobile
+          const mobileCard = document.querySelector(`[data-mobile-product-id="${productId}"]`);
+          if (mobileCard) {
+            const mobileQuantityDisplay = mobileCard.querySelector('.mobile-related-product-quantity');
+            const mobileMinusBtn = mobileCard.querySelector('.mobile-related-product-minus');
+            const mobilePlusBtn = mobileCard.querySelector('.mobile-related-product-plus');
+            
+            if (mobileQuantityDisplay) mobileQuantityDisplay.textContent = newQuantity;
+            if (mobileMinusBtn) mobileMinusBtn.disabled = newQuantity <= this.minQuantity;
+            if (mobilePlusBtn) mobilePlusBtn.disabled = newQuantity >= this.maxQuantity;
+          }
+          
+          this.saveQuantitiesToCookie();
+          this.calculateTotal();
+        }
+      }
+
+      calculateTotal() {
+        let totalItems = this.mainProductQuantity;
+        let totalPrice = this.mainProductQuantity * mainProductPrice;
+        let selectedProducts = [];
+        let orderItems = [];
+        
+        // Add main product to selection
+        if (this.mainProductQuantity > 0) {
+          selectedProducts.push(`${mainProductName} (${this.mainProductQuantity}x)`);
+          orderItems.push({
+            name: mainProductName,
+            sku: mainProductSku,
+            quantity: this.mainProductQuantity,
+            price: mainProductPrice,
+            total: this.mainProductQuantity * mainProductPrice
+          });
+        }
+        
+        // Calculate related products
+        this.relatedProducts.forEach(product => {
+          const quantity = this.relatedProductQuantities.get(product.PRODUCT_ID) || 0;
+          if (quantity > 0) {
+            totalItems += quantity;
+            totalPrice += quantity * product.M_PRODUCT_PRICE_RECALC;
+            selectedProducts.push(`${product.PRODUCT_H1} (${quantity}x)`);
+            orderItems.push({
+              name: product.PRODUCT_H1,
+              sku: product.PRODUCT_ID,
+              quantity: quantity,
+              price: product.M_PRODUCT_PRICE_RECALC,
+              total: quantity * product.M_PRODUCT_PRICE_RECALC
+            });
+          }
+        });
+        
+        // Apply 7% discount when 2 or more items total
+        let savings = 0;
+        let finalPrice = totalPrice;
+        
+        if (totalItems >= 2) {
+          savings = totalPrice * 0.07;
+          finalPrice = totalPrice - savings;
+        }
+        
+        // Update displays
+        this.updateDisplays(totalItems, totalPrice, finalPrice, savings);
+        this.updatePreOrderTable(orderItems, totalPrice, savings, finalPrice);
+        this.updateFormInputs(selectedProducts, finalPrice);
+      }
+
+      updateDisplays(totalItems, totalPrice, finalPrice, savings) {
+        const formatCurrency = (value) => `${this.currencySymbol}${value.toFixed(2).replace('.', ',')}`;
+        
+        this.totalItemsDisplay.textContent = totalItems;
+        this.totalPriceDisplay.textContent = formatCurrency(finalPrice);
+        
+        if (savings > 0) {
+          this.savingsDisplay.classList.remove('hidden');
+          this.savingsAmount.textContent = formatCurrency(savings);
+        } else {
+          this.savingsDisplay.classList.add('hidden');
+        }
+      }
+
+      updatePreOrderTable(orderItems, subtotal, savings, finalPrice) {
+        const formatCurrency = (value) => `${this.currencySymbol}${value.toFixed(2).replace('.', ',')}`;
+        
+        // Show/hide table based on whether there are items
+        if (orderItems.length > 0) {
+          this.preOrderDetails.classList.remove('hidden');
+          
+          // Update table rows
+          this.preOrderItems.innerHTML = orderItems.map(item => `
+            <tr class="border-b border-gray-200">
+              <td class="p-2">${item.name}</td>
+              <td class="p-2 text-gray-600">${item.sku}</td>
+              <td class="p-2 text-right">${item.quantity}</td>
+              <td class="p-2 text-right">${formatCurrency(item.price)}</td>
+              <td class="p-2 text-right font-medium">${formatCurrency(item.total)}</td>
+            </tr>
+          `).join('');
+          
+          // Update totals
+          this.preOrderSubtotal.textContent = formatCurrency(subtotal);
+          
+          if (savings > 0) {
+            this.preOrderSavingsRow.classList.remove('hidden');
+            this.preOrderSavings.textContent = `-${formatCurrency(savings)}`;
+          } else {
+            this.preOrderSavingsRow.classList.add('hidden');
+          }
+          
+          this.preOrderTotal.textContent = formatCurrency(finalPrice);
+        } else {
+          this.preOrderDetails.classList.add('hidden');
+        }
+      }
+
+      updateFormInputs(selectedProducts, finalPrice) {
+        const formatCurrency = (value) => `${this.currencySymbol}${value.toFixed(2).replace('.', ',')}`;
+        
+        this.selectedProductsInput.value = selectedProducts.join('; ');
+        this.finalPriceInput.value = formatCurrency(finalPrice);
+      }
+    }
+
+    // Initialize the calculator
+    new ProductOrderCalculator();
+
+    // --- Enhanced Form Validation ---
+    const form = document.getElementById('enhancedProductOrderForm');
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        const mainQuantity = parseInt(document.querySelector('.main-product-quantity').textContent);
+        if (mainQuantity === 0) {
+          e.preventDefault();
+          alert(common.PRODUCT_QUANTITY_MIN_REACHED_TOOLTIP);
+          return false;
+        }
+      });
+    }
+
+    // --- Enhanced UX Features ---
+    
+    // Add tooltips for buy-in-pairs products
+    const buyInPairsElements = document.querySelectorAll('[data-buy-pairs="true"]');
+    buyInPairsElements.forEach(element => {
+      element.classList.add('tooltip');
+      element.setAttribute('data-tooltip', common.PRODUCT_BUY_PAIRS_TOOLTIP);
+    });
+
+    // Smooth scroll to form
+    const orderButtons = document.querySelectorAll('a[href="#enhanced-order-form"]');
+    orderButtons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('enhanced-order-form').scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      });
+    });
+
+    // Enhanced quantity button feedback
+    const quantityButtons = document.querySelectorAll('.main-product-minus, .main-product-plus, .related-product-minus, .related-product-plus');
+    quantityButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        button.classList.add('scale-95');
+        setTimeout(() => button.classList.remove('scale-95'), 150);
+      });
+    });
+
+    // Clear cart functionality (optional - can be added as a button)
+    const clearCart = () => {
+      const calculator = window.productCalculator;
+      if (calculator) {
+        calculator.deleteCookie(calculator.cookieName);
+        location.reload();
+      }
+    };
+
+    // Expose clearCart function globally for potential use
+    window.clearCart = clearCart;
+  });
+</script>
