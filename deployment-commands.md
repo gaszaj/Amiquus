@@ -3,12 +3,12 @@
 ## Initial Setup (One-time only)
 ```bash
 # Configure Git (if not done)
-git config --global user.email "nixo.zderic@gmail.com"
-git config --global user.name "Nandino Zderic"
+git config --global user.email "gasper.zajc@gmail.com"
+git config --global user.name "gaszaj"
 
 # Initialize Git (if not done)
 git init
-git remote add origin https://github.com/nandinozderic/eusignal-demo.git
+git remote add origin https://github.com/gaszaj/amiquus.git
 ```
 
 ## Regular Development Workflow
