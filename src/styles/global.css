@@ -1,0 +1,69 @@
+/* global.css */
+
+:root {
+    --background: 255 255 255;
+    --foreground: 23 23 23;
+    --muted: 245 245 245;
+    --muted-foreground: 115 115 115;
+    --popover: 255 255 255;
+    --popover-foreground: 23 23 23;
+    --card: 255 255 255;
+    --card-foreground: 23 23 23;
+    --border: 229 229 229;
+    --input: 229 229 229;
+  
+    --primary: 59 130 246;               /* Blue */
+    --primary-foreground: 255 255 255;
+  
+    --secondary: 245 245 245;
+    --secondary-foreground: 23 23 23;
+  
+    --accent: 59 130 246;                /* Blue */
+    --accent-foreground: 255 255 255;
+  
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
+  
+    --success: 34 197 94;
+    --success-foreground: 255 255 255;
+  
+    --neutral-50: 250 250 250;
+    --neutral-100: 245 245 245;
+    --neutral-200: 229 229 229;
+    --neutral-300: 212 212 212;
+    --neutral-400: 163 163 163;
+    --neutral-500: 115 115 115;
+    --neutral-600: 82 82 82;
+    --neutral-700: 64 64 64;
+    --neutral-800: 38 38 38;
+    --neutral-900: 23 23 23;
+  }
+  
+  .dark {
+    --background: 23 23 23;
+    --foreground: 250 250 250;
+    --muted: 38 38 38;
+    --muted-foreground: 163 163 163;
+    --popover: 38 38 38;
+    --popover-foreground: 250 250 250;
+    --card: 38 38 38;
+    --card-foreground: 250 250 250;
+    --border: 64 64 64;
+    --input: 64 64 64;
+  
+    --primary: 255 255 0;                /* Yellow */
+    --primary-foreground: 23 23 23;
+  
+    --secondary: 38 38 38;
+    --secondary-foreground: 250 250 250;
+  
+    --accent: 255 255 0;                 /* Yellow */
+    --accent-foreground: 23 23 23;
+  
+    --destructive: 239 68 68;
+    --destructive-foreground: 250 250 250;
+  
+    --success: 34 197 94;
+    --success-foreground: 255 255 255;
+  }
+  
