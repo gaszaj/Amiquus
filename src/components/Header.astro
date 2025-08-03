@@ -1,872 +1,149 @@
 ---
-// Path: /src/components/Header.astro
-// Purpose: Header component with navigation, search, and language switcher
-// Data: Database dependencies for headerfooter, common, locale, and www data
-// Dependencies: country-flag-icons
-
+// src/components/Header.astro
 import path from 'path';
 import Database from 'better-sqlite3';
-import { 
-  AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, 
-  CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, 
-  ES, FI, FJ, FR, GA, GB, GE, GH, GI, GM, GN, GP, GR, GT, GU, GY, HK, HN, HR, HT, 
-  HU, ID, IE, IL, IN, IS, IT, JM, JO, JP, KE, KR, KW, KY, LB, LI, LS, LT, LU, LV, 
-  LY, MA, MC, MD, ME, MK, MM, MN, MR, MU, MW, MX, MY, MZ, NG, NI, NL, NO, NP, NZ, 
-  OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL, 
-  SM, SN, SR, SV, SZ, TD, TH, TN, TR, TT, UA, UG, US, UY, VE, VN, YT, ZA 
+import {
+  AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ,
+  CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG,
+  ES, FI, FJ, FR, GA, GB, GE, GH, GI, GM, GN, GP, GR, GT, GU, GY, HK, HN, HR, HT,
+  HU, ID, IE, IL, IN, IS, IT, JM, JO, JP, KE, KR, KW, KY, LB, LI, LS, LT, LU, LV,
+  LY, MA, MC, MD, ME, MK, MM, MN, MR, MU, MW, MX, MY, MZ, NG, NI, NL, NO, NP, NZ,
+  OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL,
+  SM, SN, SR, SV, SZ, TD, TH, TN, TR, TT, UA, UG, US, UY, VE, VN, YT, ZA
 } from 'country-flag-icons/string/3x2';
 
-export interface Props {
-  alternativeLinks?: Array<{
-    code: string;
-    country: string;
-    name: string;
-    languageIso: string;
-    hreflang: string;
-    href: string;
-  }>;
-  languageLinksMap?: Record<string, string>;
-    locale?: string;
-}
-
 const { alternativeLinks, languageLinksMap = {}, locale: propLocale } = Astro.props;
+const locale = propLocale || Astro.url.pathname.split('/')[1] || 'si';
 
-// Get the locale from the URL path (e.g., 'si' from /si/...)
-const locale = propLocale || Astro.url.pathname.split('/')[1] || 'si'; 
-
-// --- Database Connection ---
-// Establish a connection to the SQLite database.
-// This is more efficient than loading multiple large JSON files into memory.
 const dbPath = path.join(process.cwd(), 'src/data/data.db');
-const db = new Database(dbPath, { readonly: true }); // Open in read-only mode for safety
+const db = new Database(dbPath, { readonly: true });
 
-// Fetch all required data in a single transaction for efficiency
-const { headerFooter, common, www, localeData } = db.transaction(() => {
-    // Fetch headerfooter data for the current locale
-    const headerFooterData = db.prepare('SELECT * FROM headerfooter WHERE M_SLUG = ?').get(locale) as any;
-    
-    // Fetch common data for the current locale
-    const commonData = db.prepare('SELECT * FROM common WHERE M_SLUG = ?').get(locale) as any;
-    
-    // Fetch global site data (www table)
+const { www, headerFooter, allLocaleData } = db.transaction(() => {
     const wwwData = db.prepare('SELECT * FROM www LIMIT 1').get() as any;
-    
-    // Fetch all locale data for language switcher
+    const headerFooterData = db.prepare('SELECT * FROM headerfooter WHERE M_SLUG = ?').get(locale) as any;
     const locales = db.prepare('SELECT * FROM locale').all() as any[];
-
-    return {
-        headerFooter: headerFooterData || {},
-        common: commonData || {},
-        www: wwwData,
-        localeData: locales
-    };
+    return { www: wwwData || {}, headerFooter: headerFooterData || {}, allLocaleData: locales };
 })();
 
-// Define default English texts for aria-labels (these will be used if common.json doesn't provide specific translations)
-let ariaLabelSearch1 = "Open mobile menu";
-let ariaLabelSearch2 = "Search";
-let ariaLabelSearch3 = "Close search";
-
-// If a matching locale object is found, use its translations, otherwise stick to English defaults
-if (common) {
-  ariaLabelSearch1 = common.PAGE_SEARCH_ARIA_LABEL_SEARCH_1 || ariaLabelSearch1;
-  ariaLabelSearch2 = common.PAGE_SEARCH_ARIA_LABEL_SEARCH_2 || ariaLabelSearch2;
-  ariaLabelSearch3 = common.PAGE_SEARCH_ARIA_LABEL_SEARCH_3 || ariaLabelSearch3;
-}
-
-// Header component for the EU Signal website
-const navigation = [
-  { name: common.M_HOME_NAME, href: `/${locale}` },
-  { name: headerFooter.HEADER_LINK_NAME_1, href: `/${locale}${headerFooter.HEADER_LINK_PATH_1}` },
-  { name: headerFooter.HEADER_LINK_NAME_2, href: `/${locale}${headerFooter.HEADER_LINK_PATH_2}` },
-  { name: headerFooter.HEADER_LINK_NAME_3, href: `/${locale}${headerFooter.HEADER_LINK_PATH_3}` },
-];
-
-// Find the hreflang code for the current locale to fetch the correct search index
-const currentLocaleData = localeData.find(l => l.M_SLUG === locale);
-// Use the HREFLANG_CODE which matches your JSON file names (e.g., 'sl-si')
-const hreflangCode = currentLocaleData ? currentLocaleData.M_HREFLANG_CODE : 'sl-si'; // Provide a sensible fallback
-
-// --- Language Switcher Logic ---
-const supportedLocales = localeData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1");
-
-// Map country codes to their corresponding flag components
 const flagMap = {
-  AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, 
-  CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, 
-  ES, FI, FJ, FR, GA, GB, GE, GH, GI, GM, GN, GP, GR, GT, GU, GY, HK, HN, HR, HT, 
-  HU, ID, IE, IL, IN, IS, IT, JM, JO, JP, KE, KR, KW, KY, LB, LI, LS, LT, LU, LV, 
-  LY, MA, MC, MD, ME, MK, MM, MN, MR, MU, MW, MX, MY, MZ, NG, NI, NL, NO, NP, NZ, 
-  OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL, 
+  AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ,
+  CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG,
+  ES, FI, FJ, FR, GA, GB, GE, GH, GI, GM, GN, GP, GR, GT, GU, GY, HK, HN, HR, HT,
+  HU, ID, IE, IL, IN, IS, IT, JM, JO, JP, KE, KR, KW, KY, LB, LI, LS, LT, LU, LV,
+  LY, MA, MC, MD, ME, MK, MM, MN, MR, MU, MW, MX, MY, MZ, NG, NI, NL, NO, NP, NZ,
+  OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL,
   SM, SN, SR, SV, SZ, TD, TH, TN, TR, TT, UA, UG, US, UY, VE, VN, YT, ZA
 };
 
-// Create the final supported languages array with flags
+const supportedLocales = allLocaleData.filter(l => l.M_LOCALE_PUBLISH_Y_N === "1");
+
 const languageLinks = supportedLocales.map(langLocale => ({
   code: langLocale.M_SLUG,
   name: langLocale.M_LANGUAGE_NATIVE,
-  flag: flagMap[langLocale.M_COUNTRY_CODE as keyof typeof flagMap],
+  flag: flagMap[langLocale.M_COUNTRY_CODE],
   href: languageLinksMap[langLocale.M_SLUG] || `/${langLocale.M_SLUG}`,
   isActive: langLocale.M_SLUG === locale
 }));
 
-const currentLanguageObject = languageLinks.find(lang => lang.code === locale) ||
-                            languageLinks.find(lang => lang.code === 'si') || // Fallback to 'si'
-                            languageLinks[0]; // Final fallback
+const currentLanguageObject = languageLinks.find(l => l.code === locale) || languageLinks.find(l => l.code === 'si') || languageLinks[0];
+const isLoggedIn = Astro.cookies.has('session_id'); 
 ---
 
-<header class="header-transparent">
-  <nav class="container mx-auto px-4 py-4 flex items-center justify-between">
-    <!-- Logo -->
-    <a
-      href={`/${locale}`}
-      class="flex items-center"
-      id="header-logo-link"
-    >
-      <img
-        src={www.PAGE_LOGO_IMAGE_PATH_1.replace('public', '')}
-        alt={headerFooter.HEADER_LOGO_ALT}
-        class="h-6 w-auto"
-        style="max-height: 25px; height: auto; width: auto;"
-        fetchpriority="high"
-        width="939"
-        height="161"
-      />
-      <span class="sr-only">{common.M_HOME_NAME}</span>
-    </a>
-
-    <!-- Desktop Navigation & Language Switcher -->
-    <!-- CHANGE 1: Replaced `space-x-8` with `gap-x-8` for better flexbox spacing. -->
-    <div class="hidden md:flex items-center gap-x-8">
-      {navigation.map(item => (
-        <a
-          href={item.href}
-          class="text-gray-300 hover:text-white transition-colors"
-        >
-          {item.name}
-        </a>
-      ))}
-      
-      <!-- Desktop Search Button -->
-      <button 
-        type="button" 
-        id="desktop-search-button" 
-        class="search-icon-btn" 
-        aria-label={common.PAGE_SEARCH_SEARCH_LABEL}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24">
-          <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-            <path stroke-dasharray="40" stroke-dashoffset="40" d="M10.76 13.24c-2.34 -2.34 -2.34 -6.14 0 -8.49c2.34 -2.34 6.14 -2.34 8.49 0c2.34 2.34 2.34 6.14 0 8.49c-2.34 2.34 -6.14 2.34 -8.49 0Z">
-              <animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="40;0"/>
-            </path>
-            <path stroke-dasharray="12" stroke-dashoffset="12" d="M10.5 13.5l-7.5 7.5">
-              <animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.24s" values="12;0"/>
-            </path>
-          </g>
-        </svg>
-      </button>
-
-      <a
-        href={`/${locale}${headerFooter.HEADER_NAME_CTA_PATH}`}
-        class="bg-black text-signal-green border border-signal-green px-6 py-2 hover:bg-signal-green hover:text-black transition-all duration-200"
-      >
-        {headerFooter.HEADER_NAME_CTA}
+<header class="header-transparent border-b border-border backdrop-blur supports-[backdrop-filter]:bg-background/95 py-4 px-4 md:px-6 lg:px-8 z-50">
+  <div class="max-w-screen-xl mx-auto flex flex-col">
+    
+    <!-- TOP ROW: Contains logo and main controls -->
+    <nav class="flex items-center justify-between">
+      <a href={`/${locale}`} class="flex items-center gap-2 text-foreground hover:opacity-80 transition-opacity">
+        <img
+            src={www.PAGE_LOGO_IMAGE_PATH_1?.replace('public', '')}
+            alt={headerFooter.HEADER_LOGO_ALT}
+            class="h-8 w-auto"
+            fetchpriority="high"
+            width="939"
+            height="161"
+        />
       </a>
 
-      <!-- Desktop Language Dropdown Switcher -->
-      <!-- CHANGE 2: Used logical properties `ms-6 ps-6 border-s` for RTL support. -->
-      <div class="relative ms-6 ps-6 border-s border-gray-600" id="desktop-lang-switcher-container">
-        <button
-          type="button"
-          id="desktop-lang-button"
-          class="flex items-center text-sm font-medium text-gray-300 hover:text-white focus:outline-none"
-          aria-expanded="false"
-          aria-haspopup="true"
-        >
-          <!-- CHANGE 3: Used logical margin `me-1` -->
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 me-1" viewBox="0 0 512 512">
-            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" d="M48 112h288M192 64v48m80 336l96-224l96 224m-162.5-64h133M281.3 112S257 206 199 277S80 384 80 384"/>
-            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" d="M256 336s-35-27-72-75s-56-85-56-85"/>
-          </svg>
-          <span class="flex items-center">
-            <!-- CHANGE 3: Used logical margin `me-1` -->
-            {currentLanguageObject.flag && <span class="me-1 w-6 h-4" set:html={currentLanguageObject.flag} />}
-            <span>{currentLanguageObject.name}</span>
-          </span>
-          <!-- CHANGE 3: Used logical margins `ms-1 -me-1` -->
-          <svg class="ms-1 -me-1 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-          </svg>
-        </button>
-        <!-- CHANGE 4: Used `end-0 origin-top-end` for RTL dropdown alignment. -->
-        <div
-          id="desktop-lang-dropdown"
-          class="absolute end-0 mt-2 w-48 origin-top-end rounded-md shadow-lg bg-gray-800/80 backdrop-blur-md ring-1 ring-black ring-opacity-5 focus:outline-none hidden z-20"
-          role="menu"
-          aria-orientation="vertical"
-          aria-labelledby="desktop-lang-button"
-        >
-          <div class="py-1 max-h-60 overflow-y-auto" role="none">
-            {languageLinks.map(lang => (
-              <a
-                href={lang.href}
-                class:list={[
-                  "block px-4 py-2 text-sm transition-colors",
-                  lang.isActive
-                    ? "bg-gray-700 text-white font-semibold cursor-default"
-                    : "text-gray-300 hover:bg-gray-600 hover:text-white"
-                ]}
-                role="menuitem"
-                title={lang.name}
-              >
-                <span class="flex items-center">
-                  <!-- CHANGE 3: Used logical margin `me-2` -->
-                  {lang.flag && <span class="me-2 w-6 h-4" set:html={lang.flag} />} {lang.name}
-                </span>
-              </a>
-            ))}
+      <!-- Main Navigation Links - Appear on Large Screens -->
+      <!-- FINAL CHANGE: Breakpoint changed from xl to lg -->
+      <div class="hidden lg:flex items-center gap-8">
+        <ul class="flex items-center gap-8 rtl:gap-reverse">
+          <li><a href="#features" class="text-muted-foreground font-medium hover:text-primary transition-colors">Features</a></li>
+          <li><a href="#how-it-works" class="text-muted-foreground font-medium hover:text-primary transition-colors">How It Works</a></li>
+          <li><a href="#pricing" class="text-muted-foreground font-medium hover:text-primary transition-colors">Pricing</a></li>
+          <li><a href="/waiting-list" class="text-muted-foreground font-medium hover:text-primary transition-colors">Waiting List</a></li>
+          <li><a href="#contact" class="text-muted-foreground font-medium hover:text-primary transition-colors">Contact</a></li>
+        </ul>
+      </div>
+
+      <!-- Right Side Controls -->
+      <div class="flex items-center gap-3">
+        <!-- Desktop Language Switcher -->
+        <!-- FINAL CHANGE: Breakpoint changed from xl to lg -->
+        <div class="hidden lg:block">
+          <div class="relative" id="desktop-lang-switcher-container">
+            <button type="button" id="desktop-lang-button" class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground" aria-expanded="false" aria-haspopup="true">
+              {currentLanguageObject.flag && <span class="w-6 h-4" set:html={currentLanguageObject.flag} />}
+              <span>{currentLanguageObject.name}</span>
+              <svg class="h-4 w-4 text-gray-400 rtl:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
+            </button>
+            <div id="desktop-lang-dropdown" class="absolute end-0 mt-2 w-48 rounded-md shadow-lg bg-popover ring-1 ring-border hidden z-50">
+              <div class="py-1 max-h-60 overflow-y-auto text-sm">
+                {languageLinks.map(lang => ( <a href={lang.href} class:list={['flex items-center px-4 py-2 gap-2 transition-colors text-start', lang.isActive ? 'bg-primary/20 text-primary font-semibold' : 'text-muted-foreground hover:bg-primary/10 hover:text-primary']}>{lang.flag && <span class="w-6 h-4" set:html={lang.flag} />} {lang.name}</a> ))}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Mobile Controls -->
-    <div class="flex items-center md:hidden">
-        <!-- CHANGE 5: Used logical margin `me-4` -->
-        <button 
-            type="button" 
-            id="mobile-search-button" 
-            class="search-icon-btn me-4" 
-            aria-label={common.PAGE_SEARCH_SEARCH_LABEL}
-        >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="40" stroke-dashoffset="40" d="M10.76 13.24c-2.34 -2.34 -2.34 -6.14 0 -8.49c2.34 -2.34 6.14 -2.34 8.49 0c2.34 2.34 2.34 6.14 0 8.49c-2.34 2.34 -6.14 2.34 -8.49 0Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="40;0"/></path><path stroke-dasharray="12" stroke-dashoffset="12" d="M10.5 13.5l-7.5 7.5"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.24s" values="12;0"/></path></g></svg>
+        <button id="theme-toggle" aria-label="Toggle theme" class="p-2 rounded-md border border-border text-foreground hover:text-primary transition-colors">
+          <svg id="theme-icon" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"></svg>
         </button>
-        <button
-            type="button"
-            class="text-gray-300 hover:text-white"
-            aria-label={ariaLabelSearch1}
-            id="mobile-menu-button"
-        >
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-        </button>
-    </div>
-  </nav>
 
-  <!-- Mobile Navigation -->
-  <div class="md:hidden hidden" id="mobile-menu">
-    <div class="px-2 pt-2 pb-3 space-y-1">
-      <!-- Mobile Search Form -->
-      <div class="px-1 py-2">
         <div class="relative">
-          <input 
-            type="search" 
-            id="mobile-menu-search-input"
-            name="q-mobile" 
-            placeholder={common.PAGE_SEARCH_PLACEHOLDER}
-            class="w-full bg-gray-800 border border-gray-600 text-white placeholder-gray-400 text-base rounded-md py-2 ps-4 pe-10 focus:ring-signal-green focus:border-signal-green transition"
-          >
-          <!-- CHANGE 7: Used logical positioning `inset-y-0 end-0 ... pe-3` -->
-          <div class="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
-            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
-            </svg>
+          <button id="user-btn" class="p-2 rounded-md border border-border text-foreground hover:text-primary transition-colors" aria-haspopup="true" aria-expanded="false">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
+          </button>
+          <div id="user-dropdown" class="absolute end-0 mt-2 w-48 bg-popover border border-border rounded-md shadow-lg hidden z-50 py-1">
+            {isLoggedIn ? ( <> <a href="/user-profile" class="block text-start px-4 py-2 text-sm text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">Profile</a> <a href="/logout" class="block text-start px-4 py-2 text-sm text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">Log Out</a> </> ) : ( <> <a href="/login" class="block text-start px-4 py-2 text-sm text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">Login</a> <a href="/registration" class="block text-start px-4 py-2 text-sm text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">Register</a> </> )}
+          </div>
+        </div>
+
+        <!-- Mobile Menu (Hamburger) Button -->
+        <!-- FINAL CHANGE: Breakpoint changed from xl to lg -->
+        <button class="lg:hidden p-2 text-foreground hover:text-primary" id="mobile-menu-btn" aria-label="Toggle menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- MOBILE-ONLY SECOND ROW: For Language Switcher -->
+    <!-- FINAL CHANGE: Breakpoint changed from xl to lg -->
+    <div class="lg:hidden flex justify-end w-full pt-2">
+       <div class="relative" id="mobile-lang-switcher-container">
+        <button type="button" id="mobile-lang-button" class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground" aria-expanded="false" aria-haspopup="true">
+          {currentLanguageObject.flag && <span class="w-6 h-4" set:html={currentLanguageObject.flag} />}
+          <span>{currentLanguageObject.name}</span>
+          <svg class="h-4 w-4 text-gray-400 rtl:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
+        </button>
+        <div id="mobile-lang-dropdown" class="absolute end-0 mt-2 w-48 rounded-md shadow-lg bg-popover ring-1 ring-border hidden z-50">
+          <div class="py-1 max-h-60 overflow-y-auto text-sm">
+            {languageLinks.map(lang => ( <a href={lang.href} class:list={['flex items-center px-4 py-2 gap-2 transition-colors text-start', lang.isActive ? 'bg-primary/20 text-primary font-semibold' : 'text-muted-foreground hover:bg-primary/10 hover:text-primary']}>{lang.flag && <span class="w-6 h-4" set:html={lang.flag} />} {lang.name}</a> ))}
           </div>
         </div>
       </div>
+    </div>
 
-      {navigation.map(item => (
-        <a
-          href={item.href}
-          class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
-        >
-          {item.name}
-        </a>
-      ))}
-
-      <!-- Mobile Language Dropdown Switcher -->
-      <div class="pt-4 pb-2 border-t border-gray-700 mt-2">
-        <button
-          type="button"
-          id="mobile-lang-button"
-          class="flex justify-between items-center w-full px-3 py-2 text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors"
-          aria-expanded="false"
-          aria-controls="mobile-lang-dropdown-list"
-        >
-          <span class="flex items-center">
-            <!-- CHANGE 3: Used logical margin `me-1` -->
-            {currentLanguageObject.flag && <span class="me-1 w-6 h-4" set:html={currentLanguageObject.flag} />}
-            {currentLanguageObject.name}
-          </span>
-          <!-- CHANGE 3: Used logical margin `ms-1` -->
-          <svg class="ms-1 h-5 w-5 transform transition-transform duration-150" id="mobile-lang-chevron" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-        </button>
-        <!-- CHANGE 8: Used logical padding `ps-3` -->
-        <div id="mobile-lang-dropdown-list" class="mt-1 space-y-1 ps-3 hidden max-h-52 overflow-y-auto">
-          {languageLinks.map(lang => (
-            <a
-              href={lang.href}
-              class:list={[
-                "block ps-3 pe-4 py-2 border-s-4 text-base font-medium transition-colors rounded-e-md",
-                lang.isActive
-                  ? "bg-gray-600 border-signal-green text-white cursor-default"
-                  : "border-transparent text-gray-400 hover:bg-gray-700 hover:border-gray-500 hover:text-white"
-              ]}
-              role="menuitem"
-              title={lang.name}
-            >
-              <span class="flex items-center">
-                <!-- CHANGE 3: Used logical margin `me-2` -->
-                {lang.flag && <span class="me-2 w-6 h-4" set:html={lang.flag} />} {lang.name}
-              </span>
-            </a>
-          ))}
-        </div>
-      </div>
-
-      <a
-        href={headerFooter.HEADER_NAME_CTA_PATH}
-        class="block mt-4 mx-1 px-3 py-2 bg-black text-signal-green border border-signal-green hover:bg-signal-green hover:text-black transition-all duration-200 text-center rounded-md"
-      >
-        {headerFooter.HEADER_NAME_CTA}
-      </a>
+    <!-- Mobile Navigation Panel -->
+    <!-- FINAL CHANGE: Breakpoint changed from xl to lg -->
+    <div id="mobile-nav" class="lg:hidden hidden mt-4">
+      <ul class="flex flex-col gap-3 text-sm">
+        <li><a href="#features" class="block text-start py-2 text-muted-foreground hover:text-primary">Features</a></li>
+        <li><a href="#how-it-works" class="block text-start py-2 text-muted-foreground hover:text-primary">How It Works</a></li>
+        <li><a href="#pricing" class="block text-start py-2 text-muted-foreground hover:text-primary">Pricing</a></li>
+        <li><a href="/waiting-list" class="block text-start py-2 text-muted-foreground hover:text-primary">Waiting List</a></li>
+        <li><a href="#contact" class="block text-start py-2 text-muted-foreground hover:text-primary">Contact</a></li>
+      </ul>
     </div>
   </div>
 </header>
-
-<!-- Search Overlay -->
-<div 
-  id="search-overlay" 
-  class="fixed top-0 left-0 w-full h-full bg-black/80 backdrop-blur-sm z-40 hidden items-start justify-center pt-20 md:pt-32" 
-  aria-hidden="true" 
-  data-zero-results={common.PAGE_SEARCH_ZERO_RESULTS}
-  data-one-result={common.PAGE_SEARCH_ONE_RESULT}
-  data-many-results={common.PAGE_SEARCH_MANY_RESULTS}
-  data-searching={common.PAGE_SEARCH_SEARCHING}
-  data-load-more={common.PAGE_SEARCH_LOAD_MORE}
-  data-load-all={common.PAGE_SEARCH_LOAD_ALL}
->
-  <div class="relative w-full max-w-2xl px-4">
-    <form class="relative" role="search" onsubmit="event.preventDefault();">
-      <label for="search-input" class="sr-only">{common.PAGE_SEARCH_SEARCH_LABEL}</label>
-      <input
-        type="search"
-        id="search-input"
-        name="q"
-        placeholder={common.PAGE_SEARCH_PLACEHOLDER}
-        class="w-full bg-gray-700/50 border-2 border-gray-600 text-white placeholder-gray-400 text-xl rounded-lg py-4 ps-6 pe-28 focus:ring-signal-green focus:border-signal-green transition-colors duration-200"
-        autocomplete="off"
-      />
-      <!-- CHANGE 11: Used logical positioning `end-[68px]` -->
-      <button 
-        type="button" 
-        id="clear-search-button" 
-        class="absolute inset-y-0 end-[68px] hidden items-center text-gray-500 hover:text-red-500 transition-colors" 
-        aria-label={common.PAGE_SEARCH_CLEAR_SEARCH}
-      >
-        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      </button>
-      <!-- CHANGE 12: Used logical positioning `end-0 ... pe-5` -->
-      <button
-        type="submit"
-        class="absolute inset-y-0 end-0 flex items-center pe-5 text-gray-400 hover:text-signal-green transition-colors"
-        aria-label={ariaLabelSearch2}
-      >
-        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
-        </svg>
-      </button>
-    </form>
-
-    <!-- Search Results & Status Area -->
-    <div id="search-results-area" class="relative mt-2 bg-gray-800/80 backdrop-blur-md rounded-lg shadow-lg overflow-hidden hidden">
-      <div id="search-status" class="px-4 py-2 text-sm text-gray-400 border-b border-gray-700"></div>
-      <div id="search-results" class="max-h-[50vh] overflow-y-auto">
-        <!-- Results will be injected here by JS -->
-      </div>
-      <div id="search-footer" class="hidden border-t border-gray-700 text-center">
-        <!-- "View all" link will be injected here -->
-      </div>
-    </div>
-
-    <!-- CHANGE 13: Used logical positioning `-end-0 md:-end-12` -->
-    <button 
-      id="search-overlay-close-button" 
-      class="absolute -top-12 -end-0 md:-end-12 text-gray-400 hover:text-white" 
-      aria-label={ariaLabelSearch3}
-    >
-      <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-      </svg>
-    </button>
-  </div>
-</div>
-
-<script define:vars={{ hreflangCode }} is:inline>
-  // --- Mobile Menu Toggle ---
-  const mobileMenuButton = document.getElementById('mobile-menu-button');
-  const mobileMenu = document.getElementById('mobile-menu');
-
-  if (mobileMenuButton && mobileMenu) {
-    mobileMenuButton.addEventListener('click', () => {
-      const isExpanded = mobileMenu.classList.toggle('hidden');
-      mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
-    });
-  }
-
-  // --- Desktop Language Dropdown ---
-  const desktopLangButton = document.getElementById('desktop-lang-button');
-  const desktopLangDropdown = document.getElementById('desktop-lang-dropdown');
-  const desktopLangSwitcherContainer = document.getElementById('desktop-lang-switcher-container');
-
-  if (desktopLangButton && desktopLangDropdown && desktopLangSwitcherContainer) {
-    desktopLangButton.addEventListener('click', (event) => {
-      event.stopPropagation();
-      const isExpanded = desktopLangButton.getAttribute('aria-expanded') === 'true';
-      desktopLangButton.setAttribute('aria-expanded', String(!isExpanded));
-      desktopLangDropdown.classList.toggle('hidden');
-    });
-
-    document.addEventListener('click', (event) => {
-      if (!desktopLangSwitcherContainer.contains(event.target) && desktopLangButton.getAttribute('aria-expanded') === 'true') {
-        desktopLangButton.setAttribute('aria-expanded', 'false');
-        desktopLangDropdown.classList.add('hidden');
-      }
-    });
-  }
-
-  // --- Mobile Language Dropdown ---
-  const mobileLangButton = document.getElementById('mobile-lang-button');
-  const mobileLangDropdownList = document.getElementById('mobile-lang-dropdown-list');
-  const mobileLangChevron = document.getElementById('mobile-lang-chevron');
-
-  if (mobileLangButton && mobileLangDropdownList && mobileLangChevron) {
-    mobileLangButton.addEventListener('click', () => {
-      const isExpanded = mobileLangButton.getAttribute('aria-expanded') === 'true';
-      mobileLangButton.setAttribute('aria-expanded', String(!isExpanded));
-      mobileLangDropdownList.classList.toggle('hidden');
-      mobileLangChevron.classList.toggle('rotate-180');
-    });
-  }
-
-  // --- Scroll Handler for Header Background ---
-  document.addEventListener('DOMContentLoaded', () => {
-    const header = document.querySelector('.header-transparent');
-
-    const updateHeaderBackground = () => {
-      if (window.scrollY > 0) {
-        header.classList.add('header-scrolled');
-      } else {
-        header.classList.remove('header-scrolled');
-      }
-    };
-
-    window.addEventListener('scroll', updateHeaderBackground);
-    updateHeaderBackground(); // Initial check
-  });
-
-  // --- SEARCH COMPONENT LOGIC ---
-
-  // Helper function to truncate text to a specific length and add ellipsis
-  const truncateText = (text, maxLength) => {
-    if (!text || typeof text !== 'string') return '';
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
-  };
-  
-  // Cache for our search index. It starts empty.
-  let searchIndex = []; 
-  // A promise to prevent multiple fetches if the user clicks fast.
-  let searchIndexPromise = null; 
-
-  async function loadSearchIndex() {
-    // If the index is already loaded, do nothing.
-    if (searchIndex.length > 0) return;
-    
-    // If we are already fetching, wait for the existing fetch to complete.
-    if (searchIndexPromise) return searchIndexPromise;
-
-    // Start fetching the data.
-    searchIndexPromise = (async () => {
-      try {
-        // Construct the path to the correct localized JSON file.
-        const response = await fetch(`/index-${hreflangCode}.json`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        
-        // Map the fetched data to a consistent, lowercase-key format for the script.
-        searchIndex = data.map(item => ({
-          title: item.TITLE,
-          excerpt: item.EXCERPT,
-          href: item.HREF,
-          image: item.IMAGE 
-        }));
-        
-      } catch (error) {
-        console.error("Failed to load or parse search index:", error);
-        // Handle the error by showing a message to the user.
-        searchStatus.innerHTML = "Iskalnega indeksa ni bilo mogoče naložiti. Poskusite znova.";
-        searchIndex = []; // Ensure it's empty on failure.
-      }
-    })();
-    
-    return searchIndexPromise;
-  }
-
-  const desktopSearchButton = document.getElementById('desktop-search-button');
-  const mobileSearchButton = document.getElementById('mobile-search-button');
-  const mobileMenuSearchInput = document.getElementById('mobile-menu-search-input');
-  const searchOverlay = document.getElementById('search-overlay');
-  const searchOverlayCloseButton = document.getElementById('search-overlay-close-button');
-  const searchInput = document.getElementById('search-input');
-  const clearSearchButton = document.getElementById('clear-search-button');
-  const searchResultsArea = document.getElementById('search-results-area');
-  const searchStatus = document.getElementById('search-status');
-  const searchResults = document.getElementById('search-results');
-  const searchFooter = document.getElementById('search-footer');
-  let searchTimeout;
-
-  if (searchOverlay) {
-    const openSearch = async (prefillQuery = '') => {
-      searchOverlay.classList.remove('hidden');
-      searchOverlay.classList.add('flex');
-      searchOverlay.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
-      if(mobileMenu && !mobileMenu.classList.contains('hidden')) {
-        mobileMenu.classList.add('hidden');
-      }
-
-      // Trigger the lazy-loading of the search index on demand.
-      await loadSearchIndex();
-
-      if (prefillQuery) {
-        searchInput.value = prefillQuery;
-        // Only perform search if the index is loaded
-        if (searchIndex.length > 0) performSearch(prefillQuery);
-        clearSearchButton.classList.remove('hidden');
-        clearSearchButton.classList.add('flex');
-      }
-      setTimeout(() => searchInput.focus(), 50);
-    };
-
-    const closeSearch = () => {
-      searchOverlay.classList.add('hidden');
-      searchOverlay.classList.remove('flex');
-      searchOverlay.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
-      if (mobileMenuSearchInput) {
-        mobileMenuSearchInput.value = '';
-      }
-    };
-
-    const clearSearch = () => {
-      searchInput.value = '';
-      clearSearchButton.classList.add('hidden');
-      searchResultsArea.classList.add('hidden');
-      searchResults.innerHTML = '';
-      searchStatus.innerHTML = '';
-      searchFooter.innerHTML = '';
-      searchFooter.classList.add('hidden');
-      searchInput.focus();
-    };
-
-    const performSearch = (query) => {
-      // If index isn't loaded for some reason, inform the user and retry.
-      if (searchIndex.length === 0 && query) {
-         searchStatus.innerHTML = common.PAGE_SEARCH_INDEX_PROGRESS;
-         loadSearchIndex().then(() => performSearch(query));
-         return;
-      }
-
-      clearTimeout(searchTimeout);
-
-      searchResultsArea.classList.remove('hidden');
-      const searchingText = searchOverlay.dataset.searching.replace('[SEARCH_TERM]', `<em>${query}</em>`);
-      searchStatus.innerHTML = searchingText;
-      searchResults.innerHTML = '';
-      searchFooter.classList.add('hidden');
-
-      searchTimeout = setTimeout(() => {
-        const results = searchIndex.filter(item =>
-          item.title.toLowerCase().includes(query.toLowerCase()) ||
-          item.excerpt.toLowerCase().includes(query.toLowerCase())
-        );
-
-        let statusText = '';
-        if (results.length === 0) {
-          statusText = searchOverlay.dataset.zeroResults.replace('[SEARCH_TERM]', `<strong>${query}</strong>`);
-        } else if (results.length === 1) {
-          statusText = searchOverlay.dataset.oneResult.replace('[COUNT]', '1').replace('[SEARCH_TERM]', `<strong>${query}</strong>`);
-        } else {
-          statusText = searchOverlay.dataset.manyResults.replace('[COUNT]', results.length).replace('[SEARCH_TERM]', `<strong>${query}</strong>`);
-        }
-        searchStatus.innerHTML = statusText;
-
-        const regex = new RegExp(query.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
-        const highlight = (text) => text.replace(
-          regex,
-          (match) => `<mark class="bg-signal-green text-black font-semibold px-1 py-0.5 rounded">${match}</mark>`
-        );
-
-        let resultsShown = 7;
-        const showResults = (count) => {
-          const resultsToShow = results.slice(0, count);
-          // CHANGE 14: Use logical padding `ps-3` in the generated HTML for RTL support.
-          searchResults.innerHTML = resultsToShow.map((item, idx) => `
-            <a href="${item.href}" class="search-result-item group border-b border-white/20${idx === resultsToShow.length - 1 ? ' border-b-0' : ''} flex items-center py-2">
-              <div class="search-result-image-container flex-shrink-0 w-9 h-9">
-                ${item.image ? `<img src="${item.image}" alt="" class="search-result-image w-9 h-9" width="36" height="36" loading="lazy">` : '<div class="search-result-image-placeholder w-9 h-9"></div>'}
-              </div>
-              <div class="search-result-content flex flex-col justify-center ps-3 min-w-0">
-                <div class="search-result-title text-white font-semibold leading-tight">${highlight(truncateText(item.title, 65))}</div>
-                <div class="search-result-excerpt text-signal-green leading-snug">${highlight(truncateText(item.excerpt, 160))}</div>
-              </div>
-            </a>
-          `).join('');
-        };
-        showResults(resultsShown);
-
-        if (results.length > resultsShown) {
-          searchFooter.innerHTML = `<button id="load-more-results" class="block w-full py-3 text-sm text-gray-300 hover:bg-gray-700/50 hover:text-white transition-colors">${searchOverlay.dataset.loadMore}</button>`;
-          searchFooter.classList.remove('hidden');
-          const loadMoreButton = document.getElementById('load-more-results');
-          loadMoreButton.onclick = () => {
-             resultsShown += 7;
-             showResults(resultsShown);
-             if (results.length <= resultsShown) {
-                loadMoreButton.outerHTML = `<div class="block w-full py-3 text-sm text-gray-400">${searchOverlay.dataset.loadAll}</div>`;
-             }
-          };
-        } else if (results.length > 0) {
-          searchFooter.innerHTML = `<div class="block w-full py-3 text-sm text-gray-400">${searchOverlay.dataset.loadAll}</div>`;
-          searchFooter.classList.remove('hidden');
-        } else {
-          searchFooter.innerHTML = '';
-          searchFooter.classList.add('hidden');
-        }
-      }, 250);
-    };
-
-    desktopSearchButton?.addEventListener('click', () => openSearch());
-    mobileSearchButton?.addEventListener('click', () => openSearch());
-    searchOverlayCloseButton?.addEventListener('click', closeSearch);
-    clearSearchButton?.addEventListener('click', clearSearch);
-
-    mobileMenuSearchInput?.addEventListener('input', () => {
-      const query = mobileMenuSearchInput.value.trim();
-      if (query) {
-        openSearch(query);
-      }
-    });
-
-    searchInput?.addEventListener('input', () => {
-      const query = searchInput.value.trim();
-      if (query) {
-        clearSearchButton.classList.remove('hidden');
-        clearSearchButton.classList.add('flex');
-        performSearch(query);
-      } else {
-        clearSearch();
-      }
-    });
-
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && !searchOverlay.classList.contains('hidden')) {
-        closeSearch();
-      }
-    });
-
-    searchOverlay.addEventListener('click', (event) => {
-      if (event.target === searchOverlay) {
-        closeSearch();
-      }
-    });
-  }
-</script>
-
-<style>
-  .header-transparent {
-    position: sticky;
-    top: 0;
-    z-index: 30; /* Reduced to be below search overlay */
-    background: rgb(0, 0, 0);
-    transition: background-color 0.3s ease;
-  }
-
-  .header-scrolled {
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-  }
-
-  .rotate-180 {
-    transform: rotate(180deg);
-  }
-
-  /* Styling for scrollbars in dropdowns if content overflows */
-  .max-h-60::-webkit-scrollbar,
-  .max-h-52::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  .max-h-60::-webkit-scrollbar-track,
-  .max-h-52::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-  }
-
-  .max-h-60::-webkit-scrollbar-thumb,
-  .max-h-52::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
-  }
-
-  .max-h-60::-webkit-scrollbar-thumb:hover,
-  .max-h-52::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
-  }
-
-  /* --- Search Component Styles --- */
-  .search-icon-btn {
-    color: #e5e7eb;
-    transition: color 0.2s ease-in-out;
-  }
-  .search-icon-btn:hover {
-    color: #BCEF2F;
-  }
-  .search-icon-btn:hover svg g {
-    stroke: #BCEF2F;
-  }
-
-  /* Search result item with proper text colors */
-  .search-result-item {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1rem;
-    text-decoration: none;
-    transition: background-color 0.2s ease-in-out;
-    color: inherit;
-  }
-  .search-result-item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-
-  /* Image container for better alignment */
-  .search-result-image-container {
-    flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    /* CHANGE 15: Used logical property `margin-inline-end` */
-    margin-inline-end: 0.75rem;
-  }
-
-  .search-result-image {
-    width: 40px;
-    height: 40px;
-    border-radius: 0.375rem;
-    object-fit: cover;
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-
-  .search-result-image-placeholder {
-    width: 40px;
-    height: 40px;
-    border-radius: 0.375rem;
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-
-  .search-result-content {
-    flex-grow: 1;
-    min-width: 0;
-  }
-
-  /* Ensure text colors are properly applied */
-  .search-result-title {
-    color: #f3f4f6 !important;
-    font-weight: 500;
-    font-size: 0.9375rem;
-    line-height: 1.25rem;
-    margin-bottom: 0.125rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .search-result-excerpt {
-    color: #d1d5db !important;
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .search-result-arrow {
-    color: #6b7280;
-    /* CHANGE 15: Used logical property `margin-inline-start` */
-    margin-inline-start: 1rem;
-    font-size: 1.125rem;
-    transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
-  }
-
-  /* Hover state for arrow */
-  .search-result-item:hover .search-result-arrow {
-    color: #BCEF2F;
-    transform: translateX(4px);
-  }
-
-  /* CHANGE 16: Added RTL rule for arrow transform */
-  [dir="rtl"] .search-result-item:hover .search-result-arrow {
-    transform: translateX(-4px);
-  }
-
-  /* Highlighting for search term */
-  .search-highlight {
-    background-color: #BCEF2F;
-    color: #000;
-    font-weight: 600;
-    padding: 1px 2px;
-    border-radius: 2px;
-    font-style: normal;
-  }
-
-  /* Status text styling */
-  #search-status em, 
-  #search-status strong {
-    font-style: normal;
-    color: #fff;
-    font-weight: 600;
-  }
-
-  /* Custom scrollbar for search results */
-  #search-results::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  #search-results::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-  }
-
-  #search-results::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-  }
-
-  #search-results::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
-  }
-
-  /* Hide default search input clear button */
-  input[type="search"]::-webkit-search-decoration,
-  input[type="search"]::-webkit-search-cancel-button,
-  input[type="search"]::-webkit-search-results-button,
-  input[type="search"]::-webkit-search-results-decoration {
-    -webkit-appearance:none;
-  }
-</style>

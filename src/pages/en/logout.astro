@@ -1,0 +1,11 @@
+---
+// This page clears the session cookie and redirects to the home page.
+
+// Replace 'session_id' with the actual name of your cookie.
+Astro.cookies.delete('session_id', {
+  path: '/'
+});
+
+// Redirect the user to the home page after logging out.
+return Astro.redirect('/');
+---
