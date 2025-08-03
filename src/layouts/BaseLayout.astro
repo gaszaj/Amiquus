@@ -237,6 +237,71 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
         } catch(e) {
             console.error("Failed to initialize Move To Top button:", e);
         }
+        // --- 4. COOKIE BANNER LOGIC ---
+        try {
+            const settingsTrigger = document.getElementById('cookie-settings-trigger');
+            const banner = document.getElementById('cookie-consent-banner');
+            const initialView = document.getElementById('cookie-initial-view');
+            const detailsView = document.getElementById('cookie-details-view');
+            const acceptBtn = document.getElementById('cookie-accept-btn');
+            const customizeBtn = document.getElementById('cookie-customize-btn');
+            const declineBtn = document.getElementById('cookie-decline-btn');
+            const closeDetailsBtn = document.getElementById('cookie-close-details-btn');
+            const savePrefsBtn = document.getElementById('cookie-save-prefs-btn');
+            const acceptAllDetailsBtn = document.getElementById('cookie-accept-all-details-btn');
+            const analyticsCheckbox = document.getElementById('cookie-analytics');
+            const marketingCheckbox = document.getElementById('cookie-marketing');
+
+            if (banner && analyticsCheckbox && marketingCheckbox) {
+                const CONSENT_GIVEN_KEY = 'cookie_consent_given';
+                const PREFS_KEY = 'cookie_consent_prefs';
+
+                const showBanner = () => {
+                    banner.style.transform = 'translateY(0)';
+                    if (settingsTrigger) setTimeout(() => settingsTrigger.style.transform = 'scale(0)', 10);
+                };
+
+                const hideBanner = () => {
+                    banner.style.transform = 'translateY(100%)';
+                    if (settingsTrigger) settingsTrigger.style.transform = 'scale(1)';
+                };
+
+                const recordConsent = (preferences) => {
+                    localStorage.setItem(CONSENT_GIVEN_KEY, 'true');
+                    localStorage.setItem(PREFS_KEY, JSON.stringify(preferences));
+                    hideBanner();
+                };
+
+                acceptBtn.onclick = () => recordConsent({ analytics: true, marketing: true });
+                acceptAllDetailsBtn.onclick = () => recordConsent({ analytics: true, marketing: true });
+                declineBtn.onclick = () => recordConsent({ analytics: false, marketing: false });
+                savePrefsBtn.onclick = () => recordConsent({
+                    analytics: analyticsCheckbox.checked,
+                    marketing: marketingCheckbox.checked,
+                });
+
+                customizeBtn.onclick = () => {
+                    initialView.classList.add('hidden');
+                    detailsView.classList.remove('hidden');
+                };
+                closeDetailsBtn.onclick = () => {
+                    detailsView.classList.add('hidden');
+                    initialView.classList.remove('hidden');
+                };
+
+                settingsTrigger.onclick = showBanner;
+                
+                // Initial check
+                const consentGiven = localStorage.getItem(CONSENT_GIVEN_KEY) === 'true';
+                if (consentGiven) {
+                    settingsTrigger.classList.remove('hidden');
+                } else {
+                    setTimeout(showBanner, 1500);
+                }
+            }
+        } catch (e) {
+            console.error("Failed to initialize cookie banner:", e);
+        }
       }
 
       initializePageScripts();
