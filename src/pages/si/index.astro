@@ -1,787 +1,282 @@
 ---
-import path from 'path';
-import Database from 'better-sqlite3';
+// src/pages/index.astro
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-// --- Database Connection ---
-const dbPath = path.join(process.cwd(), 'src/data/data.db');
-const db = new Database(dbPath, { readonly: true });
+// Page-specific metadata
+const title = "Amiquus - Automated Car Listing Alerts";
+const description = "Get real-time notifications for new car listings that match your criteria. Monitor multiple platforms automatically with instant Telegram alerts.";
 
-// --- Interface Definitions (Unchanged) ---
-interface HeroData {
-  title: string;
-  subtitle: string;
-  ctaText: string;
-  ctaLink: string;
-  features: string[];
-  socialProof: {
-    text: string;
-    rating: number; 
-    userPhotos: string[];
-  };
-  ogImage?: string;
-}
-
-interface Product {
-  title: string;
-  image: string;
-  url: string;
-}
-
-interface FeatureItem {
-  icon: string;
-  title: string;
-  description: string;
-}
-
-interface FaqItem {
-  question: string;
-  answer: string;
-}
-
-interface MarqueeItem {
-  url: string;
-  image: string;
-  alt: string;
-}
-
-interface FormAlerts {
-  invalidEmail: string;
-  termsNotAccepted: string;
-  submissionSuccess: string;
-  submissionError: string;
-}
-
-// Get the locale from the URL path
-const locale = Astro.url.pathname.split('/')[1];
-
-// --- Data Fetching from Database ---
-// Fetch all required data in a single, efficient transaction.
-const { home, common, www, bestsellers, publishedLocales } = db.transaction(() => {
-    // Fetch homepage-specific content for the current locale
-    const homeData = db.prepare('SELECT * FROM home WHERE M_SLUG = ?').get(locale);
-    
-    // Fetch common translations and settings for the current locale
-    const commonData = db.prepare('SELECT * FROM common WHERE M_SLUG = ?').get(locale);
-    
-    // Fetch global site data from the 'www' table
-    const wwwData = db.prepare('SELECT * FROM www LIMIT 1').get();
-    
-    // Fetch the top 9 bestsellers for the current locale, sorted by importance.
-    // Casting PRODUCT_IMPORTANCE_RANK to an integer ensures correct numeric sorting.
-    const bestsellerData = db.prepare(`
-        SELECT * FROM product
-        WHERE PUBLISH_Y_N = '1'
-          AND PRODUCT_IS_BESTSELLER = '1'
-          AND M_SLUG = ?
-        ORDER BY CAST(PRODUCT_IMPORTANCE_RANK AS INTEGER) DESC
-        LIMIT 9
-    `).all(locale);
-
-    // Fetch all published locales for the language switcher
-    const localeData = db.prepare("SELECT M_SLUG FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all();
-
-    return { 
-        home: homeData,
-        common: commonData,
-        www: wwwData,
-        bestsellers: bestsellerData,
-        publishedLocales: localeData
-    };
-})();
-
-// --- Validation ---
-// If essential data for the homepage (home or common) is not found, redirect to 404.
-if (!home || !common) {
-  return Astro.redirect('/404');
-}
-
-// --- Page Logic and Variable Definitions ---
-
-// Helper functions for URL generation (unchanged).
-const getAbsoluteUrl = (path: string) => {
-    return new URL(`/${locale}${path}`, Astro.url.origin).toString();
-};
-const getBaseUrl = (path: string) => {
-    return new URL(path, Astro.url.origin).toString();
-};
-
-// Language and orientation data
-const languageIso: string = home.M_LANGUAGE_ISO;
-const countryCode: string = home.M_COUNTRY_CODE;
-const contentOrientation: string = common.M_CONTENT_ORIENTATION || 'ltr';
-
-// --- Data for the Homepage ---
-
-// Helper function for randomizing social proof images (unchanged).
-const getRandomItems = <T,>(array: T[], count: number): T[] => {
-  const shuffled = [...array].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count);
-};
-const allSocialProofImages = [
-  '/socialproof/sp1.webp', '/socialproof/sp2.webp', '/socialproof/sp3.webp',
-  '/socialproof/sp4.webp', '/socialproof/sp5.webp', '/socialproof/sp6.webp',
-  '/socialproof/sp7.webp', '/socialproof/sp8.webp', '/socialproof/sp9.webp',
-  '/socialproof/sp10.webp', '/socialproof/sp11.webp', '/socialproof/sp12.webp',
-  '/socialproof/sp13.webp', '/socialproof/sp14.webp', '/socialproof/sp15.webp',
-  '/socialproof/sp16.webp', '/socialproof/sp17.webp', '/socialproof/sp18.webp',
-  '/socialproof/sp19.webp', '/socialproof/sp20.webp', '/socialproof/sp21.webp',
-  '/socialproof/sp22.webp', '/socialproof/sp23.webp', '/socialproof/sp24.webp'
-];
-
-// Hero section data
-const heroData: HeroData = {
-  title: home.HOME_H1,
-  subtitle: home.HOME_SUBTITLE,
-  ogImage: home.HOME_OG_IMAGE_PATH,
-  ctaText: home.HOME_HERO_BUTTON,
-  ctaLink: "#best-sellers",
-  features: [
-    home.HOME_HERO_BENEFIT_1,
-    home.HOME_HERO_BENEFIT_2,
-    home.HOME_HERO_BENEFIT_3
-  ],
-  socialProof: {
-    text: home.HOME_HERO_SOCIAL_PROOF,
-    rating: 5,
-    userPhotos: getRandomItems(allSocialProofImages, 5)
-  }
-};
-
-// Page keywords
-const pageKeywords: string = [
-  home.M_HOME_NAME,
-  common.M_COUNTRY_NATIVE,
-  www.PAGE_ORGANISATION_FULL_NAME
-].join(', ');
-
-// Use the pre-fetched and pre-sorted bestsellers array.
-// Get top 5 products for marquee.
-const marqueeItems = bestsellers
-  .slice(0, 5)
-  .map(product => ({
-    url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_COLLECTION_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`),
-    image: getBaseUrl(product.PRODUCT_IMAGE_PATH_L),
-    alt: `${product.PAGE_COLLECTION_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME} | ${www.PAGE_ORGANISATION_FULL_NAME}`
-  }));
-
-// Get top 9 products for bestsellers section.
-const bestsellersSection = {
-  title: home.HOME_H2_1,
-  productCtaText: home.HOME_HERO_BUTTON,
-  products: bestsellers.map(product => ({
-      title: `${product.PAGE_COLLECTION_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME}`,
-      image: getBaseUrl(product.PRODUCT_IMAGE_PATH_L),
-      alt: `${product.PAGE_COLLECTION_1_LISTING_SLUG_HELPER} — ${product.PRODUCT_NAME} | ${www.PAGE_ORGANISATION_FULL_NAME}`,
-      url: getBaseUrl(`/${product.M_SLUG}/${product.PAGE_COLLECTION_1_LISTING_SLUG}/${product.PRODUCT_ASCII_SLUG}`)
-    }))
-};
-
-// Features section data (unchanged).
-const featuresSection = {
-  title: home.HOME_H2_2,
-  items: [
-    { icon: "⚡", title: home.HOME_FEATURE_NAME_1, description: home.HOME_FEATURE_LABEL_1 },
-    { icon: "🔄", title: home.HOME_FEATURE_NAME_2, description: home.HOME_FEATURE_LABEL_2 },
-    { icon: "📦", title: home.HOME_FEATURE_NAME_3, description: home.HOME_FEATURE_LABEL_3 }
-  ] as FeatureItem[] 
-};
-
-// Institutions section data (unchanged).
-const institutionsSection = {
-  title: home.HOME_H2_4,
-  items: [
-    home.INSTITUTION_1, home.INSTITUTION_2, home.INSTITUTION_3,
-    home.INSTITUTION_4, home.INSTITUTION_5, home.INSTITUTION_6
-  ]
-};
-
-// FAQ section data (unchanged).
-const faqSection = {
-  title: home.HOME_H2_5,
-  subtitle: home.HOME_FAQ_TEXT,
-  items: [
-    { question: home.HOME_Q1, answer: home.HOME_A1 }, { question: home.HOME_Q2, answer: home.HOME_A2 },
-    { question: home.HOME_Q3, answer: home.HOME_A3 }, { question: home.HOME_Q4, answer: home.HOME_A4 },
-    { question: home.HOME_Q5, answer: home.HOME_A5 }, { question: home.HOME_Q6, answer: home.HOME_A6 },
-    { question: home.HOME_Q7, answer: home.HOME_A7 }, { question: home.HOME_Q8, answer: home.HOME_A8 },
-    { question: home.HOME_Q9, answer: home.HOME_A9 }, { question: home.HOME_Q10, answer: home.HOME_A10 },
-    { question: home.HOME_Q11, answer: home.HOME_A11 }, { question: home.HOME_Q12, answer: home.HOME_A12 },
-    { question: home.HOME_Q13, answer: home.HOME_A13 }, { question: home.HOME_Q14, answer: home.HOME_A14 },
-    { question: home.HOME_Q15, answer: home.HOME_A15 }
-  ] as FaqItem[]
-};
-
-// Contact section data (unchanged).
-const contactSection = {
-  title: home.HOME_H2_6,
-  subtitle: home.HOME_CONTACT_SUBTITLE,
-  formLabels: {
-    fullName: common.M_FULLNAME_PLACEHOLDER,
-    fullNamePlaceholder: common.M_FULLNAME_PLACEHOLDER,
-    email: common.M_EMAIL_ADDRESS_LABEL,
-    emailPlaceholder: common.M_EMAIL_PLACEHOLDER,
-    message: common.M_MESSAGE_LABEL,
-    messagePlaceholder: common.M_PARTNERSHIP_MESSAGE_PLACEHOLDER,
-    terms: common.M_TERMS_REQUIRED,
-    submitButton: common.M_SEND_BUTTON
-  }
-};
-
-// Form alert messages for client-side script (unchanged).
-const formAlertMessages: FormAlerts = {
-  invalidEmail: common.M_EMAIL_INVALID,
-  termsNotAccepted: common.M_TERMS_REQUIRED,
-  submissionSuccess: common.M_CONFIRMATION_TEXT,
-  submissionError: common.M_FORM_ERROR
-};
-
-// --- Schema Definitions (Unchanged) ---
-const webpageSchema = {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": home.HOME_H1,
-  "url": Astro.url.href,
-  "description": home.HOME_META_SEO,
-  "inLanguage": `${home.M_LANGUAGE_ISO}-${home.M_COUNTRY_CODE}`,
-  "breadcrumb": {
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": home.M_HOME_NAME,
-        "item": Astro.url.href
-      }
-    ]
-  },
-  "mainEntity": {
-    "@type": "Article",
-    "headline": home.HOME_H1,
-    "description": home.HOME_META_SEO,
-    "image": getBaseUrl(home.HOME_OG_IMAGE_PATH),
-    "author": {
-      "@type": "Organization",
-      "name": www.PAGE_ORGANISATION_FULL_NAME
-    },
-    "datePublished": `${home.HOME_DATE_PUBLISHED}T${home.HOME_HOUR_PUBLISHED}+02:00`,
-    "dateModified": `${home.HOME_DATE_UPDATED}T${home.HOME_HOUR_UPDATED}+02:00`,
-    "inLanguage": `${home.M_LANGUAGE_ISO}-${home.M_COUNTRY_CODE}`
-  }
-};
-
-const faqSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": faqSection.items.map(item => ({
-    "@type": "Question",
-    "name": item.question,
-    "acceptedAnswer": {
-      "@type": "Answer",
-      "text": item.answer
-    }
-  }))
-};
-
-const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": www.PAGE_ORGANISATION_FULL_NAME,
-  "url": getBaseUrl('/'),
-  "foundingDate": www.PAGE_FOUNDING_DATE,
-  "logo": getBaseUrl(www.PAGE_LOGO_IMAGE_PATH_1),
-  "keywords": [
-    www.PAGE_ORGANISATION_FULL_NAME,
-    common.M_COUNTRY_NATIVE,
-    common.PAGE_KEYWORD_1,
-    common.PAGE_KEYWORD_2,
-    common.PAGE_KEYWORD_3,
-    common.PAGE_KEYWORD_4,
-    common.PAGE_KEYWORD_5,
-    common.PAGE_KEYWORD_6
-  ].filter(Boolean),
-  "description": common.PAGE_SLOGAN,
-  "numberOfEmployees": {
-    "@type": "QuantitativeValue",
-    "minValue": "1",
-    "maxValue": "9"
-  },
-  "slogan": common.PAGE_SLOGAN,
-  "contactPoint": {
-    "@type": "ContactPoint",
-    "email": www.PAGE_INFO_EMAIL,
-    "contactType": common.M_CUSTOMER_SUPPORT
-  },
-  "sameAs": [
-    www.PAGE_INSTAGRAM_URL,
-    www.PAGE_FACEBOOK_URL,
-    www.PAGE_TWITTER_URL,
-    www.PAGE_LINKEDIN_URL,
-    www.PAGE_YOUTUBE_URL,
-    www.PAGE_PINTEREST_URL,
-    www.PAGE_BLUESKY_URL
-  ].filter(Boolean),
-  "areaServed": {
-    "@type": "Country",
-    "name": common.M_COUNTRY,
-    "identifier": common.M_COUNTRY_CODE
-  },
-  "potentialAction": [
-    {
-      "@type": "ViewAction",
-      "name": `XML Sitemap for ${www.PAGE_ORGANISATION_FULL_NAME}`,
-      "target": getBaseUrl('/sitemap.xml')
-    },
-    {
-      "@type": "ViewAction",
-      "name": `Localized XML Sitemap (${languageIso}-${countryCode}) for ${www.PAGE_ORGANISATION_FULL_NAME}`,
-      "target": getBaseUrl(`/sitemap-${languageIso}-${countryCode}.xml`)
-    },
-    {
-      "@type": "ViewAction",
-      "name": `LLM Guidance for ${www.PAGE_ORGANISATION_FULL_NAME}`,
-      "target": getBaseUrl('/llms.txt'),
-      "description": `A text resource outlining key information about ${www.PAGE_ORGANISATION_FULL_NAME} offerings, company, products, services, and more for AI agents and AI crawlers.`
-    }
-  ],
-  "mainEntityOfPage": [
-    {
-      "@type": "WebPage",
-      "@id": getBaseUrl('/sitemap.xml'),
-      "name": `XML Sitemap for ${www.PAGE_ORGANISATION_FULL_NAME}`,
-      "description": `Provides a structured list of pages available on ${www.PAGE_ORGANISATION_FULL_NAME} for crawlers and AI agents.`
-    },
-    {
-      "@type": "WebPage",
-      "@id": getBaseUrl(`/sitemap-${languageIso}-${countryCode}.xml`),
-      "name": `Localized XML Sitemap (${languageIso}-${countryCode}) for ${www.PAGE_ORGANISATION_FULL_NAME}`,
-      "description": `Provides a full and structured list of localized pages for ${languageIso} (${languageIso}-${countryCode}) locale on ${www.PAGE_ORGANISATION_FULL_NAME} for crawlers and AI agents.`
-    },
-    {
-      "@type": "WebPage",
-      "@id": getBaseUrl('/llms.txt'),
-      "name": `LLM Guidance for ${www.PAGE_ORGANISATION_FULL_NAME}`,
-      "description": `A text resource outlining key information about ${www.PAGE_ORGANISATION_FULL_NAME} offerings, company, products, services, and more for AI agents and AI crawlers.`
-    }
-  ]
-};
-
-const schema: object[] | null = [webpageSchema, faqSchema, organizationSchema];
-
-// --- Final Props & Language Links ---
-const pageTitle: string = home.HOME_H1;
-const pageDescription: string | undefined = home.HOME_META_SEO;
-const pageOgImage: string | undefined = home.HOME_OG_IMAGE_PATH;
-
-// Build the language link map using the pre-fetched locales.
-const languageLinksMap: Record<string, string> = {};
-for (const l of publishedLocales) {
-  languageLinksMap[l.M_SLUG] = `/${l.M_SLUG}`;
-}
+// Props for BaseLayout - these are placeholders since this page isn't DB-driven yet.
+const languageIso = "en";
+const countryCode = "US";
+const contentOrientation = "ltr";
+const languageLinksMap: Record<string, string> = { 'en': '/en', 'de': '/de' };
 ---
 
-<BaseLayout 
-  languageIso={languageIso} 
-  countryCode={countryCode} 
-  contentOrientation={contentOrientation} 
-  title={pageTitle} 
-  description={pageDescription} 
-  ogImage={pageOgImage} 
-  keywords={pageKeywords} 
-  schema={schema}
+<BaseLayout
+  languageIso={languageIso}
+  countryCode={countryCode}
+  contentOrientation={contentOrientation}
+  title={title}
+  description={description}
   languageLinksMap={languageLinksMap}
 >
   <!-- Hero Section -->
-  <section class="bg-black text-white py-12">
-    <div class="container mx-auto px-4">
-      <div class="max-w-3xl">
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4">
-          {heroData.title}
-        </h1>
-        <p class="text-xl md:text-2xl text-gray-300 mb-6 leading-relaxed">
-          {heroData.subtitle}
-        </p>
-        
-        <ul class="space-y-2 mb-6">
-          {heroData.features.map(feature => (
-            <li class="flex items-center gap-2">
-              <span class="text-signal-green">✓</span>
-              <span class="text-lg">{feature}</span>
-            </li>
-          ))}
-        </ul>
-        
-        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-8">
-          <div class="flex -space-x-3 rtl:space-x-reverse mb-2 sm:mb-0">
-            {heroData.socialProof.userPhotos.map(photo => (
-              <img 
-                src={photo} 
-                alt="User Testimonial" 
-                class="w-10 h-10 rounded-full border-2 border-black"
-                width="50"
-                height="50"
-                loading="lazy"
-                decoding="async"
-              />
-            ))}
+  <section class="relative overflow-hidden bg-background py-20 sm:py-32">
+    <div class="absolute inset-0 bg-gradient-to-br from-muted via-background to-background -z-10"></div>
+    <div class="max-w-screen-xl mx-auto px-4">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div class="text-center lg:text-start animate-on-scroll">
+          <h1 class="text-4xl lg:text-5xl font-bold leading-tight text-foreground mb-6">
+            Never Miss Your Perfect Car Deal Again
+          </h1>
+          <p class="text-lg text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0">
+            Amiquus monitors multiple car listing platforms 24/7 and sends instant Telegram notifications when vehicles matching your criteria become available. Stay ahead of the competition with real-time alerts.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+            <a href="/setup-alerts" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1">
+              Start Monitoring Now
+            </a>
+            <a href="#how-it-works" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-transparent border-2 border-border text-foreground hover:bg-muted transition-colors">
+              See How It Works
+            </a>
           </div>
-          <p class="text-lg text-signal-green">{heroData.socialProof.text}</p>
         </div>
         
-        <a 
-          href={heroData.ctaLink} 
-          class="inline-block bg-signal-green text-black font-semibold ps-8 pe-8 py-3 hover:bg-signal-green hover:text-black transition-colors"
-        >
-          {heroData.ctaText}
-        </a>
-      </div>
-    </div>
-
-    <!-- Marquee Section -->
-    <div class="overflow-x-hidden width-100 relative mt-12">
-      <div class="pseo-marquee-container">
-        <div class="pseo-marquee">
-          <div class="pseo-marquee__group">
-            {[...Array(2)].map(() => (
-              <div class="flex gap-4">
-                {marqueeItems.map(item => (
-                  <a href={item.url}>
-                    <img 
-                      src={item.image} 
-                      alt={item.alt} 
-                      width="50" 
-                      height="50" 
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </a>
-                ))}
+        <div class="relative space-y-4">
+          <!-- Notification Card 1 -->
+          <div class="bg-card border border-border rounded-xl p-6 shadow-lg animate-on-scroll" data-delay="100">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary flex-shrink-0">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
               </div>
-            ))}
+              <div class="min-w-0">
+                <p class="font-semibold text-foreground truncate">🚗 New Car Alert!</p>
+                <p class="text-sm text-muted-foreground">Just now</p>
+              </div>
+            </div>
+            <div class="w-full h-40 bg-muted rounded-md mb-4 flex items-center justify-center text-muted-foreground text-sm">BMW 3 Series Image</div>
+            <div class="text-start">
+              <h3 class="mb-2 font-semibold text-foreground">BMW 3 Series 2019</h3>
+              <p class="text-success font-bold mb-2">€32,500</p>
+              <p class="text-muted-foreground text-sm mb-1">📍 Munich, Germany</p>
+              <p class="text-muted-foreground text-sm mb-4">🛣️ 45,000 km</p>
+              <a href="#" class="w-full inline-flex items-center justify-center px-4 py-2 text-sm rounded-md font-semibold bg-primary text-primary-foreground hover:opacity-90 transition">View Listing</a>
+            </div>
           </div>
-          <div aria-hidden="true" class="pseo-marquee__group">
-            {[...Array(2)].map(() => (
-              <div class="flex gap-4">
-                {marqueeItems.map(item => (
-                  <a href={item.url}>
-                    <img 
-                      src={item.image} 
-                      alt={item.alt}
-                      width="50" 
-                      height="50" 
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </a>
-                ))}
+          
+          <!-- Notification Card 2 -->
+          <div class="bg-card border border-border rounded-xl p-6 shadow-lg animate-on-scroll" data-delay="300">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary flex-shrink-0">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
               </div>
-            ))}
+              <div class="min-w-0">
+                <p class="font-semibold text-foreground truncate">💰 Price Drop Alert!</p>
+                <p class="text-sm text-muted-foreground">2 minutes ago</p>
+              </div>
+            </div>
+            <div class="text-start">
+              <h3 class="mb-2 font-semibold text-foreground">Audi A4 2020</h3>
+              <p class="text-success font-bold mb-2">
+                <span class="line-through text-muted-foreground font-normal me-2">€28,900</span>
+                €26,500
+              </p>
+              <p class="text-muted-foreground text-sm">💰 Price reduced by €2,400</p>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Bestsellers Section -->
-  <section id="best-sellers" class="py-16 bg-white">
-    <div class="container mx-auto px-4">
-      <h2 class="text-3xl font-bold text-black mb-12 text-center">{bestsellersSection.title}</h2>
-      <div class="grid grid-cols-2 lg:grid-cols-3 gap-2">
-        {bestsellersSection.products.map(product => (
-          <div class="bg-white border border-gray-100 overflow-hidden group">
-            <a href={product.url} class="block">
-              <img 
-                src={product.image} 
-                alt={product.alt}
-                class="w-full h-56 object-contain p-4"
-                width="225"
-                height="225"
-                loading="lazy"
-                decoding="async"
-              />
-              <div class="p-4 border-t border-gray-100">
-                <h3 class="font-medium text-black group-hover:text-signal-green transition-colors mb-4">
-                  {product.title}
-                </h3>
-                <span class="block w-full bg-black text-signal-green border border-signal-green py-2 ps-4 pe-4 hover:bg-signal-green hover:text-black transition-all text-center">
-                  {bestsellersSection.productCtaText}
-                </span>
-              </div>
-            </a>
-          </div>
-        ))}
+  <!-- Limited Availability Section -->
+  <section class="py-12 bg-card border-y border-border">
+    <div class="max-w-screen-xl mx-auto px-4">
+      <div class="max-w-2xl mx-auto bg-gradient-to-br from-destructive/10 to-primary/10 border-2 border-destructive rounded-xl p-8 text-center animate-on-scroll">
+        <h3 class="text-2xl font-bold text-destructive mb-4">⚠️ Limited Slots Available</h3>
+        <p class="text-foreground mb-4">
+          Only <strong>4 slots remaining</strong> out of 30 total. We intentionally limit capacity to maintain competitive advantage for our users.
+        </p>
+        <div class="w-full h-2 bg-muted rounded-full overflow-hidden my-4">
+          <div class="h-full bg-destructive" style="width: 85%;"></div>
+        </div>
+        <p class="text-sm text-muted-foreground">
+          26 active subscribers • 4 spots available
+        </p>
       </div>
     </div>
   </section>
 
   <!-- Features Section -->
-  <section class="py-16 bg-gray-50">
-    <div class="container mx-auto px-4">
-      <h2 class="text-3xl font-bold text-black mb-12 text-center">{featuresSection.title}</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {featuresSection.items.map(feature => (
-          <div class="text-center p-6 bg-white rounded-lg shadow-sm">
-            <div class="text-4xl mb-4">{feature.icon}</div>
-            <h3 class="text-xl font-semibold mb-2">{feature.title}</h3>
-            <p class="text-gray-600">{feature.description}</p>
-          </div>
-        ))}
+  <section id="features" class="py-20 sm:py-28 bg-background">
+    <div class="max-w-screen-xl mx-auto px-4">
+      <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16">
+        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">Why Choose Amiquus?</h2>
+        <p class="text-lg text-muted-foreground">Powerful features designed to give you the competitive edge in finding the perfect vehicles.</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="bg-card border border-border rounded-xl p-8 text-center transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-2xl animate-on-scroll">
+          <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35" stroke-linecap="round"></path></svg></div>
+          <h3 class="text-xl font-semibold text-foreground mb-4">Multi-Platform Monitoring</h3>
+          <p class="text-muted-foreground">Monitor leading car listing platforms simultaneously. We continuously add new platforms to expand your reach and opportunities.</p>
+        </div>
+        <div class="bg-card border border-border rounded-xl p-8 text-center transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-2xl animate-on-scroll" data-delay="100">
+          <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+          <h3 class="text-xl font-semibold text-foreground mb-4">Instant Telegram Alerts</h3>
+          <p class="text-muted-foreground">Receive immediate notifications with vehicle photos, pricing, location, and contact details. Be the first to respond to great deals.</p>
+        </div>
+        <div class="bg-card border border-border rounded-xl p-8 text-center transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-2xl animate-on-scroll" data-delay="200">
+          <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18l-2 13H5L3 6z"/><path d="M3 6L2.25 4H1"/><circle cx="9" cy="20" r="1"/><circle cx="20" cy="20" r="1"/></svg></div>
+          <h3 class="text-xl font-semibold text-foreground mb-4">Advanced Filtering</h3>
+          <p class="text-muted-foreground">Set detailed criteria including make, model, year, price range, mileage, fuel type, and location to find exactly what you need.</p>
+        </div>
+        <div class="bg-card border border-border rounded-xl p-8 text-center transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-2xl animate-on-scroll" data-delay="300">
+          <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg></div>
+          <h3 class="text-xl font-semibold text-foreground mb-4">24/7 Monitoring</h3>
+          <p class="text-muted-foreground">Our system works around the clock, checking for new listings and price changes so you never miss an opportunity.</p>
+        </div>
+        <div class="bg-card border border-border rounded-xl p-8 text-center transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-2xl animate-on-scroll" data-delay="400">
+          <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+          <h3 class="text-xl font-semibold text-foreground mb-4">Competitive Advantage</h3>
+          <p class="text-muted-foreground">Limited slots ensure you stay ahead of the competition. Perfect for dealers where being first means the difference between profit and loss.</p>
+        </div>
+        <div class="bg-card border border-border rounded-xl p-8 text-center transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-2xl animate-on-scroll" data-delay="500">
+          <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M21 12c.552 0 1-.448 1-1V8c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v3c0 .552.448 1 1 1h18z"/><path d="M3 12v7c0 .552.448 1 1 1h16c.552 0 1-.448 1-1v-7"/></svg></div>
+          <h3 class="text-xl font-semibold text-foreground mb-4">Flexible Management</h3>
+          <p class="text-muted-foreground">Pause or cancel your subscription anytime. Modify your search criteria as your needs change. Complete control at your fingertips.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Institutions Section -->
-  <section class="py-16 bg-black">
-    <div class="container mx-auto px-4">
-      <h2 class="text-3xl font-bold text-white mb-12 text-center">
-        {institutionsSection.title}
-      </h2>
-      <div class="flex flex-wrap justify-center items-center gap-12">
-        {institutionsSection.items.map(institution => (
-          <div class="text-xl font-medium text-signal-green">
-            {institution}
-          </div>
-        ))}
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="py-20 sm:py-28 bg-muted">
+    <div class="max-w-screen-xl mx-auto px-4">
+      <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16">
+        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">How Amiquus Works</h2>
+        <p class="text-lg text-muted-foreground">Get started in minutes and begin receiving alerts for your perfect vehicles.</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="bg-card border border-border rounded-xl p-8 text-center relative animate-on-scroll">
+          <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">1</div>
+          <h3 class="text-xl font-semibold text-foreground mt-6 mb-4">Set Your Criteria</h3>
+          <p class="text-muted-foreground">Define your search parameters including vehicle type, price range, location, and other specific requirements.</p>
+        </div>
+        <div class="bg-card border border-border rounded-xl p-8 text-center relative animate-on-scroll" data-delay="100">
+          <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">2</div>
+          <h3 class="text-xl font-semibold text-foreground mt-6 mb-4">Connect Telegram</h3>
+          <p class="text-muted-foreground">Link your Telegram account to receive instant notifications. Setup takes less than 2 minutes with our guided process.</p>
+        </div>
+        <div class="bg-card border border-border rounded-xl p-8 text-center relative animate-on-scroll" data-delay="200">
+          <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</div>
+          <h3 class="text-xl font-semibold text-foreground mt-6 mb-4">Choose Monitoring Frequency</h3>
+          <p class="text-muted-foreground">Select how often we check for new listings. Higher frequencies give you faster alerts and better competitive advantage.</p>
+        </div>
+        <div class="bg-card border border-border rounded-xl p-8 text-center relative animate-on-scroll" data-delay="300">
+          <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">4</div>
+          <h3 class="text-xl font-semibold text-foreground mt-6 mb-4">Receive Instant Alerts</h3>
+          <p class="text-muted-foreground">Get immediate notifications with vehicle photos, key details, and direct links. Be the first to contact sellers.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- FAQ Section -->
-  <section class="py-16 bg-white">
-    <div class="container mx-auto px-4">
-      <h2 class="text-3xl font-bold text-black mb-4 text-center">{faqSection.title}</h2>
-      <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">{faqSection.subtitle}</p>
-      <div class="max-w-3xl mx-auto space-y-4">
-        {faqSection.items.map(item => (
-          <details class="bg-gray-50 rounded-lg group">
-            <summary class="p-4 cursor-pointer font-medium flex items-center justify-between">
-              <span>{item.question}</span>
-              <svg 
-                class="w-5 h-5 transform transition-transform group-open:rotate-180" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-              </svg>
-            </summary>
-            <div class="p-4 pt-0 text-gray-600">
-              {item.answer}
+  <!-- Pricing Section -->
+  <!-- NEW, UPDATED PRICING SECTION -->
+  <section id="pricing" class="py-20 sm:py-28 bg-background">
+    <div class="max-w-screen-xl mx-auto px-4">
+      <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16">
+        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">Simple, Transparent Pricing</h2>
+        <p class="text-lg text-muted-foreground">Our pricing is based on your specific needs. Start with a base package and customize it to fit your requirements.</p>
+      </div>
+      
+      <div class="max-w-4xl mx-auto bg-card rounded-xl shadow-lg border border-border overflow-hidden animate-on-scroll">
+        <div class="p-8">
+          <h3 class="text-2xl font-bold text-foreground mb-6">Base Package: $9.99/month</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div class="text-start">
+              <h4 class="text-lg font-semibold text-foreground mb-3">What's Included:</h4>
+              <ul class="space-y-2">
+                <li class="flex items-start">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-success flex-shrink-0 mt-0.5 me-2"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  <span>One website monitoring</span>
+                </li>
+                <li class="flex items-start">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-success flex-shrink-0 mt-0.5 me-2"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  <span>Hourly updates</span>
+                </li>
+                <li class="flex items-start">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-success flex-shrink-0 mt-0.5 me-2"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  <span>Unlimited filters</span>
+                </li>
+                <li class="flex items-start">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-success flex-shrink-0 mt-0.5 me-2"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  <span>Telegram notifications</span>
+                </li>
+              </ul>
             </div>
-          </details>
-        ))}
+            <div class="text-start">
+              <h4 class="text-lg font-semibold text-foreground mb-3">Add-ons:</h4>
+              <ul class="space-y-3">
+                <li class="flex items-start justify-between">
+                  <div class="flex items-start">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-accent flex-shrink-0 mt-0.5 me-2"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <span>Each additional website</span>
+                  </div>
+                  <span class="font-medium text-foreground">$4.99/mo</span>
+                </li>
+                <li class="flex items-start justify-between">
+                  <div class="flex items-start">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-accent flex-shrink-0 mt-0.5 me-2"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <span>30-minute updates</span>
+                  </div>
+                  <span class="font-medium text-foreground">$2.99/mo</span>
+                </li>
+                <li class="flex items-start justify-between">
+                  <div class="flex items-start">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-accent flex-shrink-0 mt-0.5 me-2"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <span>15-minute updates</span>
+                  </div>
+                  <span class="font-medium text-foreground">$5.99/mo</span>
+                </li>
+                <li class="flex items-start justify-between">
+                  <div class="flex items-start">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-accent flex-shrink-0 mt-0.5 me-2"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <span>5-minute updates</span>
+                  </div>
+                  <span class="font-medium text-foreground">$9.99/mo</span>
+                </li>
+                <li class="flex items-start justify-between">
+                  <div class="flex items-start">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-accent flex-shrink-0 mt-0.5 me-2"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <span>1-minute updates</span>
+                  </div>
+                  <span class="font-medium text-foreground">$14.99/mo</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="bg-muted p-4 rounded-lg">
+            <p class="text-center text-muted-foreground text-sm">All plans include unlimited search configurations and easy subscription management.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-8 text-center">
+        <a href="/service" class="inline-flex items-center justify-center px-8 py-4 text-lg rounded-lg font-semibold bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1">
+          Get Started Now
+        </a>
       </div>
     </div>
   </section>
 
-  <!-- Contact Section -->
-  <section class="py-16 bg-gray-50">
-    <div class="container mx-auto px-4">
-      <h2 class="text-3xl font-bold text-black mb-4 text-center">{contactSection.title}</h2>
-      <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-        {contactSection.subtitle}
-      </p>
-
-      <div class="max-w-2xl mx-auto">
-        <form class="space-y-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">{contactSection.formLabels.fullName}</label>
-            <input 
-              type="text" 
-              placeholder={contactSection.formLabels.fullNamePlaceholder}
-              class="w-full ps-4 pe-4 py-2 rounded-lg border border-gray-300 focus:border-signal-green focus:ring-1 focus:ring-signal-green" 
-              required
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">{contactSection.formLabels.email}</label>
-            <input 
-              type="email" 
-              placeholder={contactSection.formLabels.emailPlaceholder}
-              class="w-full ps-4 pe-4 py-2 rounded-lg border border-gray-300 focus:border-signal-green focus:ring-1 focus:ring-signal-green" 
-              required
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">{contactSection.formLabels.message}</label>
-            <textarea 
-              rows="4" 
-              placeholder={contactSection.formLabels.messagePlaceholder}
-              class="w-full ps-4 pe-4 py-2 rounded-lg border border-gray-300 focus:border-signal-green focus:ring-1 focus:ring-signal-green"
-              required
-            ></textarea>
-          </div>
-          <div class="flex items-center gap-2">
-            <input type="checkbox" id="terms" required />
-            <label for="terms" class="text-sm text-gray-600">
-              {contactSection.formLabels.terms}
-            </label>
-          </div>
-          <button 
-            type="submit" 
-            class="w-full bg-black text-signal-green border border-signal-green py-3 rounded-lg hover:bg-signal-green hover:text-black transition-all"
-          >
-            {contactSection.formLabels.submitButton}
-          </button>
-        </form>
-      </div>
+  <!-- CTA Section -->
+  <section class="py-20 sm:py-24 bg-gradient-to-r from-primary to-accent">
+    <div class="max-w-screen-xl mx-auto px-4 text-center text-primary-foreground">
+      <h2 class="text-3xl lg:text-4xl font-bold mb-4">Ready to Find Your Perfect Vehicles?</h2>
+      <p class="text-lg opacity-90 mb-8 max-w-2xl mx-auto">Join successful dealers who use Amiquus to stay ahead of the competition. Limited slots available.</p>
+      <a href="/setup-alerts" class="inline-flex items-center justify-center px-8 py-4 text-lg rounded-lg font-semibold bg-background text-primary shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1">Get Started Now</a>
     </div>
   </section>
 </BaseLayout>
-
-<style>
-.pseo-marquee-container {
-  --space: clamp(1rem, 2vw, 2rem);
-  --gap: var(--space);
-  --duration: 25s;
-  position: relative;
-  width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
-  padding: 20px 0;
-  box-sizing: border-box;
-}
-
-.pseo-marquee {
-  display: flex;
-  overflow: hidden;
-  user-select: none;
-  gap: var(--gap);
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  mask-image: linear-gradient(
-    to right,
-    hsl(0 0% 0% / 0),
-    hsl(0 0% 0% / 1) 10%,
-    hsl(0 0% 0% / 1) 90%,
-    hsl(0 0% 0% / 0)
-  );
-  -webkit-mask-image: linear-gradient(
-    to right,
-    hsl(0 0% 0% / 0),
-    hsl(0 0% 0% / 1) 10%,
-    hsl(0 0% 0% / 1) 90%,
-    hsl(0 0% 0% / 0)
-  );
-}
-
-.pseo-marquee-container:hover .pseo-marquee__group {
-  animation-play-state: paused;
-}
-
-.pseo-marquee__group {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  gap: var(--gap);
-  min-width: 100%;
-  animation: pseo-scroll var(--duration) linear infinite;
-  will-change: transform;
-  animation-play-state: running;
-}
-
-.pseo-marquee__group img {
-  max-width: clamp(8rem, 20vw, 20rem);
-  aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: 1rem;
-  width: 100%;
-  height: auto;
-  flex-shrink: 0;
-}
-
-@keyframes pseo-scroll {
-  0%{
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(calc(-100% - var(--gap)));
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pseo-marquee__group {
-    animation-play-state: paused;
-  }
-}
-
-details > summary {
-  list-style: none;
-}
-details > summary::-webkit-details-marker {
-  display: none;
-}
-
-/* RTL-specific styles */
-[dir="rtl"] h1,
-[dir="rtl"] h2,
-[dir="rtl"] h3,
-[dir="rtl"] h4,
-[dir="rtl"] h5,
-[dir="rtl"] h6,
-[dir="rtl"] p,
-[dir="rtl"] span,
-[dir="rtl"] label {
-  letter-spacing: 0;
-}
-
-[dir="rtl"] .pseo-marquee {
-  mask-image: linear-gradient(
-    to left,
-    hsl(0 0% 0% / 0),
-    hsl(0 0% 0% / 1) 10%,
-    hsl(0 0% 0% / 1) 90%,
-    hsl(0 0% 0% / 0)
-  );
-  -webkit-mask-image: linear-gradient(
-    to left,
-    hsl(0 0% 0% / 0),
-    hsl(0 0% 0% / 1) 10%,
-    hsl(0 0% 0% / 1) 90%,
-    hsl(0 0% 0% / 0)
-  );
-}
-
-[dir="rtl"] @keyframes pseo-scroll {
-  0%{
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(calc(100% + var(--gap)));
-  }
-}
-</style>
-
-<script define:vars={{ alerts: formAlertMessages }}>
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.querySelector('section.py-16.bg-gray-50 form');
-  if (form) {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      
-      const emailInput = form.querySelector('input[type="email"]');
-      if (emailInput && (!emailInput.value || !emailInput.value.includes('@'))) { 
-        alert(alerts.invalidEmail); 
-        return;
-      }
-
-      const termsCheckbox = form.querySelector('#terms');
-      if (termsCheckbox && !termsCheckbox.checked) {
-        alert(alerts.termsNotAccepted);
-        return;
-      }
-
-      try {
-        console.log('Form data would be submitted here.');
-        alert(alerts.submissionSuccess);
-        form.reset();
-      } catch (error) {
-        console.error('Form submission error:', error);
-        alert(alerts.submissionError);
-      }
-    });
-  }
-});
-</script>
