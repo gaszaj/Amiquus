@@ -1,16 +1,17 @@
 ---
-// src/pages/index.astro
+// src/pages/si/index.astro
+
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 // Page-specific metadata
 const title = "Amiquus - Automated Car Listing Alerts";
 const description = "Get real-time notifications for new car listings that match your criteria. Monitor multiple platforms automatically with instant Telegram alerts.";
 
-// Props for BaseLayout - these are placeholders since this page isn't DB-driven yet.
+// Props for BaseLayout - simplified to match working pattern
 const languageIso = "en";
 const countryCode = "US";
 const contentOrientation = "ltr";
-const languageLinksMap: Record<string, string> = { 'en': '/en', 'de': '/de' };
+const languageLinksMap = { 'en': '/en', 'de': '/de' };
 ---
 
 <BaseLayout
@@ -28,7 +29,7 @@ const languageLinksMap: Record<string, string> = { 'en': '/en', 'de': '/de' };
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div class="text-center lg:text-start animate-on-scroll">
           <h1 class="text-4xl lg:text-5xl font-bold leading-tight text-foreground mb-6">
-            Never Miss Your Perfect Car Deal Again
+            Never Miss Your <span class="text-primary">Perfect Car Deal</span> Again
           </h1>
           <p class="text-lg text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0">
             Amiquus monitors multiple car listing platforms 24/7 and sends instant Telegram notifications when vehicles matching your criteria become available. Stay ahead of the competition with real-time alerts.
@@ -43,48 +44,80 @@ const languageLinksMap: Record<string, string> = { 'en': '/en', 'de': '/de' };
           </div>
         </div>
         
-        <div class="relative space-y-4">
-          <!-- Notification Card 1 -->
-          <div class="bg-card border border-border rounded-xl p-6 shadow-lg animate-on-scroll" data-delay="100">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary flex-shrink-0">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-              </div>
-              <div class="min-w-0">
-                <p class="font-semibold text-foreground truncate">🚗 New Car Alert!</p>
-                <p class="text-sm text-muted-foreground">Just now</p>
-              </div>
-            </div>
-            <div class="w-full h-40 bg-muted rounded-md mb-4 flex items-center justify-center text-muted-foreground text-sm">BMW 3 Series Image</div>
-            <div class="text-start">
-              <h3 class="mb-2 font-semibold text-foreground">BMW 3 Series 2019</h3>
-              <p class="text-success font-bold mb-2">€32,500</p>
-              <p class="text-muted-foreground text-sm mb-1">📍 Munich, Germany</p>
-              <p class="text-muted-foreground text-sm mb-4">🛣️ 45,000 km</p>
-              <a href="#" class="w-full inline-flex items-center justify-center px-4 py-2 text-sm rounded-md font-semibold bg-primary text-primary-foreground hover:opacity-90 transition">View Listing</a>
-            </div>
+        <div class="animate-on-scroll" data-delay="100">
+          <img 
+            src="/homepage/Amiquus_-_we_find_matching_cars.webp"
+            alt="A mockup of the Amiquus car alert service on a mobile phone"
+            class="rounded-xl shadow-2xl shadow-primary/10 w-full h-auto"
+            loading="eager"
+            decoding="async"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- "PROBLEM / SOLUTION" SECTION -->
+  <section class="py-20 sm:py-28 bg-muted">
+    <div class="max-w-screen-xl mx-auto px-4">
+      <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16">
+        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+          Stop refreshing car listing websites like a <span class="text-primary">madman!</span>
+        </h2>
+        <p class="text-lg text-muted-foreground">
+          Amiquus does it for you 24/7 - get an instant notification as soon as a matching car is listed.
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- The Problem Box -->
+        <div class="bg-card border-2 border-destructive/50 rounded-xl p-8 shadow-lg animate-on-scroll">
+          <div class="flex items-center gap-3 mb-4">
+            <h3 class="text-xl font-semibold text-destructive">The Old Way: Manual Monitoring</h3>
           </div>
-          
-          <!-- Notification Card 2 -->
-          <div class="bg-card border border-border rounded-xl p-6 shadow-lg animate-on-scroll" data-delay="300">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary flex-shrink-0">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-              </div>
-              <div class="min-w-0">
-                <p class="font-semibold text-foreground truncate">💰 Price Drop Alert!</p>
-                <p class="text-sm text-muted-foreground">2 minutes ago</p>
-              </div>
-            </div>
-            <div class="text-start">
-              <h3 class="mb-2 font-semibold text-foreground">Audi A4 2020</h3>
-              <p class="text-success font-bold mb-2">
-                <span class="line-through text-muted-foreground font-normal me-2">€28,900</span>
-                €26,500
-              </p>
-              <p class="text-muted-foreground text-sm">💰 Price reduced by €2,400</p>
-            </div>
+          <ul class="space-y-3 text-start">
+            <li class="flex items-start gap-3">
+              <span class="text-destructive font-bold mt-1">✗</span>
+              <span><strong>Wasted Time:</strong> Hours spent manually checking multiple websites every single day.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-destructive font-bold mt-1">✗</span>
+              <span><strong>Missed Opportunities:</strong> The best deals are often sold within minutes. By the time you see it, it's already gone.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-destructive font-bold mt-1">✗</span>
+              <span><strong>Frustration & Burnout:</strong> The constant, repetitive searching is exhausting and often leads to nothing.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-destructive font-bold mt-1">✗</span>
+              <span><strong>Incomplete Picture:</strong> It's nearly impossible to track every relevant platform, so you're never sure you're seeing all the options.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- The Solution Box -->
+        <div class="bg-card border-2 border-success/50 rounded-xl p-8 shadow-lg animate-on-scroll" data-delay="100">
+          <div class="flex items-center gap-3 mb-4">
+            <h3 class="text-xl font-semibold text-success">The Amiquus Way: Automated Alerts</h3>
           </div>
+          <ul class="space-y-3 text-start">
+            <li class="flex items-start gap-3">
+              <span class="text-success font-bold mt-1">✓</span>
+              <span><strong>Zero Time Wasted:</strong> Set your criteria once and let our system do the work for you, 24/7.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-success font-bold mt-1">✓</span>
+              <span><strong>Instant Notifications:</strong> Get a Telegram alert the moment a matching car is listed. Be the first to act.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-success font-bold mt-1">✓</span>
+              <span><strong>Effortless & Efficient:</strong> Focus on what you do best—making deals—while we handle the tedious searching.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-success font-bold mt-1">✓</span>
+              <span><strong>Comprehensive Coverage:</strong> We monitor all the major platforms so you get a complete view of the market without lifting a finger.</span>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -94,7 +127,7 @@ const languageLinksMap: Record<string, string> = { 'en': '/en', 'de': '/de' };
   <section class="py-12 bg-card border-y border-border">
     <div class="max-w-screen-xl mx-auto px-4">
       <div class="max-w-2xl mx-auto bg-gradient-to-br from-destructive/10 to-primary/10 border-2 border-destructive rounded-xl p-8 text-center animate-on-scroll">
-        <h3 class="text-2xl font-bold text-destructive mb-4">⚠️ Limited Slots Available</h3>
+        <h3 class="text-2xl font-bold text-destructive mb-4">⚠️ <span class="text-primary">Limited Slots</span> Available</h3>
         <p class="text-foreground mb-4">
           Only <strong>4 slots remaining</strong> out of 30 total. We intentionally limit capacity to maintain competitive advantage for our users.
         </p>
@@ -112,7 +145,7 @@ const languageLinksMap: Record<string, string> = { 'en': '/en', 'de': '/de' };
   <section id="features" class="py-20 sm:py-28 bg-background">
     <div class="max-w-screen-xl mx-auto px-4">
       <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16">
-        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">Why Choose Amiquus?</h2>
+        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">Why Choose <span class="text-primary">Amiquus?</span></h2>
         <p class="text-lg text-muted-foreground">Powerful features designed to give you the competitive edge in finding the perfect vehicles.</p>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -154,7 +187,7 @@ const languageLinksMap: Record<string, string> = { 'en': '/en', 'de': '/de' };
   <section id="how-it-works" class="py-20 sm:py-28 bg-muted">
     <div class="max-w-screen-xl mx-auto px-4">
       <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16">
-        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">How Amiquus Works</h2>
+        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">How <span class="text-primary">Amiquus</span> Works</h2>
         <p class="text-lg text-muted-foreground">Get started in minutes and begin receiving alerts for your perfect vehicles.</p>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -183,11 +216,10 @@ const languageLinksMap: Record<string, string> = { 'en': '/en', 'de': '/de' };
   </section>
 
   <!-- Pricing Section -->
-  <!-- NEW, UPDATED PRICING SECTION -->
   <section id="pricing" class="py-20 sm:py-28 bg-background">
     <div class="max-w-screen-xl mx-auto px-4">
       <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16">
-        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">Simple, Transparent Pricing</h2>
+        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">Simple, <span class="text-primary">Transparent</span> Pricing</h2>
         <p class="text-lg text-muted-foreground">Our pricing is based on your specific needs. Start with a base package and customize it to fit your requirements.</p>
       </div>
       
@@ -274,9 +306,56 @@ const languageLinksMap: Record<string, string> = { 'en': '/en', 'de': '/de' };
   <!-- CTA Section -->
   <section class="py-20 sm:py-24 bg-gradient-to-r from-primary to-accent">
     <div class="max-w-screen-xl mx-auto px-4 text-center text-primary-foreground">
-      <h2 class="text-3xl lg:text-4xl font-bold mb-4">Ready to Find Your Perfect Vehicles?</h2>
+      <h2 class="text-3xl lg:text-4xl font-bold mb-4">Ready to Find Your <span class="text-primary-foreground/80">Perfect Vehicles?</span></h2>
       <p class="text-lg opacity-90 mb-8 max-w-2xl mx-auto">Join successful dealers who use Amiquus to stay ahead of the competition. Limited slots available.</p>
       <a href="/setup-alerts" class="inline-flex items-center justify-center px-8 py-4 text-lg rounded-lg font-semibold bg-background text-primary shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1">Get Started Now</a>
     </div>
   </section>
+
+  <!-- Contact Us Section -->
+  <section id="contact" class="py-20 sm:py-28 bg-muted">
+    <div class="max-w-screen-xl mx-auto px-4">
+      <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16">
+        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+          Get in <span class="text-primary">Touch</span>
+        </h2>
+        <p class="text-lg text-muted-foreground">
+          Have a question, feedback, or a partnership inquiry? We'd love to hear from you.
+        </p>
+      </div>
+
+      <div class="max-w-2xl mx-auto">
+        <!-- Success Message (hidden by default) -->
+        <div id="contact-success-message" class="bg-success/10 border border-success/20 text-success p-8 rounded-xl text-center hidden animate-on-scroll">
+          <div class="w-12 h-12 bg-success rounded-full flex items-center justify-center mx-auto mb-4 text-success-foreground">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">Message Sent!</h3>
+          <p>Thank you for reaching out. We've received your message and will get back to you shortly.</p>
+        </div>
+
+        <!-- Contact Form -->
+        <form id="contact-form" class="bg-card border border-border rounded-xl p-8 shadow-lg space-y-4 animate-on-scroll">
+          <div class="text-start">
+            <label for="contact-name" class="block text-sm font-medium text-foreground mb-1">Full Name</label>
+            <input type="text" id="contact-name" name="name" class="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Your Name" required>
+          </div>
+          <div class="text-start">
+            <label for="contact-email" class="block text-sm font-medium text-foreground mb-1">Email Address</label>
+            <input type="email" id="contact-email" name="email" class="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder="you@example.com" required>
+          </div>
+          <div class="text-start">
+            <label for="contact-message" class="block text-sm font-medium text-foreground mb-1">Message</label>
+            <textarea id="contact-message" name="message" rows="4" class="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder="How can we help you today?" required></textarea>
+          </div>
+          <button type="submit" id="contact-submit-btn" class="w-full flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed">
+            <span id="contact-submit-text">Send Message</span>
+            <span id="contact-submit-loading" class="hidden ms-2"><div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div></span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+
 </BaseLayout>

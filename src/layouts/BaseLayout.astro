@@ -106,6 +106,7 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
 
+    
     <title>{title} | {www.PAGE_ORGANISATION_FULL_NAME}</title>
     <meta name="description" content={description} />
     <meta name="keywords" content={keywords} />
@@ -114,6 +115,7 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
     {/* Your meta tags, links, etc. go here */}
     
     {schema && <Schema schema={schema} />}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
   </head>
 
   <body class="bg-background text-foreground flex flex-col min-h-screen">
@@ -140,6 +142,54 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
         </div>
       </div>
     </section>
+
+    <!-- CAR ANIMATION SECTION -->
+     
+    <section class="car-animation-section w-full overflow-hidden py-16 bg-muted">
+      <div id="road" class="relative max-w-screen-xl mx-auto h-24 flex items-end border-b-4 border-dashed border-foreground/30">
+        <!-- Search Icon -->
+        <div
+          id="search-icon"
+          class="absolute bottom-0 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+        
+        <!-- Car Icon -->
+        <div
+          id="car-icon"
+          class="absolute bottom-0 w-28 h-12 sm:w-28 sm:h-14 md:w-32 md:h-16 lg:w-36 lg:h-18 xl:w-40 xl:h-20 text-foreground dark:text-white"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 158.7" class="w-full h-full">
+            <path fill="currentColor" d="M80.1,129.2c0,15.2-12.3,27.5-27.5,27.5c-15.2,0-27.5-12.3-27.5-27.5s12.3-27.5,27.5-27.5C67.8,101.7,80.1,114,80.1,129.2z
+              M66.1,129.2c0-7.4-6.1-13.5-13.5-13.5c-7.4,0-13.5,6.1-13.5,13.5c0,7.4,6.1,13.5,13.5,13.5S66.1,136.6,66.1,129.2z M231.2,129.2
+              c0,15.2-12.3,27.5-27.5,27.5s-27.5-12.3-27.5-27.5s12.3-27.5,27.5-27.5S231.2,114,231.2,129.2z M217.2,129.2
+              c0-7.4-6.1-13.5-13.5-13.5c-7.4,0-13.5,6.1-13.5,13.5c0,7.4,6.1,13.5,13.5,13.5S217.2,136.6,217.2,129.2z M253.8,104.7H248v0l0-28.1
+              c0-8.8-7.1-15.9-16-15.9h-39c-0.6,0-1.2-0.3-1.6-0.7l-44.5-48c-2-2-4.8-3.2-7.7-3.3l-86.5,0c-7.5,0-13.9,5.1-15.6,12.4l-8.7,37.9
+              c-0.2,1-1.1,1.7-2.2,1.7h0C16.2,60.7,8,68.8,8,78.9v23.5c0,1.2-1,2.2-2.2,2.2H2.2c-1.2,0-2.2,1-2.2,2.2v7.5
+              c0,5.6,4.6,10.2,10.2,10.2h4.1c1.1,0,2-0.8,2.2-1.8c3-17.2,18.1-30.4,36.2-30.4c18.1,0,33.1,13.1,36.1,30.3c0.2,1.1,1.1,1.8,2.2,1.8
+              h74.4c1.1,0,2-0.8,2.2-1.8c3-17.2,18-30.3,36.1-30.3s33.1,13.1,36.1,30.3c0.2,1.1,1.1,1.8,2.2,1.8h3.8c5.7,0,10.2-4.6,10.2-10.2
+              v-7.4C256,105.7,255,104.7,253.8,104.7z M92,58.4c0,1.2-1,2.2-2.2,2.2h-47c-1.4,0-2.5-1.3-2.2-2.7l7.7-34.2c0.4-1.8,1.8-3.1,3.7-3.1
+              h37.8c1.2,0,2.2,1,2.2,2.2V58.4z M170,60.7h-63.8c-1.2,0-2.2-1-2.2-2.2V22.9c0-1.2,1-2.2,2.2-2.2h31.6c0.6,0,1.2,0.3,1.7,0.7
+              l32.2,35.5C172.9,58.4,171.9,60.7,170,60.7z M130,54.8c7.8,0,14.1-6.3,14.1-14.1s-6.3-14.1-14.1-14.1s-14.1,6.3-14.1,14.1
+              S122.2,54.8,130,54.8z"/>
+          </svg>
+        </div>
+
+        
+        <!-- Telegram Icon -->
+        <div
+          id="telegram-icon"
+          class="absolute z-30 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-[#0088cc] dark:text-[#0088cc] opacity-0 pointer-events-none"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="w-full h-full" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.287 5.906q-1.168.486-4.666 2.01-.567.225-.595.442c-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294q.39.01.868-.32 3.269-2.206 3.374-2.23c.05-.012.12-.026.166.016s.042.12.037.141c-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8 8 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629q.14.092.27.187c.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.4 1.4 0 0 0-.013-.315.34.34 0 0 0-.114-.217.53.53 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09"/>
+          </svg>
+        </div>
+      </div>
+    </section>
     
     <Footer />
     <Cookie />
@@ -152,7 +202,7 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
     </div>
 
     <!-- SCRIPT FOR ALL PAGE INTERACTIONS -->
-    <script>
+    <script is:inline>
       const applyTheme = (theme) => {
         document.documentElement.classList.toggle('dark', theme === 'dark');
       };
@@ -301,6 +351,246 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
             }
         } catch (e) {
             console.error("Failed to initialize cookie banner:", e);
+        }
+
+        // --- 5. WAITING LIST FORM LOGIC ---
+        try {
+            const waitlistForm = document.getElementById('waitlist-form');
+            if (waitlistForm) {
+                const submitBtn = document.getElementById('submit-btn');
+                const submitText = document.getElementById('submit-text');
+                const submitLoading = document.getElementById('submit-loading');
+                const errorMessage = document.getElementById('error-message');
+                const successMessage = document.getElementById('success-message');
+                const formContainer = document.getElementById('waitlist-form-container');
+                const progressBar = document.getElementById('capacity-progress');
+
+                const inputs = ['first-name', 'last-name', 'email', 'phone'];
+
+                const showFieldError = (fieldId, message) => {
+                    const errorEl = document.getElementById(`${fieldId}-error`);
+                    if (errorEl) {
+                        errorEl.textContent = message;
+                        errorEl.classList.remove('hidden');
+                        document.getElementById(fieldId)?.classList.add('border-destructive');
+                    }
+                };
+
+                const hideFieldError = (fieldId) => {
+                    const errorEl = document.getElementById(`${fieldId}-error`);
+                    if (errorEl) {
+                        errorEl.classList.add('hidden');
+                        document.getElementById(fieldId)?.classList.remove('border-destructive');
+                    }
+                };
+
+                const setLoading = (loading) => {
+                    submitBtn.disabled = loading;
+                    submitText.textContent = loading ? 'Joining...' : 'Join Waiting List';
+                    submitLoading.classList.toggle('hidden', !loading);
+                };
+
+                waitlistForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    let isValid = true;
+                    inputs.forEach(hideFieldError); // Clear previous errors
+                    
+                    const firstName = document.getElementById('first-name').value.trim();
+                    const lastName = document.getElementById('last-name').value.trim();
+                    const email = document.getElementById('email').value.trim();
+
+                    if (!firstName) { showFieldError('first-name', 'First name is required.'); isValid = false; }
+                    if (!lastName) { showFieldError('last-name', 'Last name is required.'); isValid = false; }
+                    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                        showFieldError('email', 'Please enter a valid email.');
+                        isValid = false;
+                    }
+                    if (!isValid) return;
+
+                    setLoading(true);
+                    errorMessage.classList.add('hidden');
+                    
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    formContainer.classList.add('hidden');
+                    successMessage.classList.remove('hidden');
+                    successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    setLoading(false);
+                });
+
+                // Animate progress bar into view
+                if (progressBar) {
+                    setTimeout(() => { progressBar.style.width = '100%'; }, 500);
+                }
+            }
+        } catch(e) {
+            console.error("Failed to initialize waitlist form:", e);
+        }
+
+        // --- 6. CONTACT FORM LOGIC ---
+        try {
+            const contactForm = document.getElementById('contact-form');
+            if (contactForm) {
+                const submitBtn = document.getElementById('contact-submit-btn');
+                const submitText = document.getElementById('contact-submit-text');
+                const submitLoading = document.getElementById('contact-submit-loading');
+                const successMessage = document.getElementById('contact-success-message');
+                
+                const setLoading = (loading) => {
+                    submitBtn.disabled = loading;
+                    submitText.textContent = loading ? 'Sending...' : 'Send Message';
+                    submitLoading.classList.toggle('hidden', !loading);
+                };
+
+                contactForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const emailInput = document.getElementById('contact-email');
+                    const messageInput = document.getElementById('contact-message');
+                    let isValid = true;
+                    
+                    // Basic validation
+                    if (!emailInput.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
+                        emailInput.classList.add('border-destructive');
+                        isValid = false;
+                    } else {
+                        emailInput.classList.remove('border-destructive');
+                    }
+
+                    if (!messageInput.value.trim()) {
+                        messageInput.classList.add('border-destructive');
+                        isValid = false;
+                    } else {
+                        messageInput.classList.remove('border-destructive');
+                    }
+
+                    if (!isValid) return;
+
+                    setLoading(true);
+
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+
+                    contactForm.classList.add('hidden');
+                    successMessage.classList.remove('hidden');
+                    successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                    setLoading(false);
+                });
+            }
+        } catch(e) {
+            console.error("Failed to initialize contact form:", e);
+        }
+
+
+
+        // --- 7. CAR ANIMATION SCRIPT ---
+        try {
+          console.log("Car animation script starting...");
+          
+          // Wait for GSAP to load
+          const waitForGSAP = () => {
+            return new Promise((resolve) => {
+              if (typeof gsap !== 'undefined') {
+                resolve();
+              } else {
+                // Check every 100ms for GSAP
+                const checkGSAP = setInterval(() => {
+                  if (typeof gsap !== 'undefined') {
+                    clearInterval(checkGSAP);
+                    resolve();
+                  }
+                }, 100);
+                
+                // Timeout after 5 seconds
+                setTimeout(() => {
+                  clearInterval(checkGSAP);
+                  console.error("GSAP failed to load after 5 seconds");
+                }, 5000);
+              }
+            });
+          };
+
+          waitForGSAP().then(() => {
+            console.log("GSAP loaded, starting animation...");
+            
+            const car = document.getElementById("car-icon");
+            const search = document.getElementById("search-icon");
+            const telegram = document.getElementById("telegram-icon");
+            const road = document.getElementById("road");
+
+            console.log("Elements found:", { car: !!car, search: !!search, telegram: !!telegram, road: !!road });
+
+            if (car && search && telegram && road) {
+              console.log("All elements found, starting animation...");
+              
+              // Kill any existing animations
+              gsap.killTweensOf([car, search, telegram]);
+
+              const roadWidth = road.clientWidth;
+              const carWidth = car.clientWidth;
+              const isRtl = document.documentElement.dir === 'rtl';
+              const meetingPoint = roadWidth * 0.5;
+
+              console.log("Animation parameters:", { roadWidth, carWidth, isRtl, meetingPoint });
+
+              // Set initial positions
+              gsap.set(car, { 
+                x: isRtl ? roadWidth : -carWidth, 
+                scaleX: isRtl ? -1 : 1, 
+                autoAlpha: 1 
+              });
+              
+              gsap.set(search, { 
+                x: isRtl ? -search.offsetWidth : roadWidth, 
+                scaleX: isRtl ? 1 : -1, 
+                autoAlpha: 1 
+              });
+
+              gsap.set(telegram, { autoAlpha: 0, scale: 0.5 });
+
+              const masterTimeline = gsap.timeline({ repeat: -1, repeatDelay: 2 });
+              
+              // Phase 1: Car drives to the middle
+              masterTimeline.to(car, { 
+                x: meetingPoint - (carWidth / 2), 
+                duration: 3, 
+                ease: "power1.inOut" 
+              });
+
+              // Phase 1.2: Search icon scans back and forth
+              masterTimeline.to(search, { 
+                x: meetingPoint - (search.clientWidth / 2), 
+                duration: 3, 
+                ease: "power1.inOut" 
+              }, 0); // Start at time 0 (in parallel with car)
+
+              // Phase 2: At meeting point, car and search icon fade out
+              masterTimeline.to(car, { autoAlpha: 0, duration: 0.01 }, ">");
+              masterTimeline.to(search, { autoAlpha: 0, duration: 0.01 }, ">");
+
+              // Phase 3: Telegram icon appears and pulsates
+              masterTimeline.set(telegram, { 
+                x: meetingPoint - (telegram.clientWidth / 2),
+                y: -10,
+                autoAlpha: 0,
+                scale: 0.5
+              });
+              masterTimeline.to(telegram, { autoAlpha: 1, scale: 1, duration: 0.3 });
+              masterTimeline.to(telegram, { scale: 1.2, repeat: 3, yoyo: true, duration: 0.25, ease: 'power1.inOut' });
+              masterTimeline.to(telegram, { autoAlpha: 0, scale: 0.5, duration: 0.3 });
+
+              console.log("Animation started successfully!");
+            } else {
+              console.error("Some elements not found:", { car: !!car, search: !!search, telegram: !!telegram, road: !!road });
+            }
+          }).catch((error) => {
+            console.error("Failed to load GSAP:", error);
+          });
+          
+        } catch(e) {
+            console.error("Failed to initialize car animation:", e);
         }
       }
 

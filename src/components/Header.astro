@@ -69,11 +69,11 @@ const isLoggedIn = Astro.cookies.has('session_id');
       <!-- FINAL CHANGE: Breakpoint changed from xl to lg -->
       <div class="hidden lg:flex items-center gap-8">
         <ul class="flex items-center gap-8 rtl:gap-reverse">
-          <li><a href="#features" class="text-muted-foreground font-medium hover:text-primary transition-colors">Features</a></li>
-          <li><a href="#how-it-works" class="text-muted-foreground font-medium hover:text-primary transition-colors">How It Works</a></li>
-          <li><a href="#pricing" class="text-muted-foreground font-medium hover:text-primary transition-colors">Pricing</a></li>
-          <li><a href="/waiting-list" class="text-muted-foreground font-medium hover:text-primary transition-colors">Waiting List</a></li>
-          <li><a href="#contact" class="text-muted-foreground font-medium hover:text-primary transition-colors">Contact</a></li>
+          <li><a href={`/${locale}/#features`} class="text-muted-foreground font-medium hover:text-primary transition-colors">Features</a></li>
+          <li><a href={`/${locale}/#how-it-works`} class="text-muted-foreground font-medium hover:text-primary transition-colors">How It Works</a></li>
+          <li><a href={`/${locale}/#pricing`} class="text-muted-foreground font-medium hover:text-primary transition-colors">Pricing</a></li>
+          <li><a href={`/${locale}/waitlist`} class="text-muted-foreground font-medium hover:text-primary transition-colors">Waiting List</a></li>
+          <li><a href={`/${locale}/#contact`} class="text-muted-foreground font-medium hover:text-primary transition-colors">Contact</a></li>
         </ul>
       </div>
 
@@ -138,11 +138,11 @@ const isLoggedIn = Astro.cookies.has('session_id');
     <!-- FINAL CHANGE: Breakpoint changed from xl to lg -->
     <div id="mobile-nav" class="lg:hidden hidden mt-4">
       <ul class="flex flex-col gap-3 text-sm">
-        <li><a href="#features" class="block text-start py-2 text-muted-foreground hover:text-primary">Features</a></li>
-        <li><a href="#how-it-works" class="block text-start py-2 text-muted-foreground hover:text-primary">How It Works</a></li>
-        <li><a href="#pricing" class="block text-start py-2 text-muted-foreground hover:text-primary">Pricing</a></li>
-        <li><a href="/waiting-list" class="block text-start py-2 text-muted-foreground hover:text-primary">Waiting List</a></li>
-        <li><a href="#contact" class="block text-start py-2 text-muted-foreground hover:text-primary">Contact</a></li>
+        <li><a href={`/${locale}/#features`} class="block text-start py-2 text-muted-foreground hover:text-primary">Features</a></li>
+        <li><a href={`/${locale}/#how-it-works`} class="block text-start py-2 text-muted-foreground hover:text-primary">How It Works</a></li>
+        <li><a href={`/${locale}/#pricing`} class="block text-start py-2 text-muted-foreground hover:text-primary">Pricing</a></li>
+        <li><a href={`/${locale}/waitlist`} class="block text-start py-2 text-muted-foreground hover:text-primary">Waiting List</a></li>
+        <li><a href={`/${locale}/#contact`} class="block text-start py-2 text-muted-foreground hover:text-primary">Contact</a></li>
       </ul>
     </div>
   </div>
