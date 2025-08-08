@@ -69,8 +69,8 @@ const isLoggedIn = Astro.cookies.has('session_id');
       <!-- FINAL CHANGE: Breakpoint changed from xl to lg -->
       <div class="hidden lg:flex items-center gap-8">
         <ul class="flex items-center gap-8 rtl:gap-reverse">
-          <li><a href={`/${locale}/#features`} class="text-muted-foreground font-medium hover:text-primary transition-colors">Features</a></li>
           <li><a href={`/${locale}/#how-it-works`} class="text-muted-foreground font-medium hover:text-primary transition-colors">How It Works</a></li>
+          <li><a href={`/${locale}/setup-alerts`} class="text-muted-foreground font-medium hover:text-primary transition-colors">Setup Alerts</a></li>
           <li><a href={`/${locale}/#pricing`} class="text-muted-foreground font-medium hover:text-primary transition-colors">Pricing</a></li>
           <li><a href={`/${locale}/waitlist`} class="text-muted-foreground font-medium hover:text-primary transition-colors">Waiting List</a></li>
           <li><a href={`/${locale}/#contact`} class="text-muted-foreground font-medium hover:text-primary transition-colors">Contact</a></li>
@@ -105,7 +105,7 @@ const isLoggedIn = Astro.cookies.has('session_id');
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
           </button>
           <div id="user-dropdown" class="absolute end-0 mt-2 w-48 bg-popover border border-border rounded-md shadow-lg hidden z-50 py-1">
-            {isLoggedIn ? ( <> <a href="/user-profile" class="block text-start px-4 py-2 text-sm text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">Profile</a> <a href="/logout" class="block text-start px-4 py-2 text-sm text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">Log Out</a> </> ) : ( <> <a href="/login" class="block text-start px-4 py-2 text-sm text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">Login</a> <a href="/registration" class="block text-start px-4 py-2 text-sm text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">Register</a> </> )}
+            {isLoggedIn ? ( <> <a href="/user-profile" class="block text-start px-4 py-2 text-sm text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">Profile</a> <a href="/logout" class="block text-start px-4 py-2 text-sm text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">Log Out</a> </> ) : ( <> <a href={`/${locale}/login`} class="block text-start px-4 py-2 text-sm text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">Login</a> <a href={`/${locale}/registration`}" class="block text-start px-4 py-2 text-sm text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">Register</a> </> )}
           </div>
         </div>
 
@@ -138,8 +138,8 @@ const isLoggedIn = Astro.cookies.has('session_id');
     <!-- FINAL CHANGE: Breakpoint changed from xl to lg -->
     <div id="mobile-nav" class="lg:hidden hidden mt-4">
       <ul class="flex flex-col gap-3 text-sm">
-        <li><a href={`/${locale}/#features`} class="block text-start py-2 text-muted-foreground hover:text-primary">Features</a></li>
         <li><a href={`/${locale}/#how-it-works`} class="block text-start py-2 text-muted-foreground hover:text-primary">How It Works</a></li>
+        <li><a href={`/${locale}/setup-alerts`} class="block text-start py-2 text-muted-foreground hover:text-primary">Setup Alerts</a></li>
         <li><a href={`/${locale}/#pricing`} class="block text-start py-2 text-muted-foreground hover:text-primary">Pricing</a></li>
         <li><a href={`/${locale}/waitlist`} class="block text-start py-2 text-muted-foreground hover:text-primary">Waiting List</a></li>
         <li><a href={`/${locale}/#contact`} class="block text-start py-2 text-muted-foreground hover:text-primary">Contact</a></li>

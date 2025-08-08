@@ -141,19 +141,14 @@ html.dark {
   font-weight: 600;
 }
 
-/* === TEXT HIGHLIGHTER STYLE === */
-.highlight {
-  /* Creates a gradient using your theme's primary and accent colors with transparency */
-  background: linear-gradient(120deg, rgb(var(--primary) / 0.3) 0%, rgb(var(--accent) / 0.3) 100%);
-  background-repeat: no-repeat;
-  /* Makes the highlight look like an underline by default */
-  background-size: 100% 0.3em;
-  background-position: 0 88%;
-  padding: 0 0.1em;
-  transition: background-size 0.25s ease-in;
-}
-
-/* On hover, the highlight expands to cover the full text background */
-.highlight:hover {
-  background-size: 100% 88%;
+/* === CONFETTI ANIMATION === */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0;
+  }
 }

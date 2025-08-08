@@ -1,51 +1,28 @@
 ---
-// pages/404.astro
-
+// src/pages/404.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
 import path from 'path';
 import Database from 'better-sqlite3';
-import BaseLayout from '../layouts/BaseLayout.astro';
 
-// --- Database Connection ---
-// Establish a connection to the SQLite database.
-// This is more efficient than loading multiple large JSON files into memory.
+// --- LANGUAGE DETECTION LOGIC (Adapted from your old project) ---
 const dbPath = path.join(process.cwd(), 'src/data/data.db');
-const db = new Database(dbPath, { readonly: true }); // Open in read-only mode for safety
+const db = new Database(dbPath, { readonly: true });
 
-// --- DATA FETCHING & LANGUAGE DETECTION ---
-
-// Fetch all required data in a single transaction for efficiency
-const { supportedSlugs, eeatEntries, commonEntries, publishedLocales } = db.transaction(() => {
-    // Fetch all published locales for language detection
+const { supportedSlugs, publishedLocales } = db.transaction(() => {
     const locales = db.prepare("SELECT M_SLUG FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all() as any[];
-    const supportedSlugs = locales.map(l => l.M_SLUG);
-    
-    // Fetch all eeat entries for 404 page lookup
-    const eeatEntries = db.prepare("SELECT * FROM eeat WHERE EEAT_FILTERING = '01'").all() as any[];
-    
-    // Fetch all common data for language-specific settings
-    const commonEntries = db.prepare("SELECT * FROM common").all() as any[];
-
-    return {
-        supportedSlugs,
-        eeatEntries,
-        commonEntries,
-        publishedLocales: locales
-    };
+    const slugs = locales.map(l => l.M_SLUG);
+    return { supportedSlugs: slugs, publishedLocales: locales };
 })();
 
-const defaultSlug = 'si'; // Your primary fallback language
-
+const defaultSlug = 'en'; // Your primary fallback language
 let determinedSlug = defaultSlug;
 
-// --- NEW, ROBUST LANGUAGE DETECTION ---
-
-// Priority 1: Check for our 'last_lang' cookie. This is the most reliable source.
+// Priority 1: Check for our 'last_lang' cookie.
 const langCookie = Astro.cookies.get('last_lang');
 if (langCookie && supportedSlugs.includes(langCookie.value)) {
   determinedSlug = langCookie.value;
 } else {
-  // Priority 2 (Fallback): If no cookie, check the browser's language preference.
-  // This handles first-time visitors who land directly on a broken link.
+  // Priority 2 (Fallback): Check the browser's language preference.
   const acceptLanguage = Astro.request.headers.get('accept-language');
   if (acceptLanguage) {
     const preferredLangs = acceptLanguage.split(',').map(lang => lang.split(';')[0].toLowerCase().split('-')[0]);
@@ -56,297 +33,77 @@ if (langCookie && supportedSlugs.includes(langCookie.value)) {
   }
 }
 
-// --- DATA FETCHING AND RENDERING LOGIC (Remains the same as before) ---
-
-const eeat = eeatEntries.find((entry: any) => 
-  entry.M_SLUG === determinedSlug && 
-  entry.EEAT_FILTERING === "01"
-);
-
-const pageData = eeat || {
-  EEAT_NAME: "404 Page Not Found",
-  EEAT_H1: "404 - Page Not Found",
-  EEAT_META_SEO: "The page you are looking for does not exist.",
-  EEAT_CONTENT: `<p>We're sorry, we couldn't find the page you were looking for. Please use the main navigation to find your way or return to the homepage.</p><p>Please ensure your data/eeat.json file contains an entry for EEAT_FILTERING: "01" for the language: ${determinedSlug}.</p>`,
-  M_LANGUAGE_ISO: "en",
-  M_COUNTRY_CODE: "US",
+// --- HARDCODED CONTENT (with new additions) ---
+const pageData = {
+  title: "404 - Page Not Found",
+  description: "The page you are looking for does not exist or has been moved.",
+  headline: "Oops! Page Not Found",
+  subtext: "It looks like the page you were searching for has wandered off. Don't worry, it happens to the best of us.",
+  homeButtonText: "Return to Homepage",
+  alertsButtonText: "Set Up Car Alerts",
+  suggestionsTitle: "We suggest trying one of the following options:",
+  contactText: "If you believe this page should exist and think this is our mistake, we would be very grateful if you let us know via our"
 };
-
-const common = commonEntries.find((item: any) => item.M_SLUG === determinedSlug);
-
-// *** START OF MODIFICATION ***
-// Fetch the slug map for the determined language. This is the necessary addition.
-const eeatSlugsForLocale = db.prepare("SELECT EEAT_FILTERING, EEAT_SLUG FROM eeat WHERE M_SLUG = ? AND PUBLISH_Y_N = '1'").all(determinedSlug);
-const eeatSlugMap = new Map(eeatSlugsForLocale.map(e => [String(e.EEAT_FILTERING), e.EEAT_SLUG]));
-// *** END OF MODIFICATION ***
-
-// Fix TypeScript error by properly typing the languageLinksMap
-const languageLinksMap: Record<string, string> = {};
-for (const locale of publishedLocales) {
-    languageLinksMap[locale.M_SLUG] = `/${locale.M_SLUG}/`;
-}
-
-const headline = pageData.EEAT_H1;
-const pageContent = pageData.EEAT_CONTENT;
-
-const getAbsoluteUrl = (path: string) => new URL(`/${determinedSlug}${path}`, Astro.url.origin).toString();
-const getBaseUrl = (path: string) => new URL(path, Astro.url.origin).toString();
-
-// --- Process dynamic internal links and BASE_URL in the fragment ---
-// *** START OF MODIFICATION ***
-// The function is updated to accept and use the slugMap.
-const processDynamicLinks = (htmlContent: string | null, slugMap: Map<string, string>, currentLocale: string) => {
-  if (!htmlContent) return '';
-  
-  const linkRegex = /<a\s+(?:[^>]*?\s+)?data-eeat-link="([^"]+)"(?:\s+data-anchor-slug="([^"]+)")?([^>]*)>(.*?)<\/a>/g;
-  let processed = htmlContent.replace(linkRegex, (match, linkId, anchorSlug, otherAttributes, anchorText) => {
-    let resolvedUrl = '#'; // Fallback URL
-    if (linkId === 'home') {
-      resolvedUrl = `/${currentLocale}`;
-    } else {
-      const slug = slugMap.get(String(linkId));
-      if (slug) {
-        resolvedUrl = `/${currentLocale}/${slug}`;
-      }
-    }
-    if (anchorSlug) {
-      resolvedUrl += `#${anchorSlug}`;
-    }
-    return `<a href="${resolvedUrl}"${otherAttributes}>${anchorText}</a>`;
-  });
-  
-  const baseUrl = getBaseUrl('/');
-  processed = processed.replace(/%%BASE_URL%%/g, baseUrl.slice(0, -1));
-  return processed;
-};
-
-// Process the fragment for output, now passing the slugMap.
-const processedPageContent = processDynamicLinks(pageContent, eeatSlugMap, determinedSlug);
-// *** END OF MODIFICATION ***
+const requestedUrl = Astro.url.pathname;
 ---
 
 <BaseLayout
-  title={pageData.EEAT_NAME}
-  description={pageData.EEAT_META_SEO}
-  languageIso={pageData.M_LANGUAGE_ISO}
-  countryCode={pageData.M_COUNTRY_CODE}
-  contentOrientation={common?.M_CONTENT_ORIENTATION || 'ltr'}
-  languageLinksMap={languageLinksMap}
+  languageIso="en"
+  countryCode="US"
+  contentOrientation="ltr"
+  title={pageData.title}
+  description={pageData.description}
+  languageLinksMap={{ 'en': '/en', 'de': '/de' }}
   currentSlug={determinedSlug}
 >
-  <div class="bg-black text-white py-16">
-    <div class="container mx-auto ps-4 pe-4">
-      <div class="max-w-4xl mx-auto text-center">
-        <h1 class="text-4xl md:text-5xl font-bold mb-6 animate-fade-in">{headline}</h1>
+  <main class="flex items-center justify-center min-h-[calc(100vh-200px)] py-16 px-4">
+    <div class="max-w-2xl mx-auto text-center">
+      <div class="inline-flex items-center justify-center text-primary mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+      <h1 class="text-4xl lg:text-5xl font-bold text-foreground mb-4">
+        {pageData.headline}
+      </h1>
+      <p class="text-lg text-muted-foreground mb-8">
+        We're sorry, but the page you were looking for at <code class="font-semibold text-primary">Amiquus.com</code> could not be found. It may have been moved, deleted, or you may have typed the address incorrectly.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href={`/${determinedSlug}/`} class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1">
+          {pageData.homeButtonText}
+        </a>
+        <a href={`/${determinedSlug}/setup-alerts`} class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-transparent border-2 border-border text-foreground hover:bg-muted transition-colors">
+          {pageData.alertsButtonText}
+        </a>
+      </div>
+
+      <div class="mt-16 pt-8 border-t border-border text-start">
+        <h2 class="text-lg font-semibold text-foreground mb-4">{pageData.suggestionsTitle}</h2>
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3">
+            <span class="text-primary mt-1 flex-shrink-0">→</span>
+            <span>Return to the <a href={`/${determinedSlug}/`} class="font-semibold text-primary hover:underline">Homepage</a> and start over.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-primary mt-1 flex-shrink-0">→</span>
+            <span>Explore how our <a href={`/${determinedSlug}/#how-it-works`} class="font-semibold text-primary hover:underline">alert setup process</a> works.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-primary mt-1 flex-shrink-0">→</span>
+            <span>Learn more about our <a href={`/${determinedSlug}/#pricing`} class="font-semibold text-primary hover:underline">pricing and plans</a>.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-primary mt-1 flex-shrink-0">→</span>
+            <span>Find out more <a href={`/${determinedSlug}/#features`} class="font-semibold text-primary hover:underline">about our features</a>.</span>
+          </li>
+        </ul>
+        <p class="mt-8 text-sm text-muted-foreground">
+          {pageData.contactText} <a href={`/${determinedSlug}/#contact`} class="font-semibold text-primary hover:underline">contact form</a>.
+        </p>
       </div>
     </div>
-  </div>
-
-  <div class="container mx-auto ps-4 pe-4 py-12">
-    <div class="prose prose-lg max-w-4xl mx-auto">
-      <Fragment set:html={processedPageContent} />
-    </div>
-  </div>
+  </main>
 </BaseLayout>
-
-
-<style>
-  /* Base prose container */
-  .prose {
-    max-width: 65ch;
-    margin-inline: auto; /* Use logical properties for RTL support */
-  }
-
-  /* Headings */
-  .prose :global(h2) {
-    color: black;
-    font-size: 1.875rem; /* 30px */
-    font-weight: 700;
-    margin-top: 2.5rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .prose :global(h3) {
-    color: black;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-    font-size: 1.5rem; /* 24px */
-    font-weight: 600;
-  }
-
-  /* Paragraphs */
-  .prose :global(p) {
-    color: #374151; /* Tailwind gray-700 */
-    margin-bottom: 1.25rem;
-    line-height: 1.75;
-  }
-
-  /* Links */
-  .prose :global(a) {
-    color: black;
-    text-decoration: underline;
-    text-decoration-color: #BCEF2F; /* signal-green */
-    text-underline-offset: 2px;
-    transition: color 0.2s ease, text-decoration-color 0.2s ease;
-  }
-
-  .prose :global(a:hover) {
-    color: #BCEF2F; /* signal-green */
-    text-decoration-color: black;
-  }
-
-  /* Lists */
-  .prose :global(ul) {
-    list-style-type: none;
-    margin-inline-start: 1.25rem; /* Use logical properties for RTL support */
-    margin-bottom: 1.25rem;
-  }
-
-  .prose :global(ol) { 
-    margin-inline-start: 1.25rem; /* Use logical properties for RTL support */
-    margin-bottom: 1.25rem;
-  }
-
-  .prose :global(li) {
-    position: relative;
-    padding-inline-start: 1.5rem; /* Use logical properties for RTL support */
-    margin-bottom: 0.75rem;
-    line-height: 1.75;
-  }
-
-  .prose :global(ul li::before) {
-    content: "";
-    position: absolute;
-    inset-inline-start: 0; /* Use logical properties for RTL support */
-    top: 0.75rem;
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    background: #BCEF2F;
-    border: 2px solid black;
-  }
-  
-  /* Underline */
-  .prose :global(u) {
-    text-decoration: none;
-    position: relative;
-  }
-
-  .prose :global(u::after) {
-    content: "";
-    position: absolute;
-    inset-inline-start: 0; /* Use logical properties for RTL support */
-    bottom: -2px;
-    width: 100%;
-    height: 2px;
-    background: repeating-linear-gradient(
-      45deg,
-      #BCEF2F,
-      #BCEF2F 2px,
-      transparent 2px,
-      transparent 4px
-    );
-  }
-
-  /* Bold text */
-  .prose :global(b) {
-    font-weight: 700;
-  }
-
-  /* List items with links */
-  .prose :global(li a) {
-    display: inline-block;
-  }
-
-  /* Spacing between sections */
-  .prose :global(h2 + p) {
-    margin-top: 1rem;
-  }
-
-  .prose :global(p + ul) {
-    margin-top: 0.5rem;
-  }
-  
-  /* FAQ Section styling */
-  .prose :global(.faq-section) {
-    margin-top: 2rem;
-  }
-
-  .prose :global(.faq-section p) {
-    margin-bottom: 1.5rem;
-  }
-
-  /* Animations */
-  :global(.animate-fade-in) {
-    animation: fadeIn 0.5s ease-in-out;
-  }
-
-  :global(.animate-slide-up) {
-    animation: slideUp 0.5s ease-out;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  @keyframes slideUp {
-    from {
-      transform: translateY(20px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  /* Add these new styles for author cards */
-  .prose :global(.author-card) {
-    text-decoration: none;
-  }
-
-  .prose :global(.author-card:hover) {
-    text-decoration: none;
-  }
-
-  .prose :global(.author-card h3) {
-    text-decoration: none;
-  }
-
-  .prose :global(.author-card:hover h3) {
-    text-decoration: none;
-  }
-
-  /* Ensure images maintain aspect ratio during hover */
-  .prose :global(.author-card img) {
-    backface-visibility: hidden;
-    transform: translateZ(0);
-    -webkit-font-smoothing: subpixel-antialiased;
-  }
-
-  /* RTL-specific styles for better text rendering and alignment */
-  :global([dir="rtl"]) .prose {
-    text-align: right;
-  }
-
-  :global([dir="rtl"]) .prose :global(h2),
-  :global([dir="rtl"]) .prose :global(h3) {
-    text-align: right;
-  }
-
-  :global([dir="rtl"]) .prose :global(p) {
-    text-align: right;
-  }
-
-  /* RTL-specific list styling */
-  :global([dir="rtl"]) .prose :global(ul li::before) {
-    inset-inline-end: 0;
-    inset-inline-start: auto;
-  }
-
-  :global([dir="rtl"]) .prose :global(u::after) {
-    inset-inline-end: 0;
-    inset-inline-start: auto;
-  }
-</style>

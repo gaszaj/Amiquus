@@ -1,5 +1,6 @@
 ---
-// pages/index.astro
+// src/pages/index.astro
+// This page acts as a language router and a fallback selection screen.
 import path from 'path';
 import Database from 'better-sqlite3';
 import { 
@@ -13,39 +14,24 @@ import {
 } from 'country-flag-icons/string/3x2';
 
 // --- Database Connection ---
-// Establish a connection to the SQLite database.
-// This is more efficient than loading multiple large JSON files into memory.
 const dbPath = path.join(process.cwd(), 'src/data/data.db');
-const db = new Database(dbPath, { readonly: true }); // Open in read-only mode for safety
+const db = new Database(dbPath, { readonly: true });
 
-// --- Replicate Flag Logic from Header.astro ---
-const flagMap: Record<string, string> = {
-  AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, 
-  CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, 
-  ES, FI, FJ, FR, GA, GB, GE, GH, GI, GM, GN, GP, GR, GT, GU, GY, HK, HN, HR, HT, 
-  HU, ID, IE, IL, IN, IS, IT, JM, JO, JP, KE, KR, KW, KY, LB, LI, LS, LT, LU, LV, 
-  LY, MA, MC, MD, ME, MK, MM, MN, MR, MU, MW, MX, MY, MZ, NG, NI, NL, NO, NP, NZ, 
-  OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL, 
-  SM, SN, SR, SV, SZ, TD, TH, TN, TR, TT, UA, UG, US, UY, VE, VN, YT, ZA
-};
+// --- Data Fetching ---
+const { publishedLocales, www } = db.transaction(() => {
+    const locales = db.prepare("SELECT * FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all() as any[];
+    const wwwData = db.prepare('SELECT * FROM www LIMIT 1').get() as any;
+    return { publishedLocales: locales, www: wwwData || {} };
+})();
 
-// --- Language Detection & Redirect Logic (Unchanged) ---
-
-// Fetch published locales from database
-const publishedLocales = db.prepare("SELECT * FROM locale WHERE M_LOCALE_PUBLISH_Y_N = '1'").all() as any[];
-
+// --- Language Detection & Redirect Logic ---
 const acceptLanguage = Astro.request.headers.get('accept-language');
 let redirectSlug = null;
 
 if (acceptLanguage) {
-  const userPreferredLangs = acceptLanguage
-    .toLowerCase()
-    .split(',')
-    .map(part => part.split(';')[0]);
-
+  const userPreferredLangs = acceptLanguage.toLowerCase().split(',').map(part => part.split(';')[0]);
   for (const userLang of userPreferredLangs) {
-    let match = null;
-    match = publishedLocales.find((loc) => loc.M_HREFLANG_CODE.toLowerCase() === userLang);
+    let match = publishedLocales.find((loc) => loc.M_HREFLANG_CODE.toLowerCase() === userLang);
     if (!match) {
       const langPart = userLang.split('-')[0];
       match = publishedLocales.find((loc) => loc.M_LANGUAGE_ISO === langPart);
@@ -61,8 +47,8 @@ if (redirectSlug) {
   return Astro.redirect(`/${redirectSlug}/`, 302);
 }
 
-// If we reach this point, no redirect happened.
-// The HTML below will be rendered.
+// --- Fallback Page Content (if no redirect happens) ---
+const flagMap: Record<string, string> = { AE, AL, AM, AO, AR, AT, AU, AZ, BA, BD, BE, BG, BH, BJ, BO, BR, BS, BW, BY, BZ, CA, CG, CH, CI, CL, CM, CO, CR, CU, CW, CY, CZ, DE, DJ, DK, DO, DZ, EC, EE, EG, ES, FI, FJ, FR, GA, GB, GE, GH, GI, GM, GN, GP, GR, GT, GU, GY, HK, HN, HR, HT, HU, ID, IE, IL, IN, IS, IT, JM, JO, JP, KE, KR, KW, KY, LB, LI, LS, LT, LU, LV, LY, MA, MC, MD, ME, MK, MM, MN, MR, MU, MW, MX, MY, MZ, NG, NI, NL, NO, NP, NZ, OM, PA, PE, PH, PK, PL, PR, PT, PY, QA, RO, RS, RU, SA, SB, SE, SG, SI, SK, SL, SM, SN, SR, SV, SZ, TD, TH, TN, TR, TT, UA, UG, US, UY, VE, VN, YT, ZA };
 ---
 
 <!DOCTYPE html>
@@ -72,144 +58,30 @@ if (redirectSlug) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Language & Region Selection</title>
     <meta name="robots" content="noindex, nofollow">
-    <style>
-        :root {
-            --background: #f8f9fa;
-            --card-background: #ffffff;
-            --text-primary: #212529;
-            --text-secondary: #6c757d;
-            --accent-color: #BCEF2F;
-            --border-color: #e9ecef;
-            --shadow-color: rgba(0, 0, 0, 0.05);
-        }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh; 
-            margin: 0;
-            background-color: var(--background); 
-            color: var(--text-primary);
-            padding: 1rem;
-        }
-        .container { 
-            max-width: 650px; 
-            width: 100%;
-            padding: 2rem; 
-            background: var(--card-background); 
-            border-radius: 0.75rem; 
-            box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color);
-            text-align: center;
-        }
-        .logo {
-            max-width: 150px;
-            margin: 0 auto 1.5rem auto;
-        }
-        h1 { 
-            font-size: 1.75rem; 
-            font-weight: 700;
-            margin-bottom: 0.5rem; 
-        }
-        p { 
-            margin-bottom: 2rem; 
-            line-height: 1.6;
-            color: var(--text-secondary);
-            max-width: 90%;
-            margin-inline: auto; /* Use logical properties for RTL support */
-        }
-        .language-grid {
-            display: grid;
-            gap: 1rem;
-            grid-template-columns: 1fr; /* Mobile: 1 column */
-        }
-        .language-button { 
-            display: flex;
-            align-items: center;
-            width: 100%;
-            padding: 0.75rem 1rem;
-            text-decoration: none; 
-            color: var(--text-primary); 
-            font-weight: 500;
-            border: 1px solid var(--border-color);
-            border-radius: 0.5rem;
-            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .language-button:hover {
-            background-color: #f1f3f5;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
-        }
-        .flag {
-            width: 2rem;
-            height: 1.5rem;
-            margin-inline-end: 1rem; /* Use logical properties for RTL support */
-            border-radius: 0.25rem;
-            box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
-        }
-        .language-name {
-            font-size: 1rem;
-        }
-        .country-name {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-inline-start: 0.5rem; /* Use logical properties for RTL support */
-        }
-        /* Desktop styles */
-        @media (min-width: 640px) {
-            .language-grid {
-                grid-template-columns: 1fr 1fr; /* Desktop: 2 columns */
-            }
-            .container {
-                padding: 2.5rem 3rem;
-            }
-            h1 {
-                font-size: 2rem;
-            }
-        }
-
-        /* RTL-specific styles for better text rendering and alignment */
-        :global([dir="rtl"]) .container {
-            text-align: right;
-        }
-
-        :global([dir="rtl"]) h1 {
-            text-align: right;
-        }
-
-        :global([dir="rtl"]) p {
-            text-align: right;
-        }
-
-        :global([dir="rtl"]) .language-button {
-            flex-direction: row-reverse; /* Reverse flag and text order in RTL */
-        }
-
-        :global([dir="rtl"]) .flag {
-            margin-inline-end: 0;
-            margin-inline-start: 1rem;
-        }
-
-        :global([dir="rtl"]) .country-name {
-            margin-inline-start: 0;
-            margin-inline-end: 0.5rem;
-        }
-    </style>
+    {/* We use BaseLayout's CSS by importing it, even though we don't use the layout itself */}
+    <link rel="stylesheet" href="/src/styles/global.css">
+    <script is:inline>
+      // Apply theme immediately to prevent flash
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.classList.toggle('dark', theme === 'dark');
+    </script>
 </head>
-<body>
-    <div class="container">
-        <img src="/logos/EUSIGNAL-SVG_File_Horizontal-Dark.svg" alt="EUSIGNAL Logo" class="logo" />
-        <h1>Welcome!</h1>
-        <p>Your browser language is not currently supported, but you can choose from any of our available sites below to continue.</p>
+<body class="bg-muted flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-2xl bg-card border border-border rounded-xl shadow-lg p-6 sm:p-8 text-center">
+        <img src={www.PAGE_LOGO_IMAGE_PATH_1?.replace('public', '')} alt="Amiquus Logo" class="w-48 mx-auto mb-6" />
+        <h1 class="text-2xl sm:text-3xl font-bold text-foreground mb-2">Welcome!</h1>
+        <p class="text-muted-foreground mb-8">
+            Your browser language is not currently supported, but you can choose from any of our available sites below to continue.
+        </p>
         
-        <div class="language-grid">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {publishedLocales.map(locale => (
-                <a href={`/${locale.M_SLUG}/`} class="language-button">
+                <a href={`/${locale.M_SLUG}/`} class="flex items-center w-full p-3 text-start font-semibold border border-border rounded-lg text-foreground hover:bg-muted hover:border-primary transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
                     {flagMap[locale.M_COUNTRY_CODE] && (
-                        <div class="flag" set:html={flagMap[locale.M_COUNTRY_CODE]} />
+                        <div class="w-8 h-6 me-3 flex-shrink-0" set:html={flagMap[locale.M_COUNTRY_CODE]} />
                     )}
-                    <span class="language-name">{locale.M_LANGUAGE_NATIVE}</span>
-                    <span class="country-name">({locale.M_COUNTRY_NATIVE})</span>
+                    <span class="flex-grow">{locale.M_LANGUAGE_NATIVE}</span>
+                    <span class="text-xs text-muted-foreground">({locale.M_COUNTRY_NATIVE})</span>
                 </a>
             ))}
         </div>

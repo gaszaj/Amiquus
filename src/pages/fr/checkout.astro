@@ -1,0 +1,114 @@
+---
+// src/pages/checkout.astro
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Page-specific metadata
+const title = "Checkout - Amiquus";
+const description = "Complete your car alert subscription purchase with secure payment processing.";
+
+// Props for BaseLayout - placeholders for now.
+const languageIso = "en";
+const countryCode = "US";
+const contentOrientation = "ltr";
+const languageLinksMap: Record<string, string> = { 'en': '/en', 'de': '/de' };
+
+const locale = Astro.url.pathname.split('/')[1] || 'en';
+---
+
+<BaseLayout
+  languageIso={languageIso}
+  countryCode={countryCode}
+  contentOrientation={contentOrientation}
+  title={title}
+  description={description}
+  languageLinksMap={languageLinksMap}
+>
+  <main class="py-16 sm:py-24 bg-muted">
+    <div class="max-w-screen-xl mx-auto px-4">
+      <!-- Page Header -->
+      <div class="max-w-3xl mx-auto text-center mb-12">
+        <h1 class="text-4xl lg:text-5xl font-bold text-foreground mb-4 animate-on-scroll">
+          Secure <span class="text-primary">Checkout</span>
+        </h1>
+        <p class="text-lg text-muted-foreground animate-on-scroll" data-delay="100">
+          Complete your car alert subscription purchase.
+        </p>
+      </div>
+
+      <!-- Error Message -->
+      <div id="error-message" class="max-w-4xl mx-auto bg-destructive/10 border border-destructive/20 text-destructive p-4 rounded-xl mb-8 text-sm text-center hidden animate-on-scroll"></div>
+
+      <!-- Main Checkout Layout -->
+      <div class="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+        
+        <!-- Order Summary (Left side on desktop, first on mobile) -->
+        <div class="lg:order-2 space-y-6">
+          <div class="bg-card border border-border rounded-xl shadow-lg p-6 animate-on-scroll">
+            <h2 class="text-2xl font-bold text-foreground mb-6">Order Summary</h2>
+            <div id="order-details" class="space-y-3 border-b border-border pb-4">
+              <!-- Summary items will be injected by JS -->
+            </div>
+            <div id="price-summary" class="space-y-2 pt-4">
+              <div class="flex justify-between items-center text-muted-foreground text-sm"><span>Subtotal</span><span id="subtotal-amount">$0.00</span></div>
+              <div class="flex justify-between items-center text-muted-foreground text-sm"><span>VAT (22%)</span><span id="vat-amount">$0.00</span></div>
+              <div class="flex justify-between items-center text-foreground font-bold text-lg pt-2 border-t border-border mt-2"><span>Total</span><span id="total-amount">$0.00</span></div>
+            </div>
+          </div>
+          <div class="bg-card border border-border rounded-xl shadow-lg p-6 text-sm text-muted-foreground animate-on-scroll">
+            Your subscription will begin immediately after payment. You can manage or cancel your plan at any time from your profile.
+          </div>
+        </div>
+        
+        <!-- Payment Form (Right side on desktop, second on mobile) -->
+        <div class="lg:order-1 bg-card border border-border rounded-xl shadow-lg p-6 sm:p-8 animate-on-scroll">
+          <h2 class="text-2xl font-bold text-foreground mb-6">Payment Information</h2>
+          <form id="payment-form" class="space-y-4">
+            <div class="text-start">
+              <label for="card-name" class="block text-sm font-medium text-foreground mb-1">Name on Card</label>
+              <input type="text" id="card-name" class="w-full input-field" placeholder="John Doe" required>
+            </div>
+            <div class="text-start relative">
+              <label for="card-number" class="block text-sm font-medium text-foreground mb-1">Card Number</label>
+              <input type="text" id="card-number" class="w-full input-field" placeholder="1234 5678 9012 3456" required>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="text-start">
+                <label for="card-expiry" class="block text-sm font-medium text-foreground mb-1">Expiry Date</label>
+                <input type="text" id="card-expiry" class="w-full input-field" placeholder="MM/YY" required>
+              </div>
+              <div class="text-start">
+                <label for="card-cvc" class="block text-sm font-medium text-foreground mb-1">CVC</label>
+                <input type="text" id="card-cvc" class="w-full input-field" placeholder="123" required>
+              </div>
+            </div>
+            <div class="text-start">
+              <label for="billing-country" class="block text-sm font-medium text-foreground mb-1">Country</label>
+              <select id="billing-country" class="w-full input-field" required>
+                <option value="">Select Country</option>
+                <option value="SI">Slovenia</option>
+                <option value="DE">Germany</option>
+                <option value="US">United States</option>
+              </select>
+            </div>
+            <div class="pt-4">
+              <button type="submit" id="pay-button" class="w-full flex items-center justify-center px-6 py-4 rounded-lg font-semibold text-lg bg-primary text-primary-foreground hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                <span id="pay-text">Complete Payment</span>
+                <span id="pay-loading" class="hidden"><div class="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin ms-2"></div></span>
+              </button>
+            </div>
+            <div class="flex items-center justify-center gap-4 pt-4 text-muted-foreground">
+              <div class="flex items-center gap-2 text-xs"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>SSL Secured</div>
+              <div class="flex items-center gap-2 text-xs"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>256-bit Encryption</div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .input-field {
+    @apply w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary;
+  }
+</style>
