@@ -39,6 +39,24 @@ html {
   --neutral-700: 64 64 64;
   --neutral-800: 38 38 38;
   --neutral-900: 23 23 23;
+
+  /* Brand */
+  --amq-primary: 127 86 217;   /* purple-ish (≈ HSL 262/83/56) */
+  --amq-success: 16 185 129;   /* emerald-500 */
+  --amq-danger:  244 63 94;    /* rose-500 */
+
+  /* Neutrals (light) */
+  --amq-text:    15 23 42;     /* slate-900 */
+  --amq-muted:   71 85 105;    /* slate-600 */
+  --amq-border:  226 232 240;  /* slate-200 */
+  --amq-surface: 255 255 255;  /* white card surface (rarely used directly) */
+  --amq-elev:    248 250 252;  /* slate-50 / subtle elevation */
+
+  /* Optional pastel bg tints for light cards */
+  --amq-danger-tint-top:  255 240 242;
+  --amq-danger-tint-bot:  255 228 231;
+  --amq-success-tint-top: 240 253 244;
+  --amq-success-tint-bot: 220 252 231;
 }
 
 html.dark {
@@ -67,6 +85,18 @@ html.dark {
 
   --success: 34 197 94;
   --success-foreground: 255 255 255;
+
+  /* Brand stays in family so accents match dark visuals */
+  --amq-primary: 127 86 217;
+  --amq-success: 16 185 129;
+  --amq-danger:  244 63 94;
+
+  /* Neutrals (dark) — true dark card skin */
+  --amq-text:    240 244 255;  /* slightly cool white */
+  --amq-muted:   148 163 184;  /* slate-400 */
+  --amq-border:  63 63 70;     /* neutral-700 */
+  --amq-surface: 34 34 42;     /* deep surface */
+  --amq-elev:    38 38 50;     /* elevated surface */
 }
 
 /* === SCROLLBAR STYLES (GLOBAL) === */

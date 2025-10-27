@@ -35,7 +35,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
             Amiquus monitors multiple car listing platforms 24/7 and sends instant Telegram notifications when vehicles matching your criteria become available. Stay ahead of the competition with real-time alerts.
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-            <a href="/setup-alerts" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1">
+            <a href="/si/setup-alerts" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1">
               Start Monitoring Now
             </a>
             <a href="#how-it-works" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-transparent border-2 border-border text-foreground hover:bg-muted transition-colors">
@@ -57,71 +57,286 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
     </div>
   </section>
 
-  <!-- "PROBLEM / SOLUTION" SECTION -->
-  <section class="py-20 sm:py-28 bg-muted">
-    <div class="max-w-screen-xl mx-auto px-4">
-      <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16">
-        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-          Stop refreshing car listing websites like a <span class="text-primary">madman!</span>
-        </h2>
-        <p class="text-lg text-muted-foreground">
-          Amiquus does it for you 24/7 - get an instant notification as soon as a matching car is listed.
-        </p>
-      </div>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- The Problem Box -->
-        <div class="bg-card border-2 border-destructive/50 rounded-xl p-8 shadow-lg animate-on-scroll">
-          <div class="flex items-center gap-3 mb-4">
-            <h3 class="text-xl font-semibold text-destructive">The Old Way: Manual Monitoring</h3>
-          </div>
-          <ul class="space-y-3 text-start">
-            <li class="flex items-start gap-3">
-              <span class="text-destructive font-bold mt-1">✗</span>
-              <span><strong>Wasted Time:</strong> Hours spent manually checking multiple websites every single day.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <span class="text-destructive font-bold mt-1">✗</span>
-              <span><strong>Missed Opportunities:</strong> The best deals are often sold within minutes. By the time you see it, it's already gone.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <span class="text-destructive font-bold mt-1">✗</span>
-              <span><strong>Frustration & Burnout:</strong> The constant, repetitive searching is exhausting and often leads to nothing.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <span class="text-destructive font-bold mt-1">✗</span>
-              <span><strong>Incomplete Picture:</strong> It's nearly impossible to track every relevant platform, so you're never sure you're seeing all the options.</span>
-            </li>
-          </ul>
+<!-- "PROBLEM / SOLUTION" SECTION — Fixed dark swap via Tailwind dark:[background:...] -->
+<section id="amiquus-probsol" class="relative py-16 sm:py-24 overflow-hidden" aria-labelledby="probsol-title">
+  <!-- Ambient gradient backdrop (theme-driven) -->
+  <div aria-hidden="true" class="absolute inset-0 pointer-events-none">
+    <div class="absolute -top-40 left-1/2 h-[48rem] w-[48rem] -translate-x-1/2 rounded-full blur-3xl opacity-45"
+         style="background:radial-gradient(35% 35% at 50% 50%, rgb(var(--amq-primary) / .28) 0%, transparent 60%)"></div>
+    <div class="absolute bottom-[-30%] right-[-10%] h-[36rem] w-[36%] rounded-full blur-3xl opacity-35 dark:opacity-40"
+         style="background:radial-gradient(40% 40% at 50% 50%, rgb(var(--amq-success) / .25) 0%, transparent 60%)"></div>
+  </div>
+
+  <div class="max-w-screen-xl mx-auto px-4">
+    <!-- Header (forced-dark look preserved) -->
+    <div class="force-dark text-center max-w-3xl mx-auto will-animate" data-anim="fade-up">
+      <h2 id="probsol-title" class="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+        Find the car first.
+        <span class="bg-clip-text text-transparent"
+              style="background-image:linear-gradient(90deg, rgb(var(--amq-primary)), rgb(var(--amq-success)));">
+          Every time.
+        </span>
+      </h2>
+      <p class="mt-3 text-base md:text-lg lg:text-xl text-[rgb(var(--amq-muted))]" aria-live="polite">
+        Amiquus watches listings 24/7 and pings you instantly.
+      </p>
+    </div>
+
+    <!-- Cards -->
+    <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8" role="list">
+      <!-- BAD / OLD WAY -->
+      <article role="listitem" aria-label="Old way: manual refreshing" data-tone="danger"
+        class="group relative rounded-2xl p-6 md:pr-28 lg:pr-36 shadow-sm will-animate card is-theme
+               ring-1 ring-amq-danger/20
+               bg-[linear-gradient(180deg,rgba(var(--amq-danger-tint-top)/.96),rgba(var(--amq-danger-tint-bot)/.96))]
+               text-amq-text
+               dark:[background:linear-gradient(to_bottom,_rgb(var(--amq-surface)),_rgb(var(--amq-elev)))]
+               dark:border dark:border-[rgb(var(--amq-danger)/.35)] dark:shadow-none dark:text-[rgb(var(--amq-text))]"
+        data-anim="fade-right">
+        <!-- side icon -->
+        <div class="hidden sm:block absolute top-1/2 -translate-y-1/2 right-10 md:right-12 lg:right-16 opacity-90
+                    text-amq-danger" aria-hidden="true">
+          <!-- Lucide: banknote-x -->
+          <svg class="themed-svg h-16 w-16 md:h-20 md:w-20 icon-float" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M13 18H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5"/>
+            <path d="m17 17 5 5"/>
+            <path d="M18 12h.01"/>
+            <path d="m22 17-5 5"/>
+            <path d="M6 12h.01"/>
+            <circle cx="12" cy="12" r="2"/>
+          </svg>
         </div>
 
-        <!-- The Solution Box -->
-        <div class="bg-card border-2 border-success/50 rounded-xl p-8 shadow-lg animate-on-scroll" data-delay="100">
-          <div class="flex items-center gap-3 mb-4">
-            <h3 class="text-xl font-semibold text-success">The Amiquus Way: Automated Alerts</h3>
+        <header class="flex items-center gap-3" aria-label="Manual refreshing icon and title">
+          <div class="h-12 w-12 md:h-14 md:w-14 grid place-items-center rounded-xl
+                      bg-rose-100 text-amq-danger
+                      dark:[background:linear-gradient(135deg,_rgb(var(--amq-danger)/.22),_rgb(var(--amq-danger)/.08))]">
+            <!-- Hourglass -->
+            <svg viewBox="0 0 24 24" class="h-6 w-6 md:h-7 md:w-7" role="img" aria-label="Hourglass">
+              <g>
+                <path fill="currentColor" d="M6 3h12v2a5 5 0 0 1-2.1 4.1L14 10l1.9.9A5 5 0 0 1 18 15v2H6v-2a5 5 0 0 1 2.1-4.1L10 10 8.1 9.1A5 5 0 0 1 6 5V3Z"/>
+                <circle cx="12" cy="10" r="1.4" fill="currentColor" class="sand-top"></circle>
+                <circle cx="12" cy="14" r="1.4" fill="currentColor" class="sand-bot"></circle>
+              </g>
+            </svg>
           </div>
-          <ul class="space-y-3 text-start">
-            <li class="flex items-start gap-3">
-              <span class="text-success font-bold mt-1">✓</span>
-              <span><strong>Zero Time Wasted:</strong> Set your criteria once and let our system do the work for you, 24/7.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <span class="text-success font-bold mt-1">✓</span>
-              <span><strong>Instant Notifications:</strong> Get a Telegram alert the moment a matching car is listed. Be the first to act.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <span class="text-success font-bold mt-1">✓</span>
-              <span><strong>Effortless & Efficient:</strong> Focus on what you do best—making deals—while we handle the tedious searching.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <span class="text-success font-bold mt-1">✓</span>
-              <span><strong>Comprehensive Coverage:</strong> We monitor all the major platforms so you get a complete view of the market without lifting a finger.</span>
-            </li>
-          </ul>
+          <h3 class="text-lg md:text-xl lg:text-2xl font-semibold text-slate-900 dark:text-[rgb(var(--amq-danger))]">
+            Manual refreshing
+          </h3>
+        </header>
+
+        <p class="mt-3 text-sm md:text-base lg:text-[17px] leading-relaxed text-slate-800 dark:text-[rgb(var(--amq-muted))]">
+          You refresh, <span class="text-rose-700 font-semibold dark:text-[rgb(var(--amq-danger))]">you miss</span>, you repeat.
+        </p>
+
+        <!-- chips -->
+        <div class="mt-4 flex flex-wrap gap-2" aria-label="Pain points">
+          <span class="chip md:text-[12px]" style="--chip: var(--amq-danger)">Time sink</span>
+          <span class="chip md:text-[12px]" style="--chip: var(--amq-danger)">Missed deals</span>
+          <span class="chip md:text-[12px]" style="--chip: var(--amq-danger)">Stress</span>
         </div>
+
+        <!-- hover glow (dark only visual) -->
+        <div aria-hidden="true"
+             class="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500
+                    dark:[background:radial-gradient(24rem_12rem_at_0%_0%,_rgb(var(--amq-danger)/.14),_transparent_60%)]">
+        </div>
+      </article>
+
+      <!-- GOOD / AMIQUUS WAY -->
+      <article role="listitem" aria-label="Amiquus way: automated alerts" data-tone="success"
+        class="group relative rounded-2xl p-6 md:pr-28 lg:pr-36 shadow-sm will-animate card is-theme
+               ring-1 ring-amq-success/20
+               bg-[linear-gradient(180deg,rgba(var(--amq-success-tint-top)/.97),rgba(var(--amq-success-tint-bot)/.97))]
+               text-amq-text
+               dark:[background:linear-gradient(to_bottom,_rgb(var(--amq-surface)),_rgb(var(--amq-elev)))]
+               dark:border dark:border-[rgb(var(--amq-success)/.35)] dark:shadow-none dark:text-[rgb(var(--amq-text))]"
+        data-anim="fade-left">
+        <!-- side icon -->
+        <div class="hidden sm:block absolute top-1/2 -translate-y-1/2 right-10 md:right-12 lg:right-16 opacity-95
+                    text-amq-success" aria-hidden="true">
+          <!-- Lucide: banknote-arrow-up -->
+          <svg class="themed-svg h-16 w-16 md:h-20 md:w-20 icon-wobble" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 18H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5"/>
+            <path d="M18 12h.01"/>
+            <path d="M19 22v-6"/>
+            <path d="m22 19-3-3-3 3"/>
+            <path d="M6 12h.01"/>
+            <circle cx="12" cy="12" r="2"/>
+          </svg>
+        </div>
+
+        <header class="flex items-center gap-3" aria-label="Auto alerts icon and title">
+          <div class="h-12 w-12 md:h-14 md:w-14 grid place-items-center rounded-xl
+                      bg-emerald-100 text-emerald-700
+                      dark:[background:linear-gradient(135deg,_rgb(var(--amq-success)/.22),_rgb(var(--amq-success)/.08))]">
+            <!-- Bell -->
+            <svg viewBox="0 0 24 24" class="h-6 w-6 md:h-7 md:w-7" role="img" aria-label="Notification bell">
+              <path fill="currentColor" d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2Zm7-6V11a7 7 0 1 0-14 0v5l-2 2v1h18v-1l-2-2Z"/>
+              <circle class="ping-dot" cx="18" cy="6" r="2" fill="currentColor"/>
+            </svg>
+          </div>
+          <h3 class="text-lg md:text-xl lg:text-2xl font-semibold text-slate-900 dark:text-[rgb(var(--amq-success))]">
+            Automated alerts
+          </h3>
+        </header>
+
+        <p class="mt-3 text-sm md:text-base lg:text-[17px] leading-relaxed text-slate-800 dark:text-[rgb(var(--amq-muted))]">
+          <span class="font-semibold text-emerald-700 dark:text-[rgb(var(--amq-success))]">We scan.</span>
+          <span class="text-sky-500 dark:text-sky-400 font-semibold">Telegram pings you</span>. You act first.
+        </p>
+        
+
+        <!-- chips -->
+        <div class="mt-4 flex flex-wrap gap-2" aria-label="Benefits">
+          <span class="chip md:text-[12px]" style="--chip: var(--amq-success)">24/7 scan</span>
+          <span class="chip md:text-[12px]" style="--chip: var(--amq-success)">Instant ping</span>
+          <span class="chip md:text-[12px]" style="--chip: var(--amq-success)">Full coverage</span>
+        </div>
+
+        <!-- CTA -->
+        <div class="mt-5 flex items-center justify-between">
+          <div class="flex items-center gap-2 text-xs md:text-sm text-slate-700 dark:text-[rgb(var(--amq-muted))]" aria-label="Live monitoring indicator">
+            <span class="h-2 w-2 rounded-full bg-amq-success" aria-hidden="true"></span>
+            <span>Live monitoring</span>
+          </div>
+          <a href="#order"
+             aria-label="Get ahead of others. Start in 60 seconds."
+             class="cta-btn inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm md:text-[15px] font-semibold
+                    focus:outline-none focus-visible:ring-2
+                    lg:px-3.5 lg:py-1.5 lg:text-sm lg:scale-[0.97]"
+             style="color:white; background:linear-gradient(90deg, rgb(var(--amq-primary)), rgb(var(--amq-success)));
+                    background-size:200% 100%; animation:ctaGradient 5s linear infinite, ctaPulse 1.8s ease-in-out infinite;">
+            <span class="whitespace-nowrap">Get ahead of others</span>
+            <svg viewBox="0 0 24 24" class="h-4 w-4 md:h-5 md:w-5" role="img" aria-label="Arrow">
+              <path fill="currentColor" d="M13 5l7 7-7 7v-4H4v-6h9V5z"/>
+            </svg>
+          </a>
+        </div>
+
+        <!-- hover glow (dark only visual) -->
+        <div aria-hidden="true"
+             class="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500
+                    dark:[background:radial-gradient(24rem_12rem_at_100%_0%,_rgb(var(--amq-success)/.14),_transparent_60%)]">
+        </div>
+      </article>
+    </div>
+
+    <!-- Proof row -->
+    <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 will-animate" data-anim="fade-up" aria-label="Trust indicators">
+      <div class="force-dark flex items-center gap-2 text-xs md:text-sm text-[rgb(var(--amq-muted))]">
+        <span class="i-badge" aria-hidden="true"></span>
+        <span>Checks listings every ~15s on supported sites</span>
+      </div>
+      <div class="hidden sm:block h-4 w-px sep" aria-hidden="true"></div>
+      <div class="force-dark flex items-center gap-2 text-xs md:text-sm text-[rgb(var(--amq-muted))]">
+        <span class="i-shield" aria-hidden="true"></span>
+        <span>No spam. Cancel anytime.</span>
       </div>
     </div>
-  </section>
+  </div>
+</section>
+
+<style>
+  /* Force-dark pack (header visual island) */
+  .force-dark{
+    --c-primary: var(--amq-primary);
+    --c-success: var(--amq-success);
+    --c-danger:  var(--amq-danger);
+    --c-surface: var(--amq-surface);
+    --c-elev:    var(--amq-elev);
+    --c-text:    var(--amq-text);
+    --c-muted:   var(--amq-muted);
+    --c-border:  var(--amq-border);
+    color-scheme: dark;
+    color: rgb(var(--c-text));
+  }
+  .force-dark .text-muted{ color: rgb(var(--c-muted)); }
+
+  /* Chips (variable-aware) */
+  #amiquus-probsol .chip{
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:.25rem .625rem; font-size:.75rem; border-radius:9999px;
+    border:1px solid rgb(var(--chip) / .35); color: rgb(var(--chip) / .95);
+    background: linear-gradient(180deg, rgb(var(--chip)/.12), rgb(var(--chip)/.05));
+  }
+  .dark #amiquus-probsol .chip{
+    border-color: rgb(var(--chip)/.35) !important;
+    color: rgb(var(--chip)/.9) !important;
+    background: linear-gradient(180deg, rgb(var(--chip)/.10), rgb(var(--chip)/.04)) !important;
+  }
+
+  /* Inline SVGs follow currentColor */
+  .themed-svg *[fill]{ fill: currentColor !important; }
+  .themed-svg *[stroke]{ stroke: currentColor !important; }
+
+  /* Proof row separator */
+  #amiquus-probsol .sep { background: currentColor; opacity:.22; }
+
+  /* Animations (unchanged) */
+  @media (prefers-reduced-motion:no-preference){
+    #amiquus-probsol .will-animate{opacity:0;transform:translateY(12px);transition:opacity .6s ease, transform .6s ease}
+    #amiquus-probsol .will-animate.in-view{opacity:1;transform:none}
+    #amiquus-probsol [data-anim="fade-right"]{transform:translateX(-12px)}
+    #amiquus-probsol [data-anim="fade-left"]{transform:translateX(12px)}
+    #amiquus-probsol .in-view[data-anim="fade-right"],#amiquus-probsol .in-view[data-anim="fade-left"]{transform:none}
+
+    .sand-top{animation:sandTop 2.2s infinite ease-in-out}
+    .sand-bot{animation:sandBot 2.2s infinite ease-in-out}
+    @keyframes sandTop{0%{opacity:1;transform:translateY(0)}50%{opacity:.2;transform:translateY(4px)}100%{opacity:1;transform:translateY(0)}}
+    @keyframes sandBot{0%{opacity:.2;transform:translateY(-4px)}50%{opacity:1;transform:translateY(0)}100%{opacity:.2;transform:translateY(-4px)}}
+
+    .icon-float{animation:iconFloat 3s ease-in-out infinite}
+    @keyframes iconFloat{0%,100%{transform:translateY(-4px)}50%{transform:translateY(4px)}}
+    .icon-wobble{animation:iconWobble .8s ease-in-out infinite}
+    @keyframes iconWobble{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+
+    @keyframes ctaGradient{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+    @keyframes ctaPulse{
+      0%{box-shadow:0 0 0 0 rgba(59,130,246,.35)}
+      70%{box-shadow:0 0 0 12px rgba(59,130,246,0)}
+      100%{box-shadow:0 0 0 0 rgba(59,130,246,0)}
+    }
+    @keyframes ctaPulseDark{
+      0%{box-shadow:0 0 0 0 rgb(var(--amq-primary)/.55)}
+      70%{box-shadow:0 0 0 14px rgb(var(--amq-primary)/0)}
+      100%{box-shadow:0 0 0 0 rgb(var(--amq-primary)/0)}
+    }
+  }
+
+  /* Dark-mode specific button pulse */
+  .dark #amiquus-probsol .cta-btn{
+    animation: ctaGradient 5s linear infinite, ctaPulseDark 1.8s ease-in-out infinite !important;
+  }
+</style>
+
+<script>
+  // One-time reveal on scroll (scoped)
+  (function(){
+    const root = document.getElementById('amiquus-probsol');
+    if(!root) return;
+    const els = root.querySelectorAll('.will-animate');
+    if(!('IntersectionObserver' in window)){ els.forEach(el=> el.classList.add('in-view')); return; }
+    const io=new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in-view'); io.unobserve(e.target); }});
+    },{threshold:.15,rootMargin:'0px 0px -10% 0px'});
+    els.forEach(el=> io.observe(el));
+  })();
+</script>
+
+  
+  
+
+  
+
+
+
+
+
 
   <!-- Limited Availability Section -->
   <section class="py-12 bg-card border-y border-border">
@@ -296,7 +511,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       </div>
       
       <div class="mt-8 text-center">
-        <a href="/service" class="inline-flex items-center justify-center px-8 py-4 text-lg rounded-lg font-semibold bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1">
+        <a href="/si/setup-alerts" class="inline-flex items-center justify-center px-8 py-4 text-lg rounded-lg font-semibold bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1">
           Get Started Now
         </a>
       </div>
@@ -308,7 +523,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
     <div class="max-w-screen-xl mx-auto px-4 text-center text-primary-foreground">
       <h2 class="text-3xl lg:text-4xl font-bold mb-4">Ready to Find Your <span class="text-primary-foreground/80">Perfect Vehicles?</span></h2>
       <p class="text-lg opacity-90 mb-8 max-w-2xl mx-auto">Join successful dealers who use Amiquus to stay ahead of the competition. Limited slots available.</p>
-      <a href="/setup-alerts" class="inline-flex items-center justify-center px-8 py-4 text-lg rounded-lg font-semibold bg-background text-primary shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1">Get Started Now</a>
+      <a href="/si/setup-alerts" class="inline-flex items-center justify-center px-8 py-4 text-lg rounded-lg font-semibold bg-background text-primary shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1">Get Started Now</a>
     </div>
   </section>
 

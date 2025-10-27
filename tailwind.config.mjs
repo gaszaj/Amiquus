@@ -1,3 +1,4 @@
+// tailwind.config.mjs
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: 'class',
@@ -37,7 +38,18 @@ export default {
           800: 'rgb(var(--neutral-800) / <alpha-value>)',
           900: 'rgb(var(--neutral-900) / <alpha-value>)',
         },
+
+        /* ------- AMIQUUS TOKENS (no helper needed) ------- */
+        'amq-primary': 'rgb(var(--amq-primary) / <alpha-value>)',
+        'amq-success': 'rgb(var(--amq-success) / <alpha-value>)',
+        'amq-danger':  'rgb(var(--amq-danger) / <alpha-value>)',
+        'amq-text':    'rgb(var(--amq-text) / <alpha-value>)',
+        'amq-muted':   'rgb(var(--amq-muted) / <alpha-value>)',
+        'amq-border':  'rgb(var(--amq-border) / <alpha-value>)',
+        'amq-surface': 'rgb(var(--amq-surface) / <alpha-value>)',
+        'amq-elev':    'rgb(var(--amq-elev) / <alpha-value>)',
       },
+
       fontFamily: {
         sans: ['Inter Variable', 'system-ui', 'sans-serif'],
       },
@@ -86,7 +98,5 @@ export default {
       },
     },
   },
-  plugins: [
-    require('@tailwindcss/typography'), // ADD THIS LINE
-  ],
+  plugins: [require('@tailwindcss/typography')],
 };
