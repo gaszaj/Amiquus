@@ -1,0 +1,170 @@
+---
+// src/pages/user-profile.astro
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import qrCode from '/public/telegram/tg_amiquus_qr.webp';
+import { Image } from 'astro:assets';
+
+const title = "User Profile - Amiquus";
+const description = "Manage your Amiquus account, car alert subscriptions, and payment methods.";
+const languageIso = "en";
+const countryCode = "US";
+const contentOrientation = "ltr";
+const languageLinksMap: Record<string, string> = { 'en': '/en', 'de': '/de' };
+
+const locale = Astro.url.pathname.split('/')[1] || 'en';
+---
+
+<BaseLayout
+  languageIso={languageIso}
+  countryCode={countryCode}
+  contentOrientation={contentOrientation}
+  title={title}
+  description={description}
+  languageLinksMap={languageLinksMap}
+>
+  <main class="py-16 sm:py-24 bg-muted">
+    <div class="max-w-screen-xl mx-auto px-4">
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-foreground">My Profile</h1>
+        <p class="text-muted-foreground">Manage your account settings and subscription details.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start profile-layout-grid">
+        <!-- Sidebar -->
+        <aside class="lg:col-span-1 lg:sticky top-24">
+          <div class="bg-card border border-border rounded-xl shadow-lg p-4">
+            <nav id="profile-sidebar-nav">
+              <ul class="space-y-1">
+                <li><button class="sidebar-btn active w-full flex items-center gap-3 px-4 py-2 text-start rounded-md font-semibold bg-primary/10 text-primary transition-colors" data-tab="account">Account</button></li>
+                <li><button class="sidebar-btn w-full flex items-center gap-3 px-4 py-2 text-start rounded-md font-semibold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors" data-tab="subscriptions">Subscriptions</button></li>
+                <li><button class="sidebar-btn w-full flex items-center gap-3 px-4 py-2 text-start rounded-md font-semibold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors" data-tab="billing">Payment Methods</button></li>
+                <li><button class="sidebar-btn w-full flex items-center gap-3 px-4 py-2 text-start rounded-md font-semibold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors" data-tab="settings">Settings</button></li>
+                <li><button class="sidebar-btn w-full flex items-center gap-3 px-4 py-2 text-start rounded-md font-semibold text-destructive hover:bg-destructive/10 transition-colors" data-modal="logout-confirm-modal">Log Out</button></li>
+              </ul>
+            </nav>
+          </div>
+        </aside>
+
+        <!-- Main Panel -->
+        <div class="lg:col-span-3">
+          <!-- Account Tab Panel -->
+          <div id="account-tab" class="tab-panel active space-y-6">
+            <!-- Profile Info Card -->
+            <div class="bg-card border border-border rounded-xl shadow-lg">
+              <div class="p-6 border-b border-border"><h3 class="text-lg font-semibold text-foreground">Profile Information</h3><p class="text-sm text-muted-foreground">Update your personal information.</p></div>
+              <form id="profile-info-form" class="p-6 space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div class="text-start"><label for="first-name" class="block text-sm font-medium text-foreground mb-1">First Name</label><input type="text" id="first-name" value="John" class="w-full px-3 py-2 rounded-md border border-input bg-background focus:border-primary focus:ring-1 focus:ring-primary"></div>
+                  <div class="text-start"><label for="last-name" class="block text-sm font-medium text-foreground mb-1">Last Name</label><input type="text" id="last-name" value="Doe" class="w-full px-3 py-2 rounded-md border border-input bg-background focus:border-primary focus:ring-1 focus:ring-primary"></div>
+                </div>
+                <div class="text-start"><label for="email" class="block text-sm font-medium text-foreground mb-1">Email Address</label><input type="email" id="email" value="john.doe@example.com" class="w-full px-3 py-2 rounded-md border border-input bg-background focus:border-primary focus:ring-1 focus:ring-primary"></div>
+                <div class="text-end"><button type="submit" class="inline-flex items-center justify-center px-4 py-2 text-sm rounded-md font-semibold bg-primary text-primary-foreground hover:opacity-90 transition">Save Changes</button></div>
+              </form>
+            </div>
+            <!-- Change Password Card -->
+            <div class="bg-card border border-border rounded-xl shadow-lg">
+              <div class="p-6 border-b border-border"><h3 class="text-lg font-semibold text-foreground">Change Password</h3><p class="text-sm text-muted-foreground">Update your account password.</p></div>
+              <form id="change-password-form" class="p-6 space-y-4">
+                <div class="text-start"><label for="current-password" class="block text-sm font-medium text-foreground mb-1">Current Password</label><input type="password" id="current-password" class="w-full px-3 py-2 rounded-md border border-input bg-background focus:border-primary focus:ring-1 focus:ring-primary"></div>
+                <div class="text-start"><label for="new-password" class="block text-sm font-medium text-foreground mb-1">New Password</label><input type="password" id="new-password" class="w-full px-3 py-2 rounded-md border border-input bg-background focus:border-primary focus:ring-1 focus:ring-primary"></div>
+                <div class="text-start"><label for="confirm-password" class="block text-sm font-medium text-foreground mb-1">Confirm New Password</label><input type="password" id="confirm-password" class="w-full px-3 py-2 rounded-md border border-input bg-background focus:border-primary focus:ring-1 focus:ring-primary"></div>
+                <div class="text-end"><button type="submit" class="inline-flex items-center justify-center px-4 py-2 text-sm rounded-md font-semibold bg-primary text-primary-foreground hover:opacity-90 transition">Update Password</button></div>
+              </form>
+            </div>
+          </div>
+          
+          <!-- Subscriptions Tab Panel -->
+          <div id="subscriptions-tab" class="tab-panel hidden space-y-6">
+            <div class="bg-card border border-border rounded-xl shadow-lg text-center p-12">
+              <h3 class="text-xl font-semibold text-foreground mb-2">No Subscriptions Yet</h3>
+              <p class="text-muted-foreground mb-6 max-w-md mx-auto">You don't have any active subscriptions. Get started by creating your first car alert.</p>
+              <a href="/si/setup-alerts" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground hover:opacity-90 transition">Create Subscription</a>
+            </div>
+          </div>
+
+          <!-- Billing Tab Panel -->
+          <div id="billing-tab" class="tab-panel hidden space-y-6">
+            <div class="bg-card border border-border rounded-xl shadow-lg text-center p-12">
+              <h3 class="text-xl font-semibold text-foreground mb-2">No Payment Methods</h3>
+              <p class="text-muted-foreground mb-6 max-w-md mx-auto">You haven't added any payment methods yet. Add a card to manage your subscriptions.</p>
+              <button type="button" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground hover:opacity-90 transition" data-modal="add-payment-method-modal">Add Payment Method</button>
+            </div>
+          </div>
+          
+          <!-- Settings Tab Panel -->
+          <div id="settings-tab" class="tab-panel hidden space-y-6">
+            <div class="bg-card border border-border rounded-xl shadow-lg">
+              <div class="p-6 border-b border-border">
+                <h3 class="text-lg font-semibold text-foreground">Notification Settings</h3>
+                <p class="text-sm text-muted-foreground">Manage how you receive alerts and updates from Amiquus.</p>
+              </div>
+              <div class="p-6 space-y-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h4 class="font-semibold text-foreground">Telegram Username</h4>
+                    <p class="text-sm text-muted-foreground">Current: <span class="font-mono bg-muted px-2 py-1 rounded">@johndoe_cars</span></p>
+                  </div>
+                  <button class="inline-flex items-center justify-center px-4 py-2 text-sm rounded-md font-semibold bg-secondary text-secondary-foreground border border-border hover:bg-muted transition" data-modal="telegram-settings-modal">Change</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- MODALS -->
+  <div id="logout-confirm-modal" class="modal hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+    <div class="modal-content bg-card border border-border rounded-xl shadow-lg max-w-md w-full p-6 text-center">
+      <h3 class="text-lg font-bold text-foreground mb-2">Confirm Logout</h3>
+      <p class="text-sm text-muted-foreground mb-6">Are you sure you want to log out?</p>
+      <div class="flex gap-4 justify-center">
+        <button class="modal-close flex-1 inline-flex items-center justify-center px-4 py-2 rounded-md font-semibold bg-muted text-muted-foreground hover:bg-border transition">Cancel</button>
+        <a href={`/${locale}/login`} class="flex-1 inline-flex items-center justify-center px-4 py-2 rounded-md font-semibold bg-destructive text-destructive-foreground hover:opacity-90 transition">Log Out</a>
+      </div>
+    </div>
+  </div>
+  
+  <div id="add-payment-method-modal" class="modal hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+    <div class="modal-content bg-card border border-border rounded-xl shadow-lg max-w-md w-full p-6 text-start">
+      <h3 class="text-lg font-bold text-foreground mb-2">Add Payment Method</h3>
+      <p class="text-sm text-muted-foreground mb-6">Add a new card to your account.</p>
+      <form id="add-payment-form" class="space-y-4">
+        <div id="payment-element" class="p-4 border rounded-md bg-muted">Stripe Payment Element Placeholder</div>
+        <div class="flex gap-4 justify-end">
+          <button type="button" class="modal-close inline-flex items-center justify-center px-4 py-2 rounded-md font-semibold bg-muted text-muted-foreground hover:bg-border transition">Cancel</button>
+          <button type="submit" class="inline-flex items-center justify-center px-4 py-2 rounded-md font-semibold bg-primary text-primary-foreground hover:opacity-90 transition">Add Card</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <div id="telegram-settings-modal" class="modal hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+    <div class="modal-content bg-card border border-border rounded-xl shadow-lg max-w-lg w-full p-6 text-start">
+      <h3 class="text-lg font-bold text-foreground mb-2">Update Telegram Username</h3>
+      <p class="text-sm text-muted-foreground mb-6">Enter your new username and re-confirm contact with our bot.</p>
+      <form id="telegram-update-form" class="space-y-4">
+        <div>
+          <label for="new-telegram-username" class="block text-sm font-medium text-foreground mb-1">New Telegram Username</label>
+          <input type="text" id="new-telegram-username" placeholder="@new_username" class="w-full px-3 py-2 rounded-md border border-input bg-background focus:border-primary focus:ring-1 focus:ring-primary" required>
+        </div>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-start pt-2">
+          <div>
+            <p class="text-sm text-muted-foreground">To activate alerts, send a message to our bot at <a href="https://t.me/Amiquus_bot" target="_blank" rel="noopener noreferrer" class="font-semibold text-primary hover:underline">t.me/Amiquus_bot</a></p>
+            <p class="text-xs text-muted-foreground mt-1">A simple "Hi" is enough to start.</p>
+          </div>
+          <Image src={qrCode} alt="QR code to open Amiquus Telegram Bot" class="w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0" loading="lazy" decoding="async"/>
+        </div>
+        <div class="flex items-start gap-3 pt-2">
+          <input type="checkbox" id="new-contact-confirmed" class="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary">
+          <label for="new-contact-confirmed" class="text-sm text-muted-foreground">I have sent a message from my new username to the Amiquus Telegram bot.</label>
+        </div>
+        <div class="flex gap-4 justify-end pt-4">
+          <button type="button" class="modal-close inline-flex items-center justify-center px-4 py-2 rounded-md font-semibold bg-muted text-muted-foreground hover:bg-border transition">Cancel</button>
+          <button type="submit" class="inline-flex items-center justify-center px-4 py-2 rounded-md font-semibold bg-primary text-primary-foreground hover:opacity-90 transition">Save Username</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,80 @@
+---
+// src/pages/thank-you.astro
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Page-specific metadata
+const title = "Thank You - Amiquus";
+const description = "Thank you for your purchase! Your car alert subscription is now active.";
+
+// Props for BaseLayout - placeholders for now.
+const languageIso = "en";
+const countryCode = "US";
+const contentOrientation = "ltr";
+const languageLinksMap: Record<string, string> = { 'en': '/en', 'de': '/de' };
+
+const locale = Astro.url.pathname.split('/')[1] || 'en';
+---
+
+<BaseLayout
+  languageIso={languageIso}
+  countryCode={countryCode}
+  contentOrientation={contentOrientation}
+  title={title}
+  description={description}
+  languageLinksMap={languageLinksMap}
+>
+  <main class="flex items-center justify-center min-h-[calc(100vh-150px)] py-12 px-4">
+    <div class="relative w-full max-w-2xl bg-card border border-border rounded-2xl shadow-xl p-8 sm:p-12 text-center overflow-hidden animate-on-scroll">
+      
+      <!-- Confetti Container -->
+      <div id="confetti-container" class="absolute inset-0 pointer-events-none"></div>
+
+      <!-- Success Icon -->
+      <div id="success-icon" class="w-20 h-20 bg-success rounded-full flex items-center justify-center mx-auto mb-6 text-success-foreground">
+        <svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+
+      <!-- Success Message -->
+      <h1 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">Thank You!</h1>
+      <p class="text-lg text-muted-foreground mb-8">Your car alert subscription is now active.</p>
+
+      <!-- Personal Message -->
+      <div class="bg-muted p-4 rounded-lg border-s-4 border-primary text-start mb-8">
+        <p id="personal-message" class="text-foreground">You'll start receiving instant notifications when cars matching your criteria are listed. We're excited to help you find your perfect vehicle!</p>
+      </div>
+
+      <!-- Next Steps -->
+      <div class="bg-primary/10 border border-primary/20 rounded-xl p-6 text-start mb-8">
+        <h3 class="text-xl font-semibold text-primary mb-4 text-center">What happens next?</h3>
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3">
+            <div class="w-6 h-6 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-xs flex-shrink-0 mt-0.5">1</div>
+            <span class="text-sm text-foreground">Your Telegram bot will be activated within the next few minutes.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <div class="w-6 h-6 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-xs flex-shrink-0 mt-0.5">2</div>
+            <span class="text-sm text-foreground">You'll receive a confirmation message on Telegram.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <div class="w-6 h-6 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-xs flex-shrink-0 mt-0.5">3</div>
+            <span class="text-sm text-foreground">Start getting instant alerts when matching cars are listed.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <div class="w-6 h-6 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-xs flex-shrink-0 mt-0.5">4</div>
+            <span class="text-sm text-foreground">Manage your alerts anytime from your profile dashboard.</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href={`/${locale}/user-profile`} class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1">
+          Go to Profile
+        </a>
+        <a href={`/${locale}/`} class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-transparent border-2 border-border text-foreground hover:bg-muted transition-colors">
+          Back to Home
+        </a>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

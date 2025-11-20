@@ -1,0 +1,14 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:16
+    restart: always
+    container_name: amiquus_postgres_dev
+    environment:
+      POSTGRES_USER: amiquus
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: amiquus_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - ../pgdata:/var/lib/postgresql/data
