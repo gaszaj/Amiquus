@@ -12,6 +12,51 @@ const contentOrientation = "ltr";
 const languageLinksMap: Record<string, string> = { 'en': '/en', 'de': '/de' };
 
 const locale = Astro.url.pathname.split('/')[1] || 'en';
+
+const demoSubscriptions = [
+  {
+    id: 'sub_001',
+    status: 'active',
+    car: 'BMW 3 Series · Diesel · 2018+',
+    websites: ['avto.net', 'mobile.de'],
+    frequency: 'Every 15 minutes',
+    price: 19.97, // 9.99 base + 4.99 site + 5.99 frequency, just as an example
+    createdAt: '2025-01-15',
+    nextBilling: '2025-02-15',
+  },
+  {
+    id: 'sub_002',
+    status: 'paused', // this will show as "Paused"
+    car: 'VW Golf · Petrol · 2015+',
+    websites: ['avto.net'],
+    frequency: 'Hourly',
+    price: 9.99,
+    createdAt: '2024-11-02',
+    nextBilling: 'Paused',
+  },
+];
+
+const demoPaymentMethods = [
+  {
+    id: 'pm_001',
+    brand: 'Visa',
+    last4: '4242',
+    expMonth: '08',
+    expYear: '28',
+    isDefault: true,
+    addedOn: '2024-10-10',
+  },
+  {
+    id: 'pm_002',
+    brand: 'Mastercard',
+    last4: '1881',
+    expMonth: '03',
+    expYear: '27',
+    isDefault: false,
+    addedOn: '2024-12-01',
+  },
+];
+
 ---
 
 <BaseLayout
@@ -75,21 +120,173 @@ const locale = Astro.url.pathname.split('/')[1] || 'en';
           
           <!-- Subscriptions Tab Panel -->
           <div id="subscriptions-tab" class="tab-panel hidden space-y-6">
-            <div class="bg-card border border-border rounded-xl shadow-lg text-center p-12">
-              <h3 class="text-xl font-semibold text-foreground mb-2">No Subscriptions Yet</h3>
-              <p class="text-muted-foreground mb-6 max-w-md mx-auto">You don't have any active subscriptions. Get started by creating your first car alert.</p>
-              <a href="/si/setup-alerts" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground hover:opacity-90 transition">Create Subscription</a>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div class="text-start">
+                <h3 class="text-lg font-semibold text-foreground">Your Subscriptions</h3>
+                <p class="text-sm text-muted-foreground">
+                  Manage your active and paused Amiquus car alerts.
+                </p>
+              </div>
+              <a
+                href={`/${locale}/setup-alerts`}
+                class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg font-semibold bg-primary text-primary-foreground hover:opacity-90 transition text-sm"
+              >
+                Create New Subscription
+              </a>
             </div>
+
+            {demoSubscriptions.length === 0 ? (
+              <div class="bg-card border border-border rounded-xl shadow-lg text-center p-12">
+                <h3 class="text-xl font-semibold text-foreground mb-2">No Subscriptions Yet</h3>
+                <p class="text-muted-foreground mb-6 max-w-md mx-auto">
+                  You don't have any active subscriptions. Get started by creating your first car alert.
+                </p>
+              </div>
+            ) : (
+              <div class="space-y-4">
+                {demoSubscriptions.map((sub) => (
+                  <div
+                    class="bg-card border border-border rounded-xl shadow-lg p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+                  >
+                    <div class="text-start">
+                      <div class="flex items-center gap-2 mb-1">
+                        <h4 class="text-base font-semibold text-foreground">
+                          {sub.car}
+                        </h4>
+                        <span
+                          class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
+                            ${
+                              sub.status === 'active'
+                                ? 'bg-emerald-500/10 text-emerald-500'
+                                : 'bg-amber-500/10 text-amber-500'
+                            }`}
+                        >
+                          {sub.status === 'active' ? 'Active' : 'Paused'}
+                        </span>
+                      </div>
+                      <p class="text-sm text-muted-foreground">
+                        Websites: {sub.websites.join(', ')} · Frequency: {sub.frequency}
+                      </p>
+                      <p class="text-xs text-muted-foreground mt-1">
+                        Created: {sub.createdAt} · Next billing: {sub.nextBilling}
+                      </p>
+                    </div>
+
+                    <div class="flex flex-col items-end gap-2">
+                      <div class="text-sm text-muted-foreground">Price</div>
+                      <div class="text-lg font-semibold text-foreground">
+                        ${sub.price.toFixed(2)}/mo
+                      </div>
+                      <div class="flex gap-2">
+                        <button
+                          type="button"
+                          class="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-xs font-semibold border border-border bg-muted text-foreground hover:bg-border transition"
+                        >
+                          Manage
+                        </button>
+                        {sub.status === 'active' ? (
+                          <button
+                            type="button"
+                            class="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-xs font-semibold bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 transition"
+                          >
+                            Pause
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            class="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-xs font-semibold bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition"
+                          >
+                            Resume
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+
 
           <!-- Billing Tab Panel -->
           <div id="billing-tab" class="tab-panel hidden space-y-6">
-            <div class="bg-card border border-border rounded-xl shadow-lg text-center p-12">
-              <h3 class="text-xl font-semibold text-foreground mb-2">No Payment Methods</h3>
-              <p class="text-muted-foreground mb-6 max-w-md mx-auto">You haven't added any payment methods yet. Add a card to manage your subscriptions.</p>
-              <button type="button" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground hover:opacity-90 transition" data-modal="add-payment-method-modal">Add Payment Method</button>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div class="text-start">
+                <h3 class="text-lg font-semibold text-foreground">Payment Methods</h3>
+                <p class="text-sm text-muted-foreground">
+                  Manage the cards used for your Amiquus subscriptions.
+                </p>
+              </div>
+              <button
+                type="button"
+                class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg font-semibold bg-primary text-primary-foreground hover:opacity-90 transition text-sm"
+                data-modal="add-payment-method-modal"
+              >
+                Add Payment Method
+              </button>
             </div>
+
+            {demoPaymentMethods.length === 0 ? (
+              <div class="bg-card border border-border rounded-xl shadow-lg text-center p-12">
+                <h3 class="text-xl font-semibold text-foreground mb-2">No Payment Methods</h3>
+                <p class="text-muted-foreground mb-6 max-w-md mx-auto">
+                  You haven't added any payment methods yet. Add a card to manage your subscriptions.
+                </p>
+              </div>
+            ) : (
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {demoPaymentMethods.map((card) => (
+                  <div
+                    class={`bg-card border border-border rounded-xl shadow-lg p-5 flex flex-col gap-3 ${
+                      card.isDefault ? 'ring-2 ring-primary/70 ring-offset-2 ring-offset-background' : ''
+                    }`}
+                  >
+                    <div class="flex items-center justify-between gap-3">
+                      <div class="flex items-center gap-3">
+                        <div class="h-9 w-14 rounded-md bg-muted flex items-center justify-center text-[0.65rem] font-semibold text-muted-foreground uppercase tracking-wide">
+                          {card.brand}
+                        </div>
+                        <div class="text-start">
+                          <p class="text-sm font-medium text-foreground">
+                            **** **** **** {card.last4}
+                          </p>
+                          <p class="text-xs text-muted-foreground">
+                            Expires {card.expMonth}/{card.expYear}
+                          </p>
+                        </div>
+                      </div>
+                      {card.isDefault && (
+                        <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-primary/10 text-primary">
+                          Default
+                        </span>
+                      )}
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs text-muted-foreground">
+                      <p>Added on {card.addedOn}</p>
+                      <div class="flex gap-2">
+                        {!card.isDefault && (
+                          <button
+                            type="button"
+                            class="inline-flex items-center justify-center px-3 py-1.5 rounded-md border border-border bg-muted text-[0.7rem] font-semibold hover:bg-border transition"
+                          >
+                            Set as default
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          class="inline-flex items-center justify-center px-3 py-1.5 rounded-md border border-border text-[0.7rem] font-semibold text-destructive hover:bg-destructive/5 transition"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+
           
           <!-- Settings Tab Panel -->
           <div id="settings-tab" class="tab-panel hidden space-y-6">

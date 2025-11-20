@@ -106,13 +106,11 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
 
-    
     <title>{title} | {www.PAGE_ORGANISATION_FULL_NAME}</title>
     <meta name="description" content={description} />
     <meta name="keywords" content={keywords} />
 
     <link rel="canonical" href={Astro.url.href} />
-    {/* Your meta tags, links, etc. go here */}
     
     {schema && <Schema schema={schema} />}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
@@ -144,48 +142,41 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
     </section>
 
     <!-- CAR ANIMATION SECTION -->
-     
     <section class="car-animation-section w-full overflow-hidden py-16 bg-muted">
-      <div id="road" class="relative max-w-screen-xl mx-auto h-24 flex items-end border-b-4 border-dashed border-foreground/30">
-        <!-- Search Icon -->
+      <div
+        id="road"
+        class="relative max-w-screen-xl mx-auto h-24 flex items-end border-b-4 border-dashed border-foreground/30 overflow-hidden"
+      >
+        <!-- Search Icon (centered and pulsing) -->
         <div
           id="search-icon"
-          class="absolute bottom-0 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-primary">
+          class="absolute bottom-3 left-1/2 -translate-x-1/2 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-primary"
+        >
           <svg xmlns="http://www.w3.org/2000/svg" class="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </div>
-        
-        <!-- Car Icon -->
-        <div
-          id="car-icon"
-          class="absolute bottom-0 w-28 h-12 sm:w-28 sm:h-14 md:w-32 md:h-16 lg:w-36 lg:h-18 xl:w-40 xl:h-20 text-foreground dark:text-white"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 158.7" class="w-full h-full">
-            <path fill="currentColor" d="M80.1,129.2c0,15.2-12.3,27.5-27.5,27.5c-15.2,0-27.5-12.3-27.5-27.5s12.3-27.5,27.5-27.5C67.8,101.7,80.1,114,80.1,129.2z
-              M66.1,129.2c0-7.4-6.1-13.5-13.5-13.5c-7.4,0-13.5,6.1-13.5,13.5c0,7.4,6.1,13.5,13.5,13.5S66.1,136.6,66.1,129.2z M231.2,129.2
-              c0,15.2-12.3,27.5-27.5,27.5s-27.5-12.3-27.5-27.5s12.3-27.5,27.5-27.5S231.2,114,231.2,129.2z M217.2,129.2
-              c0-7.4-6.1-13.5-13.5-13.5c-7.4,0-13.5,6.1-13.5,13.5c0,7.4,6.1,13.5,13.5,13.5S217.2,136.6,217.2,129.2z M253.8,104.7H248v0l0-28.1
-              c0-8.8-7.1-15.9-16-15.9h-39c-0.6,0-1.2-0.3-1.6-0.7l-44.5-48c-2-2-4.8-3.2-7.7-3.3l-86.5,0c-7.5,0-13.9,5.1-15.6,12.4l-8.7,37.9
-              c-0.2,1-1.1,1.7-2.2,1.7h0C16.2,60.7,8,68.8,8,78.9v23.5c0,1.2-1,2.2-2.2,2.2H2.2c-1.2,0-2.2,1-2.2,2.2v7.5
-              c0,5.6,4.6,10.2,10.2,10.2h4.1c1.1,0,2-0.8,2.2-1.8c3-17.2,18.1-30.4,36.2-30.4c18.1,0,33.1,13.1,36.1,30.3c0.2,1.1,1.1,1.8,2.2,1.8
-              h74.4c1.1,0,2-0.8,2.2-1.8c3-17.2,18-30.3,36.1-30.3s33.1,13.1,36.1,30.3c0.2,1.1,1.1,1.8,2.2,1.8h3.8c5.7,0,10.2-4.6,10.2-10.2
-              v-7.4C256,105.7,255,104.7,253.8,104.7z M92,58.4c0,1.2-1,2.2-2.2,2.2h-47c-1.4,0-2.5-1.3-2.2-2.7l7.7-34.2c0.4-1.8,1.8-3.1,3.7-3.1
-              h37.8c1.2,0,2.2,1,2.2,2.2V58.4z M170,60.7h-63.8c-1.2,0-2.2-1-2.2-2.2V22.9c0-1.2,1-2.2,2.2-2.2h31.6c0.6,0,1.2,0.3,1.7,0.7
-              l32.2,35.5C172.9,58.4,171.9,60.7,170,60.7z M130,54.8c7.8,0,14.1-6.3,14.1-14.1s-6.3-14.1-14.1-14.1s-14.1,6.3-14.1,14.1
-              S122.2,54.8,130,54.8z"/>
-          </svg>
-        </div>
 
-        
-        <!-- Telegram Icon -->
+        <!-- Cars lane -->
+        <div id="cars-lane" class="relative w-full h-full"></div>
+
+        <!-- Telegram Icon (appears when red car meets search icon) -->
         <div
           id="telegram-icon"
-          class="absolute z-30 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-[#0088cc] dark:text-[#0088cc] opacity-0 pointer-events-none"
+          class="absolute z-30 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 
+                bg-[#0088cc] rounded-full flex items-center justify-center
+                text-white dark:text-white opacity-0 pointer-events-none shadow-lg"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="w-full h-full" viewBox="0 0 16 16">
-            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.287 5.906q-1.168.486-4.666 2.01-.567.225-.595.442c-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294q.39.01.868-.32 3.269-2.206 3.374-2.23c.05-.012.12-.026.166.016s.042.12.037.141c-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8 8 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629q.14.092.27.187c.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.4 1.4 0 0 0-.013-.315.34.34 0 0 0-.114-.217.53.53 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09"/>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            class="w-3/4 h-3/4"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.287 5.906q-1.168.486-4.666 2.01-.567.225-.595.442c-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294q.39.01.868-.32 3.269-2.206 3.374-2.23c.05-.012.12-.026.166.016s.042.12.037.141c-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8 8 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629q.14.092.27.187c.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.4 1.4 0 0 0-.013-.315.34.34 0 0 0-.114-.217.53.53 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09"
+            />
           </svg>
         </div>
       </div>
@@ -231,7 +222,7 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
           console.error("Failed to initialize theme toggle:", e);
         }
         
-        // --- 2. HEADER MENUS SETUP ---
+        // --- 2. HEADER MENUS SETUP --- 
         try {
           const menus = [
             { btn: document.getElementById('user-btn'), menu: document.getElementById('user-dropdown') },
@@ -256,8 +247,7 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
           console.error("Failed to initialize header menus:", e);
         }
 
-        // --- 3. MOVE TO TOP BUTTON LOGIC ---
-        // This is the missing piece.
+        // --- 3. MOVE TO TOP BUTTON LOGIC --- 
         try {
             const container = document.getElementById('moveToTopContainer');
             const button = document.getElementById('moveToTopButton');
@@ -268,7 +258,6 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                     container.classList.toggle('opacity-0', !isVisible);
                     container.classList.toggle('invisible', !isVisible);
 
-                    // Optional: Scroll progress logic
                     const main = document.querySelector('main');
                     if (main) {
                         const scrollableDist = main.offsetHeight - window.innerHeight;
@@ -280,14 +269,14 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                 window.addEventListener('scroll', handleScroll, { passive: true });
                 button.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
-                // Run once on load to set initial state
                 handleScroll();
             }
 
         } catch(e) {
             console.error("Failed to initialize Move To Top button:", e);
         }
-        // --- 4. COOKIE BANNER LOGIC ---
+
+        // --- 4. COOKIE BANNER LOGIC --- 
         try {
             const settingsTrigger = document.getElementById('cookie-settings-trigger');
             const banner = document.getElementById('cookie-consent-banner');
@@ -341,7 +330,6 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
 
                 settingsTrigger.onclick = showBanner;
                 
-                // Initial check
                 const consentGiven = localStorage.getItem(CONSENT_GIVEN_KEY) === 'true';
                 if (consentGiven) {
                     settingsTrigger.classList.remove('hidden');
@@ -353,7 +341,7 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
             console.error("Failed to initialize cookie banner:", e);
         }
 
-        // --- 5. WAITING LIST FORM LOGIC ---
+        // --- 5. WAITING LIST FORM LOGIC --- 
         try {
             const waitlistForm = document.getElementById('waitlist-form');
             if (waitlistForm) {
@@ -393,7 +381,7 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                 waitlistForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     let isValid = true;
-                    inputs.forEach(hideFieldError); // Clear previous errors
+                    inputs.forEach(hideFieldError);
                     
                     const firstName = document.getElementById('first-name').value.trim();
                     const lastName = document.getElementById('last-name').value.trim();
@@ -410,7 +398,6 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                     setLoading(true);
                     errorMessage.classList.add('hidden');
                     
-                    // Simulate API call
                     await new Promise(resolve => setTimeout(resolve, 1500));
                     
                     formContainer.classList.add('hidden');
@@ -420,7 +407,6 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                     setLoading(false);
                 });
 
-                // Animate progress bar into view
                 if (progressBar) {
                     setTimeout(() => { progressBar.style.width = '100%'; }, 500);
                 }
@@ -429,7 +415,7 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
             console.error("Failed to initialize waitlist form:", e);
         }
 
-        // --- 6. CONTACT FORM LOGIC ---
+        // --- 6. CONTACT FORM LOGIC --- 
         try {
             const contactForm = document.getElementById('contact-form');
             if (contactForm) {
@@ -450,7 +436,6 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                     const messageInput = document.getElementById('contact-message');
                     let isValid = true;
                     
-                    // Basic validation
                     if (!emailInput.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
                         emailInput.classList.add('border-destructive');
                         isValid = false;
@@ -469,7 +454,6 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
 
                     setLoading(true);
 
-                    // Simulate API call
                     await new Promise(resolve => setTimeout(resolve, 1500));
 
                     contactForm.classList.add('hidden');
@@ -483,27 +467,22 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
             console.error("Failed to initialize contact form:", e);
         }
 
-
-
-        // --- 7. CAR ANIMATION SCRIPT ---
+        // --- 7. CAR ANIMATION SCRIPT --- 
         try {
           console.log("Car animation script starting...");
-          
-          // Wait for GSAP to load
+
           const waitForGSAP = () => {
             return new Promise((resolve) => {
-              if (typeof gsap !== 'undefined') {
+              if (typeof gsap !== "undefined") {
                 resolve();
               } else {
-                // Check every 100ms for GSAP
                 const checkGSAP = setInterval(() => {
-                  if (typeof gsap !== 'undefined') {
+                  if (typeof gsap !== "undefined") {
                     clearInterval(checkGSAP);
                     resolve();
                   }
                 }, 100);
-                
-                // Timeout after 5 seconds
+
                 setTimeout(() => {
                   clearInterval(checkGSAP);
                   console.error("GSAP failed to load after 5 seconds");
@@ -512,88 +491,249 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
             });
           };
 
-          waitForGSAP().then(() => {
-            console.log("GSAP loaded, starting animation...");
-            
-            const car = document.getElementById("car-icon");
-            const search = document.getElementById("search-icon");
-            const telegram = document.getElementById("telegram-icon");
-            const road = document.getElementById("road");
+          waitForGSAP()
+            .then(() => {
+              console.log("GSAP loaded, starting animation...");
 
-            console.log("Elements found:", { car: !!car, search: !!search, telegram: !!telegram, road: !!road });
+              const road = document.getElementById("road");
+              const carsLane = document.getElementById("cars-lane");
+              const search = document.getElementById("search-icon");
+              const telegram = document.getElementById("telegram-icon");
 
-            if (car && search && telegram && road) {
-              console.log("All elements found, starting animation...");
-              
-              // Kill any existing animations
-              gsap.killTweensOf([car, search, telegram]);
+              if (!road || !carsLane || !search || !telegram) {
+                console.error("Car animation: missing elements", {
+                  road: !!road,
+                  carsLane: !!carsLane,
+                  search: !!search,
+                  telegram: !!telegram,
+                });
+                return;
+              }
 
-              const roadWidth = road.clientWidth;
-              const carWidth = car.clientWidth;
-              const isRtl = document.documentElement.dir === 'rtl';
-              const meetingPoint = roadWidth * 0.5;
+              // Use your car SVG, color via currentColor; wheels are handled separately via CSS
+              const createCarElement = (isFeatured = false) => {
+                const wrapper = document.createElement("div");
+                wrapper.className =
+                  "car-instance absolute bottom-0 w-20 h-10 sm:w-24 sm:h-12 md:w-28 md:h-14 flex items-end justify-center " +
+                  (isFeatured
+                    ? "text-red-500 dark:text-red-400"
+                    : "text-foreground/80 dark:text-foreground/70");
 
-              console.log("Animation parameters:", { roadWidth, carWidth, isRtl, meetingPoint });
+                wrapper.innerHTML = `
+                  <svg class="car-svg w-full h-full" width="102" height="40" viewBox="0 0 102 40" xmlns="http://www.w3.org/2000/svg">
+                    <g transform="translate(2 1)" stroke="currentColor" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+                      <path class="car__body" d="M47.293 2.375C52.927.792 54.017.805 54.017.805c2.613-.445 6.838-.337 9.42.237l8.381 1.863c2.59.576 6.164 2.606 7.98 4.531l6.348 6.732 6.245 1.877c3.098.508 5.609 3.431 5.609 6.507v4.206c0 .29-2.536 4.189-5.687 4.189H36.808c-2.655 0-4.34-2.1-3.688-4.67 0 0 3.71-19.944 14.173-23.902zM36.5 15.5h54.01" stroke-width="3"/>
+                      <ellipse class="car__wheel--left" stroke-width="3.2" fill="#FFF" cx="83.493" cy="30.25" rx="6.922" ry="6.808"/>
+                      <ellipse class="car__wheel--right" stroke-width="3.2" fill="#FFF" cx="46.511" cy="30.25" rx="6.922" ry="6.808"/>
+                      <path class="car__line car__line--top" d="M22.5 16.5H2.475" stroke-width="3"/>
+                      <path class="car__line car__line--middle" d="M20.5 23.5H.4755" stroke-width="3"/>
+                      <path class="car__line car__line--bottom" d="M25.5 9.5h-19" stroke-width="3"/>
+                    </g>
+                  </svg>
+                `;
+                return wrapper;
+              };
 
-              // Set initial positions
-              gsap.set(car, { 
-                x: isRtl ? roadWidth : -carWidth, 
-                scaleX: isRtl ? -1 : 1, 
-                autoAlpha: 1 
-              });
-              
-              gsap.set(search, { 
-                x: isRtl ? -search.offsetWidth : roadWidth, 
-                scaleX: isRtl ? 1 : -1, 
-                autoAlpha: 1 
-              });
+              let cycleTimeouts = [];
+              let activeCarTweens = [];
+              let tickerCallback = null;
 
-              gsap.set(telegram, { autoAlpha: 0, scale: 0.5 });
+              const clearCycle = () => {
+                cycleTimeouts.forEach((id) => clearTimeout(id));
+                cycleTimeouts = [];
+                activeCarTweens.forEach((tw) => tw.kill());
+                activeCarTweens = [];
+                if (tickerCallback) {
+                  gsap.ticker.remove(tickerCallback);
+                  tickerCallback = null;
+                }
+                if (carsLane) carsLane.innerHTML = "";
+              };
 
-              const masterTimeline = gsap.timeline({ repeat: -1, repeatDelay: 2 });
-              
-              // Phase 1: Car drives to the middle
-              masterTimeline.to(car, { 
-                x: meetingPoint - (carWidth / 2), 
-                duration: 3, 
-                ease: "power1.inOut" 
-              });
+              const setupCarCycle = () => {
+                clearCycle();
 
-              // Phase 1.2: Search icon scans back and forth
-              masterTimeline.to(search, { 
-                x: meetingPoint - (search.clientWidth / 2), 
-                duration: 3, 
-                ease: "power1.inOut" 
-              }, 0); // Start at time 0 (in parallel with car)
+                const roadWidth = road.clientWidth || carsLane.clientWidth || 800;
 
-              // Phase 2: At meeting point, car and search icon fade out
-              masterTimeline.to(car, { autoAlpha: 0, duration: 0.01 }, ">");
-              masterTimeline.to(search, { autoAlpha: 0, duration: 0.01 }, ">");
+                // Reset icons
+                gsap.set(search, { autoAlpha: 1, scale: 1 });
+                gsap.set(telegram, { autoAlpha: 0, scale: 0.6, y: -6, x: 0 });
 
-              // Phase 3: Telegram icon appears and pulsates
-              masterTimeline.set(telegram, { 
-                x: meetingPoint - (telegram.clientWidth / 2),
-                y: -10,
-                autoAlpha: 0,
-                scale: 0.5
-              });
-              masterTimeline.to(telegram, { autoAlpha: 1, scale: 1, duration: 0.3 });
-              masterTimeline.to(telegram, { scale: 1.2, repeat: 3, yoyo: true, duration: 0.25, ease: 'power1.inOut' });
-              masterTimeline.to(telegram, { autoAlpha: 0, scale: 0.5, duration: 0.3 });
+                // Search icon pulse in place
+                const pulseTl = gsap.to(search, {
+                  scale: 1.08,
+                  duration: 0.8,
+                  yoyo: true,
+                  repeat: -1,
+                  ease: "sine.inOut",
+                });
 
-              console.log("Animation started successfully!");
-            } else {
-              console.error("Some elements not found:", { car: !!car, search: !!search, telegram: !!telegram, road: !!road });
-            }
-          }).catch((error) => {
-            console.error("Failed to load GSAP:", error);
-          });
-          
-        } catch(e) {
-            console.error("Failed to initialize car animation:", e);
+                const NUM_CARS = 5;
+                const DRIVE_DURATION = 7; // seconds for full crossing
+                const BASE_START_X = -180; // off-screen left
+                const SPACING = 110;       // equal spacing between cars
+
+                const featuredIndex = Math.floor(Math.random() * NUM_CARS);
+                const cars = [];
+
+                for (let i = 0; i < NUM_CARS; i++) {
+                  const isFeatured = i === featuredIndex;
+                  const carEl = createCarElement(isFeatured);
+                  carsLane.appendChild(carEl);
+                  cars.push(carEl);
+                }
+
+                const featuredCar = cars[featuredIndex];
+                if (!featuredCar) return;
+
+                // Initial positions: all cars are locked in equal spacing around the featured car
+                const initialFeaturedX = BASE_START_X - featuredIndex * SPACING;
+                cars.forEach((car, index) => {
+                  const offsetIndex = index - featuredIndex;
+                  gsap.set(car, {
+                    x: initialFeaturedX - offsetIndex * SPACING,
+                    y: 0,
+                    autoAlpha: 1,
+                  });
+                  // subtle bobbing for each so they feel alive
+                  gsap.to(car, {
+                    y: -3,
+                    repeat: -1,
+                    yoyo: true,
+                    duration: 1.1 + index * 0.1,
+                    ease: "sine.inOut",
+                  });
+                });
+
+                const endX = roadWidth + 220;
+
+                // The red car (featured) is the ONLY one that actually animates in X
+                const featuredTween = gsap.to(featuredCar, {
+                  x: endX,
+                  duration: DRIVE_DURATION,
+                  ease: "none",
+                });
+                activeCarTweens.push(featuredTween);
+
+                // All other cars "follow" the red one with fixed spacing
+                tickerCallback = () => {
+                  const featuredX = gsap.getProperty(featuredCar, "x");
+                  cars.forEach((car, index) => {
+                    if (car === featuredCar) return;
+                    const offsetIndex = index - featuredIndex;
+                    gsap.set(car, {
+                      x: featuredX - offsetIndex * SPACING,
+                    });
+                  });
+                };
+                gsap.ticker.add(tickerCallback);
+
+                // Compute where the red car should "meet" the search icon
+                const roadRect = road.getBoundingClientRect();
+                const searchRect = search.getBoundingClientRect();
+                const searchCenterX =
+                  searchRect.left - roadRect.left + searchRect.width / 2;
+
+                let triggered = false;
+
+                const triggerTelegram = () => {
+                  if (triggered) return;
+                  triggered = true;
+
+                  // Stop the driving motion and spacing updates
+                  activeCarTweens.forEach((tw) => tw.pause());
+                  if (tickerCallback) {
+                    gsap.ticker.remove(tickerCallback);
+                    tickerCallback = null;
+                  }
+                  pulseTl.pause();
+
+                  // Fade out search icon
+                  gsap.to(search, {
+                    autoAlpha: 0,
+                    scale: 0.9,
+                    duration: 0.25,
+                    ease: "power1.inOut",
+                  });
+
+                  // Position telegram exactly where the search icon is
+                  const roadRect2 = road.getBoundingClientRect();
+                  const searchRect2 = search.getBoundingClientRect();
+                  const centerX =
+                    searchRect2.left -
+                    roadRect2.left +
+                    searchRect2.width / 2 -
+                    (telegram.clientWidth || 0) / 2;
+
+                  gsap.set(telegram, { x: centerX });
+
+                  // Show telegram + pulse and slight grow
+                  gsap.to(telegram, {
+                    autoAlpha: 1,
+                    scale: 1.12,
+                    duration: 0.3,
+                    ease: "back.out(1.7)",
+                  });
+
+                  const teleTl = gsap.timeline();
+                  teleTl
+                    .to(telegram, {
+                      y: -14,
+                      duration: 0.35,
+                      repeat: 3,
+                      yoyo: true,
+                      ease: "sine.inOut",
+                    })
+                    .to(
+                      telegram,
+                      {
+                        scale: 1.0,
+                        duration: 0.4,
+                        ease: "sine.inOut",
+                      },
+                      0
+                    );
+
+                  // After a short hold, restart a fresh cycle
+                  const restartTimeout = setTimeout(() => {
+                    setupCarCycle();
+                  }, 2600);
+
+                  cycleTimeouts.push(restartTimeout);
+                };
+
+                // Collision detection: when red car reaches search icon center, trigger
+                featuredTween.eventCallback("onUpdate", () => {
+                  if (triggered) return;
+                  const carRect = featuredCar.getBoundingClientRect();
+                  const carCenterX =
+                    carRect.left - roadRect.left + carRect.width / 2;
+
+                  // Small threshold so it's visually "on top"
+                  if (Math.abs(carCenterX - searchCenterX) < 6) {
+                    triggerTelegram();
+                  }
+                });
+
+                // Safety fallback in case something goes off (still keeps loop)
+                featuredTween.eventCallback("onComplete", () => {
+                  if (!triggered) {
+                    triggerTelegram();
+                  }
+                });
+              };
+
+              setupCarCycle();
+              console.log("Car animation cycle started.");
+            })
+            .catch((error) => {
+              console.error("Failed to load GSAP:", error);
+            });
+        } catch (e) {
+          console.error("Failed to initialize car animation:", e);
         }
 
-        // --- 8. LOGIN FORM LOGIC ---
+        // --- 8. LOGIN FORM LOGIC --- 
         try {
             const loginForm = document.getElementById('login-form');
             if (loginForm) {
@@ -623,14 +763,11 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                     hideError();
                     setLoading(true);
                     
-                    // Simulate API call
                     await new Promise(resolve => setTimeout(resolve, 1500));
                     
-                    // Example of error handling
                     if (passwordInput.value === 'fail') {
                         showError('Invalid email or password. Please try again.');
                     } else {
-                        // On success in a real app, you would redirect
                         alert('Login successful! (This is a demo)');
                     }
                     
@@ -646,7 +783,7 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
             console.error("Failed to initialize login form:", e);
         }
 
-        // --- 9. REGISTRATION FORM LOGIC ---
+        // --- 9. REGISTRATION FORM LOGIC --- 
         try {
             const registerForm = document.getElementById('register-form');
             if (registerForm) {
@@ -698,7 +835,7 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                     if (/[0-9]/.test(password)) score++;
                     if (/[^A-Za-z0-9]/.test(password)) score++;
 
-                    strengthFill.className = 'h-full transition-all duration-300 rounded-full'; // Reset
+                    strengthFill.className = 'h-full transition-all duration-300 rounded-full';
                     let text = 'Password strength';
                     
                     switch (score) {
@@ -720,7 +857,6 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                     fieldIds.forEach(hideFieldError);
                     errorMessage.classList.add('hidden');
 
-                    // --- Validation ---
                     if (!document.getElementById('firstName').value.trim()) { isValid = false; showFieldError('firstName', 'First name is required.'); }
                     if (!document.getElementById('lastName').value.trim()) { isValid = false; showFieldError('lastName', 'Last name is required.'); }
                     if (!document.getElementById('email').value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value)) { isValid = false; showFieldError('email', 'A valid email is required.'); }
@@ -744,11 +880,10 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
             console.error("Failed to initialize registration form:", e);
         }
 
-        // --- 10. SETUP ALERTS FORM LOGIC ---
+        // --- 10. SETUP ALERTS FORM LOGIC --- 
         try {
             const setupForm = document.getElementById('setup-alerts-form');
             if (setupForm) {
-                // --- FORM ELEMENTS ---
                 const carBrandSelect = document.getElementById('car-brand');
                 const carModelSelect = document.getElementById('car-model');
                 const fuelTypeSelect = document.getElementById('fuel-type');
@@ -759,7 +894,6 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                 const hasContactedBotCheckbox = document.getElementById('has-contacted-bot');
                 const termsAgreedCheckbox = document.getElementById('terms-agreed');
 
-                // --- PRICE DISPLAY ELEMENTS ---
                 const priceBaseLabel = document.getElementById('price-base-label');
                 const priceBaseValue = document.getElementById('price-base-value');
                 const priceWebsitesLabel = document.getElementById('price-websites-label');
@@ -768,7 +902,6 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                 const priceFrequencyValue = document.getElementById('price-frequency-value');
                 const priceTotalValue = document.getElementById('price-total-value');
                 
-                // --- DATA (Simulated API response) ---
                 const newcomerData = {
                     websites: ["avto.net", "mobile.de", "autoscout24", "facebook"],
                     fuel_types: ["Petrol", "Diesel", "Electric", "Hybrid", "LPG"],
@@ -787,7 +920,6 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                     { id: "1min", label: "Every 1 minute", price: 14.99 },
                 ];
 
-                // --- FUNCTIONS ---
                 const calculatePrice = () => {
                     const selectedWebsites = Array.from(document.querySelectorAll('#websites-container input:checked'));
                     const websitesCount = selectedWebsites.length;
@@ -814,7 +946,6 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                     });
                 };
                 
-                // --- INITIAL POPULATION ---
                 populateDropdown(carBrandSelect, Object.keys(newcomerData.brands_and_models));
                 populateDropdown(fuelTypeSelect, newcomerData.fuel_types);
                 
@@ -835,13 +966,12 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                         <input type="checkbox" id="${siteId}" value="${site}" name="websites" class="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary" ${isFirst ? 'checked disabled' : ''}>
                         <div class="text-sm">
                             <p class="font-semibold text-foreground">${site.charAt(0).toUpperCase() + site.slice(1)}</p>
-                            <p class="text-muted-foreground">${isFirst ? 'Base plan' : `+$4.99/mo`}</p>
+                            <p class="text-muted-foreground">${isFirst ? 'Base plan' : '+$4.99/mo'}</p>
                         </div>
                     `;
                     websitesContainer.appendChild(label);
                 });
 
-                // --- EVENT LISTENERS ---
                 carBrandSelect.addEventListener('change', () => {
                     const selectedBrand = carBrandSelect.value;
                     const models = newcomerData.brands_and_models[Object.keys(newcomerData.brands_and_models).find(b => b.toLowerCase().replace(/ /g, '-') === selectedBrand)] || [];
@@ -868,25 +998,22 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                         alert('Please agree to the terms and confirm you have contacted the bot.');
                         return;
                     }
-                    // Proceed with submission logic...
                     alert('Proceeding to checkout (demo)');
                 });
                 
-                // --- INITIALIZE ---
                 calculatePrice();
             }
         } catch (e) {
             console.error("Failed to initialize setup-alerts form:", e);
         }
 
-        // --- 11. USER PROFILE LOGIC ---
+        // --- 11. USER PROFILE LOGIC --- 
         try {
           const profilePage = document.querySelector('.profile-layout-grid');
           if (profilePage) {
               const sidebarButtons = document.querySelectorAll('.sidebar-btn');
               const tabPanels = document.querySelectorAll('.tab-panel');
               
-              // --- Toast Notification Function ---
               const toast = document.getElementById('toast-notification');
               const toastMessage = document.getElementById('toast-message');
               let toastTimeout;
@@ -902,7 +1029,6 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                   }, 4000);
               };
 
-              // --- Tab Switching Logic ---
               const switchTab = (tabId) => {
                   tabPanels.forEach(panel => {
                       panel.classList.toggle('hidden', panel.id !== `${tabId}-tab`);
@@ -919,7 +1045,6 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                   });
               };
 
-              // --- Modal Logic ---
               const openModal = (modalId) => {
                   const modal = document.getElementById(modalId);
                   if (modal) modal.classList.remove('hidden');
@@ -929,7 +1054,6 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                   if(modal) modal.classList.add('hidden');
               };
 
-              // --- Event Listeners ---
               document.querySelectorAll('[data-modal]').forEach(trigger => {
                   trigger.addEventListener('click', (e) => {
                       e.preventDefault();
@@ -956,7 +1080,6 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                   }
               });
 
-              // --- Form Submission Logic (Simulated) ---
               const handleFormSubmit = async (form, button) => {
                   const originalText = button.textContent;
                   button.disabled = true;
@@ -984,15 +1107,14 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                   handleFormSubmit(e.target, e.target.querySelector('button[type="submit"]'));
               });
 
-              // Initialize with the default tab
               switchTab('account');
           }
-      } catch (e) {
+        } catch (e) {
           console.error("Failed to initialize user profile scripts:", e);
-      }
+        }
 
-      // --- 12. CHECKOUT PAGE LOGIC ---
-      try {
+        // --- 12. CHECKOUT PAGE LOGIC --- 
+        try {
           const paymentForm = document.getElementById('payment-form');
           if (paymentForm) {
               const orderDetailsContainer = document.getElementById('order-details');
@@ -1019,8 +1141,6 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                   }
 
                   const data = JSON.parse(dataString);
-
-                  // Populate summary
                   const { basePrice, websitesPrice, frequencyPrice, total } = data.prices;
                   const vat = total * 0.22;
                   
@@ -1036,7 +1156,6 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                       <div class="flex justify-between items-center text-sm">
                           <span class="text-muted-foreground">Frequency Upgrade</span>
                           <span class="font-semibold text-foreground">$${frequencyPrice.toFixed(2)}</span>
-                      </div>
                   `;
                   
                   subtotalEl.textContent = `$${total.toFixed(2)}`;
@@ -1046,7 +1165,6 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
 
               paymentForm.addEventListener('submit', async (e) => {
                   e.preventDefault();
-                  // Basic validation
                   if (!document.getElementById('card-name').value.trim() || !document.getElementById('card-number').value.trim()) {
                       showError('Please fill in all required payment details.');
                       return;
@@ -1057,24 +1175,22 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                   payLoading.classList.remove('hidden');
 
                   await new Promise(res => setTimeout(res, 2000));
-                  // In a real app, this would redirect to a success page.
                   alert('Payment successful! (This is a demo)');
-                  window.location.href = '/user-profile?tab=subscriptions'; // Example redirect
+                  window.location.href = '/user-profile?tab=subscriptions';
               });
 
-              // Initialize
               loadOrderData();
           }
-      } catch (e) {
-          console.error("Failed to initialize checkout page:", e);
-      }
+        } catch (e) {
+          console.error("Failed to initialize checkout page scripts:", e);
+        }
 
-      // --- 13. THANK YOU PAGE LOGIC ---
-      try {
+        // --- 13. THANK YOU PAGE LOGIC --- 
+        try {
           const confettiContainer = document.getElementById('confetti-container');
           if (confettiContainer) {
               const createConfetti = () => {
-                  const colors = ['#3B82F6', '#22C55E', '#FFFF00']; // Primary, Success, Accent
+                  const colors = ['#3B82F6', '#22C55E', '#FFFF00'];
                   for (let i = 0; i < 50; i++) {
                       const piece = document.createElement('div');
                       piece.className = 'absolute w-2 h-2 rounded-full';
@@ -1085,34 +1201,29 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
                   }
               };
 
-              // Animate the success icon
               const successIcon = document.getElementById('success-icon');
-              if (successIcon) {
+              if (successIcon && typeof gsap !== 'undefined') {
                   gsap.fromTo(successIcon, 
                       { scale: 0.5, opacity: 0 }, 
                       { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(1.7)', delay: 0.2 }
                   );
               }
 
-              // Run confetti after a short delay
               setTimeout(createConfetti, 500);
 
-              // Personalize message (example)
-              // In a real app, you would get this from a secure session, not localStorage
-              const userName = "Valued Customer"; // Placeholder
+              const userName = "Valued Customer";
               const personalMessage = document.getElementById('personal-message');
               if (personalMessage) {
                   personalMessage.innerHTML = `<strong>Welcome to Amiquus, ${userName}!</strong> You'll start receiving instant notifications when cars matching your criteria are listed.`;
               }
               
-              // Clean up localStorage
               setTimeout(() => {
                   localStorage.removeItem('setupFormData');
               }, 1000);
           }
-      } catch (e) {
+        } catch (e) {
           console.error("Failed to initialize thank-you page scripts:", e);
-      }
+        }
         
       }
 
@@ -1134,5 +1245,65 @@ const getAbsoluteOgImageUrl = (imagePath) => imagePath ? `${Astro.url.origin}${i
   }
   body {
     font-size: var(--font-size-base);
+  }
+
+  /* Car animation styling from your snippet (flattened from SCSS) */
+  .car__body {
+    animation: shake 0.2s ease-in-out infinite alternate;
+  }
+
+  .car__line {
+    transform-origin: center right;
+    stroke-dasharray: 22;
+    animation: line 0.8s ease-in-out infinite;
+    animation-fill-mode: both;
+  }
+
+  .car__line--top {
+    animation-delay: 0s;
+  }
+
+  .car__line--middle {
+    animation-delay: 0.2s;
+  }
+
+  .car__line--bottom {
+    animation-delay: 0.4s;
+  }
+
+  /* Slightly softer wheels in dark mode */
+  .dark .car__wheel--left,
+  .dark .car__wheel--right {
+    fill: #e5e7eb; /* softer than pure white */
+  }
+
+  @keyframes shake {
+    0% {
+      transform: translateY(-1%);
+    }
+    100% {
+      transform: translateY(3%);
+    }
+  }
+
+  @keyframes line {
+    0% {
+      stroke-dashoffset: 22;
+    }
+    25% {
+      stroke-dashoffset: 22;
+    }
+    50% {
+      stroke-dashoffset: 0;
+    }
+    51% {
+      stroke-dashoffset: 0;
+    }
+    80% {
+      stroke-dashoffset: -22;
+    }
+    100% {
+      stroke-dashoffset: -22;
+    }
   }
 </style>
