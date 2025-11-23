@@ -66,7 +66,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
             <div class="absolute inset-0 rounded-2xl hero-stage-panel border border-border/40 overflow-hidden"></div>
 
             <!-- Background cloud (blurred cards only INSIDE this stage) -->
-            <div id="hero-bg-cloud" class="absolute inset-0"></div>
+            <div id="hero-bg-cloud" class="absolute inset-0 pointer-events-none"></div>
 
             <!-- Foreground main card -->
             <div id="hero-main-wrap" class="absolute inset-0 grid place-items-center px-6 sm:px-8">
@@ -82,7 +82,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
 
           <p class="sr-only">
             A single car listing card appears in front while many blurred listings float in the background.
-            The front card collapses into ash, euro symbols rise to show missed profit,
+            The front card collapses into ash, euro/dollar/pound symbols rise to show missed profit,
             then the next card appears. After six cards, text appears saying missed opportunity and missed profit.
           </p>
         </div>
@@ -212,15 +212,12 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
         radial-gradient(60rem 30rem at 90% 10%, rgb(var(--amq-success)/.18) 0%, transparent 60%),
         linear-gradient(180deg, rgb(4 8 18) 0%, rgb(7 10 20) 40%, rgb(7 9 16) 100%);
     }
-    #amiquus-hero{
-      color-scheme: dark;
-    }
-    #amiquus-hero .text-muted-foreground{
-      color: rgb(var(--amq-muted));
-    }
+    #amiquus-hero{ color-scheme: dark; }
+    #amiquus-hero .text-muted-foreground{ color: rgb(var(--amq-muted)); }
 
     .hero-stage{
       filter: drop-shadow(0 30px 60px rgb(0 0 0 / .45));
+      perspective: 900px; /* NEW: gives depth so scatter reads better */
     }
     .hero-stage-panel{
       background:
@@ -244,9 +241,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
         radial-gradient(30rem 18rem at 90% 0%, rgb(var(--amq-success)/.10) 0%, transparent 60%);
       opacity:.9;
     }
-    #amiquus-probsol .probsol-kicker{
-      color: rgb(var(--amq-muted));
-    }
+    #amiquus-probsol .probsol-kicker{ color: rgb(var(--amq-muted)); }
 
     .probsol-card{
       background:
@@ -255,14 +250,9 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       border: 1px solid rgb(var(--border)/.35);
       backdrop-filter: blur(8px);
     }
-    .probsol-card--bad{
-      box-shadow: 0 18px 60px rgb(244 63 94 / .10);
-    }
-    .probsol-card--good{
-      box-shadow: 0 18px 60px rgb(16 185 129 / .10);
-    }
+    .probsol-card--bad{ box-shadow: 0 18px 60px rgb(244 63 94 / .10); }
+    .probsol-card--good{ box-shadow: 0 18px 60px rgb(16 185 129 / .10); }
 
-    /* Chips */
     #amiquus-probsol .chip{
       display:inline-flex; align-items:center; justify-content:center;
       padding:.25rem .625rem; font-size:.75rem; border-radius:9999px;
@@ -270,7 +260,6 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       background: linear-gradient(180deg, rgb(var(--chip)/.12), rgb(var(--chip)/.05));
     }
 
-    /* Animations in prob/sol (unchanged behavior, new theme) */
     @media (prefers-reduced-motion:no-preference){
       #amiquus-probsol .will-animate{opacity:0;transform:translateY(12px);transition:opacity .6s ease, transform .6s ease}
       #amiquus-probsol .will-animate.in-view{opacity:1;transform:none}
@@ -302,60 +291,101 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       100%{box-shadow:0 0 0 0 rgb(var(--amq-primary)/0)}
     }
 
-    /* ===== HERO ANIMATION PACK (updated collapse-to-ash) ===== */
-    #hero-bg-cloud { perspective: 1200px; }
+    /* ===== HERO ANIMATION PACK (scattered drifting bg cards) ===== */
+    #hero-bg-cloud { position: absolute; inset: 0; transform-style: preserve-3d; pointer-events: none; }
 
     .hero-bg-card,
-    .hero-main-card {
+    .hero-main-card{
       position: absolute;
       border-radius: 1rem;
       overflow: hidden;
       background: rgb(var(--card));
-      border: 1px solid rgb(var(--border));
+      border: 1.5px solid rgb(var(--border)); /* stronger border */
       box-shadow:
         0 14px 36px rgb(0 0 0 / 0.18),
-        0 2px 10px rgb(0 0 0 / 0.10);
+        0 2px 10px rgb(0 0 0 / 0.10),
+        inset 0 0 0 1px rgb(255 255 255 / .05); /* subtle inner edge */
       will-change: transform, opacity, filter;
     }
 
-    .hero-bg-card {
-      width: clamp(145px, 34%, 230px);
-      filter: blur(5px) saturate(.9);
-      opacity: 0.45;
+    /* UPDATED: more visible, nicer border, stronger scatter */
+    .hero-bg-card{
+      width: clamp(220px, 32%, 340px);
+      height: auto;
+
+      /* Add blur to the background cards so they appear diffused behind the main card */
+      filter: blur(10px) saturate(.95);
+      opacity: .35;
+
       transform-style: preserve-3d;
-      animation: bgWiggle 5.2s ease-in-out infinite;
+      transform-origin: center center;
+
+      /* base spot + depth + tilt */
+      transform:
+        translate3d(var(--bx), var(--by), 0)
+        translate(-50%, -50%)
+        translateZ(var(--z))
+        rotateX(var(--rx))
+        rotateY(var(--ry))
+        rotate(var(--r))
+        scale(var(--s));
+
+      animation: bgDrift var(--dur) ease-in-out infinite alternate;
     }
 
-    @keyframes bgWiggle {
-      0%,100% { transform: translate3d(var(--x), var(--y), var(--z)) rotate(var(--r)) scale(var(--s)); }
-      50% { transform: translate3d(calc(var(--x) + 8px), calc(var(--y) - 10px), var(--z)) rotate(calc(var(--r) + 1.2deg)) scale(var(--s)); }
+    @keyframes bgDrift{
+      0%{
+        transform:
+          translate3d(var(--bx), var(--by), 0)
+          translate(-50%, -50%)
+          translateZ(var(--z))
+          rotateX(var(--rx))
+          rotateY(var(--ry))
+          rotate(var(--r))
+          scale(var(--s))
+          translate3d(var(--dx0), var(--dy0), 0);
+      }
+      100%{
+        transform:
+          translate3d(var(--bx), var(--by), 0)
+          translate(-50%, -50%)
+          translateZ(var(--z))
+          rotateX(var(--rx))
+          rotateY(var(--ry))
+          rotate(calc(var(--r) + 2deg))
+          scale(var(--s))
+          translate3d(var(--dx1), var(--dy1), 0);
+      }
     }
 
-    .hero-main-card {
+    .hero-main-card{
       position: relative;
       width: min(92%, 420px);
       transform: translateY(0) scale(1);
       animation: mainWiggle 1.3s ease-in-out infinite;
     }
-    @keyframes mainWiggle {
+    @keyframes mainWiggle{
       0%,100% { transform: translateY(0) rotate(-0.6deg); }
       50% { transform: translateY(-3px) rotate(0.6deg); }
     }
 
-    .hero-card-img {
+    .hero-card-img{
       height: 210px;
       background: rgb(var(--muted));
       display: grid;
       place-items: center;
     }
-    .hero-card-img img {
+    .hero-card-img img{
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
     }
 
-    .hero-meta {
+    .hero-bg-card .hero-card-img{ height: 190px; }
+    .hero-bg-card .hero-meta{ padding: 0.85rem 1rem; }
+
+    .hero-meta{
       padding: 0.9rem 1rem;
       display: grid;
       grid-template-columns: 1fr auto;
@@ -363,39 +393,37 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       align-items: center;
       background: linear-gradient(180deg, rgb(255 255 255 / .02), transparent);
     }
-    .hero-brand {
+    .hero-brand{
       font-weight: 800;
       font-size: 1.05rem;
       color: rgb(var(--amq-primary));
       line-height: 1.15;
     }
-    .hero-model {
+    .hero-model{
       font-weight: 700;
       font-size: 0.98rem;
       color: rgb(var(--foreground));
       opacity: 0.95;
     }
-    .hero-price {
+    .hero-price{
       font-weight: 900;
       font-size: 1.15rem;
       color: rgb(var(--amq-success));
       white-space: nowrap;
       text-shadow: 0 6px 18px rgb(0 0 0 / .12);
     }
-    .hero-sub {
+    .hero-sub{
       font-size: 0.8rem;
       color: rgb(var(--muted-foreground));
       margin-top: 0.1rem;
     }
 
-    .hero-main-card.is-entering {
+    .hero-main-card.is-entering{
       opacity: 0;
       transform: translateY(14px) scale(0.985);
       filter: blur(1px);
     }
-
-    /* collapse to ash + sink */
-    .hero-main-card.is-ashing {
+    .hero-main-card.is-ashing{
       opacity: 0;
       transform: translateY(60px) scale(0.9) rotateX(12deg);
       filter: blur(6px) grayscale(1);
@@ -403,7 +431,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       pointer-events: none;
     }
 
-    .ash {
+    .ash{
       position: absolute;
       left: 8%;
       right: 8%;
@@ -414,16 +442,14 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       opacity: 0;
       animation: ashPoof 950ms ease forwards;
     }
-    @keyframes ashPoof {
+    @keyframes ashPoof{
       0% { opacity: 0; transform: scale(.6) translateY(0); }
       25% { opacity: .7; transform: scale(1) translateY(-2px); }
       100% { opacity: 0; transform: scale(1.5) translateY(6px); }
     }
 
-    .money-puff {
+    .money-puff{
       position: absolute;
-      left: 75%;
-      top: 70%;
       transform: translate(-50%,-50%);
       font-weight: 900;
       color: rgb(var(--amq-danger));
@@ -431,15 +457,15 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       pointer-events: none;
       opacity: 0;
       animation: moneyPuff 1050ms ease forwards;
-      font-size: 1.4rem;
+      font-size: 1.15rem;
     }
-    @keyframes moneyPuff {
+    @keyframes moneyPuff{
       0%   { opacity: 0; transform: translate(-50%,-50%) scale(.6); }
       15%  { opacity: 1; transform: translate(-50%,-70%) scale(1); }
       100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% - 120px)) scale(1.25); }
     }
 
-    .hero-final-overlay {
+    .hero-final-overlay{
       position: absolute;
       inset: 0;
       display: grid;
@@ -454,21 +480,19 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       pointer-events: none;
       backdrop-filter: blur(4px);
     }
-    .hero-final-overlay.show {
-      animation: finalOverlay 2200ms ease forwards;
-    }
-    .hero-final-overlay .line1 {
+    .hero-final-overlay.show{ animation: finalOverlay 2200ms ease forwards; }
+    .hero-final-overlay .line1{
       font-size: clamp(1.4rem, 3vw, 2rem);
       text-transform: uppercase;
     }
-    .hero-final-overlay .line2 {
+    .hero-final-overlay .line2{
       margin-top: .35rem;
       font-size: clamp(1.1rem, 2.4vw, 1.6rem);
       color: rgb(var(--amq-danger));
       text-transform: uppercase;
       text-shadow: 0 8px 24px rgb(0 0 0 / .3);
     }
-    @keyframes finalOverlay {
+    @keyframes finalOverlay{
       0% { opacity: 0; transform: scale(.98); }
       15% { opacity: 1; transform: scale(1); }
       85% { opacity: 1; transform: scale(1); }
@@ -515,7 +539,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       ];
 
       const foreground = cars.slice(0, 6);
-      const background = cars.slice(6);
+      const backgroundPool = cars.slice(6);
 
       function createCard(car, cls){
         const card = document.createElement('article');
@@ -544,40 +568,105 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
         return card;
       }
 
+      /**
+       * Render the floating background cards. This version removes any grid
+       * structure and instead scatters cards randomly throughout the hero
+       * stage. To keep the scene airy, a small padding is applied near the
+       * edges, and no blur is removed – cards are blurred via CSS for a
+       * dreamy backdrop. Each card also has its own gentle drift animation
+       * defined via CSS variables (see bgDrift keyframes).
+       */
       function renderBackground(){
         bgCloud.innerHTML = '';
-        background.forEach((car) => {
-          const c = createCard(car, 'hero-bg-card');
-          const x = Math.round((Math.random()*80 - 40)) + '%';
-          const y = Math.round((Math.random()*70 - 35)) + '%';
-          const z = Math.round(Math.random()*-280 - 60) + 'px';
-          const s = (0.82 + Math.random()*0.25).toFixed(2);
-          const r = (Math.random()*10 - 5).toFixed(1) + 'deg';
 
-          c.style.setProperty('--x', x);
-          c.style.setProperty('--y', y);
+        const count = 12; // number of background cards
+        const placed = [];
+        const pad = 5;  // % padding from edges to avoid clipping
+        const minDist = 12; // % distance between centers to avoid obvious clumps
+
+        function pickSpot(){
+          // Attempt to find a random spot that doesn't collide too closely with others
+          for(let tries = 0; tries < 60; tries++){
+            const x = pad + Math.random() * (100 - pad*2);
+            const y = pad + Math.random() * (100 - pad*2);
+            let ok = true;
+            for(const p of placed){
+              const dx = x - p.x;
+              const dy = y - p.y;
+              const d  = Math.hypot(dx, dy);
+              if(d < minDist){ ok = false; break; }
+            }
+            if(ok){ placed.push({x,y}); return {x,y}; }
+          }
+          // fallback if we didn't find a well spaced spot
+          const x = pad + Math.random() * (100 - pad*2);
+          const y = pad + Math.random() * (100 - pad*2);
+          placed.push({x,y});
+          return {x,y};
+        }
+
+        for(let i = 0; i < count; i++){
+          const car = backgroundPool[i % backgroundPool.length];
+          const c = createCard(car, 'hero-bg-card');
+
+          const {x,y} = pickSpot();
+          // Assign position via left/top percentages to scatter across the stage
+          c.style.left = x + '%';
+          c.style.top  = y + '%';
+
+          // base offsets: random slight translations so each card starts offset from its anchor
+          const bx = (Math.random()*40 - 20).toFixed(0) + 'px';
+          const by = (Math.random()*34 - 17).toFixed(0) + 'px';
+
+          const z  = (-80 - Math.random()*420).toFixed(0) + 'px';
+          const s  = (0.68 + Math.random()*0.55).toFixed(2);
+          const r  = (Math.random()*28 - 14).toFixed(1) + 'deg';
+          const rx = (Math.random()*16 - 8).toFixed(1) + 'deg';
+          const ry = (Math.random()*16 - 8).toFixed(1) + 'deg';
+
+          // gentle float around their own scattered spot
+          const dx0 = (Math.random()*80 - 40).toFixed(0) + 'px';
+          const dy0 = (Math.random()*80 - 40).toFixed(0) + 'px';
+          const dx1 = (Math.random()*80 - 40).toFixed(0) + 'px';
+          const dy1 = (Math.random()*80 - 40).toFixed(0) + 'px';
+          const dur = (6.0 + Math.random()*6.0).toFixed(2) + 's';
+
+          c.style.setProperty('--bx', bx);
+          c.style.setProperty('--by', by);
           c.style.setProperty('--z', z);
           c.style.setProperty('--s', s);
           c.style.setProperty('--r', r);
+          c.style.setProperty('--rx', rx);
+          c.style.setProperty('--ry', ry);
+          c.style.setProperty('--dx0', dx0);
+          c.style.setProperty('--dy0', dy0);
+          c.style.setProperty('--dx1', dx1);
+          c.style.setProperty('--dy1', dy1);
+          c.style.setProperty('--dur', dur);
 
-          c.style.left = '50%';
-          c.style.top = '50%';
-          c.style.transform = `translate3d(${x}, ${y}, ${z}) rotate(${r}) scale(${s})`;
-          c.style.animationDelay = (Math.random()*2.2).toFixed(2) + 's';
+          // randomize initial animation delay for a staggered effect
+          c.style.animationDelay = (Math.random()*3.5).toFixed(2) + 's';
 
           bgCloud.appendChild(c);
-        });
+        }
       }
 
-      function spawnMoneyPuffs(target){
-        const count = 4;
+      function spawnMoneyPuffs(targetCard){
+        const symbols = ['€', '$', '£'];
+        const count = 5;
+
         for(let i=0;i<count;i++){
           const puff = document.createElement('div');
           puff.className = 'money-puff';
-          puff.textContent = '€';
-          puff.style.setProperty('--dx', (Math.random()*90 - 45).toFixed(0) + 'px');
-          puff.style.animationDelay = (i*80) + 'ms';
-          target.appendChild(puff);
+          puff.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+
+          puff.style.setProperty('--dx', (Math.random()*110 - 55).toFixed(0) + 'px');
+          puff.style.animationDelay = (i*70) + 'ms';
+
+          puff.style.left = '50%';
+          puff.style.top = '86%';
+
+          targetCard.appendChild(puff);
           puff.addEventListener('animationend', ()=> puff.remove());
         }
       }
@@ -619,10 +708,10 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
           const card = createCard(car, 'hero-main-card is-entering');
           mainWrap.appendChild(card);
 
+          // trigger entrance animation
           requestAnimationFrame(() => card.classList.remove('is-entering'));
           await new Promise(r => setTimeout(r, 1450));
 
-          // collapse to ash + money loss
           spawnMoneyPuffs(card);
           spawnAsh(card);
           card.classList.add('is-ashing');
@@ -697,7 +786,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
           <p class="text-muted-foreground">Limited slots ensure you stay ahead of the competition. Perfect for dealers where being first means the difference between profit and loss.</p>
         </div>
         <div class="bg-card border border-border rounded-xl p-8 text-center transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-2xl animate-on-scroll" data-delay="500">
-          <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M21 12c.552 0 1-.448 1-1V8c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v3c0 .552.448 1 1 1h18z"/><path d="M3 12v7c0 .552.448 1 1 1h16c.552 0 1-.448 1-1v-7"/></svg></div>
+          <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M21 12c.552 0 1-.448 1-1V8c0-.552-.448-1-1-1H3c-.552 0 1 .448 1 1v3c0 .552.448 1 1 1h18z"/><path d="M3 12v7c0 .552.448 1 1 1h16c.552 0 1-.448 1-1v-7"/></svg></div>
           <h3 class="text-xl font-semibold text-foreground mb-4">Flexible Management</h3>
           <p class="text-muted-foreground">Pause or cancel your subscription anytime. Modify your search criteria as your needs change. Complete control at your fingertips.</p>
         </div>
@@ -868,7 +957,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
             <label for="contact-message" class="block text-sm font-medium text-foreground mb-1">Message</label>
             <textarea id="contact-message" name="message" rows="4" class="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder="How can we help you today?" required></textarea>
           </div>
-          <button type="submit" id="contact-submit-btn" class="w-full flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed">
+          <button type="submit" id="contact-submit-btn" class="w-full flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground hover:opacity-90 transition disabled:opacity:50 disabled:cursor-not-allowed">
             <span id="contact-submit-text">Send Message</span>
             <span id="contact-submit-loading" class="hidden ms-2"><div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div></span>
           </button>
