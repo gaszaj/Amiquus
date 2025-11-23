@@ -1,0 +1,98 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  // Prisma internal id (string cuid)
+  id                String   @id @default(cuid())
+
+  // JSON fields
+  legacyId          Int?     @unique   // users.json: id (numeric)
+  username          String?
+  email             String   @unique
+  hashedPassword    String?            // users.json: password (nullable)
+  googleId          String?  @unique   // users.json: google_id
+  firstName         String?
+  lastName          String?
+  stripeCustomerId  String?
+
+  isEmailVerified        Boolean @default(false)
+  resetToken             String?
+  resetTokenExpiry       DateTime?
+  verificationCode       String?
+  verificationCodeExpiry DateTime?
+
+  preferredLanguage String? // keep your app field
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  sessions          Session[]
+  oauthAccounts     OAuthAccount[]
+  subscriptions     CarSubscription[]
+  twoFactorSecret   String?
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String?
+  expiresAt DateTime
+
+  // To support importing session.json
+  sid       String?  @unique
+  data      Json?            // whole sess object (cookie + passport)
+  expire    DateTime?        // session.json: expire
+}
+
+model OAuthAccount {
+  id             String @id @default(cuid())
+  provider       String
+  providerUserId String
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+
+  @@unique([provider, providerUserId])
+}
+
+//
+// Your subscriptions.json is NOT payment subscriptions.
+// It's car-alert / scraping subscriptions.
+//
+model CarSubscription {
+  id                   String   @id @default(cuid())
+  legacyId             Int?     @unique  // subscriptions.json: id
+  user                 User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId               String?
+
+  stripeSubscriptionId String?
+  stripePriceId        String?
+
+  websitesSelected     String[] // subscriptions.json: websites_selected
+  facebookMarketplaceUrl String?
+  updateFrequency      String?
+
+  brand                String?
+  modelName            String?  // JSON key is "model"
+  fuelType             String?
+  yearMin              Int?
+  yearMax              Int?
+  mileageMin           Int?
+  mileageMax           Int?
+  priceMin             Int?
+  priceMax             Int?
+
+  notificationLanguage String?
+  telegramUsername     String?
+
+  price                Int?
+  status               String?
+
+  createdAt            DateTime?
+  updatedAt            DateTime?
+}
