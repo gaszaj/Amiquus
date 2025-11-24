@@ -22,12 +22,23 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
   description={description}
   languageLinksMap={languageLinksMap}
 >
-  <!-- Hero Section (REDONE to match screenshot) -->
-  <section id="amiquus-hero" class="relative overflow-hidden py-20 sm:py-28 lg:py-32">
-    <!-- dark gradient background like screenshot -->
-    <div aria-hidden="true" class="absolute inset-0 -z-10 hero-bg"></div>
+  <!-- Hero Section -->
+  <section
+    id="amiquus-hero"
+    class="relative overflow-hidden py-20 sm:py-28 lg:py-32"
+    aria-label="Amiquus hero section"
+  >
+    <!-- gradient background -->
+    <div aria-hidden="true" class="absolute inset-0 -z-20 hero-bg"></div>
 
-    <div class="max-w-screen-xl mx-auto px-4">
+    <!-- hero-wide floating background layer -->
+    <div
+      id="hero-float-layer"
+      aria-hidden="true"
+      class="absolute inset-0 -z-10 pointer-events-none"
+    ></div>
+
+    <div class="relative z-10 max-w-screen-xl mx-auto px-4">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
         <!-- Left copy -->
         <div class="text-center lg:text-start animate-on-scroll">
@@ -62,11 +73,8 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
         <!-- Right animation stage -->
         <div class="relative animate-on-scroll" data-delay="100" aria-label="Animated missed opportunities preview">
           <div class="relative hero-stage h-[380px] sm:h-[440px] lg:h-[500px] w-full">
-            <!-- Stage panel -->
-            <div class="absolute inset-0 rounded-2xl hero-stage-panel border border-border/40 overflow-hidden"></div>
-
-            <!-- Background cloud (blurred cards only INSIDE this stage) -->
-            <div id="hero-bg-cloud" class="absolute inset-0"></div>
+            <!-- Stage panel (no ugly frame) -->
+            <div class="absolute inset-0 rounded-3xl hero-stage-panel overflow-hidden"></div>
 
             <!-- Foreground main card -->
             <div id="hero-main-wrap" class="absolute inset-0 grid place-items-center px-6 sm:px-8">
@@ -77,12 +85,12 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
             <div id="hero-final-overlay" class="hero-final-overlay" aria-hidden="true"></div>
 
             <!-- subtle depth fade at bottom -->
-            <div aria-hidden="true" class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent"></div>
+            <div aria-hidden="true" class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/30 to-transparent dark:from-black/50"></div>
           </div>
 
           <p class="sr-only">
             A single car listing card appears in front while many blurred listings float in the background.
-            The front card collapses into ash, euro symbols rise to show missed profit,
+            The front card gets a JUST SOLD red stamp, then money loss symbols rise and fade longer,
             then the next card appears. After six cards, text appears saying missed opportunity and missed profit.
           </p>
         </div>
@@ -90,7 +98,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
     </div>
   </section>
 
-  <!-- "PROBLEM / SOLUTION" SECTION (REDONE to match screenshot) -->
+  <!-- "PROBLEM / SOLUTION" SECTION -->
   <section id="amiquus-probsol" class="relative py-14 sm:py-20 overflow-hidden" aria-labelledby="probsol-title">
     <div aria-hidden="true" class="absolute inset-0 pointer-events-none probsol-bg"></div>
 
@@ -116,7 +124,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
           class="group relative rounded-2xl p-6 shadow-sm will-animate probsol-card probsol-card--bad"
           data-anim="fade-right">
           <header class="flex items-center gap-3">
-            <div class="h-12 w-12 grid place-items-center rounded-xl bg-rose-500/10 text-rose-400">
+            <div class="h-12 w-12 grid place-items-center rounded-xl probsol-icon probsol-icon--bad">
               <svg viewBox="0 0 24 24" class="h-6 w-6" role="img" aria-label="Hourglass">
                 <g>
                   <path fill="currentColor" d="M6 3h12v2a5 5 0 0 1-2.1 4.1L14 10l1.9.9A5 5 0 0 1 18 15v2H6v-2a5 5 0 0 1 2.1-4.1L10 10 8.1 9.1A5 5 0 0 1 6 5V3Z"/>
@@ -131,18 +139,18 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
           </header>
 
           <p class="mt-3 text-sm md:text-base leading-relaxed text-muted-foreground">
-            You refresh, <span class="text-rose-400 font-semibold">you miss</span>, you repeat.
+            You refresh, <span class="probsol-bad-accent font-semibold">you miss</span>, you repeat.
           </p>
 
           <div class="mt-4 flex flex-wrap gap-2">
-            <span class="chip md:text-[12px]" style="--chip: var(--amq-danger)">Time sink</span>
-            <span class="chip md:text-[12px]" style="--chip: var(--amq-danger)">Missed deals</span>
-            <span class="chip md:text-[12px]" style="--chip: var(--amq-danger)">Stress</span>
+            <span class="chip md:text-[12px]" style="--chip: 0 84% 55%;">Time sink</span>
+            <span class="chip md:text-[12px]" style="--chip: 0 84% 55%;">Missed deals</span>
+            <span class="chip md:text-[12px]" style="--chip: 0 84% 55%;">Stress</span>
           </div>
 
           <div class="mt-5 flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
-            <span class="h-2 w-2 rounded-full bg-rose-400/80" aria-hidden="true"></span>
-            <span>Live monitoring</span>
+            <span class="h-2 w-2 rounded-full probsol-dot-bad" aria-hidden="true"></span>
+            <span>Slow reactions</span>
           </div>
         </article>
 
@@ -151,7 +159,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
           class="group relative rounded-2xl p-6 shadow-sm will-animate probsol-card probsol-card--good"
           data-anim="fade-left">
           <header class="flex items-center gap-3">
-            <div class="h-12 w-12 grid place-items-center rounded-xl bg-emerald-500/10 text-emerald-300">
+            <div class="h-12 w-12 grid place-items-center rounded-xl probsol-icon probsol-icon--good">
               <svg viewBox="0 0 24 24" class="h-6 w-6" role="img" aria-label="Notification bell">
                 <path fill="currentColor" d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2Zm7-6V11a7 7 0 1 0-14 0v5l-2 2v1h18v-1l-2-2Z"/>
                 <circle class="ping-dot" cx="18" cy="6" r="2" fill="currentColor"/>
@@ -163,19 +171,19 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
           </header>
 
           <p class="mt-3 text-sm md:text-base leading-relaxed text-muted-foreground">
-            <span class="font-semibold text-emerald-300">We scan.</span>
-            <span class="text-sky-300 font-semibold">Telegram pings you</span>. You act first.
+            <span class="probsol-good-accent font-semibold">We scan.</span>
+            <span class="probsol-good-accent-2 font-semibold">Telegram pings you</span>. You act first.
           </p>
 
           <div class="mt-4 flex flex-wrap gap-2">
-            <span class="chip md:text-[12px]" style="--chip: var(--amq-success)">24/7 scan</span>
-            <span class="chip md:text-[12px]" style="--chip: var(--amq-success)">Instant ping</span>
-            <span class="chip md:text-[12px]" style="--chip: var(--amq-success)">Full coverage</span>
+            <span class="chip md:text-[12px]" style="--chip: 142 76% 36%;">24/7 scan</span>
+            <span class="chip md:text-[12px]" style="--chip: 142 76% 36%;">Instant ping</span>
+            <span class="chip md:text-[12px]" style="--chip: 142 76% 36%;">Full coverage</span>
           </div>
 
           <div class="mt-5 flex items-center justify-between">
             <div class="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
-              <span class="h-2 w-2 rounded-full bg-emerald-400/80" aria-hidden="true"></span>
+              <span class="h-2 w-2 rounded-full probsol-dot-good" aria-hidden="true"></span>
               <span>Instant ping</span>
             </div>
             <a href="#order"
@@ -204,186 +212,306 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
     </div>
   </section>
 
-  <style>
-    /* ===== HERO LOOK (match screenshot) ===== */
-    #amiquus-hero .hero-bg{
-      background:
-        radial-gradient(80rem 40rem at 0% -10%, rgb(var(--amq-primary)/.22) 0%, transparent 60%),
-        radial-gradient(60rem 30rem at 90% 10%, rgb(var(--amq-success)/.18) 0%, transparent 60%),
-        linear-gradient(180deg, rgb(4 8 18) 0%, rgb(7 10 20) 40%, rgb(7 9 16) 100%);
-    }
-    #amiquus-hero{ color-scheme: dark; }
-    #amiquus-hero .text-muted-foreground{ color: rgb(var(--amq-muted)); }
+  <!-- IMPORTANT: is:global so injected hero cards receive styles -->
+  <style is:global>
+    /* =========================================================
+       HERO + PROBSOL are global, theme-safe, and token-based
+       ========================================================= */
 
-    .hero-stage{ filter: drop-shadow(0 30px 60px rgb(0 0 0 / .45)); }
-    .hero-stage-panel{
-      background:
-        radial-gradient(120% 100% at 20% 0%, rgb(255 255 255 / .06) 0%, transparent 60%),
-        linear-gradient(180deg, rgb(255 255 255 / .04), rgb(255 255 255 / .02));
-      backdrop-filter: blur(8px);
-    }
+    /* ---------- HERO THEME ---------- */
+    #amiquus-hero {
+      position: relative;
 
-    /* ===== PROBLEM/SOLUTION LOOK (glass cards) ===== */
-    #amiquus-probsol{
-      color-scheme: dark;
-      background:
-        radial-gradient(60rem 20rem at 50% -20%, rgb(var(--amq-primary)/.12), transparent 70%),
-        linear-gradient(180deg, rgb(6 9 18) 0%, rgb(6 8 14) 100%);
-      border-top: 1px solid rgb(var(--border)/.25);
-      border-bottom: 1px solid rgb(var(--border)/.25);
-    }
-    #amiquus-probsol .probsol-bg{
-      background:
-        radial-gradient(30rem 18rem at 10% 10%, rgb(var(--amq-primary)/.10) 0%, transparent 60%),
-        radial-gradient(30rem 18rem at 90% 0%, rgb(var(--amq-success)/.10) 0%, transparent 60%);
-      opacity:.9;
-    }
-    #amiquus-probsol .probsol-kicker{ color: rgb(var(--amq-muted)); }
-
-    .probsol-card{
-      background:
-        radial-gradient(140% 120% at 0% 0%, rgb(255 255 255 / .05) 0%, transparent 55%),
-        linear-gradient(180deg, rgb(14 18 30 / .9), rgb(10 14 25 / .9));
-      border: 1px solid rgb(var(--border)/.35);
-      backdrop-filter: blur(8px);
-    }
-    .probsol-card--bad{ box-shadow: 0 18px 60px rgb(244 63 94 / .10); }
-    .probsol-card--good{ box-shadow: 0 18px 60px rgb(16 185 129 / .10); }
-
-    #amiquus-probsol .chip{
-      display:inline-flex; align-items:center; justify-content:center;
-      padding:.25rem .625rem; font-size:.75rem; border-radius:9999px;
-      border:1px solid rgb(var(--chip) / .35); color: rgb(var(--chip) / .95);
-      background: linear-gradient(180deg, rgb(var(--chip)/.12), rgb(var(--chip)/.05));
-    }
-
-    @media (prefers-reduced-motion:no-preference){
-      #amiquus-probsol .will-animate{opacity:0;transform:translateY(12px);transition:opacity .6s ease, transform .6s ease}
-      #amiquus-probsol .will-animate.in-view{opacity:1;transform:none}
-      #amiquus-probsol [data-anim="fade-right"]{transform:translateX(-12px)}
-      #amiquus-probsol [data-anim="fade-left"]{transform:translateX(12px)}
-      #amiquus-probsol .in-view[data-anim="fade-right"],
-      #amiquus-probsol .in-view[data-anim="fade-left"]{transform:none}
-
-      .sand-top{animation:sandTop 2.2s infinite ease-in-out}
-      .sand-bot{animation:sandBot 2.2s infinite ease-in-out}
-      @keyframes sandTop{0%{opacity:1;transform:translateY(0)}50%{opacity:.2;transform:translateY(4px)}100%{opacity:1;transform:translateY(0)}}
-      @keyframes sandBot{0%{opacity:.2;transform:translateY(-4px)}50%{opacity:1;transform:translateY(0)}100%{opacity:.2;transform:translateY(-4px)}}
-
-      .ping-dot{animation:pingDot 1.6s ease-in-out infinite}
-      @keyframes pingDot{0%,100%{opacity:.5;transform:scale(.9)}50%{opacity:1;transform:scale(1.15)}}
-    }
-
-    .cta-btn{
-      color:white;
-      background: linear-gradient(90deg, rgb(var(--amq-primary)), rgb(var(--amq-success)));
-      background-size:200% 100%;
-      animation:ctaGradient 5s linear infinite, ctaPulseDark 1.8s ease-in-out infinite;
-      box-shadow: 0 8px 30px rgb(0 0 0 / .35);
-    }
-    @keyframes ctaGradient{0%{background-position:0% 50%}100%{background-position:100% 50%}}
-    @keyframes ctaPulseDark{
-      0%{box-shadow:0 0 0 0 rgb(var(--amq-primary)/.55)}
-      70%{box-shadow:0 0 0 14px rgb(var(--amq-primary)/0)}
-      100%{box-shadow:0 0 0 0 rgb(var(--amq-primary)/0)}
-    }
-
-    /* ===== HERO ANIMATION PACK (fixed scattered drifting bg cards) ===== */
-    #hero-bg-cloud { position: absolute; inset: 0; }
-
-    .hero-bg-card,
-    .hero-main-card{
-      position: absolute;
-      border-radius: 1rem;
+      /* round hero bottom so overlays can't look square */
+      border-bottom-left-radius: 3rem;
+      border-bottom-right-radius: 3rem;
       overflow: hidden;
-      background: rgb(var(--card));
-      border: 1px solid rgb(var(--border));
+
+      --destructive: 0 84% 55%;
+
+      --hero-bg-a: 220 70% 98%;
+      --hero-bg-b: 205 80% 97%;
+      --hero-bg-c: 230 55% 99%;
+
+      --hero-stage-glass: rgba(255,255,255,.80);
+      --hero-stage-glass-2: rgba(255,255,255,.58);
+      --hero-stage-border: rgba(0,0,0,.06);
+
+      --hero-card-glass: rgba(255,255,255,.94);
+      --hero-card-glass-2: rgba(255,255,255,.78);
+      --hero-card-border: rgba(0,0,0,.10);
+
+      --hero-float-opacity: .34;
+      --hero-float-blur: 7px;
+
+      --money-red: 0 84% 55%;
+    }
+
+    .dark #amiquus-hero {
+      --destructive: 0 84% 55%;
+
+      --hero-bg-a: 225 85% 14%;
+      --hero-bg-b: 160 70% 12%;
+      --hero-bg-c: 230 55% 8%;
+
+      --hero-stage-glass: rgba(8,12,22,.72);
+      --hero-stage-glass-2: rgba(8,12,22,.48);
+      --hero-stage-border: rgba(255,255,255,.14);
+
+      --hero-card-glass: rgba(10,14,25,.84);
+      --hero-card-glass-2: rgba(10,14,25,.62);
+      --hero-card-border: rgba(255,255,255,.16);
+
+      --hero-float-opacity: .30;
+      --hero-float-blur: 10px;
+
+      --money-red: 0 84% 55%;
+    }
+
+    #amiquus-hero .hero-bg {
+      background:
+        radial-gradient(70rem 38rem at 0% -10%, hsl(var(--hero-bg-a)) 0%, transparent 60%),
+        radial-gradient(60rem 30rem at 95% 10%, hsl(var(--hero-bg-b)) 0%, transparent 60%),
+        linear-gradient(180deg, hsl(var(--hero-bg-c)) 0%, transparent 70%);
+    }
+
+    /* soften hero bottom so no hard “frame” edge */
+    #amiquus-hero::after{
+      content:"";
+      position:absolute;
+      left:0; right:0;
+      bottom:-1px;
+      height:140px;
+      pointer-events:none;
+      z-index: 2;
+      border-bottom-left-radius: 3rem;
+      border-bottom-right-radius: 3rem;
+      background:
+        linear-gradient(to bottom,
+          transparent 0%,
+          hsl(var(--background) / 0.65) 55%,
+          hsl(var(--background)) 100%);
+    }
+    .dark #amiquus-hero::after{
+      background:
+        linear-gradient(to bottom,
+          transparent 0%,
+          hsl(var(--background) / 0.55) 55%,
+          hsl(var(--background)) 100%);
+    }
+
+    .hero-stage {
+      filter: drop-shadow(0 30px 70px rgb(0 0 0 / .22));
+      perspective: 900px;
+
+      /* FIX: force rounding and clipping for ALL children (no square flashes) */
+      border-radius: 1.5rem;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .dark .hero-stage {
+      filter: drop-shadow(0 30px 70px rgb(0 0 0 / .50));
+    }
+
+    .hero-stage-panel {
+      background:
+        radial-gradient(120% 100% at 20% 0%, var(--hero-stage-glass) 0%, transparent 55%),
+        linear-gradient(180deg, var(--hero-stage-glass), var(--hero-stage-glass-2));
+      border: 1px solid var(--hero-stage-border);
+      backdrop-filter: blur(14px) saturate(1.1);
       box-shadow:
-        0 14px 36px rgb(0 0 0 / 0.18),
-        0 2px 10px rgb(0 0 0 / 0.10);
+        inset 0 0 0 1px rgba(255,255,255,.20),
+        inset 0 -30px 60px rgba(0,0,0,.04),
+        0 22px 70px rgb(0 0 0 / .10);
+    }
+    .dark .hero-stage-panel {
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.10),
+        inset 0 -30px 60px rgba(0,0,0,.30),
+        0 25px 80px rgb(0 0 0 / .45);
+    }
+
+    /* ---------- HERO CARDS ---------- */
+    .hero-float-card,
+    .hero-main-card {
+      position: absolute;
+      border-radius: 1.25rem;
+      overflow: hidden;
+      border: 1px solid var(--hero-card-border);
+      box-shadow:
+        0 18px 45px rgb(0 0 0 / 0.18),
+        inset 0 0 0 1px rgba(255,255,255,.08);
+      backdrop-filter: blur(12px) saturate(1.15);
+      -webkit-backdrop-filter: blur(12px) saturate(1.15);
+
+      background:
+        radial-gradient(140% 120% at 0% 0%, var(--hero-card-glass) 0%, transparent 55%),
+        linear-gradient(180deg, var(--hero-card-glass), var(--hero-card-glass-2));
+
       will-change: transform, opacity, filter;
-    }
-
-    .hero-bg-card{
-      width: clamp(140px, 32%, 220px);
-      filter: blur(8px) saturate(.9);
-      opacity: .32;
       transform-style: preserve-3d;
-      animation: bgDrift var(--dur) ease-in-out infinite alternate;
+      pointer-events: none;
     }
 
-    @keyframes bgDrift{
-      0%{
-        transform:
-          translate(-50%, -50%)
-          translate3d(var(--dx0), var(--dy0), var(--z))
-          rotate(var(--r))
-          scale(var(--s));
-      }
-      100%{
-        transform:
-          translate(-50%, -50%)
-          translate3d(var(--dx1), var(--dy1), var(--z))
-          rotate(calc(var(--r) + 1.5deg))
-          scale(var(--s));
-      }
+    .hero-float-card {
+      width: clamp(190px, 20vw, 300px);
+      opacity: var(--hero-float-opacity);
+      filter: blur(var(--hero-float-blur)) saturate(.98);
     }
 
-    .hero-main-card{
+    .hero-main-card {
       position: relative;
       width: min(92%, 420px);
-      transform: translateY(0) scale(1);
       animation: mainWiggle 1.3s ease-in-out infinite;
-    }
-    @keyframes mainWiggle{
-      0%,100% { transform: translateY(0) rotate(-0.6deg); }
-      50% { transform: translateY(-3px) rotate(0.6deg); }
+      pointer-events: auto;
     }
 
-    .hero-card-img{
+    @keyframes mainWiggle {
+      0%,100% { transform: translateY(0) rotate(-0.6deg); }
+      50%     { transform: translateY(-3px) rotate(0.6deg); }
+    }
+
+    .hero-card-img {
       height: 210px;
-      background: rgb(var(--muted));
+      background: hsl(var(--muted));
       display: grid;
       place-items: center;
+      position: relative;
+      border-top-left-radius: inherit;
+      border-top-right-radius: inherit;
+      overflow: hidden;
+      z-index: 0;
     }
-    .hero-card-img img{
+
+    .hero-card-img img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
+      position: relative;
+      z-index: 1;
     }
 
-    .hero-meta{
+    .hero-float-card .hero-card-img { height: 175px; }
+    .hero-float-card .hero-meta { padding: 0.75rem 0.9rem; }
+
+    .hero-meta {
       padding: 0.9rem 1rem;
       display: grid;
       grid-template-columns: 1fr auto;
       gap: 0.5rem 0.75rem;
       align-items: center;
-      background: linear-gradient(180deg, rgb(255 255 255 / .02), transparent);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.45), transparent);
+      border-bottom-left-radius: inherit;
+      border-bottom-right-radius: inherit;
     }
-    .hero-brand{
-      font-weight: 800;
+    .dark .hero-meta {
+      background: linear-gradient(180deg, rgba(255,255,255,.04), transparent);
+    }
+
+    .hero-brand {
+      font-weight: 900;
       font-size: 1.05rem;
-      color: rgb(var(--amq-primary));
+      color: hsl(var(--primary));
       line-height: 1.15;
+      text-shadow: 0 2px 0 rgb(0 0 0 / .06);
     }
-    .hero-model{
+
+    .hero-model {
       font-weight: 700;
       font-size: 0.98rem;
-      color: rgb(var(--foreground));
-      opacity: 0.95;
+      color: hsl(var(--foreground));
+      opacity: .95;
     }
-    .hero-price{
+
+    .hero-price {
       font-weight: 900;
-      font-size: 1.15rem;
-      color: rgb(var(--amq-success));
+      font-size: 1.18rem;
+      color: hsl(142 76% 36%);
       white-space: nowrap;
-      text-shadow: 0 6px 18px rgb(0 0 0 / .12);
+      text-shadow:
+        0 6px 18px rgb(0 0 0 / .10),
+        0 0 18px hsl(142 76% 36% / .40);
+      letter-spacing: .2px;
     }
-    .hero-sub{
-      font-size: 0.8rem;
-      color: rgb(var(--muted-foreground));
-      margin-top: 0.1rem;
+    .dark .hero-price {
+      text-shadow:
+        0 6px 18px rgb(0 0 0 / .25),
+        0 0 18px hsl(142 76% 36% / .70);
+    }
+
+    .hero-sub {
+      font-size: .8rem;
+      color: hsl(var(--muted-foreground));
+      margin-top: .1rem;
+    }
+
+    /* ---------- STAMP (nicer fit, modern distressed badge) ---------- */
+    .hero-stamp {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      padding: .55rem 1.1rem;
+      border-radius: 9999px;
+      font-weight: 950;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #fff;
+
+      background:
+        radial-gradient(120% 140% at 100% 0%, rgb(255 255 255 / .18), transparent 55%),
+        repeating-linear-gradient(
+          -45deg,
+          rgb(255 255 255 / .12) 0px,
+          rgb(255 255 255 / .12) 2px,
+          transparent 2px,
+          transparent 7px
+        ),
+        linear-gradient(
+          180deg,
+          hsl(var(--destructive)),
+          hsl(var(--destructive) / .92)
+        );
+
+      border: 2px solid rgb(255 255 255 / .95);
+      outline: 1px solid rgb(0 0 0 / .25);
+      box-shadow:
+        0 10px 26px rgb(0 0 0 / .55),
+        inset 0 0 0 1px rgb(255 255 255 / .22),
+        inset 0 -8px 16px rgb(0 0 0 / .18);
+
+      transform: translateX(-50%) rotate(-8deg) scale(.92);
+      opacity: 0;
+      filter: blur(.25px) contrast(1.2);
+      pointer-events: none;
+      z-index: 50;
+
+      text-shadow:
+        0 2px 0 rgb(0 0 0 / .55),
+        0 0 10px rgb(0 0 0 / .3);
+      white-space: nowrap;
+    }
+
+    .hero-stamp::after{
+      content:"";
+      position:absolute;
+      inset:-3px;
+      border-radius: inherit;
+      border: 1px dashed rgb(255 255 255 / .55);
+      opacity:.65;
+      pointer-events:none;
+      mix-blend-mode: overlay;
+    }
+
+    .hero-main-card.is-stamping .hero-stamp {
+      animation: stampIn 600ms cubic-bezier(.2,.9,.25,1.2) forwards;
+    }
+
+    @keyframes stampIn {
+      0%   { opacity: 0; transform: translateX(-50%) rotate(-18deg) scale(.25); }
+      70%  { opacity: 1; transform: translateX(-50%) rotate(-8deg) scale(1.12); }
+      100% { opacity: 1; transform: translateX(-50%) rotate(-8deg) scale(1); filter:none; }
     }
 
     .hero-main-card.is-entering{
@@ -391,6 +519,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       transform: translateY(14px) scale(0.985);
       filter: blur(1px);
     }
+
     .hero-main-card.is-ashing{
       opacity: 0;
       transform: translateY(60px) scale(0.9) rotateX(12deg);
@@ -416,25 +545,45 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       100% { opacity: 0; transform: scale(1.5) translateY(6px); }
     }
 
+    /* ---------- MONEY LOSS (slower/longer) ---------- */
     .money-puff{
       position: absolute;
-      left: 80%;
-      top: 76%;
       transform: translate(-50%,-50%);
-      font-weight: 900;
-      color: rgb(var(--amq-danger));
-      text-shadow: 0 8px 24px rgb(0 0 0 / .35);
+      font-weight: 1000;
+
+      color: hsl(var(--money-red));
+      text-shadow:
+        0 10px 28px rgb(0 0 0 / .55),
+        0 0 22px hsl(var(--money-red) / .90);
+
       pointer-events: none;
       opacity: 0;
-      animation: moneyPuff 1050ms ease forwards;
-      font-size: 1.15rem;
-    }
-    @keyframes moneyPuff{
-      0%   { opacity: 0; transform: translate(-50%,-50%) scale(.6); }
-      15%  { opacity: 1; transform: translate(-50%,-70%) scale(1); }
-      100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% - 120px)) scale(1.25); }
+      animation: moneyPuff 3200ms ease forwards;
+      will-change: transform, opacity, filter;
     }
 
+    @keyframes moneyPuff{
+      0%   { opacity: 0; transform: translate(-50%,-50%) scale(.55) rotate(var(--rot)); filter: blur(0px); }
+      8%   { opacity: 1; transform: translate(-50%,-90%) scale(1.35) rotate(var(--rot)); }
+
+      60%  {
+        opacity: 1;
+        transform: translate(calc(-50% + var(--dx)*.6), calc(-50% - 175px))
+          scale(1.12)
+          rotate(calc(var(--rot) * 1.25));
+      }
+
+      100% {
+        opacity: 0;
+        transform:
+          translate(calc(-50% + var(--dx)), calc(-50% - 280px))
+          scale(.18)
+          rotate(calc(var(--rot) * 1.7));
+        filter: blur(8px) saturate(.55);
+      }
+    }
+
+    /* ---------- FINAL OVERLAY (rounded + clipped) ---------- */
     .hero-final-overlay{
       position: absolute;
       inset: 0;
@@ -442,31 +591,177 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       place-items: center;
       text-align: center;
       font-weight: 900;
-      letter-spacing: .3px;
-      color: white;
-      background: rgb(0 0 0 / 0.40);
+      letter-spacing: .6px;
+
+      background:
+        radial-gradient(90% 80% at 50% 50%, rgb(0 0 0 / .10), rgb(0 0 0 / .52)),
+        linear-gradient(180deg, hsl(var(--destructive) / .10), transparent);
+
       opacity: 0;
       transform: scale(0.98);
       pointer-events: none;
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(6px);
+
+      /* FIX: never square */
+      border-radius: 1.5rem;
     }
-    .hero-final-overlay.show{ animation: finalOverlay 2200ms ease forwards; }
+
+    .hero-final-overlay .glass{
+      padding: clamp(1.15rem, 2vw, 1.75rem) clamp(1.3rem, 3vw, 2.4rem);
+      border-radius: 1.35rem;
+
+      background:
+        linear-gradient(180deg, rgb(255 255 255 / .20), rgb(255 255 255 / .08));
+      border: 1px solid rgb(255 255 255 / .45);
+      box-shadow:
+        0 18px 60px rgb(0 0 0 / .45),
+        inset 0 0 0 1px rgb(255 255 255 / .12);
+    }
+
+    .hero-final-overlay.show { animation: finalOverlay 3000ms ease forwards; }
+
     .hero-final-overlay .line1{
-      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-size: clamp(1.9rem, 4vw, 2.85rem);
       text-transform: uppercase;
+      color: hsl(var(--foreground));
+      text-shadow: 0 10px 30px rgb(0 0 0 / .65);
     }
+    .hero-final-overlay .line1 span{
+      color: hsl(var(--money-red));
+      text-shadow:
+        0 10px 30px rgb(0 0 0 / .65),
+        0 0 26px hsl(var(--money-red) / .85);
+    }
+
     .hero-final-overlay .line2{
-      margin-top: .35rem;
-      font-size: clamp(1.1rem, 2.4vw, 1.6rem);
-      color: rgb(var(--amq-danger));
+      margin-top: .55rem;
+      font-size: clamp(1.4rem, 3.1vw, 2.2rem);
+      color: hsl(var(--muted-foreground));
       text-transform: uppercase;
-      text-shadow: 0 8px 24px rgb(0 0 0 / .3);
+      letter-spacing: .12em;
+      text-shadow: 0 10px 30px rgb(0 0 0 / .65);
     }
+    .hero-final-overlay .line2 span{
+      color: hsl(var(--money-red));
+      text-shadow:
+        0 10px 30px rgb(0 0 0 / .65),
+        0 0 26px hsl(var(--money-red) / .85);
+    }
+
     @keyframes finalOverlay{
       0% { opacity: 0; transform: scale(.98); }
-      15% { opacity: 1; transform: scale(1); }
-      85% { opacity: 1; transform: scale(1); }
+      12% { opacity: 1; transform: scale(1); }
+      88% { opacity: 1; transform: scale(1); }
       100% { opacity: 0; transform: scale(1.02); }
+    }
+
+    /* =========================================================
+       PROBLEM / SOLUTION — cooler light mode (no yellow)
+       ========================================================= */
+    #amiquus-probsol{
+      background:
+        radial-gradient(42rem 18rem at 0% 0%, hsl(var(--primary)/.05), transparent 60%),
+        radial-gradient(40rem 16rem at 100% 0%, hsl(var(--primary)/.04), transparent 60%),
+        hsl(var(--background));
+      border-top: 1px solid hsl(var(--border)/.55);
+      border-bottom: 1px solid hsl(var(--border)/.55);
+    }
+
+    .dark #amiquus-probsol{
+      background:
+        radial-gradient(60rem 20rem at 50% -20%, hsl(var(--primary)/.14), transparent 70%),
+        linear-gradient(180deg, hsl(222 40% 8%) 0%, hsl(222 40% 6%) 100%);
+      border-top: 1px solid hsl(var(--border)/.35);
+      border-bottom: 1px solid hsl(var(--border)/.35);
+    }
+
+    #amiquus-probsol .probsol-bg{ opacity:.45; }
+
+    .probsol-card{
+      background:
+        linear-gradient(180deg, hsl(var(--card)), hsl(var(--card)) 60%, hsl(var(--muted)/.30));
+      border: 1px solid hsl(var(--border)/.8);
+      box-shadow:
+        0 12px 40px rgb(0 0 0 / .05),
+        inset 0 0 0 1px rgb(255 255 255 / .62);
+      backdrop-filter: blur(4px);
+      transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+    }
+    .probsol-card:hover{
+      transform: translateY(-4px);
+      border-color: hsl(var(--primary)/.45);
+      box-shadow:
+        0 18px 60px rgb(0 0 0 / .08),
+        inset 0 0 0 1px rgb(255 255 255 / .75);
+    }
+
+    .dark .probsol-card{
+      background:
+        radial-gradient(140% 120% at 0% 0%, rgb(255 255 255 / .06) 0%, transparent 55%),
+        linear-gradient(180deg, rgb(14 18 30 / .92), rgb(10 14 25 / .92));
+      border: 1px solid hsl(var(--border)/.45);
+      box-shadow: 0 18px 60px rgb(0 0 0 / .35);
+    }
+
+    .probsol-card--bad{ border-color: hsl(var(--destructive)/.25); }
+    .probsol-card--good{ border-color: hsl(142 76% 36% / .25); }
+
+    .probsol-icon{
+      box-shadow: inset 0 0 0 1px rgb(255 255 255 / .9), 0 8px 20px rgb(0 0 0 / .06);
+    }
+    .probsol-icon--bad{
+      background: linear-gradient(180deg, hsl(var(--destructive)/.10), hsl(var(--destructive)/.05));
+      color: hsl(var(--destructive));
+    }
+    .probsol-icon--good{
+      background: linear-gradient(180deg, hsl(142 76% 36% / .12), hsl(142 76% 36% / .06));
+      color: hsl(142 76% 36%);
+    }
+
+    .probsol-bad-accent{ color: hsl(var(--destructive)); }
+    .probsol-good-accent{ color: hsl(142 76% 36%); }
+    .probsol-good-accent-2{ color: hsl(var(--primary)); }
+
+    .probsol-dot-bad{ background: hsl(var(--destructive)); }
+    .probsol-dot-good{ background: hsl(142 76% 36%); }
+
+    #amiquus-probsol .chip{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:.25rem .625rem; font-size:.75rem; border-radius:9999px;
+      border:1px solid hsl(var(--chip) / .35);
+      color: hsl(var(--chip));
+      background: linear-gradient(180deg, hsl(var(--chip)/.10), hsl(var(--chip)/.04));
+    }
+
+    @media (prefers-reduced-motion:no-preference){
+      #amiquus-probsol .will-animate{opacity:0;transform:translateY(12px);transition:opacity .6s ease, transform .6s ease}
+      #amiquus-probsol .will-animate.in-view{opacity:1;transform:none}
+      #amiquus-probsol [data-anim="fade-right"]{transform:translateX(-12px)}
+      #amiquus-probsol [data-anim="fade-left"]{transform:translateX(12px)}
+      #amiquus-probsol .in-view[data-anim="fade-right"],
+      #amiquus-probsol .in-view[data-anim="fade-left"]{transform:none}
+
+      .sand-top{animation:sandTop 2.2s infinite ease-in-out}
+      .sand-bot{animation:sandBot 2.2s infinite ease-in-out}
+      @keyframes sandTop{0%{opacity:1;transform:translateY(0)}50%{opacity:.2;transform:translateY(4px)}100%{opacity:1;transform:translateY(0)}}
+      @keyframes sandBot{0%{opacity:.2;transform:translateY(-4px)}50%{opacity:1;transform:translateY(0)}100%{opacity:.2;transform:translateY(-4px)}}
+
+      .ping-dot{animation:pingDot 1.6s ease-in-out infinite}
+      @keyframes pingDot{0%,100%{opacity:.5;transform:scale(.9)}50%{opacity:1;transform:scale(1.15)}}
+    }
+
+    .cta-btn{
+      color:white;
+      background: linear-gradient(90deg, hsl(var(--primary)), hsl(142 76% 36%));
+      background-size:200% 100%;
+      animation:ctaGradient 5s linear infinite, ctaPulse 1.8s ease-in-out infinite;
+      box-shadow: 0 8px 30px rgb(0 0 0 / .25);
+    }
+    @keyframes ctaGradient{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+    @keyframes ctaPulse{
+      0%{box-shadow:0 0 0 0 hsl(var(--primary)/.35)}
+      70%{box-shadow:0 0 0 14px hsl(var(--primary)/0)}
+      100%{box-shadow:0 0 0 0 hsl(var(--primary)/0)}
     }
   </style>
 
@@ -483,12 +778,13 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       els.forEach(el=> io.observe(el));
     })();
 
-    // ===== HERO FOREGROUND + BACKGROUND ANIMATION =====
+    // ===== HERO FOREGROUND + GLOBAL FLOAT BACKGROUND =====
     (function(){
-      const bgCloud = document.getElementById('hero-bg-cloud');
+      const hero = document.getElementById('amiquus-hero');
+      const floatLayer = document.getElementById('hero-float-layer');
       const mainWrap = document.getElementById('hero-main-wrap');
       const finalOverlay = document.getElementById('hero-final-overlay');
-      if(!bgCloud || !mainWrap || !finalOverlay) return;
+      if(!hero || !floatLayer || !mainWrap || !finalOverlay) return;
 
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -516,6 +812,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
         card.className = cls;
         card.setAttribute('role','listitem');
         card.setAttribute('aria-label', `${car.brand} ${car.model} at ${car.price}`);
+
         card.innerHTML = `
           <div class="hero-card-img">
             <img
@@ -523,9 +820,12 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
               alt="${car.brand} ${car.model}"
               loading="eager"
               decoding="async"
-              onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=&quot;color: rgb(var(--muted-foreground)); font-weight:700; font-size:0.95rem;&quot;>Car photo</div>';"
+              onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=&quot;color: hsl(var(--muted-foreground)); font-weight:700; font-size:0.95rem;&quot;>Car photo</div>';"
             />
           </div>
+
+          <div class="hero-stamp" aria-hidden="true">JUST SOLD</div>
+
           <div class="hero-meta">
             <div>
               <div class="hero-brand">${car.brand}</div>
@@ -538,54 +838,133 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
         return card;
       }
 
-      function renderBackground(){
-        bgCloud.innerHTML = '';
+      // ---------- FLOAT BACKGROUND ENGINE ----------
+      let floatNodes = [];
+      let rafId = null;
+      let lastT = 0;
 
-        // Build a fuller cloud like screenshot
-        const count = 12;
+      function clearFloat(){
+        if(rafId) cancelAnimationFrame(rafId);
+        rafId = null;
+        floatLayer.innerHTML = '';
+        floatNodes = [];
+        lastT = 0;
+      }
+
+      function layoutFloat(){
+        clearFloat();
+
+        const rect = hero.getBoundingClientRect();
+        const W = rect.width;
+        const H = rect.height;
+
+        const count = Math.max(14, Math.min(22, Math.floor(W / 90)));
+        const pad = Math.min(70, W * 0.06);
+        const minDist = Math.min(220, W * 0.18);
+
+        const placed = [];
+
+        function pickSpot(){
+          for(let tries=0; tries<120; tries++){
+            const x = pad + Math.random() * (W - pad*2);
+            const y = pad + Math.random() * (H - pad*2);
+            let ok = true;
+            for(const p of placed){
+              const d = Math.hypot(x - p.x, y - p.y);
+              if(d < minDist){ ok = false; break; }
+            }
+            if(ok){ placed.push({x,y}); return {x,y}; }
+          }
+          const x = pad + Math.random() * (W - pad*2);
+          const y = pad + Math.random() * (H - pad*2);
+          placed.push({x,y});
+          return {x,y};
+        }
+
         for(let i=0;i<count;i++){
           const car = backgroundPool[i % backgroundPool.length];
-          const c = createCard(car, 'hero-bg-card');
+          const el = createCard(car, 'hero-float-card');
 
-          // real anchor positions inside stage (not translate %)
-          const left = 8 + Math.random()*84;   // 8%..92%
-          const top  = 6 + Math.random()*88;   // 6%..94%
-          const z    = -60 - Math.random()*260; // depth
-          const s    = (0.78 + Math.random()*0.30).toFixed(2);
-          const r    = (Math.random()*12 - 6).toFixed(1) + 'deg';
+          const {x,y} = pickSpot();
 
-          // drift deltas around anchor
-          const dx0 = (Math.random()*60 - 30).toFixed(0) + 'px';
-          const dy0 = (Math.random()*50 - 25).toFixed(0) + 'px';
-          const dx1 = (Math.random()*60 - 30).toFixed(0) + 'px';
-          const dy1 = (Math.random()*50 - 25).toFixed(0) + 'px';
-          const dur = (4.5 + Math.random()*3.5).toFixed(2) + 's';
+          const scale = 0.6 + Math.random()*0.75;
+          const z = -40 - Math.random()*420;
+          const rot = (Math.random()*28 - 14);
+          const rx = (Math.random()*10 - 5);
+          const ry = (Math.random()*10 - 5);
 
-          c.style.left = left + '%';
-          c.style.top  = top + '%';
-          c.style.setProperty('--z', z + 'px');
-          c.style.setProperty('--s', s);
-          c.style.setProperty('--r', r);
-          c.style.setProperty('--dx0', dx0);
-          c.style.setProperty('--dy0', dy0);
-          c.style.setProperty('--dx1', dx1);
-          c.style.setProperty('--dy1', dy1);
-          c.style.setProperty('--dur', dur);
+          const speed = 0.012 + Math.random()*0.020;
+          const ang = Math.random()*Math.PI*2;
+          const vx = Math.cos(ang)*speed*(0.8 + Math.random()*0.7);
+          const vy = Math.sin(ang)*speed*(0.8 + Math.random()*0.7);
 
-          c.style.animationDelay = (Math.random()*2.5).toFixed(2) + 's';
-          bgCloud.appendChild(c);
+          const rotV = (Math.random()*0.008 - 0.004);
+
+          el.style.transform =
+            `translate3d(${x}px, ${y}px, ${z}px) translate(-50%,-50%) rotateX(${rx}deg) rotateY(${ry}deg) rotate(${rot}deg) scale(${scale})`;
+
+          floatLayer.appendChild(el);
+
+          floatNodes.push({ el, x, y, vx, vy, rot, rotV, scale, z, rx, ry });
+        }
+
+        if(!reduceMotion){
+          rafId = requestAnimationFrame(tick);
         }
       }
 
-      function spawnMoneyPuffs(target){
-        const count = 4;
+      function tick(t){
+        if(!lastT) lastT = t;
+        const dt = t - lastT;
+        lastT = t;
+
+        const rect = hero.getBoundingClientRect();
+        const W = rect.width;
+        const H = rect.height;
+
+        for(const n of floatNodes){
+          n.x += n.vx * dt;
+          n.y += n.vy * dt;
+          n.rot += n.rotV * dt;
+
+          if(n.x < -80) n.x = W + 80;
+          if(n.x > W + 80) n.x = -80;
+          if(n.y < -80) n.y = H + 80;
+          if(n.y > H + 80) n.y = -80;
+
+          n.el.style.transform =
+            `translate3d(${n.x}px, ${n.y}px, ${n.z}px) translate(-50%,-50%) rotateX(${n.rx}deg) rotateY(${n.ry}deg) rotate(${n.rot}deg) scale(${n.scale})`;
+        }
+
+        rafId = requestAnimationFrame(tick);
+      }
+
+      const ro = new ResizeObserver(() => layoutFloat());
+      ro.observe(hero);
+
+      // ---------- FOREGROUND CYCLE ----------
+      function spawnMoneyPuffs(targetCard){
+        const symbols = ['€', '$', '£'];
+        const count = 14;
         for(let i=0;i<count;i++){
           const puff = document.createElement('div');
           puff.className = 'money-puff';
-          puff.textContent = '€';
-          puff.style.setProperty('--dx', (Math.random()*90 - 45).toFixed(0) + 'px');
-          puff.style.animationDelay = (i*80) + 'ms';
-          target.appendChild(puff);
+
+          const sym = symbols[Math.floor(Math.random()*symbols.length)];
+          puff.textContent = `-${sym}`;
+
+          const dx = (Math.random()*240 - 120).toFixed(0) + 'px';
+          const rot = (Math.random()*40 - 20).toFixed(0) + 'deg';
+          const size = (1.35 + Math.random()*1.25);
+
+          puff.style.setProperty('--dx', dx);
+          puff.style.setProperty('--rot', rot);
+          puff.style.animationDelay = (i*70) + 'ms';
+          puff.style.left = (38 + Math.random()*24) + '%';
+          puff.style.top = (82 + Math.random()*5) + '%';
+          puff.style.fontSize = (1.35*size).toFixed(2) + 'rem';
+
+          targetCard.appendChild(puff);
           puff.addEventListener('animationend', ()=> puff.remove());
         }
       }
@@ -597,29 +976,38 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
         a.addEventListener('animationend', ()=> a.remove());
       }
 
+      function applyStamp(card){
+        const stamp = card.querySelector('.hero-stamp');
+        if(!stamp) return;
+
+        card.classList.remove('is-stamping');
+        stamp.textContent = "JUST SOLD";
+        void stamp.offsetWidth;
+        card.classList.add('is-stamping');
+      }
+
       async function showFinalOverlay(){
         finalOverlay.innerHTML = `
-          <div>
-            <div class="line1">Missed opportunity</div>
-            <div class="line2">Missed profit</div>
+          <div class="glass">
+            <div class="line1">Missed <span>opportunity</span></div>
+            <div class="line2">Missed <span>profit</span></div>
           </div>
         `;
         finalOverlay.classList.add('show');
-        await new Promise(r => setTimeout(r, 2200));
+        await new Promise(r => setTimeout(r, 3000));
         finalOverlay.classList.remove('show');
       }
 
       let idx = 0;
 
       async function cycle(){
+        layoutFloat();
+
         if(reduceMotion){
-          renderBackground();
           mainWrap.innerHTML = '';
           mainWrap.appendChild(createCard(foreground[0], 'hero-main-card'));
           return;
         }
-
-        renderBackground();
 
         while(true){
           mainWrap.innerHTML = '';
@@ -628,9 +1016,14 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
           mainWrap.appendChild(card);
 
           requestAnimationFrame(() => card.classList.remove('is-entering'));
-          await new Promise(r => setTimeout(r, 1450));
+          await new Promise(r => setTimeout(r, 1200));
+
+          applyStamp(card);
+          await new Promise(r => setTimeout(r, 850));
 
           spawnMoneyPuffs(card);
+          await new Promise(r => setTimeout(r, 2200));
+
           spawnAsh(card);
           card.classList.add('is-ashing');
           await new Promise(r => setTimeout(r, 950));
@@ -639,11 +1032,9 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
           if(idx >= foreground.length){
             idx = 0;
             await showFinalOverlay();
-            await new Promise(r => setTimeout(r, 450));
-            renderBackground();
+            await new Promise(r => setTimeout(r, 550));
           } else {
-            await new Promise(r => setTimeout(r, 200));
-            renderBackground();
+            await new Promise(r => setTimeout(r, 260));
           }
         }
       }
@@ -677,7 +1068,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
         <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">Why Choose <span class="text-primary">Amiquus?</span></h2>
         <p class="text-lg text-muted-foreground">Powerful features designed to give you the competitive edge in finding the perfect vehicles.</p>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 sm:flex-row sm:grid-cols-2 lg:grid-cols-3 gap-8">
         <div class="bg-card border border-border rounded-xl p-8 text-center transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-2xl animate-on-scroll">
           <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35" stroke-linecap="round"></path></svg></div>
           <h3 class="text-xl font-semibold text-foreground mb-4">Multi-Platform Monitoring</h3>
@@ -704,7 +1095,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
           <p class="text-muted-foreground">Limited slots ensure you stay ahead of the competition. Perfect for dealers where being first means the difference between profit and loss.</p>
         </div>
         <div class="bg-card border border-border rounded-xl p-8 text-center transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-2xl animate-on-scroll" data-delay="500">
-          <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M21 12c.552 0 1-.448 1-1V8c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v3c0 .552.448 1 1 1h18z"/><path d="M3 12v7c0 .552.448 1 1 1h16c.552 0 1-.448 1-1v-7"/></svg></div>
+          <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M21 12c.552 0 1-.448 1-1V8c0-.552-.448-1-1-1H3c-.552 0 1 .448 1 1v3c0 .552.448 1 1 1h18z"/><path d="M3 12v7c0 .552.448 1 1 1h16c.552 0 1-.448 1-1v-7"/></svg></div>
           <h3 class="text-xl font-semibold text-foreground mb-4">Flexible Management</h3>
           <p class="text-muted-foreground">Pause or cancel your subscription anytime. Modify your search criteria as your needs change. Complete control at your fingertips.</p>
         </div>
@@ -875,7 +1266,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
             <label for="contact-message" class="block text-sm font-medium text-foreground mb-1">Message</label>
             <textarea id="contact-message" name="message" rows="4" class="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder="How can we help you today?" required></textarea>
           </div>
-          <button type="submit" id="contact-submit-btn" class="w-full flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed">
+          <button type="submit" id="contact-submit-btn" class="w-full flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground hover:opacity-90 transition disabled:opacity:50 disabled:cursor-not-allowed">
             <span id="contact-submit-text">Send Message</span>
             <span id="contact-submit-loading" class="hidden ms-2"><div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div></span>
           </button>

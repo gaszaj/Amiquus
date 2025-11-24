@@ -66,7 +66,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
             <div class="absolute inset-0 rounded-2xl hero-stage-panel border border-border/40 overflow-hidden"></div>
 
             <!-- Background cloud (blurred cards only INSIDE this stage) -->
-            <div id="hero-bg-cloud" class="absolute inset-0"></div>
+            <div id="hero-bg-cloud" class="absolute inset-0 pointer-events-none"></div>
 
             <!-- Foreground main card -->
             <div id="hero-main-wrap" class="absolute inset-0 grid place-items-center px-6 sm:px-8">
@@ -82,7 +82,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
 
           <p class="sr-only">
             A single car listing card appears in front while many blurred listings float in the background.
-            The front card collapses into ash, euro symbols rise to show missed profit,
+            The front card collapses into ash, euro/dollar/pound symbols rise to show missed profit,
             then the next card appears. After six cards, text appears saying missed opportunity and missed profit.
           </p>
         </div>
@@ -215,7 +215,10 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
     #amiquus-hero{ color-scheme: dark; }
     #amiquus-hero .text-muted-foreground{ color: rgb(var(--amq-muted)); }
 
-    .hero-stage{ filter: drop-shadow(0 30px 60px rgb(0 0 0 / .45)); }
+    .hero-stage{
+      filter: drop-shadow(0 30px 60px rgb(0 0 0 / .45));
+      perspective: 900px; /* NEW: gives depth so scatter reads better */
+    }
     .hero-stage-panel{
       background:
         radial-gradient(120% 100% at 20% 0%, rgb(255 255 255 / .06) 0%, transparent 60%),
@@ -288,8 +291,8 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       100%{box-shadow:0 0 0 0 rgb(var(--amq-primary)/0)}
     }
 
-    /* ===== HERO ANIMATION PACK (fixed scattered drifting bg cards) ===== */
-    #hero-bg-cloud { position: absolute; inset: 0; }
+    /* ===== HERO ANIMATION PACK (scattered drifting bg cards) ===== */
+    #hero-bg-cloud { position: absolute; inset: 0; transform-style: preserve-3d; pointer-events: none; }
 
     .hero-bg-card,
     .hero-main-card{
@@ -297,35 +300,61 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       border-radius: 1rem;
       overflow: hidden;
       background: rgb(var(--card));
-      border: 1px solid rgb(var(--border));
+      border: 1.5px solid rgb(var(--border)); /* stronger border */
       box-shadow:
         0 14px 36px rgb(0 0 0 / 0.18),
-        0 2px 10px rgb(0 0 0 / 0.10);
+        0 2px 10px rgb(0 0 0 / 0.10),
+        inset 0 0 0 1px rgb(255 255 255 / .05); /* subtle inner edge */
       will-change: transform, opacity, filter;
     }
 
+    /* UPDATED: more visible, nicer border, stronger scatter */
     .hero-bg-card{
-      width: clamp(140px, 32%, 220px);
-      filter: blur(8px) saturate(.9);
-      opacity: .32;
+      width: clamp(220px, 32%, 340px);
+      height: auto;
+
+      /* Add blur to the background cards so they appear diffused behind the main card */
+      filter: blur(10px) saturate(.95);
+      opacity: .35;
+
       transform-style: preserve-3d;
+      transform-origin: center center;
+
+      /* base spot + depth + tilt */
+      transform:
+        translate3d(var(--bx), var(--by), 0)
+        translate(-50%, -50%)
+        translateZ(var(--z))
+        rotateX(var(--rx))
+        rotateY(var(--ry))
+        rotate(var(--r))
+        scale(var(--s));
+
       animation: bgDrift var(--dur) ease-in-out infinite alternate;
     }
 
     @keyframes bgDrift{
       0%{
         transform:
+          translate3d(var(--bx), var(--by), 0)
           translate(-50%, -50%)
-          translate3d(var(--dx0), var(--dy0), var(--z))
+          translateZ(var(--z))
+          rotateX(var(--rx))
+          rotateY(var(--ry))
           rotate(var(--r))
-          scale(var(--s));
+          scale(var(--s))
+          translate3d(var(--dx0), var(--dy0), 0);
       }
       100%{
         transform:
+          translate3d(var(--bx), var(--by), 0)
           translate(-50%, -50%)
-          translate3d(var(--dx1), var(--dy1), var(--z))
-          rotate(calc(var(--r) + 1.5deg))
-          scale(var(--s));
+          translateZ(var(--z))
+          rotateX(var(--rx))
+          rotateY(var(--ry))
+          rotate(calc(var(--r) + 2deg))
+          scale(var(--s))
+          translate3d(var(--dx1), var(--dy1), 0);
       }
     }
 
@@ -352,6 +381,9 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       object-fit: cover;
       display: block;
     }
+
+    .hero-bg-card .hero-card-img{ height: 190px; }
+    .hero-bg-card .hero-meta{ padding: 0.85rem 1rem; }
 
     .hero-meta{
       padding: 0.9rem 1rem;
@@ -418,8 +450,6 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
 
     .money-puff{
       position: absolute;
-      left: 80%;
-      top: 76%;
       transform: translate(-50%,-50%);
       font-weight: 900;
       color: rgb(var(--amq-danger));
@@ -538,54 +568,105 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
         return card;
       }
 
+      /**
+       * Render the floating background cards. This version removes any grid
+       * structure and instead scatters cards randomly throughout the hero
+       * stage. To keep the scene airy, a small padding is applied near the
+       * edges, and no blur is removed – cards are blurred via CSS for a
+       * dreamy backdrop. Each card also has its own gentle drift animation
+       * defined via CSS variables (see bgDrift keyframes).
+       */
       function renderBackground(){
         bgCloud.innerHTML = '';
 
-        // Build a fuller cloud like screenshot
-        const count = 12;
-        for(let i=0;i<count;i++){
+        const count = 12; // number of background cards
+        const placed = [];
+        const pad = 5;  // % padding from edges to avoid clipping
+        const minDist = 12; // % distance between centers to avoid obvious clumps
+
+        function pickSpot(){
+          // Attempt to find a random spot that doesn't collide too closely with others
+          for(let tries = 0; tries < 60; tries++){
+            const x = pad + Math.random() * (100 - pad*2);
+            const y = pad + Math.random() * (100 - pad*2);
+            let ok = true;
+            for(const p of placed){
+              const dx = x - p.x;
+              const dy = y - p.y;
+              const d  = Math.hypot(dx, dy);
+              if(d < minDist){ ok = false; break; }
+            }
+            if(ok){ placed.push({x,y}); return {x,y}; }
+          }
+          // fallback if we didn't find a well spaced spot
+          const x = pad + Math.random() * (100 - pad*2);
+          const y = pad + Math.random() * (100 - pad*2);
+          placed.push({x,y});
+          return {x,y};
+        }
+
+        for(let i = 0; i < count; i++){
           const car = backgroundPool[i % backgroundPool.length];
           const c = createCard(car, 'hero-bg-card');
 
-          // real anchor positions inside stage (not translate %)
-          const left = 8 + Math.random()*84;   // 8%..92%
-          const top  = 6 + Math.random()*88;   // 6%..94%
-          const z    = -60 - Math.random()*260; // depth
-          const s    = (0.78 + Math.random()*0.30).toFixed(2);
-          const r    = (Math.random()*12 - 6).toFixed(1) + 'deg';
+          const {x,y} = pickSpot();
+          // Assign position via left/top percentages to scatter across the stage
+          c.style.left = x + '%';
+          c.style.top  = y + '%';
 
-          // drift deltas around anchor
-          const dx0 = (Math.random()*60 - 30).toFixed(0) + 'px';
-          const dy0 = (Math.random()*50 - 25).toFixed(0) + 'px';
-          const dx1 = (Math.random()*60 - 30).toFixed(0) + 'px';
-          const dy1 = (Math.random()*50 - 25).toFixed(0) + 'px';
-          const dur = (4.5 + Math.random()*3.5).toFixed(2) + 's';
+          // base offsets: random slight translations so each card starts offset from its anchor
+          const bx = (Math.random()*40 - 20).toFixed(0) + 'px';
+          const by = (Math.random()*34 - 17).toFixed(0) + 'px';
 
-          c.style.left = left + '%';
-          c.style.top  = top + '%';
-          c.style.setProperty('--z', z + 'px');
+          const z  = (-80 - Math.random()*420).toFixed(0) + 'px';
+          const s  = (0.68 + Math.random()*0.55).toFixed(2);
+          const r  = (Math.random()*28 - 14).toFixed(1) + 'deg';
+          const rx = (Math.random()*16 - 8).toFixed(1) + 'deg';
+          const ry = (Math.random()*16 - 8).toFixed(1) + 'deg';
+
+          // gentle float around their own scattered spot
+          const dx0 = (Math.random()*80 - 40).toFixed(0) + 'px';
+          const dy0 = (Math.random()*80 - 40).toFixed(0) + 'px';
+          const dx1 = (Math.random()*80 - 40).toFixed(0) + 'px';
+          const dy1 = (Math.random()*80 - 40).toFixed(0) + 'px';
+          const dur = (6.0 + Math.random()*6.0).toFixed(2) + 's';
+
+          c.style.setProperty('--bx', bx);
+          c.style.setProperty('--by', by);
+          c.style.setProperty('--z', z);
           c.style.setProperty('--s', s);
           c.style.setProperty('--r', r);
+          c.style.setProperty('--rx', rx);
+          c.style.setProperty('--ry', ry);
           c.style.setProperty('--dx0', dx0);
           c.style.setProperty('--dy0', dy0);
           c.style.setProperty('--dx1', dx1);
           c.style.setProperty('--dy1', dy1);
           c.style.setProperty('--dur', dur);
 
-          c.style.animationDelay = (Math.random()*2.5).toFixed(2) + 's';
+          // randomize initial animation delay for a staggered effect
+          c.style.animationDelay = (Math.random()*3.5).toFixed(2) + 's';
+
           bgCloud.appendChild(c);
         }
       }
 
-      function spawnMoneyPuffs(target){
-        const count = 4;
+      function spawnMoneyPuffs(targetCard){
+        const symbols = ['€', '$', '£'];
+        const count = 5;
+
         for(let i=0;i<count;i++){
           const puff = document.createElement('div');
           puff.className = 'money-puff';
-          puff.textContent = '€';
-          puff.style.setProperty('--dx', (Math.random()*90 - 45).toFixed(0) + 'px');
-          puff.style.animationDelay = (i*80) + 'ms';
-          target.appendChild(puff);
+          puff.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+
+          puff.style.setProperty('--dx', (Math.random()*110 - 55).toFixed(0) + 'px');
+          puff.style.animationDelay = (i*70) + 'ms';
+
+          puff.style.left = '50%';
+          puff.style.top = '86%';
+
+          targetCard.appendChild(puff);
           puff.addEventListener('animationend', ()=> puff.remove());
         }
       }
@@ -627,6 +708,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
           const card = createCard(car, 'hero-main-card is-entering');
           mainWrap.appendChild(card);
 
+          // trigger entrance animation
           requestAnimationFrame(() => card.classList.remove('is-entering'));
           await new Promise(r => setTimeout(r, 1450));
 
@@ -704,7 +786,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
           <p class="text-muted-foreground">Limited slots ensure you stay ahead of the competition. Perfect for dealers where being first means the difference between profit and loss.</p>
         </div>
         <div class="bg-card border border-border rounded-xl p-8 text-center transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-2xl animate-on-scroll" data-delay="500">
-          <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M21 12c.552 0 1-.448 1-1V8c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v3c0 .552.448 1 1 1h18z"/><path d="M3 12v7c0 .552.448 1 1 1h16c.552 0 1-.448 1-1v-7"/></svg></div>
+          <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M21 12c.552 0 1-.448 1-1V8c0-.552-.448-1-1-1H3c-.552 0 1 .448 1 1v3c0 .552.448 1 1 1h18z"/><path d="M3 12v7c0 .552.448 1 1 1h16c.552 0 1-.448 1-1v-7"/></svg></div>
           <h3 class="text-xl font-semibold text-foreground mb-4">Flexible Management</h3>
           <p class="text-muted-foreground">Pause or cancel your subscription anytime. Modify your search criteria as your needs change. Complete control at your fingertips.</p>
         </div>
@@ -875,7 +957,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
             <label for="contact-message" class="block text-sm font-medium text-foreground mb-1">Message</label>
             <textarea id="contact-message" name="message" rows="4" class="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder="How can we help you today?" required></textarea>
           </div>
-          <button type="submit" id="contact-submit-btn" class="w-full flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed">
+          <button type="submit" id="contact-submit-btn" class="w-full flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground hover:opacity-90 transition disabled:opacity:50 disabled:cursor-not-allowed">
             <span id="contact-submit-text">Send Message</span>
             <span id="contact-submit-loading" class="hidden ms-2"><div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div></span>
           </button>
