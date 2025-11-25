@@ -72,7 +72,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
 
         <!-- Right animation stage -->
         <div class="relative animate-on-scroll" data-delay="100" aria-label="Animated missed opportunities preview">
-          <div class="relative hero-stage h-[380px] sm:h-[440px] lg:h-[500px] w-full">
+          <div class="relative hero-stage h-[23.75rem] sm:h-[27.5rem] lg:h-[31.25rem] w-full">
             <!-- Stage panel (no ugly frame) -->
             <div class="absolute inset-0 rounded-3xl hero-stage-panel overflow-hidden"></div>
 
@@ -87,114 +87,188 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
             <!-- subtle depth fade at bottom -->
             <div aria-hidden="true" class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/30 to-transparent dark:from-black/50"></div>
           </div>
-
-          <p class="sr-only">
-            A single car listing card appears in front while many blurred listings float in the background.
-            The front card gets a JUST SOLD red stamp, then money loss symbols rise and fade longer,
-            then the next card appears. After six cards, text appears saying missed opportunity and missed profit.
-          </p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- "PROBLEM / SOLUTION" SECTION -->
-  <section id="amiquus-probsol" class="relative py-14 sm:py-20 overflow-hidden" aria-labelledby="probsol-title">
-    <div aria-hidden="true" class="absolute inset-0 pointer-events-none probsol-bg"></div>
+  <!-- "PROBLEM / SOLUTION" SECTION (V4 — smoother transitions, cleaner blocks, wobble, Telegram callout, CTA pulse) -->
+  <section
+    id="amiquus-probsol"
+    class="relative py-14 sm:py-20 overflow-hidden bg-background"
+    aria-labelledby="probsol-title"
+  >
+    <!-- soft transition fades so section blends with neighbors -->
+    <div aria-hidden="true" class="probsol-fade probsol-fade--top"></div>
+    <div aria-hidden="true" class="probsol-fade probsol-fade--bot"></div>
 
-    <div class="max-w-screen-xl mx-auto px-4">
+    <!-- soft blobs / brand-colored, very subtle -->
+    <div aria-hidden="true" class="probsol-blob probsol-blob--red"></div>
+    <div aria-hidden="true" class="probsol-blob probsol-blob--green"></div>
+
+    <div class="max-w-screen-xl mx-auto px-4 relative z-10">
       <div class="text-center max-w-3xl mx-auto will-animate" data-anim="fade-up">
-        <div class="probsol-kicker uppercase tracking-[0.22em] text-xs md:text-sm text-muted-foreground/90 mb-3">
+        <div class="uppercase tracking-[0.22em] text-xs md:text-sm text-muted-foreground/90 mb-3">
           Problem / Solution
         </div>
 
         <h2 id="probsol-title" class="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
-          Find the car first.
-          <span class="text-primary">Every time.</span>
+          Stop reacting.
+          <span class="text-primary">Start winning deals.</span>
         </h2>
 
         <p class="mt-3 text-base md:text-lg text-muted-foreground" aria-live="polite">
-          Amiquus watches listings 24/7 and pings you instantly.
+          Two paths. One keeps you chasing. The other puts you first.
         </p>
       </div>
 
-      <div class="mt-8 sm:mt-10 grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-7" role="list">
-        <!-- BAD / OLD WAY -->
-        <article role="listitem" aria-label="Old way: manual refreshing"
-          class="group relative rounded-2xl p-6 shadow-sm will-animate probsol-card probsol-card--bad"
-          data-anim="fade-right">
-          <header class="flex items-center gap-3">
-            <div class="h-12 w-12 grid place-items-center rounded-xl probsol-icon probsol-icon--bad">
-              <svg viewBox="0 0 24 24" class="h-6 w-6" role="img" aria-label="Hourglass">
-                <g>
-                  <path fill="currentColor" d="M6 3h12v2a5 5 0 0 1-2.1 4.1L14 10l1.9.9A5 5 0 0 1 18 15v2H6v-2a5 5 0 0 1 2.1-4.1L10 10 8.1 9.1A5 5 0 0 1 6 5V3Z"/>
-                  <circle cx="12" cy="10" r="1.4" fill="currentColor" class="sand-top"></circle>
-                  <circle cx="12" cy="14" r="1.4" fill="currentColor" class="sand-bot"></circle>
-                </g>
-              </svg>
-            </div>
-            <h3 class="text-lg md:text-xl font-semibold text-foreground">
+      <div class="mt-9 sm:mt-12 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8" role="list">
+        <!-- PROBLEM CARD -->
+        <article
+          role="listitem"
+          aria-label="Problem: manual refreshing"
+          class="group relative overflow-hidden rounded-2xl border border-border bg-muted/90 dark:bg-card/80 backdrop-blur-sm shadow-sm
+                transition-all duration-300 hover:-translate-y-1 hover:shadow-xl will-animate"
+          data-anim="fade-right"
+        >
+          <!-- top accent -->
+          <div aria-hidden="true" class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-red-500 via-rose-500/95 to-red-500/40"></div>
+
+          <header class="relative z-10 p-6 sm:p-7 flex items-start justify-between gap-4">
+            <div class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-extrabold tracking-wide
+                        bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30">
+              <span aria-hidden="true" class="h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
               Manual refreshing
-            </h3>
+            </div>
+            <div class="text-xs font-semibold text-muted-foreground">The old way</div>
           </header>
 
-          <p class="mt-3 text-sm md:text-base leading-relaxed text-muted-foreground">
-            You refresh, <span class="probsol-bad-accent font-semibold">you miss</span>, you repeat.
-          </p>
+          <div class="relative z-10 px-6 sm:px-7 pb-6 sm:pb-7">
+            <p class="text-base md:text-lg font-semibold text-foreground leading-relaxed">
+              You keep reloading listings and scrolling noise, but the best cars disappear before you even notice them.
+            </p>
 
-          <div class="mt-4 flex flex-wrap gap-2">
-            <span class="chip md:text-[12px]" style="--chip: 0 84% 55%;">Time sink</span>
-            <span class="chip md:text-[12px]" style="--chip: 0 84% 55%;">Missed deals</span>
-            <span class="chip md:text-[12px]" style="--chip: 0 84% 55%;">Stress</span>
+            <!-- neutral wobbling blocks -->
+            <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="probsol-item probsol-item--p1">
+                <div class="probsol-item-title">
+                  <span class="amq-underline amq-underline--danger">Time sink</span>
+                </div>
+                <div class="probsol-item-sub">Hours lost scanning junk</div>
+              </div>
+
+              <div class="probsol-item probsol-item--p2">
+                <div class="probsol-item-title">
+                  <span class="amq-underline amq-underline--danger">Missed deals</span>
+                </div>
+                <div class="probsol-item-sub">Top listings vanish fast</div>
+              </div>
+
+              <div class="probsol-item probsol-item--p3">
+                <div class="probsol-item-title">
+                  <span class="amq-underline amq-underline--danger">Stress mode</span>
+                </div>
+                <div class="probsol-item-sub">Always chasing the feed</div>
+              </div>
+
+              <div class="probsol-item probsol-item--p4">
+                <div class="probsol-item-title">
+                  <span class="amq-underline amq-underline--danger">Lost profit</span>
+                </div>
+                <div class="probsol-item-sub">You’re late to call</div>
+              </div>
+            </div>
+
+            <div class="mt-5 flex items-center justify-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-extrabold text-red-600 dark:text-red-400">
+              <span class="inline-block h-2 w-2 rounded-full bg-red-500" aria-hidden="true"></span>
+              Slow reactions → someone else buys first
+            </div>
           </div>
 
-          <div class="mt-5 flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
-            <span class="h-2 w-2 rounded-full probsol-dot-bad" aria-hidden="true"></span>
-            <span>Slow reactions</span>
-          </div>
+          <footer class="relative z-10 px-6 sm:px-7 pb-6 sm:pb-7 text-sm text-muted-foreground font-semibold">
+            Reactive by default. You see it after others already moved.
+          </footer>
         </article>
 
-        <!-- GOOD / AMIQUUS WAY -->
-        <article role="listitem" aria-label="Amiquus way: automated alerts"
-          class="group relative rounded-2xl p-6 shadow-sm will-animate probsol-card probsol-card--good"
-          data-anim="fade-left">
-          <header class="flex items-center gap-3">
-            <div class="h-12 w-12 grid place-items-center rounded-xl probsol-icon probsol-icon--good">
-              <svg viewBox="0 0 24 24" class="h-6 w-6" role="img" aria-label="Notification bell">
-                <path fill="currentColor" d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2Zm7-6V11a7 7 0 1 0-14 0v5l-2 2v1h18v-1l-2-2Z"/>
-                <circle class="ping-dot" cx="18" cy="6" r="2" fill="currentColor"/>
-              </svg>
-            </div>
-            <h3 class="text-lg md:text-xl font-semibold text-foreground">
+        <!-- SOLUTION CARD -->
+        <article
+          role="listitem"
+          aria-label="Solution: Amiquus automated alerts"
+          class="group relative overflow-hidden rounded-2xl border border-border bg-muted/90 dark:bg-card/80 backdrop-blur-sm shadow-sm
+                transition-all duration-300 hover:-translate-y-1 hover:shadow-xl will-animate"
+          data-anim="fade-left"
+        >
+          <!-- top accent -->
+          <div aria-hidden="true" class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-emerald-500 via-teal-500/95 to-emerald-500/40"></div>
+
+          <header class="relative z-10 p-6 sm:p-7 flex items-start justify-between gap-4">
+            <div class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-extrabold tracking-wide
+                        bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
+              <span aria-hidden="true" class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
               Automated alerts
-            </h3>
+            </div>
+            <div class="text-xs font-semibold text-muted-foreground">The Amiquus way</div>
           </header>
 
-          <p class="mt-3 text-sm md:text-base leading-relaxed text-muted-foreground">
-            <span class="probsol-good-accent font-semibold">We scan.</span>
-            <span class="probsol-good-accent-2 font-semibold">Telegram pings you</span>. You act first.
-          </p>
+          <div class="relative z-10 px-6 sm:px-7 pb-6 sm:pb-7">
+            <p class="text-base md:text-lg font-semibold text-foreground leading-relaxed">
+              Amiquus scans 24/7 and pings you on Telegram within seconds — so you contact sellers first.
+            </p>
 
-          <div class="mt-4 flex flex-wrap gap-2">
-            <span class="chip md:text-[12px]" style="--chip: 142 76% 36%;">24/7 scan</span>
-            <span class="chip md:text-[12px]" style="--chip: 142 76% 36%;">Instant ping</span>
-            <span class="chip md:text-[12px]" style="--chip: 142 76% 36%;">Full coverage</span>
+            <!-- neutral wobbling blocks -->
+            <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="probsol-item probsol-item--s1">
+                <div class="probsol-item-title">
+                  <span class="amq-underline amq-underline--success">24/7 scan</span>
+                </div>
+                <div class="probsol-item-sub">Zero downtime monitoring</div>
+              </div>
+
+              <div class="probsol-item probsol-item--s2">
+                <div class="probsol-item-title">
+                  <span class="amq-underline amq-underline--success">Telegram pings</span>
+                </div>
+                <div class="probsol-item-sub">Photos, price, contact — instantly</div>
+              </div>
+
+              <div class="probsol-item probsol-item--s3">
+                <div class="probsol-item-title">
+                  <span class="amq-underline amq-underline--success">Full coverage</span>
+                </div>
+                <div class="probsol-item-sub">Multiple sites, one feed</div>
+              </div>
+
+              <div class="probsol-item probsol-item--s4">
+                <div class="probsol-item-title">
+                  <span class="amq-underline amq-underline--success">First-mover edge</span>
+                </div>
+                <div class="probsol-item-sub">You call before others</div>
+              </div>
+            </div>
+
+            <div class="mt-5 flex items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-extrabold text-emerald-700 dark:text-emerald-400">
+              <span class="inline-block h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true"></span>
+              Instant reaction → profit stays with you
+            </div>
           </div>
 
-          <div class="mt-5 flex items-center justify-between">
-            <div class="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
-              <span class="h-2 w-2 rounded-full probsol-dot-good" aria-hidden="true"></span>
-              <span>Instant ping</span>
+          <footer class="relative z-10 px-6 sm:px-7 pb-6 sm:pb-7 flex items-center justify-between gap-4">
+            <div class="text-sm text-muted-foreground font-semibold">
+              Proactive by design. You see it first.
             </div>
-            <a href="#order"
-               aria-label="Get ahead of others. Start in 60 seconds."
-               class="cta-btn inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm md:text-[15px] font-semibold">
-              <span class="whitespace-nowrap">Get ahead of others</span>
-              <svg viewBox="0 0 24 24" class="h-4 w-4 md:h-5 md:w-5" role="img" aria-label="Arrow">
+
+            <a
+              href="/si/setup-alerts"
+              aria-label="Start automated alerts"
+              class="cta-pulse inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-extrabold
+                     bg-emerald-600 text-white shadow-md hover:opacity-95 hover:-translate-y-0.5 transition"
+            >
+              Start alerts
+              <svg viewBox="0 0 24 24" class="h-4 w-4" aria-hidden="true">
                 <path fill="currentColor" d="M13 5l7 7-7 7v-4H4v-6h9V5z"/>
               </svg>
             </a>
-          </div>
+          </footer>
         </article>
       </div>
 
@@ -222,27 +296,28 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
     #amiquus-hero {
       position: relative;
 
-      /* round hero bottom so overlays can't look square */
-      border-bottom-left-radius: 3rem;
-      border-bottom-right-radius: 3rem;
+      /* no rounded bottom edges */
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
       overflow: hidden;
 
       --destructive: 0 84% 55%;
 
-      --hero-bg-a: 220 70% 98%;
-      --hero-bg-b: 205 80% 97%;
-      --hero-bg-c: 230 55% 99%;
+      /* Light mode should match other bg-background sections */
+      --hero-bg-a: var(--background);
+      --hero-bg-b: var(--background);
+      --hero-bg-c: var(--background);
 
-      --hero-stage-glass: rgba(255,255,255,.80);
-      --hero-stage-glass-2: rgba(255,255,255,.58);
-      --hero-stage-border: rgba(0,0,0,.06);
+      --hero-stage-glass: rgba(255, 255, 255, 0.8);
+      --hero-stage-glass-2: rgba(255, 255, 255, 0.58);
+      --hero-stage-border: rgba(0, 0, 0, 0.06);
 
-      --hero-card-glass: rgba(255,255,255,.94);
-      --hero-card-glass-2: rgba(255,255,255,.78);
-      --hero-card-border: rgba(0,0,0,.10);
+      --hero-card-glass: rgba(255, 255, 255, 0.94);
+      --hero-card-glass-2: rgba(255, 255, 255, 0.78);
+      --hero-card-border: rgba(0, 0, 0, 0.1);
 
-      --hero-float-opacity: .34;
-      --hero-float-blur: 7px;
+      --hero-float-opacity: 0.34;
+      --hero-float-blur: 0.4375rem; /* 7px */
 
       --money-red: 0 84% 55%;
     }
@@ -254,21 +329,26 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       --hero-bg-b: 160 70% 12%;
       --hero-bg-c: 230 55% 8%;
 
-      --hero-stage-glass: rgba(8,12,22,.72);
-      --hero-stage-glass-2: rgba(8,12,22,.48);
-      --hero-stage-border: rgba(255,255,255,.14);
+      --hero-stage-glass: rgba(8, 12, 22, 0.72);
+      --hero-stage-glass-2: rgba(8, 12, 22, 0.48);
+      --hero-stage-border: rgba(255, 255, 255, 0.14);
 
-      --hero-card-glass: rgba(10,14,25,.84);
-      --hero-card-glass-2: rgba(10,14,25,.62);
-      --hero-card-border: rgba(255,255,255,.16);
+      --hero-card-glass: rgba(10, 14, 25, 0.84);
+      --hero-card-glass-2: rgba(10, 14, 25, 0.62);
+      --hero-card-border: rgba(255, 255, 255, 0.16);
 
-      --hero-float-opacity: .30;
-      --hero-float-blur: 10px;
+      --hero-float-opacity: 0.3;
+      --hero-float-blur: 0.625rem; /* 10px */
 
       --money-red: 0 84% 55%;
     }
 
+    /* Light mode hero background: FLAT like other sections */
     #amiquus-hero .hero-bg {
+      background: rgb(var(--background));
+    }
+    /* Dark mode hero background: moody gradient */
+    .dark #amiquus-hero .hero-bg {
       background:
         radial-gradient(70rem 38rem at 0% -10%, hsl(var(--hero-bg-a)) 0%, transparent 60%),
         radial-gradient(60rem 30rem at 95% 10%, hsl(var(--hero-bg-b)) 0%, transparent 60%),
@@ -276,59 +356,55 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
     }
 
     /* soften hero bottom so no hard “frame” edge */
-    #amiquus-hero::after{
-      content:"";
-      position:absolute;
-      left:0; right:0;
-      bottom:-1px;
-      height:140px;
-      pointer-events:none;
+    #amiquus-hero::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 8.75rem; /* 140px */
+      pointer-events: none;
       z-index: 2;
-      border-bottom-left-radius: 3rem;
-      border-bottom-right-radius: 3rem;
-      background:
-        linear-gradient(to bottom,
-          transparent 0%,
-          hsl(var(--background) / 0.65) 55%,
-          hsl(var(--background)) 100%);
+      background: linear-gradient(to bottom, transparent 0%, transparent 100%);
     }
-    .dark #amiquus-hero::after{
+    .dark #amiquus-hero::after {
       background:
-        linear-gradient(to bottom,
+        linear-gradient(
+          to bottom,
           transparent 0%,
-          hsl(var(--background) / 0.55) 55%,
-          hsl(var(--background)) 100%);
+          rgb(var(--background) / 0.55) 55%,
+          rgb(var(--background)) 100%
+        );
     }
 
     .hero-stage {
-      filter: drop-shadow(0 30px 70px rgb(0 0 0 / .22));
-      perspective: 900px;
+      filter: drop-shadow(0 1.875rem 4.375rem rgb(0 0 0 / 0.22)); /* 30px 70px */
+      perspective: 56.25rem; /* 900px */
 
-      /* FIX: force rounding and clipping for ALL children (no square flashes) */
       border-radius: 1.5rem;
       overflow: hidden;
       isolation: isolate;
     }
     .dark .hero-stage {
-      filter: drop-shadow(0 30px 70px rgb(0 0 0 / .50));
+      filter: drop-shadow(0 1.875rem 4.375rem rgb(0 0 0 / 0.5));
     }
 
     .hero-stage-panel {
       background:
         radial-gradient(120% 100% at 20% 0%, var(--hero-stage-glass) 0%, transparent 55%),
         linear-gradient(180deg, var(--hero-stage-glass), var(--hero-stage-glass-2));
-      border: 1px solid var(--hero-stage-border);
-      backdrop-filter: blur(14px) saturate(1.1);
+      border: 0.0625rem solid var(--hero-stage-border);
+      backdrop-filter: blur(0.875rem) saturate(1.1); /* 14px */
       box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,.20),
-        inset 0 -30px 60px rgba(0,0,0,.04),
-        0 22px 70px rgb(0 0 0 / .10);
+        inset 0 0 0 0.0625rem rgba(255, 255, 255, 0.2),
+        inset 0 -1.875rem 3.75rem rgba(0, 0, 0, 0.04),
+        0 1.375rem 4.375rem rgb(0 0 0 / 0.1); /* 22px 70px */
     }
     .dark .hero-stage-panel {
       box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,.10),
-        inset 0 -30px 60px rgba(0,0,0,.30),
-        0 25px 80px rgb(0 0 0 / .45);
+        inset 0 0 0 0.0625rem rgba(255, 255, 255, 0.1),
+        inset 0 -1.875rem 3.75rem rgba(0, 0, 0, 0.3),
+        0 1.5625rem 5rem rgb(0 0 0 / 0.45); /* 25px 80px */
     }
 
     /* ---------- HERO CARDS ---------- */
@@ -337,12 +413,12 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       position: absolute;
       border-radius: 1.25rem;
       overflow: hidden;
-      border: 1px solid var(--hero-card-border);
+      border: 0.0625rem solid var(--hero-card-border);
       box-shadow:
-        0 18px 45px rgb(0 0 0 / 0.18),
-        inset 0 0 0 1px rgba(255,255,255,.08);
-      backdrop-filter: blur(12px) saturate(1.15);
-      -webkit-backdrop-filter: blur(12px) saturate(1.15);
+        0 1.125rem 2.8125rem rgb(0 0 0 / 0.18), /* 18px 45px */
+        inset 0 0 0 0.0625rem rgba(255 255 255 / 0.08);
+      backdrop-filter: blur(0.75rem) saturate(1.15); /* 12px */
+      -webkit-backdrop-filter: blur(0.75rem) saturate(1.15);
 
       background:
         radial-gradient(140% 120% at 0% 0%, var(--hero-card-glass) 0%, transparent 55%),
@@ -354,26 +430,31 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
     }
 
     .hero-float-card {
-      width: clamp(190px, 20vw, 300px);
+      width: clamp(11.875rem, 20vw, 18.75rem); /* 190px–300px */
       opacity: var(--hero-float-opacity);
-      filter: blur(var(--hero-float-blur)) saturate(.98);
+      filter: blur(var(--hero-float-blur)) saturate(0.98);
     }
 
     .hero-main-card {
       position: relative;
-      width: min(92%, 420px);
+      width: min(92%, 26.25rem); /* 420px */
       animation: mainWiggle 1.3s ease-in-out infinite;
       pointer-events: auto;
     }
 
     @keyframes mainWiggle {
-      0%,100% { transform: translateY(0) rotate(-0.6deg); }
-      50%     { transform: translateY(-3px) rotate(0.6deg); }
+      0%,
+      100% {
+        transform: translateY(0) rotate(-0.6deg);
+      }
+      50% {
+        transform: translateY(-0.1875rem) rotate(0.6deg); /* 3px */
+      }
     }
 
     .hero-card-img {
-      height: 210px;
-      background: hsl(var(--muted));
+      height: 13rem; /* ~208px */
+      background: rgb(var(--muted));
       display: grid;
       place-items: center;
       position: relative;
@@ -392,8 +473,12 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       z-index: 1;
     }
 
-    .hero-float-card .hero-card-img { height: 175px; }
-    .hero-float-card .hero-meta { padding: 0.75rem 0.9rem; }
+    .hero-float-card .hero-card-img {
+      height: 11rem; /* ~176px */
+    }
+    .hero-float-card .hero-meta {
+      padding: 0.75rem 0.9rem;
+    }
 
     .hero-meta {
       padding: 0.9rem 1rem;
@@ -401,174 +486,199 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       grid-template-columns: 1fr auto;
       gap: 0.5rem 0.75rem;
       align-items: center;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.45), transparent);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), transparent);
       border-bottom-left-radius: inherit;
       border-bottom-right-radius: inherit;
     }
     .dark .hero-meta {
-      background: linear-gradient(180deg, rgba(255,255,255,.04), transparent);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent);
     }
 
     .hero-brand {
       font-weight: 900;
       font-size: 1.05rem;
-      color: hsl(var(--primary));
+      color: rgb(var(--primary));
       line-height: 1.15;
-      text-shadow: 0 2px 0 rgb(0 0 0 / .06);
+      text-shadow: 0 0.125rem 0 rgb(0 0 0 / 0.06); /* 2px */
     }
 
     .hero-model {
       font-weight: 700;
       font-size: 0.98rem;
-      color: hsl(var(--foreground));
-      opacity: .95;
+      color: rgb(var(--foreground));
+      opacity: 0.95;
     }
 
     .hero-price {
       font-weight: 900;
       font-size: 1.18rem;
       color: hsl(142 76% 36%);
+
       white-space: nowrap;
       text-shadow:
-        0 6px 18px rgb(0 0 0 / .10),
-        0 0 18px hsl(142 76% 36% / .40);
-      letter-spacing: .2px;
+        0 0.375rem 1.125rem rgb(0 0 0 / 0.1), /* 6px 18px */
+        0 0 1.125rem hsl(142 76% 36% / 0.4); /* 18px */
+      letter-spacing: 0.0125rem;
     }
     .dark .hero-price {
       text-shadow:
-        0 6px 18px rgb(0 0 0 / .25),
-        0 0 18px hsl(142 76% 36% / .70);
+        0 0.375rem 1.125rem rgb(0 0 0 / 0.25),
+        0 0 1.125rem hsl(142 76% 36% / 0.7);
     }
 
     .hero-sub {
-      font-size: .8rem;
-      color: hsl(var(--muted-foreground));
-      margin-top: .1rem;
+      font-size: 0.8rem;
+      color: rgb(var(--muted-foreground));
+      margin-top: 0.1rem;
     }
 
-    /* ---------- STAMP (nicer fit, modern distressed badge) ---------- */
+    /* ---------- STAMP ---------- */
     .hero-stamp {
       position: absolute;
-      top: 14px;
+      top: 0.875rem; /* 14px */
       left: 50%;
-      padding: .55rem 1.1rem;
+      padding: 0.48rem 1.05rem;
       border-radius: 9999px;
       font-weight: 950;
-      letter-spacing: .12em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       color: #fff;
+      font-size: 0.7rem;
+      line-height: 1.1;
+      text-align: center;
 
+      /* Solid red-ish pill, no stripes */
       background:
-        radial-gradient(120% 140% at 100% 0%, rgb(255 255 255 / .18), transparent 55%),
-        repeating-linear-gradient(
-          -45deg,
-          rgb(255 255 255 / .12) 0px,
-          rgb(255 255 255 / .12) 2px,
-          transparent 2px,
-          transparent 7px
-        ),
+        radial-gradient(120% 140% at 100% 0%, rgb(255 255 255 / 0.16), transparent 60%),
         linear-gradient(
           180deg,
-          hsl(var(--destructive)),
-          hsl(var(--destructive) / .92)
+          hsl(var(--destructive)) 0%,
+          hsl(var(--destructive) / 0.9) 100%
         );
 
-      border: 2px solid rgb(255 255 255 / .95);
-      outline: 1px solid rgb(0 0 0 / .25);
+      border: 0.125rem solid rgb(255 255 255 / 0.95);
       box-shadow:
-        0 10px 26px rgb(0 0 0 / .55),
-        inset 0 0 0 1px rgb(255 255 255 / .22),
-        inset 0 -8px 16px rgb(0 0 0 / .18);
+        0 0.5rem 1.375rem rgb(0 0 0 / 0.45), /* 8px 22px */
+        inset 0 0 0 0.0625rem rgb(255 255 255 / 0.18),
+        inset 0 -0.375rem 0.75rem rgb(0 0 0 / 0.18);
 
-      transform: translateX(-50%) rotate(-8deg) scale(.92);
+      transform: translateX(-50%) rotate(-9deg) scale(0.94);
       opacity: 0;
-      filter: blur(.25px) contrast(1.2);
+      filter: blur(0.0125rem) contrast(1.15);
       pointer-events: none;
       z-index: 50;
 
       text-shadow:
-        0 2px 0 rgb(0 0 0 / .55),
-        0 0 10px rgb(0 0 0 / .3);
-      white-space: nowrap;
+        0 0.125rem 0 rgb(0 0 0 / 0.55),
+        0 0 0.625rem rgb(0 0 0 / 0.25);
+      white-space: normal; /* allow two lines */
     }
 
-    .hero-stamp::after{
-      content:"";
-      position:absolute;
-      inset:-3px;
+    .hero-stamp::after {
+      content: "";
+      position: absolute;
+      inset: -0.1875rem; /* 3px */
       border-radius: inherit;
-      border: 1px dashed rgb(255 255 255 / .55);
-      opacity:.65;
-      pointer-events:none;
+      border: 0.0625rem dashed rgb(255 255 255 / 0.55);
+      opacity: 0.55;
+      pointer-events: none;
       mix-blend-mode: overlay;
     }
 
     .hero-main-card.is-stamping .hero-stamp {
-      animation: stampIn 600ms cubic-bezier(.2,.9,.25,1.2) forwards;
+      animation: stampIn 0.6s cubic-bezier(0.2, 0.9, 0.25, 1.2) forwards;
     }
 
     @keyframes stampIn {
-      0%   { opacity: 0; transform: translateX(-50%) rotate(-18deg) scale(.25); }
-      70%  { opacity: 1; transform: translateX(-50%) rotate(-8deg) scale(1.12); }
-      100% { opacity: 1; transform: translateX(-50%) rotate(-8deg) scale(1); filter:none; }
+      0% {
+        opacity: 0;
+        transform: translateX(-50%) rotate(-18deg) scale(0.25);
+      }
+      70% {
+        opacity: 1;
+        transform: translateX(-50%) rotate(-9deg) scale(1.12);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(-50%) rotate(-9deg) scale(1);
+        filter: none;
+      }
     }
 
-    .hero-main-card.is-entering{
+    .hero-main-card.is-entering {
       opacity: 0;
-      transform: translateY(14px) scale(0.985);
-      filter: blur(1px);
+      transform: translateY(0.875rem) scale(0.985); /* 14px */
+      filter: blur(0.0625rem); /* 1px */
     }
 
-    .hero-main-card.is-ashing{
+    .hero-main-card.is-ashing {
       opacity: 0;
-      transform: translateY(60px) scale(0.9) rotateX(12deg);
-      filter: blur(6px) grayscale(1);
-      transition: transform 900ms ease, opacity 900ms ease, filter 900ms ease;
+      transform: translateY(3.75rem) scale(0.9) rotateX(12deg); /* 60px */
+      filter: blur(0.375rem) grayscale(1); /* 6px */
+      transition: transform 0.9s ease, opacity 0.9s ease, filter 0.9s ease;
       pointer-events: none;
     }
 
-    .ash{
+    .ash {
       position: absolute;
       left: 8%;
       right: 8%;
-      bottom: 10px;
-      height: 18px;
-      background: radial-gradient(closest-side, rgb(255 255 255 / .22), transparent 70%);
-      filter: blur(8px);
+      bottom: 0.625rem; /* 10px */
+      height: 1.125rem; /* 18px */
+      background: radial-gradient(closest-side, rgb(255 255 255 / 0.22), transparent 70%);
+      filter: blur(0.5rem); /* 8px */
       opacity: 0;
-      animation: ashPoof 950ms ease forwards;
+      animation: ashPoof 0.95s ease forwards;
     }
-    @keyframes ashPoof{
-      0% { opacity: 0; transform: scale(.6) translateY(0); }
-      25% { opacity: .7; transform: scale(1) translateY(-2px); }
-      100% { opacity: 0; transform: scale(1.5) translateY(6px); }
+    @keyframes ashPoof {
+      0% {
+        opacity: 0;
+        transform: scale(0.6) translateY(0);
+      }
+      25% {
+        opacity: 0.7;
+        transform: scale(1) translateY(-0.125rem); /* 2px */
+      }
+      100% {
+        opacity: 0;
+        transform: scale(1.5) translateY(0.375rem); /* 6px */
+      }
     }
 
-    /* ---------- MONEY LOSS (slower/longer) ---------- */
-    .money-puff{
+    /* ---------- MONEY LOSS ---------- */
+    .money-puff {
       position: absolute;
-      transform: translate(-50%,-50%);
+      transform: translate(-50%, -50%);
       font-weight: 1000;
 
       color: hsl(var(--money-red));
       text-shadow:
-        0 10px 28px rgb(0 0 0 / .55),
-        0 0 22px hsl(var(--money-red) / .90);
+        0 0.625rem 1.75rem rgb(0 0 0 / 0.55), /* 10px 28px */
+        0 0 1.375rem hsl(var(--money-red) / 0.9); /* 22px */
 
       pointer-events: none;
       opacity: 0;
-      animation: moneyPuff 3200ms ease forwards;
+      animation: moneyPuff 3.2s ease forwards;
       will-change: transform, opacity, filter;
     }
 
-    @keyframes moneyPuff{
-      0%   { opacity: 0; transform: translate(-50%,-50%) scale(.55) rotate(var(--rot)); filter: blur(0px); }
-      8%   { opacity: 1; transform: translate(-50%,-90%) scale(1.35) rotate(var(--rot)); }
-
-      60%  {
+    @keyframes moneyPuff {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.55) rotate(var(--rot));
+        filter: blur(0);
+      }
+      8% {
         opacity: 1;
-        transform: translate(calc(-50% + var(--dx)*.6), calc(-50% - 175px))
+        transform: translate(-50%, -90%) scale(1.35) rotate(var(--rot));
+      }
+
+      60% {
+        opacity: 1;
+        transform: translate(
+            calc(-50% + var(--dx) * 0.6),
+            calc(-50% - 10.9375rem)
+          ) /* 175px */
           scale(1.12)
           rotate(calc(var(--rot) * 1.25));
       }
@@ -576,241 +686,483 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       100% {
         opacity: 0;
         transform:
-          translate(calc(-50% + var(--dx)), calc(-50% - 280px))
-          scale(.18)
+          translate(
+            calc(-50% + var(--dx)),
+            calc(-50% - 17.5rem)
+          ) /* 280px */
+          scale(0.18)
           rotate(calc(var(--rot) * 1.7));
-        filter: blur(8px) saturate(.55);
+        filter: blur(0.5rem) saturate(0.55); /* 8px */
       }
     }
 
-    /* ---------- FINAL OVERLAY (rounded + clipped) ---------- */
-    .hero-final-overlay{
+    /* ---------- FINAL OVERLAY ---------- */
+    .hero-final-overlay {
       position: absolute;
       inset: 0;
       display: grid;
       place-items: center;
       text-align: center;
       font-weight: 900;
-      letter-spacing: .6px;
+      letter-spacing: 0.0375rem;
 
       background:
-        radial-gradient(90% 80% at 50% 50%, rgb(0 0 0 / .10), rgb(0 0 0 / .52)),
-        linear-gradient(180deg, hsl(var(--destructive) / .10), transparent);
+        radial-gradient(90% 80% at 50% 50%, rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.52)),
+        linear-gradient(180deg, hsl(var(--destructive) / 0.1), transparent);
 
       opacity: 0;
       transform: scale(0.98);
       pointer-events: none;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(0.375rem); /* 6px */
 
-      /* FIX: never square */
       border-radius: 1.5rem;
     }
 
-    .hero-final-overlay .glass{
-      padding: clamp(1.15rem, 2vw, 1.75rem) clamp(1.3rem, 3vw, 2.4rem);
+    .hero-final-overlay .glass {
+      padding: clamp(1.15rem, 2vw, 1.75rem)
+        clamp(1.3rem, 3vw, 2.4rem);
       border-radius: 1.35rem;
 
-      background:
-        linear-gradient(180deg, rgb(255 255 255 / .20), rgb(255 255 255 / .08));
-      border: 1px solid rgb(255 255 255 / .45);
+      background: linear-gradient(
+        180deg,
+        rgb(255 255 255 / 0.2),
+        rgb(255 255 255 / 0.08)
+      );
+      border: 0.0625rem solid rgb(255 255 255 / 0.45);
       box-shadow:
-        0 18px 60px rgb(0 0 0 / .45),
-        inset 0 0 0 1px rgb(255 255 255 / .12);
+        0 1.125rem 3.75rem rgb(0 0 0 / 0.45), /* 18px 60px */
+        inset 0 0 0 0.0625rem rgb(255 255 255 / 0.12);
     }
 
-    .hero-final-overlay.show { animation: finalOverlay 3000ms ease forwards; }
+    .hero-final-overlay.show {
+      animation: finalOverlay 3s ease forwards;
+    }
 
-    .hero-final-overlay .line1{
+    .hero-final-overlay .line1 {
       font-size: clamp(1.9rem, 4vw, 2.85rem);
       text-transform: uppercase;
-      color: hsl(var(--foreground));
-      text-shadow: 0 10px 30px rgb(0 0 0 / .65);
+      color: rgb(var(--foreground));
+      text-shadow: 0 0.625rem 1.875rem rgb(0 0 0 / 0.65); /* 10px 30px */
     }
-    .hero-final-overlay .line1 span{
-      color: hsl(var(--money-red));
-      text-shadow:
-        0 10px 30px rgb(0 0 0 / .65),
-        0 0 26px hsl(var(--money-red) / .85);
+    .hero-final-overlay .line1 span {
+      color: inherit;
+      text-shadow: inherit;
     }
 
-    .hero-final-overlay .line2{
-      margin-top: .55rem;
+    .hero-final-overlay .line2 {
+      margin-top: 0.55rem;
       font-size: clamp(1.4rem, 3.1vw, 2.2rem);
-      color: hsl(var(--muted-foreground));
-      text-transform: uppercase;
-      letter-spacing: .12em;
-      text-shadow: 0 10px 30px rgb(0 0 0 / .65);
-    }
-    .hero-final-overlay .line2 span{
       color: hsl(var(--money-red));
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
       text-shadow:
-        0 10px 30px rgb(0 0 0 / .65),
-        0 0 26px hsl(var(--money-red) / .85);
+        0 0.625rem 1.875rem rgb(0 0 0 / 0.65),
+        0 0 1.625rem hsl(var(--money-red) / 0.85); /* 26px */
+    }
+    .hero-final-overlay .line2 span {
+      color: inherit;
+      text-shadow: inherit;
     }
 
-    @keyframes finalOverlay{
-      0% { opacity: 0; transform: scale(.98); }
-      12% { opacity: 1; transform: scale(1); }
-      88% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(1.02); }
+    @keyframes finalOverlay {
+      0% {
+        opacity: 0;
+        transform: scale(0.98);
+      }
+      12% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      88% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(1.02);
+      }
     }
 
     /* =========================================================
-       PROBLEM / SOLUTION — cooler light mode (no yellow)
+       PROBLEM / SOLUTION — V4
        ========================================================= */
-    #amiquus-probsol{
-      background:
-        radial-gradient(42rem 18rem at 0% 0%, hsl(var(--primary)/.05), transparent 60%),
-        radial-gradient(40rem 16rem at 100% 0%, hsl(var(--primary)/.04), transparent 60%),
-        hsl(var(--background));
-      border-top: 1px solid hsl(var(--border)/.55);
-      border-bottom: 1px solid hsl(var(--border)/.55);
+    #amiquus-probsol {
+      position: relative;
+      isolation: isolate;
     }
 
-    .dark #amiquus-probsol{
-      background:
-        radial-gradient(60rem 20rem at 50% -20%, hsl(var(--primary)/.14), transparent 70%),
-        linear-gradient(180deg, hsl(222 40% 8%) 0%, hsl(222 40% 6%) 100%);
-      border-top: 1px solid hsl(var(--border)/.35);
-      border-bottom: 1px solid hsl(var(--border)/.35);
+    /* blending fades (now using rgb tokens, no weird tint) */
+    .probsol-fade {
+      position: absolute;
+      left: -10%;
+      right: -10%;
+      height: 7.5rem; /* 120px */
+      z-index: 1;
+      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        rgb(var(--background)) 0%,
+        transparent 100%
+      );
+    }
+    .probsol-fade--top {
+      top: -1px;
+      transform: translateY(-40%);
+    }
+    .probsol-fade--bot {
+      bottom: -1px;
+      transform: translateY(40%) rotate(180deg);
+    }
+    .dark .probsol-fade {
+      background: linear-gradient(
+        to bottom,
+        rgb(var(--background)) 0%,
+        transparent 100%
+      );
+      opacity: 0.9;
     }
 
-    #amiquus-probsol .probsol-bg{ opacity:.45; }
-
-    .probsol-card{
-      background:
-        linear-gradient(180deg, hsl(var(--card)), hsl(var(--card)) 60%, hsl(var(--muted)/.30));
-      border: 1px solid hsl(var(--border)/.8);
-      box-shadow:
-        0 12px 40px rgb(0 0 0 / .05),
-        inset 0 0 0 1px rgb(255 255 255 / .62);
-      backdrop-filter: blur(4px);
-      transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+    .probsol-blob {
+      position: absolute;
+      width: 32.5rem; /* 520px */
+      height: 32.5rem;
+      border-radius: 9999px;
+      filter: blur(5rem); /* 80px */
+      opacity: 0.28;
+      z-index: 0;
+      pointer-events: none;
+      animation: blobFloat 18s ease-in-out infinite;
+      transform: translate3d(0, 0, 0);
     }
-    .probsol-card:hover{
-      transform: translateY(-4px);
-      border-color: hsl(var(--primary)/.45);
-      box-shadow:
-        0 18px 60px rgb(0 0 0 / .08),
-        inset 0 0 0 1px rgb(255 255 255 / .75);
+    .probsol-blob--red {
+      left: -11.25rem; /* 180px */
+      top: -13.75rem; /* 220px */
+      background: radial-gradient(
+        circle,
+        rgb(var(--amq-danger)) / 0.9,
+        transparent 60%
+      );
+      animation-delay: -4s;
     }
-
-    .dark .probsol-card{
-      background:
-        radial-gradient(140% 120% at 0% 0%, rgb(255 255 255 / .06) 0%, transparent 55%),
-        linear-gradient(180deg, rgb(14 18 30 / .92), rgb(10 14 25 / .92));
-      border: 1px solid hsl(var(--border)/.45);
-      box-shadow: 0 18px 60px rgb(0 0 0 / .35);
+    .probsol-blob--green {
+      right: -11.25rem;
+      bottom: -15rem; /* 240px */
+      background: radial-gradient(
+        circle,
+        rgb(var(--amq-success)) / 0.9,
+        transparent 60%
+      );
+      animation-delay: -9s;
     }
-
-    .probsol-card--bad{ border-color: hsl(var(--destructive)/.25); }
-    .probsol-card--good{ border-color: hsl(142 76% 36% / .25); }
-
-    .probsol-icon{
-      box-shadow: inset 0 0 0 1px rgb(255 255 255 / .9), 0 8px 20px rgb(0 0 0 / .06);
+    .dark .probsol-blob {
+      opacity: 0.4;
+      filter: blur(5.9375rem); /* 95px */
     }
-    .probsol-icon--bad{
-      background: linear-gradient(180deg, hsl(var(--destructive)/.10), hsl(var(--destructive)/.05));
-      color: hsl(var(--destructive));
-    }
-    .probsol-icon--good{
-      background: linear-gradient(180deg, hsl(142 76% 36% / .12), hsl(142 76% 36% / .06));
-      color: hsl(142 76% 36%);
-    }
-
-    .probsol-bad-accent{ color: hsl(var(--destructive)); }
-    .probsol-good-accent{ color: hsl(142 76% 36%); }
-    .probsol-good-accent-2{ color: hsl(var(--primary)); }
-
-    .probsol-dot-bad{ background: hsl(var(--destructive)); }
-    .probsol-dot-good{ background: hsl(142 76% 36%); }
-
-    #amiquus-probsol .chip{
-      display:inline-flex; align-items:center; justify-content:center;
-      padding:.25rem .625rem; font-size:.75rem; border-radius:9999px;
-      border:1px solid hsl(var(--chip) / .35);
-      color: hsl(var(--chip));
-      background: linear-gradient(180deg, hsl(var(--chip)/.10), hsl(var(--chip)/.04));
+    @keyframes blobFloat {
+      0%,
+      100% {
+        transform: translateY(0) translateX(0) scale(1);
+      }
+      50% {
+        transform: translateY(1.5625rem) translateX(0.9375rem) scale(1.05); /* 25px 15px */
+      }
     }
 
-    @media (prefers-reduced-motion:no-preference){
-      #amiquus-probsol .will-animate{opacity:0;transform:translateY(12px);transition:opacity .6s ease, transform .6s ease}
-      #amiquus-probsol .will-animate.in-view{opacity:1;transform:none}
-      #amiquus-probsol [data-anim="fade-right"]{transform:translateX(-12px)}
-      #amiquus-probsol [data-anim="fade-left"]{transform:translateX(12px)}
-      #amiquus-probsol .in-view[data-anim="fade-right"],
-      #amiquus-probsol .in-view[data-anim="fade-left"]{transform:none}
-
-      .sand-top{animation:sandTop 2.2s infinite ease-in-out}
-      .sand-bot{animation:sandBot 2.2s infinite ease-in-out}
-      @keyframes sandTop{0%{opacity:1;transform:translateY(0)}50%{opacity:.2;transform:translateY(4px)}100%{opacity:1;transform:translateY(0)}}
-      @keyframes sandBot{0%{opacity:.2;transform:translateY(-4px)}50%{opacity:1;transform:translateY(0)}100%{opacity:.2;transform:translateY(-4px)}}
-
-      .ping-dot{animation:pingDot 1.6s ease-in-out infinite}
-      @keyframes pingDot{0%,100%{opacity:.5;transform:scale(.9)}50%{opacity:1;transform:scale(1.15)}}
+    /* clean blocks — neutral backgrounds */
+    .probsol-item {
+      position: relative;
+      display: grid;
+      gap: 0.25rem;
+      padding: 1rem 1.05rem;
+      border-radius: 0.95rem;
+      border: 0.0625rem solid rgb(var(--border) / 0.9);
+      background: rgb(var(--card));
+      box-shadow: inset 0 0.0625rem 0 rgb(255 255 255 / 0.35);
+      backdrop-filter: blur(0.375rem); /* 6px */
+      will-change: transform;
+      animation: probsolWobble 5.5s ease-in-out infinite;
+    }
+    .dark .probsol-item {
+      background: rgb(var(--card) / 0.9);
+      box-shadow: inset 0 0.0625rem 0 rgb(255 255 255 / 0.06);
+      border-color: rgb(var(--border) / 0.7);
     }
 
-    .cta-btn{
-      color:white;
-      background: linear-gradient(90deg, hsl(var(--primary)), hsl(142 76% 36%));
-      background-size:200% 100%;
-      animation:ctaGradient 5s linear infinite, ctaPulse 1.8s ease-in-out infinite;
-      box-shadow: 0 8px 30px rgb(0 0 0 / .25);
+    .probsol-item-title {
+      font-weight: 900;
+      color: rgb(var(--foreground));
+      font-size: 1rem;
+      letter-spacing: 0.0125rem;
     }
-    @keyframes ctaGradient{0%{background-position:0% 50%}100%{background-position:100% 50%}}
-    @keyframes ctaPulse{
-      0%{box-shadow:0 0 0 0 hsl(var(--primary)/.35)}
-      70%{box-shadow:0 0 0 14px hsl(var(--primary)/0)}
-      100%{box-shadow:0 0 0 0 hsl(var(--primary)/0)}
+    .probsol-item-sub {
+      font-size: 0.88rem;
+      color: rgb(var(--muted-foreground));
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    /* staggered wobble only; keep neutral colors */
+    .probsol-item--p1 {
+      animation-delay: -0.5s;
+    }
+    .probsol-item--p2 {
+      animation-delay: -1.3s;
+    }
+    .probsol-item--p3 {
+      animation-delay: -2.1s;
+    }
+    .probsol-item--p4 {
+      animation-delay: -2.9s;
+    }
+
+    .probsol-item--s1 {
+      animation-delay: -0.7s;
+    }
+    .probsol-item--s2 {
+      animation-delay: -1.6s;
+    }
+    .probsol-item--s3 {
+      animation-delay: -2.4s;
+    }
+    .probsol-item--s4 {
+      animation-delay: -3.2s;
+    }
+
+    @keyframes probsolWobble {
+      0%,
+      100% {
+        transform: translateY(0) translateX(0) rotate(0deg);
+      }
+      25% {
+        transform: translateY(-0.125rem) translateX(0.0625rem) rotate(0.2deg); /* 2px 1px */
+      }
+      50% {
+        transform: translateY(0.0625rem) translateX(-0.0625rem) rotate(-0.2deg); /* 1px */
+      }
+      75% {
+        transform: translateY(-0.0625rem) translateX(0.03125rem) rotate(0.15deg); /* 1px ~ */
+      }
+    }
+
+    /* CTA pulse */
+    .cta-pulse {
+      position: relative;
+      animation: ctaPulse 2.2s ease-in-out infinite;
+      box-shadow: 0 0.625rem 1.875rem hsl(142 76% 36% / 0.35); /* 10px 30px */
+    }
+    @keyframes ctaPulse {
+      0%,
+      100% {
+        transform: translateY(0);
+        box-shadow:
+          0 0.625rem 1.875rem hsl(142 76% 36% / 0.35),
+          0 0 0 0 hsl(142 76% 36% / 0.35);
+      }
+      50% {
+        transform: translateY(-0.0625rem); /* 1px */
+        box-shadow:
+          0 0.875rem 2.125rem hsl(142 76% 36% / 0.5),
+          0 0 0 0.625rem hsl(142 76% 36% / 0); /* 10px */
+      }
+    }
+
+    .will-animate {
+      opacity: 0;
+      transform: translateY(0.75rem); /* 12px */
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .will-animate.in-view {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* =========================================================
+       ANIMATED UNDERLINE (darker, thicker, per-section animated)
+       ========================================================= */
+
+    .amq-underline {
+      position: relative;
+      display: inline-block;
+      padding-bottom: 0.04em;
+      background-image: linear-gradient(
+        to top,
+        hsl(var(--primary)) 0,
+        hsl(var(--primary)) 0.28em,
+        transparent 0.28em
+      );
+      background-repeat: no-repeat;
+      background-size: 100% 0.28em; /* default: fully underlined, a bit thicker/darker */
+      background-position: 0 100%;
+    }
+
+    .dark .amq-underline {
+      background-image: linear-gradient(
+        to top,
+        hsl(var(--primary)) 0,
+        hsl(var(--primary)) 0.28em,
+        transparent 0.28em
+      );
+    }
+
+    /* variants with stronger accent colors */
+    .amq-underline--danger {
+      background-image: linear-gradient(
+        to top,
+        hsl(var(--amq-danger)) 0,
+        hsl(var(--amq-danger)) 0.28em,
+        transparent 0.28em
+      );
+    }
+
+    .dark .amq-underline--danger {
+      background-image: linear-gradient(
+        to top,
+        hsl(var(--amq-danger)) 0,
+        hsl(var(--amq-danger)) 0.28em,
+        transparent 0.28em
+      );
+    }
+
+    .amq-underline--success {
+      background-image: linear-gradient(
+        to top,
+        hsl(var(--amq-success)) 0,
+        hsl(var(--amq-success)) 0.28em,
+        transparent 0.28em
+      );
+    }
+
+    .dark .amq-underline--success {
+      background-image: linear-gradient(
+        to top,
+        hsl(var(--amq-success)) 0,
+        hsl(var(--amq-success)) 0.28em,
+        transparent 0.28em
+      );
+    }
+
+    /* In the Problem/Solution section, underlines "draw in" when the section enters view */
+    #amiquus-probsol .amq-underline {
+      background-size: 0% 0.28em; /* start hidden */
+    }
+
+    .amq-underline--animate {
+      animation: amqUnderlineGrow 0.6s cubic-bezier(0.2, 0.9, 0.25, 1.15) forwards;
+      animation-delay: var(--amq-underline-delay, 0s);
+    }
+
+    @keyframes amqUnderlineGrow {
+      0% {
+        background-size: 0% 0.28em;
+      }
+      100% {
+        background-size: 100% 0.28em;
+      }
     }
   </style>
 
   <script>
-    // One-time reveal on scroll (scoped to prob/sol)
-    (function(){
+    // Reveal on scroll (section-safe) + underline trigger on every entry
+    (function () {
       const root = document.getElementById('amiquus-probsol');
-      if(!root) return;
+      if (!root) return;
+
       const els = root.querySelectorAll('.will-animate');
-      if(!('IntersectionObserver' in window)){ els.forEach(el=> el.classList.add('in-view')); return; }
-      const io=new IntersectionObserver((entries)=>{
-        entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in-view'); io.unobserve(e.target); }});
-      },{threshold:.15,rootMargin:'0px 0px -10% 0px'});
-      els.forEach(el=> io.observe(el));
+      const underlineEls = Array.from(root.querySelectorAll('.amq-underline'));
+
+      // Fallback: no IntersectionObserver support → show everything + static underline
+      if (!('IntersectionObserver' in window)) {
+        els.forEach((el) => el.classList.add('in-view'));
+        underlineEls.forEach((el) => {
+          el.style.setProperty('--amq-underline-delay', '0s');
+          el.classList.add('amq-underline--animate');
+        });
+        return;
+      }
+
+      // Fade / slide-in for cards, once
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add('in-view');
+              io.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
+      );
+
+      els.forEach((el) => io.observe(el));
+
+      // Underline animation: re-trigger every time the whole section comes into view
+      function triggerUnderlineAnimation() {
+        underlineEls.forEach((el, index) => {
+          // Remove to reset
+          el.classList.remove('amq-underline--animate');
+
+          // Force reflow so animation can restart
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+          void el.offsetWidth;
+
+          // Slightly varied timing per underline (stagger + small random)
+          const base = 0.08 * index; // stagger
+          const jitter = Math.random() * 0.12; // random offset
+          const delay = (base + jitter).toFixed(3) + 's';
+
+          el.style.setProperty('--amq-underline-delay', delay);
+          el.classList.add('amq-underline--animate');
+        });
+      }
+
+      const sectionIO = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              triggerUnderlineAnimation();
+            }
+          });
+        },
+        { threshold: 0.35 } // section reasonably in view
+      );
+
+      sectionIO.observe(root);
     })();
 
     // ===== HERO FOREGROUND + GLOBAL FLOAT BACKGROUND =====
-    (function(){
+    (function () {
       const hero = document.getElementById('amiquus-hero');
       const floatLayer = document.getElementById('hero-float-layer');
       const mainWrap = document.getElementById('hero-main-wrap');
       const finalOverlay = document.getElementById('hero-final-overlay');
-      if(!hero || !floatLayer || !mainWrap || !finalOverlay) return;
+      if (!hero || !floatLayer || !mainWrap || !finalOverlay) return;
 
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       const cars = [
-        { brand:"BMW", model:"320d Touring", price:"€18,900", img:"/homepage/demo-cars/car-01.webp" },
-        { brand:"Audi", model:"A4 Avant", price:"€21,450", img:"/homepage/demo-cars/car-02.webp" },
-        { brand:"Mercedes", model:"C220d AMG", price:"€23,100", img:"/homepage/demo-cars/car-03.webp" },
-        { brand:"VW", model:"Golf GTI", price:"€17,990", img:"/homepage/demo-cars/car-04.webp" },
-        { brand:"Škoda", model:"Octavia RS", price:"€19,800", img:"/homepage/demo-cars/car-05.webp" },
-        { brand:"Tesla", model:"Model 3 LR", price:"€29,900", img:"/homepage/demo-cars/car-06.webp" },
+        { brand: 'BMW', model: '320d Touring', price: '€18,900', img: '/homepage/demo-cars/bmw_320d_touring_hero_image.webp' },
+        { brand: 'Audi', model: 'A4 Avant', price: '€21,450', img: '/homepage/demo-cars/audi_a4_avant_hero_image.webp' },
+        { brand: 'Mercedes', model: 'C220d AMG', price: '€23,100', img: '/homepage/demo-cars/mercedes_c220d_amg_hero_image.webp' },
+        { brand: 'VW', model: 'Golf GTI', price: '€17,990', img: '/homepage/demo-cars/vw_golf_gti_hero_image.webp' },
+        { brand: 'Škoda', model: 'Octavia RS', price: '€19,800', img: '/homepage/demo-cars/skoda_octavia_rs_hero_image.webp' },
+        { brand: 'Tesla', model: 'Model 3 LR', price: '€29,900', img: '/homepage/demo-cars/tesla_model_3_lr_hero_image.webp' },
+
         // background pool
-        { brand:"Volvo", model:"V60 D4", price:"€22,750", img:"/homepage/demo-cars/car-07.webp" },
-        { brand:"Peugeot", model:"3008 GT", price:"€16,700", img:"/homepage/demo-cars/car-08.webp" },
-        { brand:"Renault", model:"Megane RS", price:"€15,400", img:"/homepage/demo-cars/car-09.webp" },
-        { brand:"Toyota", model:"RAV4 Hybrid", price:"€24,300", img:"/homepage/demo-cars/car-10.webp" },
-        { brand:"Ford", model:"Focus ST", price:"€14,980", img:"/homepage/demo-cars/car-11.webp" },
-        { brand:"Kia", model:"Ceed SW", price:"€13,200", img:"/homepage/demo-cars/car-12.webp" },
+        { brand: 'Volvo', model: 'V60 D4', price: '€22,750', img: '/homepage/demo-cars/volvo_v60_d4_hero_image.webp' },
+        { brand: 'Peugeot', model: '3008 GT', price: '€16,700', img: '/homepage/demo-cars/peugeot_3008_gt_hero_image.webp' },
+        { brand: 'Renault', model: 'Megane RS', price: '€15,400', img: '/homepage/demo-cars/renault_megane_rs_hero_image.webp' },
+        { brand: 'Toyota', model: 'RAV4 Hybrid', price: '€24,300', img: '/homepage/demo-cars/toyota_rav4_hybrid_hero_image.webp' },
+        { brand: 'Ford', model: 'Focus ST', price: '€14,980', img: '/homepage/demo-cars/ford_focus_st_hero_image.webp' },
+        { brand: 'Kia', model: 'Ceed SW', price: '€13,200', img: '/homepage/demo-cars/kia_ceed_sw_hero_image.webp' }
       ];
 
       const foreground = cars.slice(0, 6);
       const backgroundPool = cars.slice(6);
 
-      function createCard(car, cls){
+      function createCard(car, cls) {
         const card = document.createElement('article');
         card.className = cls;
-        card.setAttribute('role','listitem');
+        card.setAttribute('role', 'listitem');
         card.setAttribute('aria-label', `${car.brand} ${car.model} at ${car.price}`);
 
         card.innerHTML = `
@@ -820,11 +1172,11 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
               alt="${car.brand} ${car.model}"
               loading="eager"
               decoding="async"
-              onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=&quot;color: hsl(var(--muted-foreground)); font-weight:700; font-size:0.95rem;&quot;>Car photo</div>';"
+              onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=&quot;color: rgb(var(--muted-foreground)); font-weight:700; font-size:0.95rem;&quot;>Car photo</div>';"
             />
           </div>
 
-          <div class="hero-stamp" aria-hidden="true">JUST SOLD</div>
+          <div class="hero-stamp" aria-hidden="true">OOPS<br>JUST SOLD</div>
 
           <div class="hero-meta">
             <div>
@@ -843,15 +1195,15 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       let rafId = null;
       let lastT = 0;
 
-      function clearFloat(){
-        if(rafId) cancelAnimationFrame(rafId);
+      function clearFloat() {
+        if (rafId) cancelAnimationFrame(rafId);
         rafId = null;
         floatLayer.innerHTML = '';
         floatNodes = [];
         lastT = 0;
       }
 
-      function layoutFloat(){
+      function layoutFloat() {
         clearFloat();
 
         const rect = hero.getBoundingClientRect();
@@ -864,57 +1216,62 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
 
         const placed = [];
 
-        function pickSpot(){
-          for(let tries=0; tries<120; tries++){
-            const x = pad + Math.random() * (W - pad*2);
-            const y = pad + Math.random() * (H - pad*2);
+        function pickSpot() {
+          for (let tries = 0; tries < 120; tries++) {
+            const x = pad + Math.random() * (W - pad * 2);
+            const y = pad + Math.random() * (H - pad * 2);
             let ok = true;
-            for(const p of placed){
+            for (const p of placed) {
               const d = Math.hypot(x - p.x, y - p.y);
-              if(d < minDist){ ok = false; break; }
+              if (d < minDist) {
+                ok = false;
+                break;
+              }
             }
-            if(ok){ placed.push({x,y}); return {x,y}; }
+            if (ok) {
+              placed.push({ x, y });
+              return { x, y };
+            }
           }
-          const x = pad + Math.random() * (W - pad*2);
-          const y = pad + Math.random() * (H - pad*2);
-          placed.push({x,y});
-          return {x,y};
+          const x = pad + Math.random() * (W - pad * 2);
+          const y = pad + Math.random() * (H - pad * 2);
+          placed.push({ x, y });
+          return { x, y };
         }
 
-        for(let i=0;i<count;i++){
+        for (let i = 0; i < count; i++) {
           const car = backgroundPool[i % backgroundPool.length];
           const el = createCard(car, 'hero-float-card');
 
-          const {x,y} = pickSpot();
+          const { x, y } = pickSpot();
 
-          const scale = 0.6 + Math.random()*0.75;
-          const z = -40 - Math.random()*420;
-          const rot = (Math.random()*28 - 14);
-          const rx = (Math.random()*10 - 5);
-          const ry = (Math.random()*10 - 5);
+          const scale = 0.6 + Math.random() * 0.75;
+          const z = -40 - Math.random() * 420;
+          const rot = Math.random() * 28 - 14;
+          const rx = Math.random() * 10 - 5;
+          const ry = Math.random() * 10 - 5;
 
-          const speed = 0.012 + Math.random()*0.020;
-          const ang = Math.random()*Math.PI*2;
-          const vx = Math.cos(ang)*speed*(0.8 + Math.random()*0.7);
-          const vy = Math.sin(ang)*speed*(0.8 + Math.random()*0.7);
+          const speed = 0.012 + Math.random() * 0.02;
+          const ang = Math.random() * Math.PI * 2;
+          const vx = Math.cos(ang) * speed * (0.8 + Math.random() * 0.7);
+          const vy = Math.sin(ang) * speed * (0.8 + Math.random() * 0.7);
 
-          const rotV = (Math.random()*0.008 - 0.004);
+          const rotV = Math.random() * 0.008 - 0.004;
 
-          el.style.transform =
-            `translate3d(${x}px, ${y}px, ${z}px) translate(-50%,-50%) rotateX(${rx}deg) rotateY(${ry}deg) rotate(${rot}deg) scale(${scale})`;
+          el.style.transform = `translate3d(${x}px, ${y}px, ${z}px) translate(-50%,-50%) rotateX(${rx}deg) rotateY(${ry}deg) rotate(${rot}deg) scale(${scale})`;
 
           floatLayer.appendChild(el);
 
           floatNodes.push({ el, x, y, vx, vy, rot, rotV, scale, z, rx, ry });
         }
 
-        if(!reduceMotion){
+        if (!reduceMotion) {
           rafId = requestAnimationFrame(tick);
         }
       }
 
-      function tick(t){
-        if(!lastT) lastT = t;
+      function tick(t) {
+        if (!lastT) lastT = t;
         const dt = t - lastT;
         lastT = t;
 
@@ -922,18 +1279,17 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
         const W = rect.width;
         const H = rect.height;
 
-        for(const n of floatNodes){
+        for (const n of floatNodes) {
           n.x += n.vx * dt;
           n.y += n.vy * dt;
           n.rot += n.rotV * dt;
 
-          if(n.x < -80) n.x = W + 80;
-          if(n.x > W + 80) n.x = -80;
-          if(n.y < -80) n.y = H + 80;
-          if(n.y > H + 80) n.y = -80;
+          if (n.x < -80) n.x = W + 80;
+          if (n.x > W + 80) n.x = -80;
+          if (n.y < -80) n.y = H + 80;
+          if (n.y > H + 80) n.y = -80;
 
-          n.el.style.transform =
-            `translate3d(${n.x}px, ${n.y}px, ${n.z}px) translate(-50%,-50%) rotateX(${n.rx}deg) rotateY(${n.ry}deg) rotate(${n.rot}deg) scale(${n.scale})`;
+          n.el.style.transform = `translate3d(${n.x}px, ${n.y}px, ${n.z}px) translate(-50%,-50%) rotateX(${n.rx}deg) rotateY(${n.ry}deg) rotate(${n.rot}deg) scale(${n.scale})`;
         }
 
         rafId = requestAnimationFrame(tick);
@@ -943,50 +1299,50 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       ro.observe(hero);
 
       // ---------- FOREGROUND CYCLE ----------
-      function spawnMoneyPuffs(targetCard){
+      function spawnMoneyPuffs(targetCard) {
         const symbols = ['€', '$', '£'];
         const count = 14;
-        for(let i=0;i<count;i++){
+        for (let i = 0; i < count; i++) {
           const puff = document.createElement('div');
           puff.className = 'money-puff';
 
-          const sym = symbols[Math.floor(Math.random()*symbols.length)];
+          const sym = symbols[Math.floor(Math.random() * symbols.length)];
           puff.textContent = `-${sym}`;
 
-          const dx = (Math.random()*240 - 120).toFixed(0) + 'px';
-          const rot = (Math.random()*40 - 20).toFixed(0) + 'deg';
-          const size = (1.35 + Math.random()*1.25);
+          const dx = (Math.random() * 240 - 120).toFixed(0) + 'px';
+          const rot = (Math.random() * 40 - 20).toFixed(0) + 'deg';
+          const size = 1.35 + Math.random() * 1.25;
 
           puff.style.setProperty('--dx', dx);
           puff.style.setProperty('--rot', rot);
-          puff.style.animationDelay = (i*70) + 'ms';
-          puff.style.left = (38 + Math.random()*24) + '%';
-          puff.style.top = (82 + Math.random()*5) + '%';
-          puff.style.fontSize = (1.35*size).toFixed(2) + 'rem';
+          puff.style.animationDelay = i * 70 + 'ms';
+          puff.style.left = 38 + Math.random() * 24 + '%';
+          puff.style.top = 82 + Math.random() * 5 + '%';
+          puff.style.fontSize = (1.35 * size).toFixed(2) + 'rem';
 
           targetCard.appendChild(puff);
-          puff.addEventListener('animationend', ()=> puff.remove());
+          puff.addEventListener('animationend', () => puff.remove());
         }
       }
 
-      function spawnAsh(target){
+      function spawnAsh(target) {
         const a = document.createElement('div');
         a.className = 'ash';
         target.appendChild(a);
-        a.addEventListener('animationend', ()=> a.remove());
+        a.addEventListener('animationend', () => a.remove());
       }
 
-      function applyStamp(card){
+      function applyStamp(card) {
         const stamp = card.querySelector('.hero-stamp');
-        if(!stamp) return;
+        if (!stamp) return;
 
         card.classList.remove('is-stamping');
-        stamp.textContent = "JUST SOLD";
+        stamp.innerHTML = 'OOPS<br>JUST SOLD';
         void stamp.offsetWidth;
         card.classList.add('is-stamping');
       }
 
-      async function showFinalOverlay(){
+      async function showFinalOverlay() {
         finalOverlay.innerHTML = `
           <div class="glass">
             <div class="line1">Missed <span>opportunity</span></div>
@@ -994,47 +1350,47 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
           </div>
         `;
         finalOverlay.classList.add('show');
-        await new Promise(r => setTimeout(r, 3000));
+        await new Promise((r) => setTimeout(r, 3000));
         finalOverlay.classList.remove('show');
       }
 
       let idx = 0;
 
-      async function cycle(){
+      async function cycle() {
         layoutFloat();
 
-        if(reduceMotion){
+        if (reduceMotion) {
           mainWrap.innerHTML = '';
           mainWrap.appendChild(createCard(foreground[0], 'hero-main-card'));
           return;
         }
 
-        while(true){
+        while (true) {
           mainWrap.innerHTML = '';
           const car = foreground[idx];
           const card = createCard(car, 'hero-main-card is-entering');
           mainWrap.appendChild(card);
 
           requestAnimationFrame(() => card.classList.remove('is-entering'));
-          await new Promise(r => setTimeout(r, 1200));
+          await new Promise((r) => setTimeout(r, 1200));
 
           applyStamp(card);
-          await new Promise(r => setTimeout(r, 850));
+          await new Promise((r) => setTimeout(r, 850));
 
           spawnMoneyPuffs(card);
-          await new Promise(r => setTimeout(r, 2200));
+          await new Promise((r) => setTimeout(r, 2200));
 
           spawnAsh(card);
           card.classList.add('is-ashing');
-          await new Promise(r => setTimeout(r, 950));
+          await new Promise((r) => setTimeout(r, 950));
 
           idx++;
-          if(idx >= foreground.length){
+          if (idx >= foreground.length) {
             idx = 0;
             await showFinalOverlay();
-            await new Promise(r => setTimeout(r, 550));
+            await new Promise((r) => setTimeout(r, 550));
           } else {
-            await new Promise(r => setTimeout(r, 260));
+            await new Promise((r) => setTimeout(r, 260));
           }
         }
       }
@@ -1046,7 +1402,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
   <!-- Limited Availability Section -->
   <section class="py-12 bg-card border-y border-border">
     <div class="max-w-screen-xl mx-auto px-4">
-      <div class="max-w-2xl mx-auto bg-gradient-to-br from-destructive/10 to-primary/10 border-2 border-destructive rounded-xl p-8 text-center animate-on-scroll">
+      <div class="max-w-2xl mx-auto bg-gradient-to-br from-destructive/15 to-primary/20 border-2 border-destructive rounded-xl p-8 text-center animate-on-scroll">
         <h3 class="text-2xl font-bold text-destructive mb-4">⚠️ <span class="text-primary">Limited Slots</span> Available</h3>
         <p class="text-foreground mb-4">
           Only <strong>4 slots remaining</strong> out of 30 total. We intentionally limit capacity to maintain competitive advantage for our users.
@@ -1061,89 +1417,408 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
     </div>
   </section>
 
-  <!-- Features Section -->
-  <section id="features" class="py-20 sm:py-28 bg-background">
-    <div class="max-w-screen-xl mx-auto px-4">
-      <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16">
-        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">Why Choose <span class="text-primary">Amiquus?</span></h2>
-        <p class="text-lg text-muted-foreground">Powerful features designed to give you the competitive edge in finding the perfect vehicles.</p>
+    <!-- Features Section -->
+    <section id="features" class="py-20 sm:py-28 bg-background">
+      <div class="max-w-screen-xl mx-auto px-4">
+        <!-- Section header -->
+        <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16 animate-on-scroll">
+          <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+            Why dealers choose <span class="text-primary">Amiquus</span>
+          </h2>
+          <p class="text-lg text-muted-foreground">
+            Amiquus quietly watches the market for you, across multiple websites, and pings you on Telegram
+            the moment a profitable car appears.
+          </p>
+        </div>
+  
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] gap-10 lg:gap-14 items-start">
+          <!-- Left: main feature story -->
+          <div class="space-y-6 animate-on-scroll">
+            <!-- Feature row 1 -->
+            <article class="flex gap-4 sm:gap-5">
+              <div
+                class="mt-1 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"
+                aria-hidden="true"
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="11" cy="11" r="7.5"></circle>
+                  <path d="M21 21l-4.35-4.35" stroke-linecap="round"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg sm:text-xl font-semibold text-foreground mb-1">
+                  Multi-platform <span class="amq-underline">coverage</span>
+                </h3>
+                <p class="text-sm sm:text-base text-muted-foreground">
+                  Instead of refreshing each website manually, Amiquus monitors all supported platforms in one place
+                  and turns them into a single, clean feed of opportunities.
+                </p>
+              </div>
+            </article>
+  
+            <!-- Feature row 2 -->
+            <article class="flex gap-4 sm:gap-5 animate-on-scroll" data-delay="80">
+              <div
+                class="mt-1 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                aria-hidden="true"
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="9"></circle>
+                  <polyline points="12,6 12,12 16,14" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg sm:text-xl font-semibold text-foreground mb-1">
+                  <span class="amq-underline">24/7</span> monitoring &amp; instant Telegram alerts
+                </h3>
+                <p class="text-sm sm:text-base text-muted-foreground">
+                  Amiquus scans listings around the clock and sends you a Telegram message within seconds of a match:
+                  photos, title, price, key specs and a direct link – ready to call or message the seller.
+                </p>
+              </div>
+            </article>
+  
+            <!-- Feature row 3 -->
+            <article class="flex gap-4 sm:gap-5 animate-on-scroll" data-delay="140">
+              <div
+                class="mt-1 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                aria-hidden="true"
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M3 6h18l-2 11H5L3 6z" />
+                  <circle cx="9" cy="18.5" r="1" />
+                  <circle cx="18" cy="18.5" r="1" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg sm:text-xl font-semibold text-foreground mb-1">
+                  Advanced <span class="amq-underline">filters</span> tuned to profit
+                </h3>
+                <p class="text-sm sm:text-base text-muted-foreground">
+                  Narrow your search to exactly what makes sense for your dealership:
+                  brand, model, year, mileage, price bracket, fuel type, region and more.
+                  Amiquus only alerts you when cars fit your buying strategy.
+                </p>
+              </div>
+            </article>
+  
+            <!-- Feature row 4 -->
+            <article class="flex gap-4 sm:gap-5 animate-on-scroll" data-delay="200">
+              <div
+                class="mt-1 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400"
+                aria-hidden="true"
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 12l2 2 4-4" />
+                  <rect x="3" y="8" width="18" height="8" rx="1.5" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg sm:text-xl font-semibold text-foreground mb-1">
+                  Flexible, <span class="amq-underline">dealer-friendly</span> control
+                </h3>
+                <p class="text-sm sm:text-base text-muted-foreground">
+                  Pause or adjust alerts when you change focus, test new niches or stock levels change.
+                  No lock-in, no spam – just a tool that quietly works in the background when you need it.
+                </p>
+              </div>
+            </article>
+          </div>
+  
+          <!-- Right: supported sites + quick summary -->
+          <aside
+            class="bg-card border border-border rounded-2xl p-6 sm:p-7 lg:p-8 shadow-sm space-y-6 animate-on-scroll"
+            aria-label="Supported websites and coverage"
+          >
+            <div>
+              <h3 class="text-lg sm:text-xl font-semibold text-foreground mb-2">
+                Supported <span class="amq-underline">websites</span>
+              </h3>
+              <p class="text-sm sm:text-base text-muted-foreground mb-4">
+                We start where Slovenian dealers actually buy – and keep adding more data sources over time.
+              </p>
+  
+              <div class="space-y-3">
+                <div
+                  class="flex items-center justify-between gap-3 rounded-xl bg-muted/70 dark:bg-muted/50 border border-border/70 px-3.5 py-2.5"
+                >
+                  <div class="flex items-center gap-2.5">
+                    <span
+                      class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold"
+                      aria-hidden="true"
+                    >
+                      A
+                    </span>
+                    <div>
+                      <div class="text-sm font-semibold text-foreground">avto.net</div>
+                      <div class="text-[0.78rem] text-muted-foreground">
+                        Core market for used cars in Slovenia
+                      </div>
+                    </div>
+                  </div>
+                  <span class="text-[0.78rem] font-medium px-2 py-1 rounded-full bg-primary/10 text-primary">
+                    Live
+                  </span>
+                </div>
+  
+                <div
+                  class="flex items-center justify-between gap-3 rounded-xl bg-muted/70 dark:bg-muted/50 border border-border/70 px-3.5 py-2.5"
+                >
+                  <div class="flex items-center gap-2.5">
+                    <span
+                      class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-bold"
+                      aria-hidden="true"
+                    >
+                      f
+                    </span>
+                    <div>
+                      <div class="text-sm font-semibold text-foreground">Facebook Marketplace</div>
+                      <div class="text-[0.78rem] text-muted-foreground">
+                        Private listings &amp; fast local deals
+                      </div>
+                    </div>
+                  </div>
+                  <span class="text-[0.78rem] font-medium px-2 py-1 rounded-full bg-primary/10 text-primary">
+                    Live
+                  </span>
+                </div>
+  
+                <div
+                  class="flex items-center justify-between gap-3 rounded-xl border border-dashed border-border/70 px-3.5 py-2.5 bg-background/60"
+                >
+                  <div>
+                    <div class="text-sm font-semibold text-foreground">More platforms</div>
+                    <div class="text-[0.78rem] text-muted-foreground">
+                      We regularly add new sites based on dealer demand.
+                      Your subscription automatically benefits from new sources.
+                    </div>
+                  </div>
+                  <span class="hidden sm:inline-flex text-[0.78rem] px-2 py-1 rounded-full bg-muted text-muted-foreground">
+                    Coming soon
+                  </span>
+                </div>
+              </div>
+            </div>
+  
+            <div class="border-t border-border/70 pt-4 text-sm text-muted-foreground space-y-2">
+              <div class="flex items-center gap-2">
+                <span class="i-badge" aria-hidden="true"></span>
+                <span>Checks supported websites roughly every few minutes (depending on your plan).</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="i-shield" aria-hidden="true"></span>
+                <span>No password sharing – Amiquus only reads public listings and sends you alerts.</span>
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
-      <div class="grid grid-cols-1 sm:flex-row sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div class="bg-card border border-border rounded-xl p-8 text-center transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-2xl animate-on-scroll">
-          <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35" stroke-linecap="round"></path></svg></div>
-          <h3 class="text-xl font-semibold text-foreground mb-4">Multi-Platform Monitoring</h3>
-          <p class="text-muted-foreground">Monitor leading car listing platforms simultaneously. We continuously add new platforms to expand your reach and opportunities.</p>
+    </section>
+  
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-20 sm:py-28 bg-muted">
+      <div class="max-w-screen-xl mx-auto px-4">
+        <!-- Section header -->
+        <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16 animate-on-scroll">
+          <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+            How <span class="text-primary">Amiquus</span> works in practice
+          </h2>
+          <p class="text-lg text-muted-foreground">
+            From your criteria to a real Telegram notification – here’s exactly what happens, step by step.
+          </p>
         </div>
-        <div class="bg-card border border-border rounded-xl p-8 text-center transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-2xl animate-on-scroll" data-delay="100">
-          <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-          <h3 class="text-xl font-semibold text-foreground mb-4">Instant Telegram Alerts</h3>
-          <p class="text-muted-foreground">Receive immediate notifications with vehicle photos, pricing, location, and contact details. Be the first to respond to great deals.</p>
-        </div>
-        <div class="bg-card border border-border rounded-xl p-8 text-center transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-2xl animate-on-scroll" data-delay="200">
-          <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18l-2 13H5L3 6z"/><path d="M3 6L2.25 4H1"/><circle cx="9" cy="20" r="1"/><circle cx="20" cy="20" r="1"/></svg></div>
-          <h3 class="text-xl font-semibold text-foreground mb-4">Advanced Filtering</h3>
-          <p class="text-muted-foreground">Set detailed criteria including make, model, year, price range, mileage, fuel type, and location to find exactly what you need.</p>
-        </div>
-        <div class="bg-card border border-border rounded-xl p-8 text-center transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-2xl animate-on-scroll" data-delay="300">
-          <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg></div>
-          <h3 class="text-xl font-semibold text-foreground mb-4">24/7 Monitoring</h3>
-          <p class="text-muted-foreground">Our system works around the clock, checking for new listings and price changes so you never miss an opportunity.</p>
-        </div>
-        <div class="bg-card border border-border rounded-xl p-8 text-center transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-2xl animate-on-scroll" data-delay="400">
-          <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
-          <h3 class="text-xl font-semibold text-foreground mb-4">Competitive Advantage</h3>
-          <p class="text-muted-foreground">Limited slots ensure you stay ahead of the competition. Perfect for dealers where being first means the difference between profit and loss.</p>
-        </div>
-        <div class="bg-card border border-border rounded-xl p-8 text-center transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-2xl animate-on-scroll" data-delay="500">
-          <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6 text-primary"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M21 12c.552 0 1-.448 1-1V8c0-.552-.448-1-1-1H3c-.552 0 1 .448 1 1v3c0 .552.448 1 1 1h18z"/><path d="M3 12v7c0 .552.448 1 1 1h16c.552 0 1-.448 1-1v-7"/></svg></div>
-          <h3 class="text-xl font-semibold text-foreground mb-4">Flexible Management</h3>
-          <p class="text-muted-foreground">Pause or cancel your subscription anytime. Modify your search criteria as your needs change. Complete control at your fingertips.</p>
+  
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10 lg:gap-14 items-start">
+          <!-- Left: step-by-step flow -->
+          <ol class="space-y-5 sm:space-y-6 animate-on-scroll" aria-label="Step by step Amiquus flow">
+            <li class="flex gap-4">
+              <div
+                class="flex-shrink-0 mt-1 h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold shadow-sm"
+                aria-hidden="true"
+              >
+                1
+              </div>
+              <div>
+                <h3 class="text-base sm:text-lg font-semibold text-foreground mb-1">
+                  You define your <span class="amq-underline">buy box</span>
+                </h3>
+                <p class="text-sm sm:text-base text-muted-foreground">
+                  Choose brands, models, age, mileage, price range, fuel type and region that match your dealership
+                  strategy. You can create multiple configurations for different niches.
+                </p>
+              </div>
+            </li>
+  
+            <li class="flex gap-4 animate-on-scroll" data-delay="80">
+              <div
+                class="flex-shrink-0 mt-1 h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-primary/90 text-primary-foreground flex items-center justify-center text-sm font-bold shadow-sm"
+                aria-hidden="true"
+              >
+                2
+              </div>
+              <div>
+                <h3 class="text-base sm:text-lg font-semibold text-foreground mb-1">
+                  Amiquus starts <span class="amq-underline">monitoring</span> websites
+                </h3>
+                <p class="text-sm sm:text-base text-muted-foreground">
+                  Our system checks avto.net and Facebook Marketplace according to your update frequency
+                  (e.g. every 15 minutes). It only looks for cars that match the criteria you set.
+                </p>
+              </div>
+            </li>
+  
+            <li class="flex gap-4 animate-on-scroll" data-delay="140">
+              <div
+                class="flex-shrink-0 mt-1 h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-emerald-600 text-primary-foreground flex items-center justify-center text-sm font-bold shadow-sm"
+                aria-hidden="true"
+              >
+                3
+              </div>
+              <div>
+                <h3 class="text-base sm:text-lg font-semibold text-foreground mb-1">
+                  A new matching car appears
+                </h3>
+                <p class="text-sm sm:text-base text-muted-foreground">
+                  As soon as a listing fits your filters, Amiquus builds a concise summary:
+                  photos, title, price, key specs, location and a direct link to the original listing.
+                </p>
+              </div>
+            </li>
+  
+            <li class="flex gap-4 animate-on-scroll" data-delay="200">
+              <div
+                class="flex-shrink-0 mt-1 h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-emerald-500 text-primary-foreground flex items-center justify-center text-sm font-bold shadow-sm"
+                aria-hidden="true"
+              >
+                4
+              </div>
+              <div>
+                <h3 class="text-base sm:text-lg font-semibold text-foreground mb-1">
+                  You get an <span class="amq-underline">instant Telegram alert</span>
+                </h3>
+                <p class="text-sm sm:text-base text-muted-foreground">
+                  The summary is sent straight to your Telegram – on desktop or phone.
+                  One tap opens the listing, another tap calls or messages the seller. You decide in seconds, not hours.
+                </p>
+              </div>
+            </li>
+  
+            <li class="flex gap-4 animate-on-scroll" data-delay="260">
+              <div
+                class="flex-shrink-0 mt-1 h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-zinc-900 text-primary-foreground flex items-center justify-center text-sm font-bold shadow-sm dark:bg-zinc-100 dark:text-zinc-900"
+                aria-hidden="true"
+              >
+                5
+              </div>
+              <div>
+                <h3 class="text-base sm:text-lg font-semibold text-foreground mb-1">
+                  You adjust as your needs change
+                </h3>
+                <p class="text-sm sm:text-base text-muted-foreground">
+                  Want to pause a niche, change prices or add another website?
+                  Update your settings and Amiquus instantly follows your new strategy.
+                </p>
+              </div>
+            </li>
+          </ol>
+  
+          <!-- Right: example Telegram notification -->
+          <div class="animate-on-scroll" data-delay="120">
+            <div
+              class="mx-auto max-w-sm rounded-3xl bg-card border border-border shadow-xl overflow-hidden flex flex-col"
+              aria-label="Example Telegram alert"
+            >
+              <!-- fake phone top bar -->
+              <div class="flex items-center justify-between px-4 pt-3 pb-2 text-[0.7rem] text-muted-foreground">
+                <span>Amiquus Alerts</span>
+                <span>now</span>
+              </div>
+  
+              <!-- Telegram screenshot placeholder -->
+              <div class="relative bg-background border-y border-border">
+                <!-- Replace the src with your real Telegram screenshot -->
+                <img
+                  src="/homepage/demo-telegram/amiquus_telegram_example.webp"
+                  alt="Example of a real Amiquus Telegram notification with car photo, price and details"
+                  class="w-full max-h-80 object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div
+                  class="absolute inset-x-3 bottom-3 rounded-xl bg-black/65 text-xs text-white px-3 py-2 backdrop-blur-sm"
+                >
+                  This is what your real notification will look like – direct link, key specs and price in one message.
+                </div>
+              </div>
+  
+              <div class="p-4 space-y-2 text-sm">
+                <div class="flex items-center justify-between gap-3">
+                  <span class="font-semibold text-foreground">Instant Telegram alert</span>
+                  <span class="rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[0.7rem] px-2 py-0.5 font-semibold">
+                    Real example
+                  </span>
+                </div>
+                <p class="text-xs text-muted-foreground">
+                  You’ll provide a real screenshot here – no mockups.
+                  Dealers immediately see how clear and actionable each alert is.
+                </p>
+              </div>
+            </div>
+  
+            <p class="mt-4 text-xs sm:text-sm text-muted-foreground text-center max-w-sm mx-auto">
+              <span class="font-semibold">Note:</span> Replace the placeholder image path with your actual Telegram
+              screenshot to show a real alert from Amiquus in production.
+            </p>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- How It Works Section -->
-  <section id="how-it-works" class="py-20 sm:py-28 bg-muted">
-    <div class="max-w-screen-xl mx-auto px-4">
-      <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16">
-        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">How <span class="text-primary">Amiquus</span> Works</h2>
-        <p class="text-lg text-muted-foreground">Get started in minutes and begin receiving alerts for your perfect vehicles.</p>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        <div class="bg-card border border-border rounded-xl p-8 text-center relative animate-on-scroll">
-          <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">1</div>
-          <h3 class="text-xl font-semibold text-foreground mt-6 mb-4">Set Your Criteria</h3>
-          <p class="text-muted-foreground">Define your search parameters including vehicle type, price range, location, and other specific requirements.</p>
-        </div>
-        <div class="bg-card border border-border rounded-xl p-8 text-center relative animate-on-scroll" data-delay="100">
-          <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">2</div>
-          <h3 class="text-xl font-semibold text-foreground mt-6 mb-4">Connect Telegram</h3>
-          <p class="text-muted-foreground">Link your Telegram account to receive instant notifications. Setup takes less than 2 minutes with our guided process.</p>
-        </div>
-        <div class="bg-card border border-border rounded-xl p-8 text-center relative animate-on-scroll" data-delay="200">
-          <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</div>
-          <h3 class="text-xl font-semibold text-foreground mt-6 mb-4">Choose Monitoring Frequency</h3>
-          <p class="text-muted-foreground">Select how often we check for new listings. Higher frequencies give you faster alerts and better competitive advantage.</p>
-        </div>
-        <div class="bg-card border border-border rounded-xl p-8 text-center relative animate-on-scroll" data-delay="300">
-          <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">4</div>
-          <h3 class="text-xl font-semibold text-foreground mt-6 mb-4">Receive Instant Alerts</h3>
-          <p class="text-muted-foreground">Get immediate notifications with vehicle photos, key details, and direct links. Be the first to contact sellers.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+    </section>
+  
 
   <!-- Pricing Section -->
   <section id="pricing" class="py-20 sm:py-28 bg-background">
     <div class="max-w-screen-xl mx-auto px-4">
       <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16">
-        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">Simple, <span class="text-primary">Transparent</span> Pricing</h2>
-        <p class="text-lg text-muted-foreground">Our pricing is based on your specific needs. Start with a base package and customize it to fit your requirements.</p>
+        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+          Simple, <span class="text-primary">Transparent</span> Pricing
+        </h2>
+        <p class="text-lg text-muted-foreground">
+          Our pricing is based on your specific needs. Start with a base package and customize it to fit your
+          requirements.
+        </p>
       </div>
 
-      <div class="max-w-4xl mx-auto bg-card rounded-xl shadow-lg border border-border overflow-hidden animate-on-scroll">
+      <div
+        class="max-w-4xl mx-auto bg-card rounded-xl shadow-lg border border-border overflow-hidden animate-on-scroll"
+      >
         <div class="p-8">
           <h3 class="text-2xl font-bold text-foreground mb-6">Base Package: $9.99/month</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -1151,19 +1826,75 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
               <h4 class="text-lg font-semibold text-foreground mb-3">What's Included:</h4>
               <ul class="space-y-2">
                 <li class="flex items-start">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-success flex-shrink-0 mt-0.5 me-2"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    class="text-success flex-shrink-0 mt-0.5 me-2"
+                  >
+                    <path
+                      d="M20 6L9 17l-5-5"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></path>
+                  </svg>
                   <span>One website monitoring</span>
                 </li>
                 <li class="flex items-start">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-success flex-shrink-0 mt-0.5 me-2"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    class="text-success flex-shrink-0 mt-0.5 me-2"
+                  >
+                    <path
+                      d="M20 6L9 17l-5-5"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></path>
+                  </svg>
                   <span>Hourly updates</span>
                 </li>
                 <li class="flex items-start">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-success flex-shrink-0 mt-0.5 me-2"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    class="text-success flex-shrink-0 mt-0.5 me-2"
+                  >
+                    <path
+                      d="M20 6L9 17l-5-5"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></path>
+                  </svg>
                   <span>Unlimited filters</span>
                 </li>
                 <li class="flex items-start">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-success flex-shrink-0 mt-0.5 me-2"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    class="text-success flex-shrink-0 mt-0.5 me-2"
+                  >
+                    <path
+                      d="M20 6L9 17l-5-5"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></path>
+                  </svg>
                   <span>Telegram notifications</span>
                 </li>
               </ul>
@@ -1173,35 +1904,105 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
               <ul class="space-y-3">
                 <li class="flex items-start justify-between">
                   <div class="flex items-start">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-accent flex-shrink-0 mt-0.5 me-2"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      class="text-accent flex-shrink-0 mt-0.5 me-2"
+                    >
+                      <path
+                        d="M12 5v14M5 12h14"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      ></path>
+                    </svg>
                     <span>Each additional website</span>
                   </div>
                   <span class="font-medium text-foreground">$4.99/mo</span>
                 </li>
                 <li class="flex items-start justify-between">
                   <div class="flex items-start">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-accent flex-shrink-0 mt-0.5 me-2"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      class="text-accent flex-shrink-0 mt-0.5 me-2"
+                    >
+                      <path
+                        d="M12 5v14M5 12h14"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      ></path>
+                    </svg>
                     <span>30-minute updates</span>
                   </div>
                   <span class="font-medium text-foreground">$2.99/mo</span>
                 </li>
                 <li class="flex items-start justify-between">
                   <div class="flex items-start">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-accent flex-shrink-0 mt-0.5 me-2"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      class="text-accent flex-shrink-0 mt-0.5 me-2"
+                    >
+                      <path
+                        d="M12 5v14M5 12h14"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      ></path>
+                    </svg>
                     <span>15-minute updates</span>
                   </div>
                   <span class="font-medium text-foreground">$5.99/mo</span>
                 </li>
                 <li class="flex items-start justify-between">
                   <div class="flex items-start">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-accent flex-shrink-0 mt-0.5 me-2"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      class="text-accent flex-shrink-0 mt-0.5 me-2"
+                    >
+                      <path
+                        d="M12 5v14M5 12h14"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      ></path>
+                    </svg>
                     <span>5-minute updates</span>
                   </div>
                   <span class="font-medium text-foreground">$9.99/mo</span>
                 </li>
                 <li class="flex items-start justify-between">
                   <div class="flex items-start">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-accent flex-shrink-0 mt-0.5 me-2"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      class="text-accent flex-shrink-0 mt-0.5 me-2"
+                    >
+                      <path
+                        d="M12 5v14M5 12h14"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      ></path>
+                    </svg>
                     <span>1-minute updates</span>
                   </div>
                   <span class="font-medium text-foreground">$14.99/mo</span>
@@ -1210,13 +2011,18 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
             </div>
           </div>
           <div class="bg-muted p-4 rounded-lg">
-            <p class="text-center text-muted-foreground text-sm">All plans include unlimited search configurations and easy subscription management.</p>
+            <p class="text-center text-muted-foreground text-sm">
+              All plans include unlimited search configurations and easy subscription management.
+            </p>
           </div>
         </div>
       </div>
 
       <div class="mt-8 text-center">
-        <a href="/si/setup-alerts" class="inline-flex items-center justify-center px-8 py-4 text-lg rounded-lg font-semibold bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1">
+        <a
+          href="/si/setup-alerts"
+          class="inline-flex items-center justify-center px-8 py-4 text-lg rounded-lg font-semibold bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1"
+        >
           Get Started Now
         </a>
       </div>
@@ -1226,9 +2032,18 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
   <!-- CTA Section -->
   <section class="py-20 sm:py-24 bg-gradient-to-r from-primary to-accent">
     <div class="max-w-screen-xl mx-auto px-4 text-center text-primary-foreground">
-      <h2 class="text-3xl lg:text-4xl font-bold mb-4">Ready to Find Your <span class="text-primary-foreground/80">Perfect Vehicles?</span></h2>
-      <p class="text-lg opacity-90 mb-8 max-w-2xl mx-auto">Join successful dealers who use Amiquus to stay ahead of the competition. Limited slots available.</p>
-      <a href="/si/setup-alerts" class="inline-flex items-center justify-center px-8 py-4 text-lg rounded-lg font-semibold bg-background text-primary shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1">Get Started Now</a>
+      <h2 class="text-3xl lg:text-4xl font-bold mb-4">
+        Ready to Find Your <span class="text-primary-foreground/80">Perfect Vehicles?</span>
+      </h2>
+      <p class="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
+        Join successful dealers who use Amiquus to stay ahead of the competition. Limited slots available.
+      </p>
+      <a
+        href="/si/setup-alerts"
+        class="inline-flex items-center justify-center px-8 py-4 text-lg rounded-lg font-semibold bg-background text-primary shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1"
+      >
+        Get Started Now
+      </a>
     </div>
   </section>
 
@@ -1245,9 +2060,17 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       </div>
 
       <div class="max-w-2xl mx-auto">
-        <div id="contact-success-message" class="bg-success/10 border border-success/20 text-success p-8 rounded-xl text-center hidden animate-on-scroll">
-          <div class="w-12 h-12 bg-success rounded-full flex items-center justify-center mx-auto mb-4 text-success-foreground">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <div
+          id="contact-success-message"
+          class="bg-success/10 border border-success/20 text-success p-8 rounded-xl text-center hidden animate-on-scroll"
+        >
+          <div
+            class="w-12 h-12 bg-success rounded-full flex items-center justify-center mx-auto mb-4 text-success-foreground"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
           </div>
           <h3 class="text-xl font-semibold mb-2">Message Sent!</h3>
           <p>Thank you for reaching out. We've received your message and will get back to you shortly.</p>
@@ -1256,19 +2079,46 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
         <form id="contact-form" class="bg-card border border-border rounded-xl p-8 shadow-lg space-y-4 animate-on-scroll">
           <div class="text-start">
             <label for="contact-name" class="block text-sm font-medium text-foreground mb-1">Full Name</label>
-            <input type="text" id="contact-name" name="name" class="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Your Name" required>
+            <input
+              type="text"
+              id="contact-name"
+              name="name"
+              class="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary"
+              placeholder="Your Name"
+              required
+            />
           </div>
           <div class="text-start">
             <label for="contact-email" class="block text-sm font-medium text-foreground mb-1">Email Address</label>
-            <input type="email" id="contact-email" name="email" class="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder="you@example.com" required>
+            <input
+              type="email"
+              id="contact-email"
+              name="email"
+              class="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary"
+              placeholder="you@example.com"
+              required
+            />
           </div>
           <div class="text-start">
             <label for="contact-message" class="block text-sm font-medium text-foreground mb-1">Message</label>
-            <textarea id="contact-message" name="message" rows="4" class="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder="How can we help you today?" required></textarea>
+            <textarea
+              id="contact-message"
+              name="message"
+              rows="4"
+              class="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary"
+              placeholder="How can we help you today?"
+              required
+            ></textarea>
           </div>
-          <button type="submit" id="contact-submit-btn" class="w-full flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground hover:opacity-90 transition disabled:opacity:50 disabled:cursor-not-allowed">
+          <button
+            type="submit"
+            id="contact-submit-btn"
+            class="w-full flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground hover:opacity-90 transition disabled:opacity:50 disabled:cursor-not-allowed"
+          >
             <span id="contact-submit-text">Send Message</span>
-            <span id="contact-submit-loading" class="hidden ms-2"><div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div></span>
+            <span id="contact-submit-loading" class="hidden ms-2">
+              <div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+            </span>
           </button>
         </form>
       </div>
