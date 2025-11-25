@@ -29,7 +29,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
     aria-label="Amiquus hero section"
   >
     <!-- gradient background -->
-    <div aria-hidden="true" class="absolute inset-0 -z-20 hero-bg"></div>
+    <div aria-hidden="true" class="absolute inset-0 -z-20 bg-background"></div>
 
     <!-- hero-wide floating background layer -->
     <div
@@ -87,12 +87,6 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
             <!-- subtle depth fade at bottom -->
             <div aria-hidden="true" class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/30 to-transparent dark:from-black/50"></div>
           </div>
-
-          <p class="sr-only">
-            A single car listing card appears in front while many blurred listings float in the background.
-            The front card gets a JUST SOLD red stamp, then money loss symbols rise and fade longer,
-            then the next card appears. After six cards, text appears saying missed opportunity and missed profit.
-          </p>
         </div>
       </div>
     </div>
@@ -100,7 +94,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
 
   <!-- "PROBLEM / SOLUTION" SECTION -->
   <section id="amiquus-probsol" class="relative py-14 sm:py-20 overflow-hidden" aria-labelledby="probsol-title">
-    <div aria-hidden="true" class="absolute inset-0 pointer-events-none probsol-bg"></div>
+    <div aria-hidden="true" class="absolute inset-0 pointer-events-none bg-background"></div>
 
     <div class="max-w-screen-xl mx-auto px-4">
       <div class="text-center max-w-3xl mx-auto will-animate" data-anim="fade-up">
@@ -186,7 +180,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
               <span class="h-2 w-2 rounded-full probsol-dot-good" aria-hidden="true"></span>
               <span>Instant ping</span>
             </div>
-            <a href="#order"
+            <a href="/setup-alerts"
                aria-label="Get ahead of others. Start in 60 seconds."
                class="cta-btn inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm md:text-[15px] font-semibold">
               <span class="whitespace-nowrap">Get ahead of others</span>
@@ -222,16 +216,17 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
     #amiquus-hero {
       position: relative;
 
-      /* round hero bottom so overlays can't look square */
-      border-bottom-left-radius: 3rem;
-      border-bottom-right-radius: 3rem;
+      /* CHANGE #1: no rounded bottom edges */
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
       overflow: hidden;
 
       --destructive: 0 84% 55%;
 
-      --hero-bg-a: 220 70% 98%;
-      --hero-bg-b: 205 80% 97%;
-      --hero-bg-c: 230 55% 99%;
+      /* Light mode should match other bg-background sections */
+      --hero-bg-a: var(--background);
+      --hero-bg-b: var(--background);
+      --hero-bg-c: var(--background);
 
       --hero-stage-glass: rgba(255,255,255,.80);
       --hero-stage-glass-2: rgba(255,255,255,.58);
@@ -268,7 +263,12 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       --money-red: 0 84% 55%;
     }
 
+    /* Light mode hero background: FLAT like other sections */
     #amiquus-hero .hero-bg {
+      background: hsl(var(--background));
+    }
+    /* Dark mode hero background: keep your moody gradient */
+    .dark #amiquus-hero .hero-bg {
       background:
         radial-gradient(70rem 38rem at 0% -10%, hsl(var(--hero-bg-a)) 0%, transparent 60%),
         radial-gradient(60rem 30rem at 95% 10%, hsl(var(--hero-bg-b)) 0%, transparent 60%),
@@ -284,13 +284,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       height:140px;
       pointer-events:none;
       z-index: 2;
-      border-bottom-left-radius: 3rem;
-      border-bottom-right-radius: 3rem;
-      background:
-        linear-gradient(to bottom,
-          transparent 0%,
-          hsl(var(--background) / 0.65) 55%,
-          hsl(var(--background)) 100%);
+      background: linear-gradient(to bottom, transparent 0%, transparent 100%);
     }
     .dark #amiquus-hero::after{
       background:
@@ -299,6 +293,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
           hsl(var(--background) / 0.55) 55%,
           hsl(var(--background)) 100%);
     }
+
 
     .hero-stage {
       filter: drop-shadow(0 30px 70px rgb(0 0 0 / .22));
@@ -447,49 +442,48 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       margin-top: .1rem;
     }
 
-    /* ---------- STAMP (nicer fit, modern distressed badge) ---------- */
+    /* ---------- STAMP (CHANGE #3: refined JUST SOLD badge) ---------- */
     .hero-stamp {
       position: absolute;
       top: 14px;
       left: 50%;
-      padding: .55rem 1.1rem;
+      padding: .48rem 1.05rem;
       border-radius: 9999px;
       font-weight: 950;
-      letter-spacing: .12em;
+      letter-spacing: .10em;
       text-transform: uppercase;
       color: #fff;
 
       background:
-        radial-gradient(120% 140% at 100% 0%, rgb(255 255 255 / .18), transparent 55%),
+        radial-gradient(120% 140% at 100% 0%, rgb(255 255 255 / .20), transparent 55%),
         repeating-linear-gradient(
           -45deg,
-          rgb(255 255 255 / .12) 0px,
-          rgb(255 255 255 / .12) 2px,
+          rgb(255 255 255 / .10) 0px,
+          rgb(255 255 255 / .10) 2px,
           transparent 2px,
-          transparent 7px
+          transparent 8px
         ),
         linear-gradient(
           180deg,
-          hsl(var(--destructive)),
-          hsl(var(--destructive) / .92)
+          hsl(var(--destructive)) 0%,
+          hsl(var(--destructive) / .9) 100%
         );
 
       border: 2px solid rgb(255 255 255 / .95);
-      outline: 1px solid rgb(0 0 0 / .25);
       box-shadow:
-        0 10px 26px rgb(0 0 0 / .55),
-        inset 0 0 0 1px rgb(255 255 255 / .22),
-        inset 0 -8px 16px rgb(0 0 0 / .18);
+        0 8px 22px rgb(0 0 0 / .45),
+        inset 0 0 0 1px rgb(255 255 255 / .18),
+        inset 0 -6px 12px rgb(0 0 0 / .18);
 
-      transform: translateX(-50%) rotate(-8deg) scale(.92);
+      transform: translateX(-50%) rotate(-9deg) scale(.94);
       opacity: 0;
-      filter: blur(.25px) contrast(1.2);
+      filter: blur(.2px) contrast(1.15);
       pointer-events: none;
       z-index: 50;
 
       text-shadow:
         0 2px 0 rgb(0 0 0 / .55),
-        0 0 10px rgb(0 0 0 / .3);
+        0 0 10px rgb(0 0 0 / .25);
       white-space: nowrap;
     }
 
@@ -499,7 +493,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       inset:-3px;
       border-radius: inherit;
       border: 1px dashed rgb(255 255 255 / .55);
-      opacity:.65;
+      opacity:.55;
       pointer-events:none;
       mix-blend-mode: overlay;
     }
@@ -510,8 +504,8 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
 
     @keyframes stampIn {
       0%   { opacity: 0; transform: translateX(-50%) rotate(-18deg) scale(.25); }
-      70%  { opacity: 1; transform: translateX(-50%) rotate(-8deg) scale(1.12); }
-      100% { opacity: 1; transform: translateX(-50%) rotate(-8deg) scale(1); filter:none; }
+      70%  { opacity: 1; transform: translateX(-50%) rotate(-9deg) scale(1.12); }
+      100% { opacity: 1; transform: translateX(-50%) rotate(-9deg) scale(1); filter:none; }
     }
 
     .hero-main-card.is-entering{
@@ -620,6 +614,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
 
     .hero-final-overlay.show { animation: finalOverlay 3000ms ease forwards; }
 
+    /* CHANGE #2: line1 fully white */
     .hero-final-overlay .line1{
       font-size: clamp(1.9rem, 4vw, 2.85rem);
       text-transform: uppercase;
@@ -627,25 +622,24 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       text-shadow: 0 10px 30px rgb(0 0 0 / .65);
     }
     .hero-final-overlay .line1 span{
-      color: hsl(var(--money-red));
-      text-shadow:
-        0 10px 30px rgb(0 0 0 / .65),
-        0 0 26px hsl(var(--money-red) / .85);
+      color: inherit;
+      text-shadow: inherit;
     }
 
+    /* CHANGE #2: line2 fully red */
     .hero-final-overlay .line2{
       margin-top: .55rem;
       font-size: clamp(1.4rem, 3.1vw, 2.2rem);
-      color: hsl(var(--muted-foreground));
+      color: hsl(var(--money-red));
       text-transform: uppercase;
       letter-spacing: .12em;
-      text-shadow: 0 10px 30px rgb(0 0 0 / .65);
-    }
-    .hero-final-overlay .line2 span{
-      color: hsl(var(--money-red));
       text-shadow:
         0 10px 30px rgb(0 0 0 / .65),
         0 0 26px hsl(var(--money-red) / .85);
+    }
+    .hero-final-overlay .line2 span{
+      color: inherit;
+      text-shadow: inherit;
     }
 
     @keyframes finalOverlay{
@@ -656,13 +650,10 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
     }
 
     /* =========================================================
-       PROBLEM / SOLUTION — cooler light mode (no yellow)
+       PROBLEM / SOLUTION — light mode matches bg-background
        ========================================================= */
     #amiquus-probsol{
-      background:
-        radial-gradient(42rem 18rem at 0% 0%, hsl(var(--primary)/.05), transparent 60%),
-        radial-gradient(40rem 16rem at 100% 0%, hsl(var(--primary)/.04), transparent 60%),
-        hsl(var(--background));
+      background: hsl(var(--background));
       border-top: 1px solid hsl(var(--border)/.55);
       border-bottom: 1px solid hsl(var(--border)/.55);
     }
@@ -763,6 +754,18 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       70%{box-shadow:0 0 0 14px hsl(var(--primary)/0)}
       100%{box-shadow:0 0 0 0 hsl(var(--primary)/0)}
     }
+
+    /* FINAL OVERLAY */
+    .hero-final-overlay .line1{
+      font-size: clamp(1.9rem, 4vw, 2.85rem);
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow: 0 10px 30px rgb(0 0 0 / .65);
+    }
+    .hero-final-overlay .line1 span{
+      color: inherit;
+      text-shadow: inherit;
+    }
   </style>
 
   <script>
@@ -789,19 +792,20 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       const cars = [
-        { brand:"BMW", model:"320d Touring", price:"€18,900", img:"/homepage/demo-cars/car-01.webp" },
-        { brand:"Audi", model:"A4 Avant", price:"€21,450", img:"/homepage/demo-cars/car-02.webp" },
-        { brand:"Mercedes", model:"C220d AMG", price:"€23,100", img:"/homepage/demo-cars/car-03.webp" },
-        { brand:"VW", model:"Golf GTI", price:"€17,990", img:"/homepage/demo-cars/car-04.webp" },
-        { brand:"Škoda", model:"Octavia RS", price:"€19,800", img:"/homepage/demo-cars/car-05.webp" },
-        { brand:"Tesla", model:"Model 3 LR", price:"€29,900", img:"/homepage/demo-cars/car-06.webp" },
+        { brand:"BMW",      model:"320d Touring",  price:"€18,900", img:"/homepage/demo-cars/bmw_320d_touring_hero_image.webp" },
+        { brand:"Audi",     model:"A4 Avant",      price:"€21,450", img:"/homepage/demo-cars/audi_a4_avant_hero_image.webp" },
+        { brand:"Mercedes", model:"C220d AMG",     price:"€23,100", img:"/homepage/demo-cars/mercedes_c220d_amg_hero_image.webp" },
+        { brand:"VW",       model:"Golf GTI",      price:"€17,990", img:"/homepage/demo-cars/vw_golf_gti_hero_image.webp" },
+        { brand:"Škoda",    model:"Octavia RS",    price:"€19,800", img:"/homepage/demo-cars/skoda_octavia_rs_hero_image.webp" },
+        { brand:"Tesla",    model:"Model 3 LR",    price:"€29,900", img:"/homepage/demo-cars/tesla_model_3_lr_hero_image.webp" },
+
         // background pool
-        { brand:"Volvo", model:"V60 D4", price:"€22,750", img:"/homepage/demo-cars/car-07.webp" },
-        { brand:"Peugeot", model:"3008 GT", price:"€16,700", img:"/homepage/demo-cars/car-08.webp" },
-        { brand:"Renault", model:"Megane RS", price:"€15,400", img:"/homepage/demo-cars/car-09.webp" },
-        { brand:"Toyota", model:"RAV4 Hybrid", price:"€24,300", img:"/homepage/demo-cars/car-10.webp" },
-        { brand:"Ford", model:"Focus ST", price:"€14,980", img:"/homepage/demo-cars/car-11.webp" },
-        { brand:"Kia", model:"Ceed SW", price:"€13,200", img:"/homepage/demo-cars/car-12.webp" },
+        { brand:"Volvo",    model:"V60 D4",        price:"€22,750", img:"/homepage/demo-cars/volvo_v60_d4_hero_image.webp" },
+        { brand:"Peugeot",  model:"3008 GT",       price:"€16,700", img:"/homepage/demo-cars/peugeot_3008_gt_hero_image.webp" },
+        { brand:"Renault",  model:"Megane RS",     price:"€15,400", img:"/homepage/demo-cars/renault_megane_rs_hero_image.webp" },
+        { brand:"Toyota",   model:"RAV4 Hybrid",   price:"€24,300", img:"/homepage/demo-cars/toyota_rav4_hybrid_hero_image.webp" },
+        { brand:"Ford",     model:"Focus ST",      price:"€14,980", img:"/homepage/demo-cars/ford_focus_st_hero_image.webp" },
+        { brand:"Kia",      model:"Ceed SW",       price:"€13,200", img:"/homepage/demo-cars/kia_ceed_sw_hero_image.webp" },
       ];
 
       const foreground = cars.slice(0, 6);
