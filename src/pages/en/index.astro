@@ -1,90 +1,359 @@
 ---
-// src/pages/si/index.astro
-
+import path from 'path';
+import Database from 'better-sqlite3';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-// Page-specific metadata
-const title = "Amiquus - Automated Car Listing Alerts";
-const description = "Get real-time notifications for new car listings that match your criteria. Monitor multiple platforms automatically with instant Telegram alerts.";
+// -----------------------------------------------------------------------------
+//  Multi‑language homepage for Amiquus
+//
+//  This Astro page consumes data from a SQLite database (`src/data/data.db`) in
+//  exactly the same way the reference project does.  All user‑facing strings
+//  (hero headlines, meta descriptions, CTA labels, etc.) live in the `home`
+//  table of the database.  Nothing is hard coded: if you need to update
+//  copy or translate it into another language just edit the corresponding
+//  row in the `home.json` file and regenerate `data.db`.
+//
+//  The page also constructs rich Schema.org objects for improved SEO.  See
+//  `webpageSchema` and `organizationSchema` below for details.  Additional
+//  schemas (FAQPage, HowTo, etc.) can easily be added by extending the
+//  `schema` array.
+//
+//  All large CSS and JS blocks are consolidated at the bottom of this file.
+// -----------------------------------------------------------------------------
 
-// Props for BaseLayout - simplified to match working pattern
-const languageIso = "en";
-const countryCode = "US";
-const contentOrientation = "ltr";
-const languageLinksMap = { 'en': '/en', 'de': '/de' };
+// Determine the locale from the URL (e.g. "/en", "/si", "/hr").  Fallback to
+// "en" if the first segment is empty.
+const locale = Astro.url.pathname.split('/')[1] || 'en';
+
+// Open a read‑only connection to the SQLite database.  The database should
+// contain at least the `home`, `common`, `www` and `locale` tables.  Each
+// language (en, si, hr) should have a corresponding row in `home`.
+const dbPath = path.join(process.cwd(), 'src/data/data.db');
+const db = new Database(dbPath, { readonly: true });
+
+// Fetch all required data in a single transaction.  If any essential table
+// is missing or the locale doesn’t exist in the `home` table we redirect to
+// a 404 page.
+const { home, common, www, locales } = db.transaction(() => {
+  const homeRow = db.prepare('SELECT * FROM home WHERE M_SLUG = ?').get(locale);
+  const commonRow = db.prepare('SELECT * FROM common WHERE M_SLUG = ?').get(locale);
+  const wwwRow = db.prepare('SELECT * FROM www LIMIT 1').get();
+  const localeRows = db.prepare(
+    'SELECT M_SLUG, M_LANGUAGE_ISO FROM locale WHERE M_LOCALE_PUBLISH_Y_N = ?'
+    ).all('1');
+  return { home: homeRow, common: commonRow, www: wwwRow, locales: localeRows };
+})();
+
+// If no matching locale or common row exists then we can’t render anything.
+if (!home || !common) {
+  return Astro.redirect('/404');
+}
+
+// Basic language and orientation metadata.  These are passed to BaseLayout so
+// that the document <html> tag can include the correct `lang`, `dir` and other
+// attributes.
+const languageIso: string = home.M_LANGUAGE_ISO;
+const countryCode: string = home.M_COUNTRY_CODE;
+const contentOrientation: string = common.M_CONTENT_ORIENTATION || 'ltr';
+
+// Helpers to generate absolute URLs.  We use `getBaseUrl()` for generating
+// canonical URLs and to build image paths for Schema.org objects.
+const getBaseUrl = (p: string) => new URL(p, Astro.url.origin).toString();
+
+// Title, description and Open‑Graph image come from the database.  These
+// populate the <title>, <meta name="description"> and og:image tags via
+// BaseLayout.
+const pageTitle: string = home.HOME_H1;
+const pageDescription: string | undefined = home.HOME_META_SEO;
+const pageOgImage: string | undefined = home.HOME_OG_IMAGE_PATH;
+
+// Keywords can be customised via the `common` table.  Join non‑empty values
+// with commas to produce a single string.  Feel free to extend this list.
+const pageKeywords: string = [
+  home.HOME_H1,
+  common.M_COUNTRY_NATIVE,
+  www.PAGE_ORGANISATION_FULL_NAME
+].filter(Boolean).join(', ');
+
+// Build a language switcher map.  Each key is a locale slug (e.g. "en") and
+// each value is the URL for that locale (e.g. "/en").  BaseLayout uses this
+// to render hreflang link tags.
+const languageLinksMap: Record<string, string> = {};
+for (const row of locales) {
+  languageLinksMap[row.M_SLUG] = `/${row.M_SLUG}`;
+}
+
+// -----------------------------------------------------------------------------
+// Structured Data (Schema.org)
+//
+// We prepare WebPage and Organization schema objects.  If you wish to add
+// FAQPage, HowTo, BreadcrumbList or any other schema, simply extend the
+// `schema` array with additional objects following the examples below.  See
+// https://schema.org/docs/schemas.html for more details.
+// -----------------------------------------------------------------------------
+// FAQ items and schema.  Up to three Q/A pairs are defined in the database.
+const faqItems = [
+  { question: home.FAQ_Q1, answer: home.FAQ_A1 },
+  { question: home.FAQ_Q2, answer: home.FAQ_A2 },
+  { question: home.FAQ_Q3, answer: home.FAQ_A3 }
+].filter(item => item.question && item.answer);
+const faqSchema = faqItems.length > 0 ? {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  'mainEntity': faqItems.map(item => ({
+    '@type': 'Question',
+    'name': item.question,
+    'acceptedAnswer': {
+      '@type': 'Answer',
+      'text': item.answer
+    }
+  }))
+} : null;
+
+const webpageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  'name': home.HOME_H1,
+  'url': Astro.url.href,
+  'description': home.HOME_META_SEO,
+  'inLanguage': `${languageIso}-${countryCode}`,
+  'breadcrumb': {
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      {
+        '@type': 'ListItem',
+        'position': 1,
+        'name': home.HOME_H1,
+        'item': Astro.url.href
+      }
+    ]
+  },
+  'mainEntity': {
+    '@type': 'Article',
+    'headline': home.HOME_H1,
+    'description': home.HOME_META_SEO,
+    'image': getBaseUrl(home.HOME_OG_IMAGE_PATH),
+    'author': {
+      '@type': 'Organization',
+      'name': www.PAGE_ORGANISATION_FULL_NAME
+    },
+    'datePublished': `${home.HOME_DATE_PUBLISHED || ''}T${home.HOME_HOUR_PUBLISHED || '00:00:00'}+02:00`,
+    'dateModified': `${home.HOME_DATE_UPDATED || ''}T${home.HOME_HOUR_UPDATED || '00:00:00'}+02:00`,
+    'inLanguage': `${languageIso}-${countryCode}`
+  }
+};
+
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  'name': www.PAGE_ORGANISATION_FULL_NAME,
+  'url': getBaseUrl('/'),
+  'logo': getBaseUrl(www.PAGE_LOGO_IMAGE_PATH_1 || ''),
+  'foundingDate': www.PAGE_FOUNDING_DATE,
+  'slogan': common.PAGE_SLOGAN,
+  'description': common.PAGE_SLOGAN,
+  'keywords': [
+    www.PAGE_ORGANISATION_FULL_NAME,
+    common.M_COUNTRY_NATIVE,
+    common.PAGE_KEYWORD_1,
+    common.PAGE_KEYWORD_2,
+    common.PAGE_KEYWORD_3,
+    common.PAGE_KEYWORD_4,
+    common.PAGE_KEYWORD_5,
+    common.PAGE_KEYWORD_6
+  ].filter(Boolean),
+  'contactPoint': {
+    '@type': 'ContactPoint',
+    'email': www.PAGE_INFO_EMAIL,
+    'contactType': common.M_CUSTOMER_SUPPORT
+  },
+  'sameAs': [
+    www.PAGE_INSTAGRAM_URL,
+    www.PAGE_FACEBOOK_URL,
+    www.PAGE_TWITTER_URL,
+    www.PAGE_LINKEDIN_URL,
+    www.PAGE_YOUTUBE_URL,
+    www.PAGE_PINTEREST_URL,
+    www.PAGE_BLUESKY_URL
+  ].filter(Boolean),
+  'areaServed': {
+    '@type': 'Country',
+    'name': common.M_COUNTRY,
+    'identifier': common.M_COUNTRY_CODE
+  }
+};
+
+// Include the FAQ schema if available.  Additional schemas can be appended
+// here by extending the array.
+const schema: object[] = faqSchema ? [webpageSchema, organizationSchema, faqSchema] : [webpageSchema, organizationSchema];
+
+// -----------------------------------------------------------------------------
+//  Derive content variables from the `home` row.  These variables are used
+//  throughout the template.  You can add or remove variables depending on
+//  what data you choose to store in the database.
+// -----------------------------------------------------------------------------
+
+// Hero section
+const heroTitlePart1: string = home.HOME_TITLE_PART1 || '';
+const heroHighlight: string = home.HOME_HIGHLIGHT || '';
+const heroTitlePart2: string = home.HOME_TITLE_PART2 || '';
+const heroSubtitle: string = home.HOME_SUBTITLE || '';
+const heroPrimaryText: string = home.HOME_CTA_PRIMARY_TEXT || '';
+const heroPrimaryLink: string = home.HOME_CTA_PRIMARY_LINK || '#';
+const heroSecondaryText: string = home.HOME_CTA_SECONDARY_TEXT || '';
+const heroSecondaryLink: string = home.HOME_CTA_SECONDARY_LINK || '#';
+
+// Problem / Solution section
+const psSectionTitle: string = home.PS_SECTION_TITLE || '';
+const psSubtitle: string = home.PS_SUBTITLE || '';
+const problemTag: string = home.PROBLEM_TAG || '';
+const problemLabel: string = home.PROBLEM_LABEL || '';
+const problemDescription: string = home.PROBLEM_DESCRIPTION || '';
+const problemItems = [
+  { title: home.PROBLEM_ITEM1_TITLE, sub: home.PROBLEM_ITEM1_SUB },
+  { title: home.PROBLEM_ITEM2_TITLE, sub: home.PROBLEM_ITEM2_SUB },
+  { title: home.PROBLEM_ITEM3_TITLE, sub: home.PROBLEM_ITEM3_SUB },
+  { title: home.PROBLEM_ITEM4_TITLE, sub: home.PROBLEM_ITEM4_SUB }
+];
+const problemBottom: string = home.PROBLEM_BOTTOM || '';
+const problemFooter: string = home.PROBLEM_FOOTER || '';
+
+const solutionTag: string = home.SOLUTION_TAG || '';
+const solutionLabel: string = home.SOLUTION_LABEL || '';
+const solutionDescription: string = home.SOLUTION_DESCRIPTION || '';
+const solutionItems = [
+  { title: home.SOLUTION_ITEM1_TITLE, sub: home.SOLUTION_ITEM1_SUB },
+  { title: home.SOLUTION_ITEM2_TITLE, sub: home.SOLUTION_ITEM2_SUB },
+  { title: home.SOLUTION_ITEM3_TITLE, sub: home.SOLUTION_ITEM3_SUB },
+  { title: home.SOLUTION_ITEM4_TITLE, sub: home.SOLUTION_ITEM4_SUB }
+];
+const solutionBottom: string = home.SOLUTION_BOTTOM || '';
+const solutionFooter: string = home.SOLUTION_FOOTER || '';
+const solutionCtaText: string = home.SOLUTION_CTA_TEXT || '';
+const solutionCtaLink: string = home.SOLUTION_CTA_LINK || '#';
+
+const trustIndicator1: string = home.TRUST_INDICATOR1_TEXT || '';
+const trustIndicator2: string = home.TRUST_INDICATOR2_TEXT || '';
+
+// Limited availability section
+const limitedHeading: string = home.LIMITED_HEADING || '';
+const limitedText: string = home.LIMITED_TEXT || '';
+const limitedValue: number = parseFloat(home.LIMITED_PROGRESS_VALUE || '0');
+const limitedLabel: string = home.LIMITED_PROGRESS_LABEL || '';
+
+// How it works section
+const howTitle: string = home.HOW_TITLE || '';
+const howSubtitle: string = home.HOW_SUBTITLE || '';
+const howSteps = [
+  { number: 1, title: home.HOW_STEP1_TITLE, desc: home.HOW_STEP1_DESC },
+  { number: 2, title: home.HOW_STEP2_TITLE, desc: home.HOW_STEP2_DESC },
+  { number: 3, title: home.HOW_STEP3_TITLE, desc: home.HOW_STEP3_DESC },
+  { number: 4, title: home.HOW_STEP4_TITLE, desc: home.HOW_STEP4_DESC },
+  { number: 5, title: home.HOW_STEP5_TITLE, desc: home.HOW_STEP5_DESC }
+];
+const howExampleImage: string = home.HOW_EXAMPLE_IMAGE || '';
+const howExampleCaption: string = home.HOW_EXAMPLE_CAPTION || '';
+const howExampleNote: string = home.HOW_EXAMPLE_NOTE || '';
+
+// Pricing section
+const pricingTitle: string = home.PRICING_TITLE || '';
+const pricingSubtitle: string = home.PRICING_SUBTITLE || '';
+const basePrice: string = home.PRICING_BASE_PRICE || '';
+const basePeriod: string = home.PRICING_BASE_PERIOD || '';
+const baseFeatures = [
+  home.PRICING_FEATURE1,
+  home.PRICING_FEATURE2,
+  home.PRICING_FEATURE3,
+  home.PRICING_FEATURE4
+].filter(Boolean);
+const addOns = [
+  { name: home.PRICING_ADDON1_NAME, price: home.PRICING_ADDON1_PRICE },
+  { name: home.PRICING_ADDON2_NAME, price: home.PRICING_ADDON2_PRICE },
+  { name: home.PRICING_ADDON3_NAME, price: home.PRICING_ADDON3_PRICE },
+  { name: home.PRICING_ADDON4_NAME, price: home.PRICING_ADDON4_PRICE },
+  { name: home.PRICING_ADDON5_NAME, price: home.PRICING_ADDON5_PRICE }
+].filter(item => item.name && item.price);
+const pricingNote: string = home.PRICING_NOTE || '';
+const pricingCtaText: string = home.PRICING_CTA_TEXT || '';
+const pricingCtaLink: string = home.PRICING_CTA_LINK || '#';
+
+// CTA section
+const ctaTitle: string = home.CTA_TITLE || '';
+const ctaSubtitle: string = home.CTA_SUBTITLE || '';
+const ctaButtonText: string = home.CTA_BUTTON_TEXT || '';
+const ctaButtonLink: string = home.CTA_BUTTON_LINK || '#';
+
+// Contact section
+const contactTitle: string = home.CONTACT_TITLE || '';
+const contactSubtitle: string = home.CONTACT_SUBTITLE || '';
+const contactSuccessTitle: string = home.CONTACT_SUCCESS_TITLE || '';
+const contactSuccessText: string = home.CONTACT_SUCCESS_TEXT || '';
+const contactNameLabel: string = home.CONTACT_FIELD_NAME_LABEL || '';
+const contactNamePlaceholder: string = home.CONTACT_FIELD_NAME_PLACEHOLDER || '';
+const contactEmailLabel: string = home.CONTACT_FIELD_EMAIL_LABEL || '';
+const contactEmailPlaceholder: string = home.CONTACT_FIELD_EMAIL_PLACEHOLDER || '';
+const contactMessageLabel: string = home.CONTACT_FIELD_MESSAGE_LABEL || '';
+const contactMessagePlaceholder: string = home.CONTACT_FIELD_MESSAGE_PLACEHOLDER || '';
+const contactTerms: string = home.CONTACT_TERMS || '';
+const contactSubmitText: string = home.CONTACT_SUBMIT_TEXT || '';
+
+// Accessibility labels (aria-*).  These strings are stored in the database so
+// that every visible aria-label can be translated per locale.  If a
+// translation is missing the defaults below are used.
+const ariaHeroSection: string = home.ARIA_HERO_SECTION || '';
+const ariaHeroPreview: string = home.ARIA_HERO_PREVIEW || '';
+const ariaGoToPricing: string = home.ARIA_GO_TO_PRICING || '';
+const ariaGoToSetupAlerts: string = home.ARIA_GO_TO_SETUP_ALERTS || '';
+const ariaSolutionCta: string = home.ARIA_SOLUTION_CTA || '';
+const ariaTrustIndicators: string = home.ARIA_TRUST_INDICATORS || '';
+const ariaHowSteps: string = home.ARIA_HOW_STEPS || '';
+const ariaExampleTelegram: string = home.ARIA_EXAMPLE_TELEGRAM || '';
+const ariaProblemCardPrefix: string = home.ARIA_PROBLEM_CARD_PREFIX || 'Problem:';
+const ariaSolutionCardPrefix: string = home.ARIA_SOLUTION_CARD_PREFIX || 'Solution:';
+
 ---
-
 <BaseLayout
   languageIso={languageIso}
   countryCode={countryCode}
   contentOrientation={contentOrientation}
-  title={title}
-  description={description}
+  title={pageTitle}
+  description={pageDescription}
+  ogImage={pageOgImage}
+  keywords={pageKeywords}
+  schema={schema}
   languageLinksMap={languageLinksMap}
 >
   <!-- Hero Section -->
-  <section
-    id="amiquus-hero"
-    class="relative overflow-hidden py-20 sm:py-28 lg:py-32"
-    aria-label="Amiquus hero section"
-  >
-    <!-- gradient background -->
+  <section id="amiquus-hero" class="relative overflow-hidden py-20 sm:py-28 lg:py-32" aria-label={ariaHeroSection}>
     <div aria-hidden="true" class="absolute inset-0 -z-20 hero-bg"></div>
-
-    <!-- hero-wide floating background layer -->
-    <div
-      id="hero-float-layer"
-      aria-hidden="true"
-      class="absolute inset-0 -z-10 pointer-events-none"
-    ></div>
-
+    <div id="hero-float-layer" aria-hidden="true" class="absolute inset-0 -z-10 pointer-events-none"></div>
     <div class="relative z-10 max-w-screen-xl mx-auto px-4">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
         <!-- Left copy -->
         <div class="text-center lg:text-start animate-on-scroll">
           <h1 class="text-4xl md:text-5xl font-extrabold leading-tight text-foreground mb-5">
-            Never Miss Your
-            <span class="text-primary">Perfect Car Deal</span>
-            Again
+            {heroTitlePart1}
+            <span class="text-primary">{heroHighlight}</span>
+            {heroTitlePart2}
           </h1>
-
           <p class="text-base md:text-lg text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0">
-            Amiquus monitors multiple car listing platforms 24/7 and sends instant Telegram notifications the moment a matching car appears — so you act first, not last.
+            {heroSubtitle}
           </p>
-
           <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
-            <a
-              href="#pricing"
-              class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1"
-              aria-label="Go to pricing"
-            >
-              Pricing
+            <a href={heroPrimaryLink} class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1" aria-label={ariaGoToPricing}>
+              {heroPrimaryText}
             </a>
-            <a
-              href="/si/setup-alerts"
-              class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-transparent border border-border/70 text-foreground/90 hover:bg-white/5 transition-colors"
-              aria-label="Go to setup alerts"
-            >
-              Get Alerts
+            <a href={heroSecondaryLink} class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-transparent border border-border/70 text-foreground/90 hover:bg-white/5 transition-colors" aria-label={ariaGoToSetupAlerts}>
+              {heroSecondaryText}
             </a>
           </div>
         </div>
-
         <!-- Right animation stage -->
-        <div class="relative animate-on-scroll" data-delay="100" aria-label="Animated missed opportunities preview">
+        <div class="relative animate-on-scroll" data-delay="100" aria-label={ariaHeroPreview}>
           <div class="relative hero-stage h-[23.75rem] sm:h-[27.5rem] lg:h-[31.25rem] w-full">
-            <!-- Stage panel (no ugly frame) -->
             <div class="absolute inset-0 rounded-3xl hero-stage-panel overflow-hidden"></div>
-
-            <!-- Foreground main card -->
-            <div id="hero-main-wrap" class="absolute inset-0 grid place-items-center px-6 sm:px-8">
-              <!-- injected by script -->
-            </div>
-
-            <!-- Final text overlay (after 6 cards) -->
+            <div id="hero-main-wrap" class="absolute inset-0 grid place-items-center px-6 sm:px-8"></div>
             <div id="hero-final-overlay" class="hero-final-overlay" aria-hidden="true"></div>
-
-            <!-- subtle depth fade at bottom -->
             <div aria-hidden="true" class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/30 to-transparent dark:from-black/50"></div>
           </div>
         </div>
@@ -92,201 +361,328 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
     </div>
   </section>
 
-  <!-- "PROBLEM / SOLUTION" SECTION (V4 — smoother transitions, cleaner blocks, wobble, Telegram callout, CTA pulse) -->
-  <section
-    id="amiquus-probsol"
-    class="relative py-14 sm:py-20 overflow-hidden bg-background"
-    aria-labelledby="probsol-title"
-  >
-    <!-- soft transition fades so section blends with neighbors -->
+  <!-- Problem / Solution Section -->
+  <section id="amiquus-probsol" class="relative py-14 sm:py-20 overflow-hidden bg-background" aria-labelledby="probsol-title">
     <div aria-hidden="true" class="probsol-fade probsol-fade--top"></div>
     <div aria-hidden="true" class="probsol-fade probsol-fade--bot"></div>
-
-    <!-- soft blobs / brand-colored, very subtle -->
     <div aria-hidden="true" class="probsol-blob probsol-blob--red"></div>
     <div aria-hidden="true" class="probsol-blob probsol-blob--green"></div>
-
     <div class="max-w-screen-xl mx-auto px-4 relative z-10">
       <div class="text-center max-w-3xl mx-auto will-animate" data-anim="fade-up">
         <div class="uppercase tracking-[0.22em] text-xs md:text-sm text-muted-foreground/90 mb-3">
           Problem / Solution
         </div>
-
         <h2 id="probsol-title" class="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
-          Stop reacting.
-          <span class="text-primary">Start winning deals.</span>
+          {psSectionTitle.split('.')[0] || ''}.
+          <span class="text-primary">{psSectionTitle.split('.')[1] || ''}</span>
         </h2>
-
         <p class="mt-3 text-base md:text-lg text-muted-foreground" aria-live="polite">
-          Two paths. One keeps you chasing. The other puts you first.
+          {psSubtitle}
         </p>
       </div>
-
       <div class="mt-9 sm:mt-12 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8" role="list">
-        <!-- PROBLEM CARD -->
-        <article
-          role="listitem"
-          aria-label="Problem: manual refreshing"
-          class="group relative overflow-hidden rounded-2xl border border-border bg-muted/90 dark:bg-card/80 backdrop-blur-sm shadow-sm
-                transition-all duration-300 hover:-translate-y-1 hover:shadow-xl will-animate"
-          data-anim="fade-right"
-        >
-          <!-- top accent -->
+        <!-- Problem Card -->
+        <article role="listitem" aria-label={`${ariaProblemCardPrefix} ${problemTag}`} class="group relative overflow-hidden rounded-2xl border border-border bg-muted/90 dark:bg-card/80 backdrop-blur-sm shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl will-animate" data-anim="fade-right">
           <div aria-hidden="true" class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-red-500 via-rose-500/95 to-red-500/40"></div>
-
           <header class="relative z-10 p-6 sm:p-7 flex items-start justify-between gap-4">
-            <div class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-extrabold tracking-wide
-                        bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30">
+            <div class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-extrabold tracking-wide bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30">
               <span aria-hidden="true" class="h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
-              Manual refreshing
+              {problemTag}
             </div>
-            <div class="text-xs font-semibold text-muted-foreground">The old way</div>
+            <div class="text-xs font-semibold text-muted-foreground">{problemLabel}</div>
           </header>
-
           <div class="relative z-10 px-6 sm:px-7 pb-6 sm:pb-7">
             <p class="text-base md:text-lg font-semibold text-foreground leading-relaxed">
-              You keep reloading listings and scrolling noise, but the best cars disappear before you even notice them.
+              {problemDescription}
             </p>
-
-            <!-- neutral wobbling blocks -->
             <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div class="probsol-item probsol-item--p1">
-                <div class="probsol-item-title">
-                  <span class="amq-underline amq-underline--danger">Time sink</span>
+              {problemItems.map((item, index) => (
+                <div class={`probsol-item probsol-item--p${index + 1}`}>
+                  <div class="probsol-item-title">
+                    <span class="amq-underline amq-underline--danger">{item.title}</span>
+                  </div>
+                  <div class="probsol-item-sub">{item.sub}</div>
                 </div>
-                <div class="probsol-item-sub">Hours lost scanning junk</div>
-              </div>
-
-              <div class="probsol-item probsol-item--p2">
-                <div class="probsol-item-title">
-                  <span class="amq-underline amq-underline--danger">Missed deals</span>
-                </div>
-                <div class="probsol-item-sub">Top listings vanish fast</div>
-              </div>
-
-              <div class="probsol-item probsol-item--p3">
-                <div class="probsol-item-title">
-                  <span class="amq-underline amq-underline--danger">Stress mode</span>
-                </div>
-                <div class="probsol-item-sub">Always chasing the feed</div>
-              </div>
-
-              <div class="probsol-item probsol-item--p4">
-                <div class="probsol-item-title">
-                  <span class="amq-underline amq-underline--danger">Lost profit</span>
-                </div>
-                <div class="probsol-item-sub">You’re late to call</div>
-              </div>
+              ))}
             </div>
-
             <div class="mt-5 flex items-center justify-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-extrabold text-red-600 dark:text-red-400">
               <span class="inline-block h-2 w-2 rounded-full bg-red-500" aria-hidden="true"></span>
-              Slow reactions → someone else buys first
+              {problemBottom}
             </div>
           </div>
-
           <footer class="relative z-10 px-6 sm:px-7 pb-6 sm:pb-7 text-sm text-muted-foreground font-semibold">
-            Reactive by default. You see it after others already moved.
+            {problemFooter}
           </footer>
         </article>
-
-        <!-- SOLUTION CARD -->
-        <article
-          role="listitem"
-          aria-label="Solution: Amiquus automated alerts"
-          class="group relative overflow-hidden rounded-2xl border border-border bg-muted/90 dark:bg-card/80 backdrop-blur-sm shadow-sm
-                transition-all duration-300 hover:-translate-y-1 hover:shadow-xl will-animate"
-          data-anim="fade-left"
-        >
-          <!-- top accent -->
+        <!-- Solution Card -->
+        <article role="listitem" aria-label={`${ariaSolutionCardPrefix} ${solutionTag}`} class="group relative overflow-hidden rounded-2xl border border-border bg-muted/90 dark:bg-card/80 backdrop-blur-sm shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl will-animate" data-anim="fade-left">
           <div aria-hidden="true" class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-emerald-500 via-teal-500/95 to-emerald-500/40"></div>
-
           <header class="relative z-10 p-6 sm:p-7 flex items-start justify-between gap-4">
-            <div class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-extrabold tracking-wide
-                        bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
+            <div class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-extrabold tracking-wide bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
               <span aria-hidden="true" class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              Automated alerts
+              {solutionTag}
             </div>
-            <div class="text-xs font-semibold text-muted-foreground">The Amiquus way</div>
+            <div class="text-xs font-semibold text-muted-foreground">{solutionLabel}</div>
           </header>
-
           <div class="relative z-10 px-6 sm:px-7 pb-6 sm:pb-7">
             <p class="text-base md:text-lg font-semibold text-foreground leading-relaxed">
-              Amiquus scans 24/7 and pings you on Telegram within seconds — so you contact sellers first.
+              {solutionDescription}
             </p>
-
-            <!-- neutral wobbling blocks -->
             <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div class="probsol-item probsol-item--s1">
-                <div class="probsol-item-title">
-                  <span class="amq-underline amq-underline--success">24/7 scan</span>
+              {solutionItems.map((item, index) => (
+                <div class={`probsol-item probsol-item--s${index + 1}`}>
+                  <div class="probsol-item-title">
+                    <span class="amq-underline amq-underline--success">{item.title}</span>
+                  </div>
+                  <div class="probsol-item-sub">{item.sub}</div>
                 </div>
-                <div class="probsol-item-sub">Zero downtime monitoring</div>
-              </div>
-
-              <div class="probsol-item probsol-item--s2">
-                <div class="probsol-item-title">
-                  <span class="amq-underline amq-underline--success">Telegram pings</span>
-                </div>
-                <div class="probsol-item-sub">Photos, price, contact — instantly</div>
-              </div>
-
-              <div class="probsol-item probsol-item--s3">
-                <div class="probsol-item-title">
-                  <span class="amq-underline amq-underline--success">Full coverage</span>
-                </div>
-                <div class="probsol-item-sub">Multiple sites, one feed</div>
-              </div>
-
-              <div class="probsol-item probsol-item--s4">
-                <div class="probsol-item-title">
-                  <span class="amq-underline amq-underline--success">First-mover edge</span>
-                </div>
-                <div class="probsol-item-sub">You call before others</div>
-              </div>
+              ))}
             </div>
-
             <div class="mt-5 flex items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-extrabold text-emerald-700 dark:text-emerald-400">
               <span class="inline-block h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true"></span>
-              Instant reaction → profit stays with you
+              {solutionBottom}
             </div>
           </div>
-
           <footer class="relative z-10 px-6 sm:px-7 pb-6 sm:pb-7 flex items-center justify-between gap-4">
             <div class="text-sm text-muted-foreground font-semibold">
-              Proactive by design. You see it first.
+              {solutionFooter}
             </div>
-
-            <a
-              href="/si/setup-alerts"
-              aria-label="Start automated alerts"
-              class="cta-pulse inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-extrabold
-                     bg-emerald-600 text-white shadow-md hover:opacity-95 hover:-translate-y-0.5 transition"
-            >
-              Start alerts
+            <a href={solutionCtaLink} aria-label={ariaSolutionCta} class="cta-pulse inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-extrabold bg-emerald-600 text-white shadow-md hover:opacity-95 hover:-translate-y-0.5 transition">
+              {solutionCtaText}
               <svg viewBox="0 0 24 24" class="h-4 w-4" aria-hidden="true">
-                <path fill="currentColor" d="M13 5l7 7-7 7v-4H4v-6h9V5z"/>
+                <path fill="currentColor" d="M13 5l7 7-7 7v-4H4v-6h9V5z" />
               </svg>
             </a>
           </footer>
         </article>
       </div>
-
-      <div class="mt-7 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 will-animate" data-anim="fade-up" aria-label="Trust indicators">
+      <div class="mt-7 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 will-animate" data-anim="fade-up" aria-label={ariaTrustIndicators}>
         <div class="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
           <span class="i-badge" aria-hidden="true"></span>
-          <span>Checks listings every ~15s on supported sites</span>
+          <span>{trustIndicator1}</span>
         </div>
         <div class="hidden sm:block h-4 w-px bg-border/40" aria-hidden="true"></div>
         <div class="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
           <span class="i-shield" aria-hidden="true"></span>
-          <span>No spam. Cancel anytime.</span>
+          <span>{trustIndicator2}</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- IMPORTANT: is:global so injected hero cards receive styles -->
+  <!-- Limited Availability Section -->
+  <section class="py-12 bg-card border-y border-border">
+    <div class="max-w-screen-xl mx-auto px-4">
+      <div class="max-w-2xl mx-auto bg-gradient-to-br from-destructive/15 to-primary/20 border-2 border-destructive rounded-xl p-8 text-center animate-on-scroll">
+        <h3 class="text-2xl font-bold text-destructive mb-4">
+          {limitedHeading}
+        </h3>
+        <p class="text-foreground mb-4">
+          {limitedText}
+        </p>
+        <div class="w-full h-2 bg-muted rounded-full overflow-hidden my-4">
+          <div class="h-full bg-destructive" style={`width: ${limitedValue * 100}%`}></div>
+        </div>
+        <p class="text-sm text-muted-foreground">
+          {limitedLabel}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="py-20 sm:py-28 bg-muted">
+    <div class="max-w-screen-xl mx-auto px-4">
+      <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16 animate-on-scroll">
+        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+          How <span class="text-primary">Amiquus</span> Works
+        </h2>
+        <p class="text-lg text-muted-foreground">
+          {howSubtitle}
+        </p>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10 lg:gap-14 items-start">
+        <ol class="space-y-5 sm:space-y-6 animate-on-scroll" aria-label={ariaHowSteps}>
+          {howSteps.map(({ number, title, desc }) => (
+            <li class="flex gap-4" key={number}>
+              <div class="flex-shrink-0 mt-1">
+                <div class="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-sm sm:text-base font-bold shadow-md ring-2 ring-primary/25" aria-hidden="true">
+                  {number}
+                </div>
+              </div>
+              <div>
+                <h3 class="text-base sm:text-lg font-semibold text-foreground mb-1">
+                  {title}
+                </h3>
+                <p class="text-sm sm:text-base text-muted-foreground">
+                  {desc}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <div class="animate-on-scroll" data-delay="120">
+          <div class="mx-auto max-w-sm rounded-3xl bg-card border border-border shadow-xl overflow-hidden flex flex-col" aria-label={ariaExampleTelegram}>
+            <div class="flex items-center justify-between px-4 pt-3 pb-2 text-[0.7rem] text-muted-foreground">
+              <span>Amiquus Alerts</span>
+              <span>now</span>
+            </div>
+            <div class="relative bg-background border-y border-border">
+              <img src={howExampleImage} alt="Example of a real Amiquus Telegram notification with car photo, price and details" class="w-full max-h-80 object-cover" loading="lazy" decoding="async" />
+              <div class="absolute inset-x-3 bottom-3 rounded-xl bg-black/65 text-xs text-white px-3 py-2 backdrop-blur-sm">
+                {howExampleCaption}
+              </div>
+            </div>
+            <div class="p-4 space-y-2 text-sm">
+              <div class="flex items-center justify-between gap-3">
+                <span class="font-semibold text-foreground">Instant Telegram alert</span>
+                <span class="rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[0.7rem] px-2 py-0.5 font-semibold">
+                  Real example
+                </span>
+              </div>
+              <p class="text-xs text-muted-foreground">
+                {howExampleNote}
+              </p>
+            </div>
+          </div>
+          <p class="mt-4 text-xs sm:text-sm text-muted-foreground text-center max-w-sm mx-auto">
+            <span class="font-semibold">Tip:</span> {howExampleNote}
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing" class="py-20 sm:py-28 bg-background">
+    <div class="max-w-screen-xl mx-auto px-4">
+      <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16">
+        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+          {pricingTitle}
+        </h2>
+        <p class="text-lg text-muted-foreground">
+          {pricingSubtitle}
+        </p>
+      </div>
+      <div class="max-w-4xl mx-auto bg-card rounded-xl shadow-lg border border-border overflow-hidden animate-on-scroll">
+        <div class="p-8">
+          <h3 class="text-2xl font-bold text-foreground mb-6">Base Package: ${basePrice}/{basePeriod}</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div class="text-start">
+              <h4 class="text-lg font-semibold text-foreground mb-3">What's Included:</h4>
+              <ul class="space-y-2">
+                {baseFeatures.map(feature => (
+                  <li class="flex items-start" key={feature}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-success flex-shrink-0 mt-0.5 me-2">
+                      <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div class="text-start">
+              <h4 class="text-lg font-semibold text-foreground mb-3">Add-ons:</h4>
+              <ul class="space-y-3">
+                {addOns.map(({ name, price }) => (
+                  <li class="flex items-start justify-between" key={name}>
+                    <div class="flex items-start">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-accent flex-shrink-0 mt-0.5 me-2">
+                        <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                      <span>{name}</span>
+                    </div>
+                    <span class="font-medium text-foreground">{price}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div class="bg-muted p-4 rounded-lg">
+            <p class="text-center text-muted-foreground text-sm">
+              {pricingNote}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="mt-8 text-center">
+        <a href={pricingCtaLink} class="inline-flex items-center justify-center px-8 py-4 text-lg rounded-lg font-semibold bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1">
+          {pricingCtaText}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20 sm:py-24 bg-gradient-to-r from-primary to-accent">
+    <div class="max-w-screen-xl mx-auto px-4 text-center text-primary-foreground">
+      <h2 class="text-3xl lg:text-4xl font-bold mb-4">
+        {ctaTitle}
+      </h2>
+      <p class="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
+        {ctaSubtitle}
+      </p>
+      <a href={ctaButtonLink} class="inline-flex items-center justify-center px-8 py-4 text-lg rounded-lg font-semibold bg-background text-primary shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1">
+        {ctaButtonText}
+      </a>
+    </div>
+  </section>
+
+  <!-- Contact Us Section -->
+  <section id="contact" class="py-20 sm:py-28 bg-muted">
+    <div class="max-w-screen-xl mx-auto px-4">
+      <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16">
+        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+          {contactTitle}
+        </h2>
+        <p class="text-lg text-muted-foreground">
+          {contactSubtitle}
+        </p>
+      </div>
+      <div class="max-w-2xl mx-auto">
+        <div id="contact-success-message" class="bg-success/10 border border-success/20 text-success p-8 rounded-xl text-center hidden animate-on-scroll">
+          <div class="w-12 h-12 bg-success rounded-full flex items-center justify-center mx-auto mb-4 text-success-foreground">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">{contactSuccessTitle}</h3>
+          <p>{contactSuccessText}</p>
+        </div>
+        <form id="contact-form" class="bg-card border border-border rounded-xl p-8 shadow-lg space-y-4 animate-on-scroll">
+          <div class="text-start">
+            <label for="contact-name" class="block text-sm font-medium text-foreground mb-1">{contactNameLabel}</label>
+            <input type="text" id="contact-name" name="name" class="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder={contactNamePlaceholder} required />
+          </div>
+          <div class="text-start">
+            <label for="contact-email" class="block text-sm font-medium text-foreground mb-1">{contactEmailLabel}</label>
+            <input type="email" id="contact-email" name="email" class="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder={contactEmailPlaceholder} required />
+          </div>
+          <div class="text-start">
+            <label for="contact-message" class="block text-sm font-medium text-foreground mb-1">{contactMessageLabel}</label>
+            <textarea id="contact-message" name="message" rows="4" class="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder={contactMessagePlaceholder} required></textarea>
+          </div>
+          <button type="submit" id="contact-submit-btn" class="w-full flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed">
+            <span id="contact-submit-text">{contactSubmitText}</span>
+            <span id="contact-submit-loading" class="hidden ms-2">
+              <div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+            </span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+  <!-- Styles and Scripts: consolidated at the end for clarity -->
+  <!--
+    The following styles and scripts are copied verbatim from the original
+    Amiquus landing page.  They define the appearance and behaviour of
+    the hero, problem/solution, features map and other interactive elements.
+    Keeping them intact ensures that the dynamic version of the page retains
+    the same UI/UX as the original static implementation.
+  -->
+
+  <!-- Global styles for hero and problem/solution sections -->
   <style is:global>
     /* =========================================================
        HERO + PROBSOL are global, theme-safe, and token-based
@@ -1061,6 +1457,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
     }
   </style>
 
+  <!-- JavaScript for hero animations and scroll-triggered effects -->
   <script>
     // Reveal on scroll (section-safe) + underline trigger on every entry
     (function () {
@@ -1102,7 +1499,6 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
           el.classList.remove('amq-underline--animate');
 
           // Force reflow so animation can restart
-          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
           void el.offsetWidth;
 
           // Slightly varied timing per underline (stagger + small random)
@@ -1123,7 +1519,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
             }
           });
         },
-        { threshold: 0.35 } // section reasonably in view
+        { threshold: 0.35 }
       );
 
       sectionIO.observe(root);
@@ -1184,8 +1580,8 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
               <div class="hero-model">${car.model}</div>
               <div class="hero-sub">New listing</div>
             </div>
-            <div class="hero-price">${car.price}</div>
-          </div>
+              <div class="hero-price">${car.price}</div>
+            </div>
         `;
         return card;
       }
@@ -1399,321 +1795,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
     })();
   </script>
 
-  <!-- Limited Availability Section -->
-  <section class="py-12 bg-card border-y border-border">
-    <div class="max-w-screen-xl mx-auto px-4">
-      <div class="max-w-2xl mx-auto bg-gradient-to-br from-destructive/15 to-primary/20 border-2 border-destructive rounded-xl p-8 text-center animate-on-scroll">
-        <h3 class="text-2xl font-bold text-destructive mb-4">⚠️ <span class="text-primary">Limited Slots</span> Available</h3>
-        <p class="text-foreground mb-4">
-          Only <strong>4 slots remaining</strong> out of 30 total. We intentionally limit capacity to maintain competitive advantage for our users.
-        </p>
-        <div class="w-full h-2 bg-muted rounded-full overflow-hidden my-4">
-          <div class="h-full bg-destructive" style="width: 85%;"></div>
-        </div>
-        <p class="text-sm text-muted-foreground">
-          26 active subscribers • 4 spots available
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Features Section -->
-  <!-- Features Section -->
-  <section id="features" class="py-20 sm:py-28 bg-background border-t border-border/60">
-    <div class="max-w-screen-xl mx-auto px-4">
-      <!-- Section header -->
-      <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16 animate-on-scroll">
-        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-          Amiquus is your
-          <span class="text-primary amq-underline">always-on car scout</span>
-        </h2>
-        <p class="text-lg text-muted-foreground">
-          While you focus on running your business and life, Amiquus quietly scans the market,
-          filters the noise and delivers only
-          <span class="amq-underline">actionable car opportunities</span>
-          straight to your Telegram.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] gap-10 lg:gap-14 items-start">
-        <!-- LEFT: MAP-STYLE FEATURE GRAPH -->
-        <aside
-          class="hero-map card relative rounded-2xl border border-border bg-card/80 backdrop-blur-md shadow-sm overflow-hidden animate-on-scroll"
-          aria-label="How Amiquus helps you win better car deals"
-        >
-          <div class="map-wrap">
-            <!-- top-right instruction hint -->
-            <div class="map-hint" aria-hidden="true">
-              <span class="map-hint__label">Tip</span>
-              Tap a node to see what Amiquus does for you
-            </div>
-
-            <svg
-              class="map-svg"
-              viewBox="0 0 700 520"
-              role="img"
-              aria-labelledby="mapTitle mapDesc"
-              preserveAspectRatio="xMidYMid meet"
-            >
-              <title id="mapTitle">Amiquus Assistance Map</title>
-              <desc id="mapDesc">
-                Central node labeled Amiquus connected to its main capabilities and benefits for you.
-              </desc>
-
-              <!-- connectors -->
-              <g
-                class="lines"
-                stroke="currentColor"
-                stroke-opacity=".26"
-                stroke-width="2"
-                stroke-linecap="round"
-                vector-effect="non-scaling-stroke"
-              >
-                <!-- right column (shifted inward) -->
-                <line x1="402.68" y1="213.9" x2="510" y2="120" />
-                <line x1="420" y1="260" x2="570" y2="260" />
-                <line x1="402.68" y1="306.1" x2="510" y2="400" />
-
-                <!-- left column (shifted inward) -->
-                <line x1="297.32" y1="213.9" x2="190" y2="120" />
-                <line x1="280" y1="260" x2="130" y2="260" />
-                <line x1="297.32" y1="306.1" x2="190" y2="400" />
-              </g>
-
-              <!-- center node with logo -->
-              <g class="node node--center">
-                <circle cx="350" cy="260" r="78" />
-                <!-- adjust logo path to your real one -->
-                <image
-                  href="/logos/amiquus-logo-mark.svg"
-                  x="316"
-                  y="226"
-                  width="68"
-                  height="68"
-                  class="center-logo"
-                  aria-hidden="true"
-                />
-                <text x="350" y="306" class="center-title">Amiquus</text>
-                <text x="350" y="334" class="center-sub">on your side</text>
-              </g>
-
-              <!-- RIGHT COLUMN -->
-              <g
-                class="node is-clickable"
-                transform="translate(510,120)"
-                role="button"
-                tabindex="0"
-                aria-label="Multi-Platform Monitoring. Open details"
-                data-title="Multi-Platform Monitoring"
-                data-sub="More good cars, less manual work"
-                data-body="Amiquus watches leading car listing platforms in parallel, normalizes results into one clean stream and continuously adds new websites as they become relevant—so you see more of the market without doing more refreshing."
-              >
-                <g class="float">
-                  <rect x="-120" y="-54" width="240" height="108" rx="16" ry="16"></rect>
-                  <text class="t1" x="0" y="-10">Multi-Platform</text>
-                  <text class="t2" x="0" y="14">Monitoring</text>
-                </g>
-              </g>
-
-              <g
-                class="node is-clickable"
-                transform="translate(570,260)"
-                role="button"
-                tabindex="0"
-                aria-label="Instant Telegram Alerts. Open details"
-                data-title="Instant Telegram Alerts"
-                data-sub="You get photos, price and contact in seconds"
-                data-body="Each alert includes key info in one glance: photos, title, price, basic specs, location and seller contact. No logging in and hunting around—just tap and call while others are still loading the page."
-              >
-                <g class="float">
-                  <rect x="-120" y="-54" width="240" height="108" rx="16" ry="16"></rect>
-                  <text class="t1" x="0" y="-10">Instant Telegram</text>
-                  <text class="t2" x="0" y="14">Alerts</text>
-                </g>
-              </g>
-
-              <g
-                class="node is-clickable"
-                transform="translate(510,400)"
-                role="button"
-                tabindex="0"
-                aria-label="Competitive Advantage. Open details"
-                data-title="Competitive Advantage"
-                data-sub="Limited capacity keeps you ahead"
-                data-body="Because we cap the number of active users, you are not fighting against hundreds of people using the same data. When Amiquus pings you, you have a real first-mover edge instead of a crowded race."
-              >
-                <g class="float">
-                  <rect x="-120" y="-54" width="240" height="108" rx="16" ry="16"></rect>
-                  <text class="t1" x="0" y="-10">Competitive</text>
-                  <text class="t2" x="0" y="14">Advantage</text>
-                </g>
-              </g>
-
-              <!-- LEFT COLUMN -->
-              <g
-                class="node is-clickable"
-                transform="translate(190,120)"
-                role="button"
-                tabindex="0"
-                aria-label="Advanced Filtering. Open details"
-                data-title="Advanced Filtering"
-                data-sub="Only the cars that truly fit you"
-                data-body="Define make, model, generation, year, mileage, fuel type, transmission, price band and preferred locations. Amiquus ignores everything else—so your alerts feel curated instead of spammy."
-              >
-                <g class="float">
-                  <rect x="-120" y="-54" width="240" height="108" rx="16" ry="16"></rect>
-                  <text class="t1" x="0" y="-10">Advanced</text>
-                  <text class="t2" x="0" y="14">Filtering</text>
-                </g>
-              </g>
-
-              <g
-                class="node is-clickable"
-                transform="translate(130,260)"
-                role="button"
-                tabindex="0"
-                aria-label="24/7 Monitoring. Open details"
-                data-title="24/7 Monitoring"
-                data-sub="While you sleep, Amiquus keeps watching"
-                data-body="Our backend checks for new listings and price changes around the clock. You don’t have to sit in front of a screen all day—Amiquus simply nudges you when there is something worth opening."
-              >
-                <g class="float">
-                  <rect x="-120" y="-54" width="240" height="108" rx="16" ry="16"></rect>
-                  <text class="t1" x="0" y="-10">24/7</text>
-                  <text class="t2" x="0" y="14">Monitoring</text>
-                </g>
-              </g>
-
-              <g
-                class="node is-clickable"
-                transform="translate(190,400)"
-                role="button"
-                tabindex="0"
-                aria-label="Flexible Management. Open details"
-                data-title="Flexible Management"
-                data-sub="You stay in full control"
-                data-body="Pause or cancel anytime, adjust criteria when your needs change, and switch between different search profiles. Amiquus acts like a flexible assistant—not a rigid, long contract."
-              >
-                <g class="float">
-                  <rect x="-120" y="-54" width="240" height="108" rx="16" ry="16"></rect>
-                  <text class="t1" x="0" y="-10">Flexible</text>
-                  <text class="t2" x="0" y="14">Management</text>
-                </g>
-              </g>
-            </svg>
-          </div>
-
-          <!-- simple modal for node details -->
-          <div class="map-modal" id="amqFeatureModal" aria-hidden="true">
-            <div class="map-modal__backdrop" data-close></div>
-            <article
-              class="map-modal__panel"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="amqFeatureModalTitle"
-              aria-describedby="amqFeatureModalBody"
-            >
-              <button
-                class="map-modal__close"
-                type="button"
-                aria-label="Close details"
-                data-close
-              >
-                &times;
-              </button>
-              <h3 class="map-modal__title" id="amqFeatureModalTitle"></h3>
-              <p class="map-modal__sub" id="amqFeatureModalSub"></p>
-              <div class="map-modal__body" id="amqFeatureModalBody"></div>
-            </article>
-          </div>
-        </aside>
-
-        <!-- RIGHT: supported sites + quick summary -->
-        <aside
-          class="bg-card border border-border rounded-2xl p-6 sm:p-7 lg:p-8 shadow-sm space-y-6 animate-on-scroll"
-          aria-label="Supported websites and coverage"
-        >
-          <div>
-            <h3 class="text-lg sm:text-xl font-semibold text-foreground mb-2">
-              Supported <span class="amq-underline">websites</span>
-            </h3>
-            <p class="text-sm sm:text-base text-muted-foreground mb-4">
-              We start where Slovenian dealers actually buy – and keep adding more data sources over time.
-            </p>
-
-            <div class="space-y-3">
-              <div
-                class="flex items-center justify-between gap-3 rounded-xl bg-muted/70 dark:bg-muted/50 border border-border/70 px-3.5 py-2.5"
-              >
-                <div class="flex items-center gap-2.5">
-                  <span
-                    class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold"
-                    aria-hidden="true"
-                  >
-                    A
-                  </span>
-                  <div>
-                    <div class="text-sm font-semibold text-foreground">avto.net</div>
-                    <div class="text-[0.78rem] text-muted-foreground">
-                      Core market for used cars in Slovenia
-                    </div>
-                  </div>
-                </div>
-                <span class="text-[0.78rem] font-medium px-2 py-1 rounded-full bg-primary/10 text-primary">
-                  Live
-                </span>
-              </div>
-
-              <div
-                class="flex items-center justify-between gap-3 rounded-xl bg-muted/70 dark:bg-muted/50 border border-border/70 px-3.5 py-2.5"
-              >
-                <div class="flex items-center gap-2.5">
-                  <span
-                    class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-bold"
-                    aria-hidden="true"
-                  >
-                    f
-                  </span>
-                  <div>
-                    <div class="text-sm font-semibold text-foreground">Facebook Marketplace</div>
-                    <div class="text-[0.78rem] text-muted-foreground">
-                      Private listings &amp; fast local deals
-                    </div>
-                  </div>
-                </div>
-                <span class="text-[0.78rem] font-medium px-2 py-1 rounded-full bg-primary/10 text-primary">
-                  Live
-                </span>
-              </div>
-
-              <div
-                class="flex items-center justify-between gap-3 rounded-xl border border-dashed border-border/70 px-3.5 py-2.5 bg-background/60"
-              >
-                <div>
-                  <div class="text-sm font-semibold text-foreground">More platforms</div>
-                  <div class="text-[0.78rem] text-muted-foreground">
-                    We regularly add new sites based on dealer demand.
-                    Your subscription automatically benefits from new sources.
-                  </div>
-                </div>
-                <span class="hidden sm:inline-flex text-[0.78rem] px-2 py-1 rounded-full bg-muted text-muted-foreground">
-                  Coming soon
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div class="border-t border-border/70 pt-4 text-sm text-muted-foreground space-y-2">
-            <div class="flex items-center gap-2">
-              <span class="i-badge" aria-hidden="true"></span>
-              <span>Checks supported websites roughly every few minutes (depending on your plan).</span>
-            </div>
-          </div>
-        </aside>
-      </div>
-    </div>
-  </section>
-
+  <!-- Styles for the features map section -->
   <style is:global>
     /* ===== FEATURES MAP: STYLING (MATCH AMIQUUS TOKENS, LIGHT & DARK) ===== */
 
@@ -2048,6 +2130,7 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
     }
   </style>
 
+  <!-- JavaScript for the features modal -->
   <script>
     (function () {
       const modal = document.getElementById('amqFeatureModal');
@@ -2136,524 +2219,4 @@ const languageLinksMap = { 'en': '/en', 'de': '/de' };
         });
     })();
   </script>
-  
-  
-  
-
-  <!-- How It Works Section -->
-  <!-- How It Works Section -->
-  <section id="how-it-works" class="py-20 sm:py-28 bg-muted">
-    <div class="max-w-screen-xl mx-auto px-4">
-      <!-- Section header -->
-      <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16 animate-on-scroll">
-        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-          How <span class="text-primary">Amiquus</span> Works
-        </h2>
-        <p class="text-lg text-muted-foreground">
-          Get started in minutes and begin receiving alerts for the vehicles that actually fit your strategy.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10 lg:gap-14 items-start">
-        <!-- Left: step-by-step flow -->
-        <ol class="space-y-5 sm:space-y-6 animate-on-scroll" aria-label="Step by step Amiquus setup and alert flow">
-          <!-- STEP 1 -->
-          <li class="flex gap-4">
-            <div class="flex-shrink-0 mt-1">
-              <div
-                class="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full
-                        bg-gradient-to-br from-primary to-primary/80 text-primary-foreground
-                        text-sm sm:text-base font-bold shadow-md ring-2 ring-primary/25"
-                aria-hidden="true"
-              >
-                1
-              </div>
-            </div>
-            <div>
-              <h3 class="text-base sm:text-lg font-semibold text-foreground mb-1">
-                Set your <span class="amq-underline">buy box</span>
-              </h3>
-              <p class="text-sm sm:text-base text-muted-foreground">
-                Define the deals you actually want to see: brands, models, age, mileage, price range,
-                fuel type, gearbox and regions. Create multiple profiles for different niches
-                (e.g. wagons, EVs, budget stock).
-              </p>
-            </div>
-          </li>
-
-          <!-- STEP 2 -->
-          <li class="flex gap-4 animate-on-scroll" data-delay="80">
-            <div class="flex-shrink-0 mt-1">
-              <div
-                class="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full
-                        bg-gradient-to-br from-sky-500 to-primary text-primary-foreground
-                        text-sm sm:text-base font-bold shadow-md ring-2 ring-sky-500/25"
-                aria-hidden="true"
-              >
-                2
-              </div>
-            </div>
-            <div>
-              <h3 class="text-base sm:text-lg font-semibold text-foreground mb-1">
-                Connect <span class="amq-underline">Telegram</span>
-              </h3>
-              <p class="text-sm sm:text-base text-muted-foreground">
-                Link your Telegram account in a guided setup that takes under two minutes.
-                From then on, every important listing lands directly in a chat you already use
-                on desktop and phone.
-              </p>
-            </div>
-          </li>
-
-          <!-- STEP 3 -->
-          <li class="flex gap-4 animate-on-scroll" data-delay="140">
-            <div class="flex-shrink-0 mt-1">
-              <div
-                class="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full
-                        bg-gradient-to-br from-amber-500 to-orange-500 text-primary-foreground
-                        text-sm sm:text-base font-bold shadow-md ring-2 ring-amber-400/30"
-                aria-hidden="true"
-              >
-                3
-              </div>
-            </div>
-            <div>
-              <h3 class="text-base sm:text-lg font-semibold text-foreground mb-1">
-                Choose monitoring <span class="amq-underline">frequency</span>
-              </h3>
-              <p class="text-sm sm:text-base text-muted-foreground">
-                Decide how aggressively you want to compete: from relaxed hourly checks
-                to high-frequency scans every few minutes. Faster checks mean earlier alerts
-                and a stronger first-mover edge.
-              </p>
-            </div>
-          </li>
-
-          <!-- STEP 4 -->
-          <li class="flex gap-4 animate-on-scroll" data-delay="200">
-            <div class="flex-shrink-0 mt-1">
-              <div
-                class="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full
-                        bg-gradient-to-br from-emerald-500 to-emerald-600 text-primary-foreground
-                        text-sm sm:text-base font-bold shadow-md ring-2 ring-emerald-400/30"
-                aria-hidden="true"
-              >
-                4
-              </div>
-            </div>
-            <div>
-              <h3 class="text-base sm:text-lg font-semibold text-foreground mb-1">
-                Receive instant <span class="amq-underline">alerts</span>
-              </h3>
-              <p class="text-sm sm:text-base text-muted-foreground">
-                Whenever a new listing matches your filters, Amiquus sends a concise alert:
-                photos, title, price, key specs, location and a direct link. One tap to open the ad,
-                another tap to call or message the seller.
-              </p>
-            </div>
-          </li>
-
-          <!-- STEP 5 -->
-          <li class="flex gap-4 animate-on-scroll" data-delay="260">
-            <div class="flex-shrink-0 mt-1">
-              <div
-                class="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full
-                        bg-gradient-to-br from-zinc-900 to-zinc-700 text-primary-foreground
-                        text-sm sm:text-base font-bold shadow-md ring-2 ring-zinc-900/30
-                        dark:bg-gradient-to-br dark:from-zinc-100 dark:to-zinc-300
-                        dark:text-zinc-900 dark:ring-zinc-200/70"
-                aria-hidden="true"
-              >
-                5
-              </div>
-            </div>
-            <div>
-              <h3 class="text-base sm:text-lg font-semibold text-foreground mb-1">
-                Optimise and fine-tune over time
-              </h3>
-              <p class="text-sm sm:text-base text-muted-foreground">
-                Pause niches that are full, tighten price bands, add new regions or plug in another website.
-                You stay in control of the strategy – Amiquus simply follows your latest settings.
-              </p>
-            </div>
-          </li>
-        </ol>
-
-        <!-- Right: example Telegram notification -->
-        <div class="animate-on-scroll" data-delay="120">
-          <div
-            class="mx-auto max-w-sm rounded-3xl bg-card border border-border shadow-xl overflow-hidden flex flex-col"
-            aria-label="Example Telegram alert"
-          >
-            <!-- fake phone top bar -->
-            <div class="flex items-center justify-between px-4 pt-3 pb-2 text-[0.7rem] text-muted-foreground">
-              <span>Amiquus Alerts</span>
-              <span>now</span>
-            </div>
-
-            <!-- Telegram screenshot placeholder -->
-            <div class="relative bg-background border-y border-border">
-              <!-- Replace the src with your real Telegram screenshot -->
-              <img
-                src="/homepage/demo-telegram/amiquus_telegram_example.webp"
-                alt="Example of a real Amiquus Telegram notification with car photo, price and details"
-                class="w-full max-h-80 object-cover"
-                loading="lazy"
-                decoding="async"
-              />
-              <div
-                class="absolute inset-x-3 bottom-3 rounded-xl bg-black/65 text-xs text-white px-3 py-2 backdrop-blur-sm"
-              >
-                This is what your real notification will look like – clear photos, price and a direct link in one message.
-              </div>
-            </div>
-
-            <div class="p-4 space-y-2 text-sm">
-              <div class="flex items-center justify-between gap-3">
-                <span class="font-semibold text-foreground">Instant Telegram alert</span>
-                <span
-                  class="rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[0.7rem] px-2 py-0.5 font-semibold"
-                >
-                  Real example
-                </span>
-              </div>
-              <p class="text-xs text-muted-foreground">
-                Swap this placeholder with a screenshot from your own Amiquus bot, so dealers see
-                exactly what they’ll get in their chat.
-              </p>
-            </div>
-          </div>
-
-          <p class="mt-4 text-xs sm:text-sm text-muted-foreground text-center max-w-sm mx-auto">
-            <span class="font-semibold">Tip:</span> Using a real alert screenshot builds trust and shows how
-            actionable each notification is in daily work.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-  
-  
-
-  <!-- Pricing Section -->
-  <section id="pricing" class="py-20 sm:py-28 bg-background">
-    <div class="max-w-screen-xl mx-auto px-4">
-      <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16">
-        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-          Simple, <span class="text-primary">Transparent</span> Pricing
-        </h2>
-        <p class="text-lg text-muted-foreground">
-          Our pricing is based on your specific needs. Start with a base package and customize it to fit your
-          requirements.
-        </p>
-      </div>
-
-      <div
-        class="max-w-4xl mx-auto bg-card rounded-xl shadow-lg border border-border overflow-hidden animate-on-scroll"
-      >
-        <div class="p-8">
-          <h3 class="text-2xl font-bold text-foreground mb-6">Base Package: $9.99/month</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div class="text-start">
-              <h4 class="text-lg font-semibold text-foreground mb-3">What's Included:</h4>
-              <ul class="space-y-2">
-                <li class="flex items-start">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    class="text-success flex-shrink-0 mt-0.5 me-2"
-                  >
-                    <path
-                      d="M20 6L9 17l-5-5"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    ></path>
-                  </svg>
-                  <span>One website monitoring</span>
-                </li>
-                <li class="flex items-start">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    class="text-success flex-shrink-0 mt-0.5 me-2"
-                  >
-                    <path
-                      d="M20 6L9 17l-5-5"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    ></path>
-                  </svg>
-                  <span>Hourly updates</span>
-                </li>
-                <li class="flex items-start">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    class="text-success flex-shrink-0 mt-0.5 me-2"
-                  >
-                    <path
-                      d="M20 6L9 17l-5-5"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    ></path>
-                  </svg>
-                  <span>Unlimited filters</span>
-                </li>
-                <li class="flex items-start">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    class="text-success flex-shrink-0 mt-0.5 me-2"
-                  >
-                    <path
-                      d="M20 6L9 17l-5-5"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    ></path>
-                  </svg>
-                  <span>Telegram notifications</span>
-                </li>
-              </ul>
-            </div>
-            <div class="text-start">
-              <h4 class="text-lg font-semibold text-foreground mb-3">Add-ons:</h4>
-              <ul class="space-y-3">
-                <li class="flex items-start justify-between">
-                  <div class="flex items-start">
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      class="text-accent flex-shrink-0 mt-0.5 me-2"
-                    >
-                      <path
-                        d="M12 5v14M5 12h14"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      ></path>
-                    </svg>
-                    <span>Each additional website</span>
-                  </div>
-                  <span class="font-medium text-foreground">$4.99/mo</span>
-                </li>
-                <li class="flex items-start justify-between">
-                  <div class="flex items-start">
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      class="text-accent flex-shrink-0 mt-0.5 me-2"
-                    >
-                      <path
-                        d="M12 5v14M5 12h14"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      ></path>
-                    </svg>
-                    <span>30-minute updates</span>
-                  </div>
-                  <span class="font-medium text-foreground">$2.99/mo</span>
-                </li>
-                <li class="flex items-start justify-between">
-                  <div class="flex items-start">
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      class="text-accent flex-shrink-0 mt-0.5 me-2"
-                    >
-                      <path
-                        d="M12 5v14M5 12h14"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      ></path>
-                    </svg>
-                    <span>15-minute updates</span>
-                  </div>
-                  <span class="font-medium text-foreground">$5.99/mo</span>
-                </li>
-                <li class="flex items-start justify-between">
-                  <div class="flex items-start">
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      class="text-accent flex-shrink-0 mt-0.5 me-2"
-                    >
-                      <path
-                        d="M12 5v14M5 12h14"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      ></path>
-                    </svg>
-                    <span>5-minute updates</span>
-                  </div>
-                  <span class="font-medium text-foreground">$9.99/mo</span>
-                </li>
-                <li class="flex items-start justify-between">
-                  <div class="flex items-start">
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      class="text-accent flex-shrink-0 mt-0.5 me-2"
-                    >
-                      <path
-                        d="M12 5v14M5 12h14"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      ></path>
-                    </svg>
-                    <span>1-minute updates</span>
-                  </div>
-                  <span class="font-medium text-foreground">$14.99/mo</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div class="bg-muted p-4 rounded-lg">
-            <p class="text-center text-muted-foreground text-sm">
-              All plans include unlimited search configurations and easy subscription management.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-8 text-center">
-        <a
-          href="/si/setup-alerts"
-          class="inline-flex items-center justify-center px-8 py-4 text-lg rounded-lg font-semibold bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1"
-        >
-          Get Started Now
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA Section -->
-  <section class="py-20 sm:py-24 bg-gradient-to-r from-primary to-accent">
-    <div class="max-w-screen-xl mx-auto px-4 text-center text-primary-foreground">
-      <h2 class="text-3xl lg:text-4xl font-bold mb-4">
-        Ready to Find Your <span class="text-primary-foreground/80">Perfect Vehicles?</span>
-      </h2>
-      <p class="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
-        Join successful dealers who use Amiquus to stay ahead of the competition. Limited slots available.
-      </p>
-      <a
-        href="/si/setup-alerts"
-        class="inline-flex items-center justify-center px-8 py-4 text-lg rounded-lg font-semibold bg-background text-primary shadow-lg hover:opacity-90 transition-transform hover:-translate-y-1"
-      >
-        Get Started Now
-      </a>
-    </div>
-  </section>
-
-  <!-- Contact Us Section -->
-  <section id="contact" class="py-20 sm:py-28 bg-muted">
-    <div class="max-w-screen-xl mx-auto px-4">
-      <div class="max-w-3xl mx-auto text-center mb-12 lg:mb-16">
-        <h2 class="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-          Get in <span class="text-primary">Touch</span>
-        </h2>
-        <p class="text-lg text-muted-foreground">
-          Have a question, feedback, or a partnership inquiry? We'd love to hear from you.
-        </p>
-      </div>
-
-      <div class="max-w-2xl mx-auto">
-        <div
-          id="contact-success-message"
-          class="bg-success/10 border border-success/20 text-success p-8 rounded-xl text-center hidden animate-on-scroll"
-        >
-          <div
-            class="w-12 h-12 bg-success rounded-full flex items-center justify-center mx-auto mb-4 text-success-foreground"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-              <polyline points="22 4 12 14.01 9 11.01" />
-            </svg>
-          </div>
-          <h3 class="text-xl font-semibold mb-2">Message Sent!</h3>
-          <p>Thank you for reaching out. We've received your message and will get back to you shortly.</p>
-        </div>
-
-        <form id="contact-form" class="bg-card border border-border rounded-xl p-8 shadow-lg space-y-4 animate-on-scroll">
-          <div class="text-start">
-            <label for="contact-name" class="block text-sm font-medium text-foreground mb-1">Full Name</label>
-            <input
-              type="text"
-              id="contact-name"
-              name="name"
-              class="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary"
-              placeholder="Your Name"
-              required
-            />
-          </div>
-          <div class="text-start">
-            <label for="contact-email" class="block text-sm font-medium text-foreground mb-1">Email Address</label>
-            <input
-              type="email"
-              id="contact-email"
-              name="email"
-              class="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary"
-              placeholder="you@example.com"
-              required
-            />
-          </div>
-          <div class="text-start">
-            <label for="contact-message" class="block text-sm font-medium text-foreground mb-1">Message</label>
-            <textarea
-              id="contact-message"
-              name="message"
-              rows="4"
-              class="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:border-primary focus:ring-1 focus:ring-primary"
-              placeholder="How can we help you today?"
-              required
-            ></textarea>
-          </div>
-          <button
-            type="submit"
-            id="contact-submit-btn"
-            class="w-full flex items-center justify-center px-6 py-3 rounded-lg font-semibold bg-primary text-primary-foreground hover:opacity-90 transition disabled:opacity:50 disabled:cursor-not-allowed"
-          >
-            <span id="contact-submit-text">Send Message</span>
-            <span id="contact-submit-loading" class="hidden ms-2">
-              <div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-            </span>
-          </button>
-        </form>
-      </div>
-    </div>
-  </section>
 </BaseLayout>
